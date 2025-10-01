@@ -95,42 +95,18 @@ export async function GET(request: Request) {
             const monthName = targetDate.toLocaleDateString('pl-PL', { month: 'long' })
             const year = targetDate.getFullYear()
 
-            // Sprawdź czy miesiąc był zamknięty
-            const monthCloseTransaction = await prisma.transaction.findFirst({
+            // Pobierz transakcje z miesiąca - ZAWSZE wszystkie transakcje z miesiąca
+            const monthTransactions = await prisma.transaction.findMany({
                 where: {
                     userId: USER_ID,
-                    description: { contains: 'Zamknięcie miesiąca' },
-                    date: { gte: startOfMonth, lte: endOfMonth }
+                    date: { gte: startOfMonth, lte: endOfMonth },
+                    type: { in: ['income', 'expense'] },
+                    NOT: [
+                        { description: { contains: 'Zamknięcie miesiąca' } },
+                        { description: { contains: 'przeniesienie bilansu' } }
+                    ]
                 }
             })
-
-            // Pobierz transakcje z miesiąca
-            let monthTransactions
-            if (monthCloseTransaction) {
-                monthTransactions = await prisma.transaction.findMany({
-                    where: {
-                        userId: USER_ID,
-                        date: { gt: monthCloseTransaction.date, lte: endOfMonth },
-                        type: { in: ['income', 'expense'] },
-                        NOT: [
-                            { description: { contains: 'Zamknięcie miesiąca' } },
-                            { description: { contains: 'przeniesienie bilansu' } }
-                        ]
-                    }
-                })
-            } else {
-                monthTransactions = await prisma.transaction.findMany({
-                    where: {
-                        userId: USER_ID,
-                        date: { gte: startOfMonth, lte: endOfMonth },
-                        type: { in: ['income', 'expense'] },
-                        NOT: [
-                            { description: { contains: 'Zamknięcie miesiąca' } },
-                            { description: { contains: 'przeniesienie bilansu' } }
-                        ]
-                    }
-                })
-            }
 
             const totalIncome = monthTransactions
                 .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
