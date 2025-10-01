@@ -62,15 +62,15 @@ export async function GET() {
         })
 
         // Oblicz rzeczywiste saldo konta głównego
-        const totalAllIncome = allTransactions
+        const totalAllIncome = Math.round(allTransactions
             .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        const totalAllExpenses = allTransactions
+        const totalAllExpenses = Math.round(allTransactions
             .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        const balance = totalAllIncome - totalAllExpenses
+        const balance = Math.round((totalAllIncome - totalAllExpenses) * 100) / 100
 
         // ✅ SPRAWDŹ CZY MIESIĄC ZOSTAŁ ZAMKNIĘTY
         const now = new Date()
@@ -132,13 +132,13 @@ export async function GET() {
 
         // Oblicz statystyki miesięczne
         // Oblicz statystyki miesięczne - TYLKO transakcje ze statystykami
-        const totalIncome = monthTransactions
+        const totalIncome = Math.round(monthTransactions
             .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        const totalExpenses = monthTransactions
+        const totalExpenses = Math.round(monthTransactions
             .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         // ✅ DEBUG - sprawdź co się dzieje
         console.log('=== DASHBOARD DEBUG ===')
@@ -167,7 +167,7 @@ export async function GET() {
                 const envelopeTransactions = monthTransactions.filter(t => 
                     t.type === 'expense' && t.envelopeId === e.id
                 )
-                const spent = envelopeTransactions.reduce((sum, t) => sum + t.amount, 0)
+                const spent = Math.round(envelopeTransactions.reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
                 return {
                     id: e.id,

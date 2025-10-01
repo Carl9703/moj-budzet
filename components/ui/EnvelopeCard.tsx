@@ -21,7 +21,7 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
             : (planned > 0 ? Math.round((current / planned) * 100) : 0)
 
     // Dla miesięcznych: planned - spent, dla rocznych: planned - current (lub brak dla wolnych środków)
-    const remaining = Math.round((type === 'monthly' ? planned - spent : planned - current) * 100) / 100
+    const remaining = Math.round(((type === 'monthly' ? planned - spent : planned - current) * 100)) / 100
 
     // Sprawdź czy przekroczono budżet (tylko dla miesięcznych)
     const isOverBudget = type === 'monthly' && spent > planned
@@ -168,7 +168,7 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
                 }}>
                     {type === 'monthly' ?
                         (isOverBudget ?
-                            `⚠️ Przekroczono o ${formatMoney(spent - planned)}` :
+                            `⚠️ Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100)}` :
                             `Zostało: ${formatMoney(remaining)}`) :
                         isFreedomFunds ?
                             `💰 Dostępne środki` : // Specjalny tekst dla wolnych środków
