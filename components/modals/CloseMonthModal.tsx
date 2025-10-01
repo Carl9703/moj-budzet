@@ -3,6 +3,7 @@
 
 import { Modal } from '@/components/ui/Modal'
 import { useState, useEffect } from 'react'
+import { formatMoney } from '@/lib/utils/money'
 
 interface EnvelopeStatus {
     name: string
@@ -91,8 +92,8 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                                     fontWeight: '500',
                                     color: e.current > 0 ? '#059669' : e.current < 0 ? '#dc2626' : '#6b7280'
                                 }}>
-                                    {e.current > 0 ? `Zostało ${e.current} zł` :
-                                        e.current < 0 ? `Przekroczono o ${Math.abs(e.current)} zł` :
+                                    {e.current > 0 ? `Zostało ${formatMoney(e.current, false)}` :
+                                        e.current < 0 ? `Przekroczono o ${formatMoney(Math.abs(e.current), false)}` :
                                             'Wykorzystano w całości'}
                                 </span>
                             </div>
