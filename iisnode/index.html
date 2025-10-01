@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>iisnode logs</title>
+    <style type="text/css">
+        body
+        {
+            font-family: "Trebuchet MS" , Arial, Helvetica, sans-serif;
+        }
+        table
+        {
+            border-collapse: collapse;
+        }
+        td, th
+        {
+            border: 1px solid lightgray;
+            padding: 3px 7px 2px 7px;
+        }
+        th
+        {
+            text-align: left;
+            padding-top: 5px;
+            padding-bottom: 4px;
+            background-color: Gray;
+            color: #ffffff;
+        }
+        td.stderr
+        {
+            color: Red;
+        }
+    </style>
+</head>
+<body>
+    <table id="logFilesTable">
+        <tr>
+            <th>
+                Computer name
+            </th>
+            <th>
+                PID
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Created
+            </th>
+            <th>
+                Link
+            </th>
+        </tr>
+    </table>
+    <p id="lastUpdated"></p>
+    <script type="text/javascript">
+
+        // this is replaced with actual data at runtime by code in interceptor.js
+        var logFiles = [{"file":"DESKTOP-8QFGOGP-10680-stderr-1758130131017.txt","computername":"DESKTOP-8QFGOGP","pid":10680,"type":"stderr","created":1758130131017},{"file":"DESKTOP-8QFGOGP-10680-stdout-1758130131016.txt","computername":"DESKTOP-8QFGOGP","pid":10680,"type":"stdout","created":1758130131016},{"file":"DESKTOP-8QFGOGP-12576-stderr-1758130190460.txt","computername":"DESKTOP-8QFGOGP","pid":12576,"type":"stderr","created":1758130190460},{"file":"DESKTOP-8QFGOGP-12576-stdout-1758130190459.txt","computername":"DESKTOP-8QFGOGP","pid":12576,"type":"stdout","created":1758130190459},{"file":"DESKTOP-8QFGOGP-12636-stderr-1758130038319.txt","computername":"DESKTOP-8QFGOGP","pid":12636,"type":"stderr","created":1758130038319},{"file":"DESKTOP-8QFGOGP-12636-stdout-1758130038319.txt","computername":"DESKTOP-8QFGOGP","pid":12636,"type":"stdout","created":1758130038319},{"file":"DESKTOP-8QFGOGP-19148-stderr-1758129889166.txt","computername":"DESKTOP-8QFGOGP","pid":19148,"type":"stderr","created":1758129889166},{"file":"DESKTOP-8QFGOGP-5132-stderr-1758130062571.txt","computername":"DESKTOP-8QFGOGP","pid":5132,"type":"stderr","created":1758130062571},{"file":"DESKTOP-8QFGOGP-5132-stdout-1758130062570.txt","computername":"DESKTOP-8QFGOGP","pid":5132,"type":"stdout","created":1758130062570}];
+        var lastUpdated = 1758130192337;
+        var date = new Date();
+
+        date.setTime(lastUpdated);
+        document.getElementById('lastUpdated').innerHTML = 'Index was last updated ' + date;
+
+        logFiles.sort(function (a, b) {
+            return b.created - a.created;
+        });
+
+        var logFilesTable = document.getElementById("logFilesTable");
+        for (var i = 0; i < logFiles.length; i++) {
+            var logFile = logFiles[i];
+            date.setTime(logFile.created);
+            var row = logFilesTable.insertRow(-1);
+            var computerNameCell = row.insertCell(0);
+            var pidCell = row.insertCell(1);
+            var typeCell = row.insertCell(2);
+            var dateCell = row.insertCell(3);
+            var logCell = row.insertCell(4);
+            computerNameCell.innerHTML = logFile.computername;
+            pidCell.innerHTML = logFile.pid.toString();
+            typeCell.innerHTML = logFile.type;
+            typeCell.setAttribute('class', logFile.type);
+            dateCell.innerHTML = date.toString();
+            logCell.innerHTML = '<a href="' + logFile.file + '">log</a>';
+        };
+
+    </script>
+</body>
+</html>

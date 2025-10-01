@@ -1,0 +1,17 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\api",
+    "\\app\\api\\dashboard",
+    "\\app\\api\\transactions",
+    "\\app\\archive",
+    "\\app\\history",
+    "\\components",
+    "\\components\\transactions",
+    "\\lib",
+    "\\lib\\constants"
+  ],
+  "SelectedNode": "\\components\\transactions\\TransactionHistory.tsx",
+  "PreviewInSolutionExplorer": false
+}
