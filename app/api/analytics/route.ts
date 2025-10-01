@@ -137,7 +137,7 @@ export async function GET(request: Request) {
                 .reduce((sum, t) => sum + t.amount, 0)
 
             const totalExpenses = monthTransactions
-                .filter(t => t.type === 'expense')
+                .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
                 .reduce((sum, t) => sum + t.amount, 0)
 
             if (totalIncome > 0 || totalExpenses > 0) {
@@ -172,7 +172,7 @@ export async function GET(request: Request) {
             include: { envelope: true }
         })
 
-        const expenseTransactions = allTransactions.filter(t => t.type === 'expense')
+        const expenseTransactions = allTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
 
         const transfers: TransferAnalysis[] = []
         const realExpenses: { amount: number; envelope?: { name?: string | null } | null; category?: string | null }[] = []
