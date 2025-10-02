@@ -8,10 +8,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-change-in-pro
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🔐 Signin API called')
     const { email, password } = await req.json()
+    console.log('📧 Email:', email)
 
     // Podstawowa walidacja
     if (!email || !password) {
+      console.log('❌ Missing email or password')
       return NextResponse.json(
         { error: 'Email i hasło są wymagane' },
         { status: 400 }
@@ -20,11 +23,16 @@ export async function POST(req: NextRequest) {
 
     // Demo użytkownik
     if (email === 'demo@example.com' && password === 'demo123') {
+      console.log('🚀 Demo user login attempt')
+      console.log('🔗 DATABASE_URL exists:', !!process.env.DATABASE_URL)
+      console.log('🔗 DATABASE_URL_DEV exists:', !!process.env.DATABASE_URL_DEV)
+      
       let user = await prisma.user.findUnique({
         where: { email: 'demo@example.com' }
       })
 
       if (!user) {
+        console.log('👤 Creating demo user')
         // Stwórz demo użytkownika
         user = await prisma.user.create({
           data: {
@@ -32,18 +40,26 @@ export async function POST(req: NextRequest) {
             name: 'Demo User',
           }
         })
+        console.log('✅ Demo user created:', user.id)
 
         // Stwórz podstawowe koperty dla demo użytkownika
+        console.log('📦 Creating envelopes')
         await createDefaultEnvelopes(user.id)
+        console.log('⚙️ Creating config')
         await createDemoConfig(user.id)
+        console.log('✅ Demo setup complete')
+      } else {
+        console.log('👤 Demo user found:', user.id)
       }
 
+      console.log('🔑 Creating JWT token')
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         JWT_SECRET,
         { expiresIn: '7d' }
       )
 
+      console.log('✅ Demo login successful')
       return NextResponse.json({
         token,
         user: {
@@ -93,9 +109,10 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('❌ Login error:', error)
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas logowania' },
+      { error: 'Wystąpił błąd podczas logowania: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     )
   }
