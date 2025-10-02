@@ -1,8 +1,8 @@
 // app/api/archive/route.ts - POPRAWIONA WERSJA z kategoriami
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryIco
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'n, getCategoryName } from '@/lib/constants/categories'
+import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
 
 interface TransactionData {

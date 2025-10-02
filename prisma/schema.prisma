@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL_MAIN")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // NextAuth.js wymagane modele

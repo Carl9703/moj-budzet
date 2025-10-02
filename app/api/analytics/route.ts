@@ -1,10 +1,9 @@
 // app/api/analytics/route.ts - Z OBSŁUGĄ OKRESÓW I PORÓWNANIAMI
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryName, getCategoryIco
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'n } from '@/lib/constants/categories'
+import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
-const userId = 'default-user'
 
 interface MonthlyData {
     month: string

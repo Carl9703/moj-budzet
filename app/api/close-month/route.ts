@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 
-co
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'nst userId = 'default-user'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
 export async function POST(request: NextRequest) {
     try {
