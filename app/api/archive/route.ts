@@ -1,5 +1,5 @@
 // app/api/archive/route.ts - POPRAWIONA WERSJA z kategoriami
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
