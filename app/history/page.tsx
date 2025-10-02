@@ -35,22 +35,22 @@ export default function HistoryPage() {
   
   if (loading) {
     return (
-      <div style={{ 
+      <div className="min-h-screen bg-theme-primary" style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh' 
       }}>
-        <div style={{ fontSize: '24px' }}>Ładowanie historii...</div>
+        <div className="text-theme-secondary" style={{ fontSize: '24px' }}>📜 Ładowanie historii...</div>
       </div>
     )
   }
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-theme-primary">
       <TopNavigation />
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
-        <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
+        <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
           📜 Historia transakcji
         </h1>
         

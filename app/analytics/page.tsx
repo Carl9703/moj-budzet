@@ -133,14 +133,14 @@ export default function AnalyticsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-theme-primary">
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh'
                 }}>
-                    <div style={{ fontSize: '24px', color: '#6b7280' }}>
+                    <div className="text-theme-secondary" style={{ fontSize: '24px' }}>
                         📊 Ładowanie analiz...
                     </div>
                 </div>
@@ -149,39 +149,45 @@ export default function AnalyticsPage() {
     }
 
     if (!data) {
-        return <div>Błąd ładowania danych</div>
+        return (
+            <div className="min-h-screen bg-theme-primary">
+                <div className="text-theme-primary" style={{ padding: '20px', textAlign: 'center' }}>
+                    Błąd ładowania danych
+                </div>
+            </div>
+        )
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-theme-primary">
             <TopNavigation />
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-                <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
+                <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
                     📊 Analizy Budżetowe
                 </h1>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
                     {/* PODSUMOWANIE */}
-                    <div style={{
-                        backgroundColor: 'white',
+                    <div className="bg-theme-secondary card" style={{
                         padding: '24px',
                         borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
+                        border: '1px solid var(--border-primary)',
+                        boxShadow: 'var(--shadow-md)'
                     }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px' }}>
+                        <h2 className="section-header" style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', color: 'var(--text-primary)' }}>
                             📈 Podsumowanie finansowe
                         </h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#fef3c7', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '14px', color: '#92400e', marginBottom: '4px' }}>Rzeczywiste wydatki</div>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc2626' }}>
+                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                                <div className="text-theme-secondary" style={{ fontSize: '14px', marginBottom: '4px' }}>Rzeczywiste wydatki</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                                     {formatMoney(data.summary.totalRealExpenses)}
                                 </div>
                             </div>
-                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#dbeafe', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '14px', color: '#1e40af', marginBottom: '4px' }}>Transfery i oszczędności</div>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#3b82f6' }}>
+                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                                <div className="text-theme-secondary" style={{ fontSize: '14px', marginBottom: '4px' }}>Transfery i oszczędności</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-primary)' }}>
                                     {formatMoney(data.summary.totalTransfers)}
                                 </div>
                             </div>
@@ -189,13 +195,13 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* WŁASNY PIĘKNY WYKRES CSS + SVG */}
-                    <div style={{
-                        backgroundColor: 'white',
+                    <div className="bg-theme-secondary card" style={{
                         padding: '24px',
                         borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
+                        border: '1px solid var(--border-primary)',
+                        boxShadow: 'var(--shadow-md)'
                     }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h2 className="section-header" style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
                             📈 Trendy Miesięczne (ostatnie 6 miesięcy)
                         </h2>
 

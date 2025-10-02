@@ -132,16 +132,15 @@ export default function ArchivePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-theme-primary">
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh'
                 }}>
-                    <div style={{
+                    <div className="text-theme-secondary" style={{
                         fontSize: '24px',
-                        color: '#6b7280',
                         textAlign: 'center'
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
@@ -154,7 +153,7 @@ export default function ArchivePage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-theme-primary">
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -195,10 +194,10 @@ export default function ArchivePage() {
     const monthData = getSelectedMonthData()
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-theme-primary">
             <TopNavigation />
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
+                <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
                     📁 Archiwum miesięcy
                 </h1>
 
