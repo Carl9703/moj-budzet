@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function SignInPage() {
+  console.log('🚀 SignInPage component loaded')
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -13,6 +15,7 @@ export default function SignInPage() {
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('📝 handleSubmit called')
     e.preventDefault()
     setIsLoading(true)
     setError('')
@@ -47,6 +50,7 @@ export default function SignInPage() {
   }
 
   const handleDemoLogin = async () => {
+    console.log('🚀 handleDemoLogin called')
     setEmail('demo@example.com')
     setPassword('demo123')
     
