@@ -64,8 +64,15 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
         const data = await request.json()
 
         // Użyj daty z frontendu lub aktualnej z prawidłową godziną
