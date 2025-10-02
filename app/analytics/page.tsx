@@ -168,98 +168,41 @@ export default function AnalyticsPage() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
-                    {/* BUDGET HEALTH SCORE - SIMPLIFIED */}
-                    <div style={{
+                    {/* PODSUMOWANIE */}
+                    <div className="bg-theme-secondary card" style={{
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid var(--border-primary)',
-                        backgroundColor: 'var(--bg-secondary)'
+                        boxShadow: 'var(--shadow-md)'
                     }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', color: 'var(--text-primary)' }}>
-                            💰 Budget Health
+                        <h2 className="section-header" style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', color: 'var(--text-primary)' }}>
+                            📈 Podsumowanie finansowe
                         </h2>
-                        
-                        {(() => {
-                            const avgSavingsRate = data.movingAverages.avgIncome > 0 ? (data.movingAverages.avgSavings / data.movingAverages.avgIncome) * 100 : 0
-                            const isHealthy = avgSavingsRate >= 15
-                            
-                            return (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                                    {/* SIMPLE SCORE */}
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{
-                                            fontSize: '48px',
-                                            fontWeight: 'bold',
-                                            color: isHealthy ? 'var(--accent-success)' : 'var(--accent-warning)'
-                                        }}>
-                                            {avgSavingsRate.toFixed(0)}%
-                                        </div>
-                                        <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                            Savings Rate
-                                        </div>
-                                    </div>
-                                    
-                                    {/* SIMPLE INSIGHT */}
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ 
-                                            padding: '16px', 
-                                            backgroundColor: isHealthy ? 'var(--bg-success)' : 'var(--bg-warning)', 
-                                            borderRadius: '6px',
-                                            border: `1px solid ${isHealthy ? 'var(--accent-success)' : 'var(--accent-warning)'}`
-                                        }}>
-                                            <div style={{ fontSize: '16px', marginBottom: '8px' }}>
-                                                {isHealthy ? '✅ Great job!' : '💡 Quick tip:'}
-                                            </div>
-                                            <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
-                                                {isHealthy 
-                                                    ? `You're saving ${avgSavingsRate.toFixed(0)}% - keep it up!`
-                                                    : `Try to save 15-20% of income. You're at ${avgSavingsRate.toFixed(0)}%.`
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        })()}
-                    </div>
-
-                    {/* QUICK SUMMARY - SIMPLIFIED */}
-                    <div style={{
-                        padding: '24px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-primary)',
-                        backgroundColor: 'var(--bg-secondary)'
-                    }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '32px' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                    Total Expenses
-                                </div>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                                <div className="text-theme-secondary" style={{ fontSize: '14px', marginBottom: '4px' }}>Rzeczywiste wydatki</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                                     {formatMoney(data.summary.totalRealExpenses)}
                                 </div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                    Total Savings
-                                </div>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                            <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                                <div className="text-theme-secondary" style={{ fontSize: '14px', marginBottom: '4px' }}>Transfery i oszczędności</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-primary)' }}>
                                     {formatMoney(data.summary.totalTransfers)}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-
-                    {/* MONTHLY TRENDS - SIMPLIFIED */}
-                    <div style={{
+                    {/* WŁASNY PIĘKNY WYKRES CSS + SVG */}
+                    <div className="bg-theme-secondary card" style={{
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid var(--border-primary)',
-                        backgroundColor: 'var(--bg-secondary)'
+                        boxShadow: 'var(--shadow-md)'
                     }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '32px', color: 'var(--text-primary)' }}>
-                            📈 Monthly Trends
+                        <h2 className="section-header" style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                            📈 Trendy Miesięczne (ostatnie 6 miesięcy)
                         </h2>
 
                         {/* WYKRES */}
@@ -589,37 +532,40 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
 
-                    {/* EXPENSES BY CATEGORY - SIMPLIFIED */}
+                    {/* WYDATKI WG KOPERT Z WYBOREM OKRESU */}
                     <div style={{
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid var(--border-primary)'
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                            <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--text-primary)' }}>
-                                💸 Expenses by Category
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                💸 Wydatki wg kopert
                             </h2>
 
-                            <select
-                                value={selectedPeriod}
-                                onChange={(e) => setSelectedPeriod(e.target.value)}
-                                style={{
-                                    padding: '8px 12px',
-                                    border: '1px solid var(--border-primary)',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    backgroundColor: 'var(--bg-secondary)',
-                                    color: 'var(--text-primary)',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {periodOptions.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                            {/* SELECTOR OKRESU */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>📅</span>
+                                <select
+                                    value={selectedPeriod}
+                                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '6px',
+                                        fontSize: '14px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {periodOptions.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -812,6 +758,123 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
 
+                    {/* PORÓWNANIA OKRESOWE */}
+                    <div style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        padding: '24px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-primary)'
+                    }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            📊 Porównania Okresowe
+                        </h2>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+
+                            {/* Miesiąc vs miesiąc */}
+                            {data.monthComparison && (
+                                <div style={{
+                                    padding: '16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--border-tertiary)'
+                                }}>
+                                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
+                                        📅 Miesiąc do miesiąca
+                                    </h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                                        <div>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Przychody: </span>
+                                            <span style={{
+                                                fontWeight: '600',
+                                                color: getChangeColor(data.monthComparison.incomeChange, false)
+                                            }}>
+                                                {formatChange(data.monthComparison.incomeChange)}
+                                                ({data.monthComparison.incomeChangePercent >= 0 ? '+' : ''}{data.monthComparison.incomeChangePercent}%)
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Wydatki: </span>
+                                            <span style={{
+                                                fontWeight: '600',
+                                                color: getChangeColor(data.monthComparison.expenseChange, true)
+                                            }}>
+                                                {formatChange(data.monthComparison.expenseChange)}
+                                                ({data.monthComparison.expenseChangePercent >= 0 ? '+' : ''}{data.monthComparison.expenseChangePercent}%)
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Bilans: </span>
+                                            <span style={{
+                                                fontWeight: '600',
+                                                color: getChangeColor(data.monthComparison.savingsChange, false)
+                                            }}>
+                                                {formatChange(data.monthComparison.savingsChange)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Średnie ruchome */}
+                            <div style={{
+                                padding: '16px',
+                                backgroundColor: 'var(--bg-tertiary)',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-tertiary)'
+                            }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                                    📈 Średnie ruchome (3 miesiące)
+                                </h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                                    <div>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. przychody: </span>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-success)' }}>
+                                            {formatMoney(data.movingAverages.avgIncome)}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. wydatki: </span>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-error)' }}>
+                                            {formatMoney(data.movingAverages.avgExpenses)}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. bilans: </span>
+                                        <span style={{
+                                            fontWeight: '600',
+                                            color: data.movingAverages.avgSavings >= 0 ? 'var(--accent-success)' : 'var(--accent-error)'
+                                        }}>
+                                            {formatMoney(data.movingAverages.avgSavings)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Prognoza */}
+                            <div style={{
+                                padding: '16px',
+                                backgroundColor: 'var(--bg-tertiary)',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-tertiary)'
+                            }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
+                                    🔮 Prognoza (6 miesięcy)
+                                </h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                                    <div>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Przy obecnym tempie: </span>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-primary)' }}>
+                                            {formatMoney(data.movingAverages.avgSavings * 6)}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                        Przewidywany bilans za 6 miesięcy
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
