@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+const USER_ID = 'default-user'
 
 export async function POST(request: NextRequest) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
 
         let body = null
         try {

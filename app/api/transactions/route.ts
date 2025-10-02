@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+
+const USER_ID = 'default-user'
 
 export async function GET(request: NextRequest) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
 
         const transactions = await prisma.transaction.findMany({
             where: { userId },
@@ -66,13 +61,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
         const data = await request.json()
 
         // Użyj daty z frontendu lub aktualnej z prawidłową godziną

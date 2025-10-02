@@ -1,8 +1,9 @@
 // app/api/analytics/route.ts - Z OBSŁUGĄ OKRESÓW I PORÓWNANIAMI
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+
+const USER_ID = 'default-user'
 
 
 interface MonthlyData {
@@ -55,17 +56,11 @@ interface TransferAnalysis {
     percentage: number
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
+        const userId = USER_ID
 
         // Określ zakres dat na podstawie okresu
         const now = new Date()

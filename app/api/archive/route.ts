@@ -1,8 +1,9 @@
 // app/api/archive/route.ts - POPRAWIONA WERSJA z kategoriami
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+
+const USER_ID = 'default-user'
 
 
 interface TransactionData {
@@ -43,13 +44,7 @@ interface MonthData {
 
 export async function GET(request: NextRequest) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
 
         // Pobierz wszystkie transakcje WŁĄCZAJĄC POLE includeInStats
         const allTransactions = await prisma.transaction.findMany({

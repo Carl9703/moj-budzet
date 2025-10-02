@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+const USER_ID = 'default-user'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
@@ -10,13 +10,7 @@ export async function GET(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
@@ -51,13 +45,7 @@ export async function PATCH(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
         const params = await context.params
         const data = await request.json()
 
@@ -144,13 +132,7 @@ export async function DELETE(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const currentUser = await getCurrentUser(request)
-        
-        if (!currentUser) {
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
+        const userId = USER_ID
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
