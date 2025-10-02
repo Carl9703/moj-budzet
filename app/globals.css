@@ -19,22 +19,22 @@
 }
 
 [data-theme="dark"] {
-    /* Dark Theme - Improved */
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2d2d2d;
-    --bg-tertiary: #404040;
+    /* Dark Theme - High Contrast */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2a2a2a;
     --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-tertiary: #b0b0b0;
-    --border-primary: #404040;
-    --border-secondary: #555555;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.6);
-    --accent-primary: #4a9eff;
-    --accent-success: #00d084;
-    --accent-warning: #ffb800;
-    --accent-error: #ff5757;
+    --text-secondary: #ffffff;
+    --text-tertiary: #cccccc;
+    --border-primary: #444444;
+    --border-secondary: #666666;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.7);
+    --accent-primary: #5aa3ff;
+    --accent-success: #00e676;
+    --accent-warning: #ffc107;
+    --accent-error: #ff5252;
 }
 
 body {
@@ -132,6 +132,24 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* High contrast headings in dark mode */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Section headers with better visibility */
+[data-theme="dark"] .section-header {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 [data-theme="dark"] .card:hover {
     box-shadow: var(--shadow-lg);
     border-color: var(--border-secondary);
@@ -140,6 +158,25 @@ body {
 /* Better progress bars in dark mode */
 [data-theme="dark"] .progress-bar-bg {
     background-color: #333333 !important;
+}
+
+/* Fix white squares in progress bars */
+[data-theme="dark"] .progress-bar-fill {
+    background-color: var(--accent-primary) !important;
+}
+
+/* Savings goals improvements */
+[data-theme="dark"] .savings-goal-card {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-primary) !important;
+}
+
+[data-theme="dark"] .savings-goal-progress {
+    background-color: #333333 !important;
+}
+
+[data-theme="dark"] .savings-goal-fill {
+    background-color: var(--accent-success) !important;
 }
 
 /* Better button styles in dark mode */

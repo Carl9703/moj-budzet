@@ -307,7 +307,7 @@ export default function HomePage() {
                         }}>
                             {/* LEWA - koperty miesięczne */}
                             <div className="slide-in-left">
-                                <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#374151' }}>
+                                <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                                     📅 Koperty miesięczne
                                 </h2>
                                 <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
@@ -342,7 +342,7 @@ export default function HomePage() {
 
                             {/* PRAWA - koperty roczne (bez Wesela i Wakacji) */}
                             <div className="slide-in-right">
-                                <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#374151' }}>
+                                <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                                     📆 Koperty roczne
                                 </h2>
                                 <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>

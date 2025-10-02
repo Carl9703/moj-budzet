@@ -15,11 +15,11 @@ interface Props {
 
 export function SavingsGoals({ goals }: Props) {
     return (
-        <div className="bg-white rounded-lg p-6" style={{
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #f3f4f6'
+        <div className="bg-theme-secondary card rounded-lg p-6" style={{
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--border-primary)'
         }}>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: '#374151' }}>
+            <h3 className="section-header" style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>
                 🎯 Cele oszczędnościowe
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -29,14 +29,14 @@ export function SavingsGoals({ goals }: Props) {
                     const isCompleted = goal.current >= goal.target
 
                     return (
-                        <div key={goal.id} style={{
-                            border: '1px solid #e5e7eb',
+                        <div key={goal.id} className="savings-goal-card" style={{
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '8px',
                             padding: '16px',
-                            backgroundColor: isCompleted ? '#f0fdf4' : '#ffffff'
+                            backgroundColor: isCompleted ? 'var(--bg-tertiary)' : 'var(--bg-secondary)'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <h4 style={{ fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h4 className="text-theme-primary" style={{ fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ fontSize: '20px' }}>{goal.icon}</span>
                                     {goal.name}
                                 </h4>
@@ -45,17 +45,17 @@ export function SavingsGoals({ goals }: Props) {
                                 </span>
                             </div>
 
-                            <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '9999px', height: '10px', marginBottom: '12px' }}>
-                                <div style={{
+                            <div className="savings-goal-progress" style={{ width: '100%', backgroundColor: 'var(--bg-tertiary)', borderRadius: '9999px', height: '10px', marginBottom: '12px' }}>
+                                <div className="savings-goal-fill" style={{
                                     width: `${progress}%`,
-                                    backgroundColor: isCompleted ? '#10b981' : '#3b82f6',
+                                    backgroundColor: isCompleted ? 'var(--accent-success)' : 'var(--accent-primary)',
                                     height: '100%',
                                     borderRadius: '9999px',
                                     transition: 'width 0.3s ease'
                                 }} />
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>
+                            <div className="text-theme-secondary" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
                                 <span>{goal.current.toLocaleString()} / {goal.target.toLocaleString()} zł</span>
                                 {!isCompleted && (
                                     <span>{monthsLeft === 1 ? '1 miesiąc' : monthsLeft < 5 ? `${monthsLeft} miesiące` : `${monthsLeft} miesięcy`}</span>
