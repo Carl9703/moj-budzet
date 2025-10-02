@@ -2,20 +2,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 
-co
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'nst userId = 'default-user'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: userId
+                userId
             },
             include: {
                 envelope: true
@@ -41,10 +47,17 @@ export async function GET(
 
 // PATCH - edytuj transakcję (obsługa zwrotów i zwiększenia kwoty)
 export async function PATCH(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
         const params = await context.params
         const data = await request.json()
 
@@ -127,15 +140,22 @@ export async function PATCH(
 
 // DELETE - usuń transakcję
 export async function DELETE(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: userId
+                userId
             }
         })
 
