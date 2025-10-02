@@ -22,7 +22,7 @@ export function EmptyState({
                     iconColor: '#10b981',
                     titleColor: '#065f46',
                     descriptionColor: '#047857',
-                    backgroundColor: '#f0fdf4',
+                    backgroundColor: 'var(--bg-success)',
                     borderColor: '#bbf7d0'
                 }
             case 'warning':
@@ -30,7 +30,7 @@ export function EmptyState({
                     iconColor: '#f59e0b',
                     titleColor: '#92400e',
                     descriptionColor: '#b45309',
-                    backgroundColor: '#fffbeb',
+                    backgroundColor: 'var(--bg-warning)',
                     borderColor: '#fed7aa'
                 }
             case 'error':
@@ -38,7 +38,7 @@ export function EmptyState({
                     iconColor: '#ef4444',
                     titleColor: '#991b1b',
                     descriptionColor: '#dc2626',
-                    backgroundColor: '#fef2f2',
+                    backgroundColor: 'var(--bg-error)',
                     borderColor: '#fecaca'
                 }
             default:
@@ -46,7 +46,7 @@ export function EmptyState({
                     iconColor: '#6b7280',
                     titleColor: '#374151',
                     descriptionColor: '#6b7280',
-                    backgroundColor: '#f9fafb',
+                    backgroundColor: 'var(--bg-tertiary)',
                     borderColor: '#e5e7eb'
                 }
         }

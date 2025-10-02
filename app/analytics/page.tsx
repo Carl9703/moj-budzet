@@ -773,30 +773,30 @@ export default function AnalyticsPage() {
                             {data.transfers.map((transfer, index) => (
                                 <div key={transfer.name} style={{
                                     padding: '16px',
-                                    backgroundColor: '#f0f9ff',
+                                    backgroundColor: 'var(--bg-tertiary)',
                                     borderRadius: '6px',
-                                    border: '1px solid #e0f2fe'
+                                    border: '1px solid var(--border-tertiary)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                        <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                        <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
                                             #{index + 1} {transfer.name}
                                         </span>
-                                        <span style={{ fontSize: '12px', color: '#0369a1' }}>{transfer.percentage}%</span>
+                                        <span style={{ fontSize: '12px', color: 'var(--accent-primary)' }}>{transfer.percentage}%</span>
                                     </div>
-                                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#0c4a6e', marginBottom: '6px' }}>
+                                    <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
                                         {formatMoney(transfer.amount)}
                                     </div>
                                     <div style={{
                                         width: '100%',
                                         height: '4px',
-                                        backgroundColor: '#e0f2fe',
+                                        backgroundColor: 'var(--bg-quaternary)',
                                         borderRadius: '2px',
                                         overflow: 'hidden'
                                     }}>
                                         <div style={{
                                             width: `${transfer.percentage}%`,
                                             height: '100%',
-                                            backgroundColor: '#0369a1',
+                                            backgroundColor: 'var(--accent-primary)',
                                             transition: 'width 0.3s ease'
                                         }} />
                                     </div>
@@ -826,7 +826,7 @@ export default function AnalyticsPage() {
                                     borderRadius: '6px',
                                     border: '1px solid var(--border-tertiary)'
                                 }}>
-                                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                                         📅 Miesiąc do miesiąca
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
@@ -876,13 +876,13 @@ export default function AnalyticsPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
                                     <div>
                                         <span style={{ color: 'var(--text-secondary)' }}>Śr. przychody: </span>
-                                        <span style={{ fontWeight: '600', color: '#059669' }}>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-success)' }}>
                                             {formatMoney(data.movingAverages.avgIncome)}
                                         </span>
                                     </div>
                                     <div>
                                         <span style={{ color: 'var(--text-secondary)' }}>Śr. wydatki: </span>
-                                        <span style={{ fontWeight: '600', color: '#dc2626' }}>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-error)' }}>
                                             {formatMoney(data.movingAverages.avgExpenses)}
                                         </span>
                                     </div>
@@ -890,7 +890,7 @@ export default function AnalyticsPage() {
                                         <span style={{ color: 'var(--text-secondary)' }}>Śr. bilans: </span>
                                         <span style={{
                                             fontWeight: '600',
-                                            color: data.movingAverages.avgSavings >= 0 ? '#059669' : '#dc2626'
+                                            color: data.movingAverages.avgSavings >= 0 ? 'var(--accent-success)' : 'var(--accent-error)'
                                         }}>
                                             {formatMoney(data.movingAverages.avgSavings)}
                                         </span>
@@ -901,17 +901,17 @@ export default function AnalyticsPage() {
                             {/* Prognoza */}
                             <div style={{
                                 padding: '16px',
-                                backgroundColor: '#f0f9ff',
+                                backgroundColor: 'var(--bg-tertiary)',
                                 borderRadius: '6px',
-                                border: '1px solid #e0f2fe'
+                                border: '1px solid var(--border-tertiary)'
                             }}>
-                                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#0369a1' }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                                     🔮 Prognoza (6 miesięcy)
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
                                     <div>
                                         <span style={{ color: 'var(--text-secondary)' }}>Przy obecnym tempie: </span>
-                                        <span style={{ fontWeight: '600', color: '#0369a1' }}>
+                                        <span style={{ fontWeight: '600', color: 'var(--accent-primary)' }}>
                                             {formatMoney(data.movingAverages.avgSavings * 6)}
                                         </span>
                                     </div>

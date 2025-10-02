@@ -16,7 +16,7 @@ export function QuickActions({ onAddIncome, onAddExpense }: Props) {
                 <button
                     onClick={onAddIncome}
                     style={{
-                        backgroundColor: '#10b981',
+                        backgroundColor: 'var(--accent-success)',
                         color: 'white',
                         padding: '10px',
                         borderRadius: '6px',
@@ -36,7 +36,7 @@ export function QuickActions({ onAddIncome, onAddExpense }: Props) {
                 <button
                     onClick={onAddExpense}
                     style={{
-                        backgroundColor: '#ef4444',
+                        backgroundColor: 'var(--accent-error)',
                         color: 'white',
                         padding: '10px',
                         borderRadius: '6px',

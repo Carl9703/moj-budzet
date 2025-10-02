@@ -28,7 +28,7 @@ export function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth
                     disabled={previousMonthStatus.isClosed}
                     style={{
                         padding: '6px 12px',
-                        backgroundColor: previousMonthStatus.isClosed ? '#9ca3af' : '#6366f1',
+                        backgroundColor: previousMonthStatus.isClosed ? 'var(--text-tertiary)' : 'var(--accent-info)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',

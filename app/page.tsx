@@ -153,7 +153,7 @@ export default function HomePage() {
 
             if (loading) {
                 return (
-                    <div className="min-h-screen" style={{ backgroundColor: '#f9fafb' }}>
+                    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
                         <TopNavigation />
                         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
                             {/* GÓRNY RZĄD - skeleton */}
@@ -174,7 +174,7 @@ export default function HomePage() {
                                     <div style={{ 
                                         width: '150px', 
                                         height: '20px', 
-                                        backgroundColor: '#f3f4f6', 
+                                        backgroundColor: 'var(--bg-tertiary)', 
                                         borderRadius: '4px', 
                                         marginBottom: '12px' 
                                     }} />
@@ -194,7 +194,7 @@ export default function HomePage() {
                                         <div style={{ 
                                             width: '120px', 
                                             height: '20px', 
-                                            backgroundColor: '#f3f4f6', 
+                                            backgroundColor: 'var(--bg-tertiary)', 
                                             borderRadius: '4px', 
                                             marginBottom: '16px' 
                                         }} />
@@ -203,14 +203,14 @@ export default function HomePage() {
                                                 <div style={{ 
                                                     width: '100px', 
                                                     height: '16px', 
-                                                    backgroundColor: '#f3f4f6', 
+                                                    backgroundColor: 'var(--bg-tertiary)', 
                                                     borderRadius: '4px', 
                                                     marginBottom: '8px' 
                                                 }} />
                                                 <div style={{ 
                                                     width: '100%', 
                                                     height: '8px', 
-                                                    backgroundColor: '#f3f4f6', 
+                                                    backgroundColor: 'var(--bg-tertiary)', 
                                                     borderRadius: '4px' 
                                                 }} />
                                             </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
                                     <div style={{ 
                                         width: '120px', 
                                         height: '20px', 
-                                        backgroundColor: '#f3f4f6', 
+                                        backgroundColor: 'var(--bg-tertiary)', 
                                         borderRadius: '4px', 
                                         marginBottom: '12px' 
                                     }} />

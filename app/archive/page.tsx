@@ -427,7 +427,7 @@ export default function ArchivePage() {
                                                     return (
                                                         <div key={envelope.name} style={{
                                                             padding: '16px',
-                                                            backgroundColor: '#f9fafb',
+                                                            backgroundColor: 'var(--bg-tertiary)',
                                                             borderRadius: '6px',
                                                             border: '1px solid #f3f4f6'
                                                         }}>
@@ -453,14 +453,14 @@ export default function ArchivePage() {
                                                                 <div style={{
                                                                     width: '100%',
                                                                     height: '4px',
-                                                                    backgroundColor: '#e5e7eb',
+                                                                    backgroundColor: 'var(--bg-quaternary)',
                                                                     borderRadius: '2px',
                                                                     overflow: 'hidden'
                                                                 }}>
                                                                     <div style={{
                                                                         width: `${envelope.percentage}%`,
                                                                         height: '100%',
-                                                                        backgroundColor: index === 0 ? '#dc2626' : index === 1 ? '#f59e0b' : '#6b7280',
+                                                                        backgroundColor: index === 0 ? 'var(--accent-error)' : index === 1 ? 'var(--accent-warning)' : 'var(--text-secondary)',
                                                                         transition: 'width 0.3s ease'
                                                                     }} />
                                                                 </div>
@@ -536,7 +536,7 @@ export default function ArchivePage() {
                                                                                                     justifyContent: 'space-between',
                                                                                                     alignItems: 'center',
                                                                                                     padding: '6px 8px',
-                                                                                                    backgroundColor: '#ffffff',
+                                                                                                    backgroundColor: 'var(--bg-secondary)',
                                                                                                     borderRadius: '4px',
                                                                                                     marginBottom: '4px',
                                                                                                     border: '1px solid #f0f0f0',
@@ -606,7 +606,7 @@ export default function ArchivePage() {
                                                                 onClick={() => toggleTransfer(transfer.name)}
                                                                 style={{
                                                                     padding: '16px',
-                                                                    backgroundColor: '#f0f9ff',
+                                                                    backgroundColor: 'var(--bg-tertiary)',
                                                                     cursor: 'pointer',
                                                                     display: 'flex',
                                                                     justifyContent: 'space-between',
@@ -651,7 +651,7 @@ export default function ArchivePage() {
                                                                                 justifyContent: 'space-between',
                                                                                 alignItems: 'center',
                                                                                 padding: '12px',
-                                                                                backgroundColor: '#f8fafc',
+                                                                                backgroundColor: 'var(--bg-tertiary)',
                                                                                 borderRadius: '6px',
                                                                                 marginBottom: '8px',
                                                                                 border: '1px solid #e2e8f0'
