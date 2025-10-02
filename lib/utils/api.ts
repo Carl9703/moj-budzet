@@ -4,7 +4,10 @@ export function getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('authToken')
     
     if (!token) {
-        throw new Error('No authentication token found')
+        // Don't throw error immediately, let the component handle it
+        return {
+            'Content-Type': 'application/json'
+        }
     }
 
     return {
@@ -29,7 +32,8 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
         if (response.status === 401) {
             // Token expired or invalid
             localStorage.removeItem('authToken')
-            window.location.href = '/auth/signin'
+            localStorage.removeItem('user')
+            // Don't redirect immediately, let the component handle it
             throw new Error('Authentication required')
         }
 
@@ -37,7 +41,7 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
     } catch (error) {
         // Handle network errors or missing token
         if (error instanceof Error && error.message === 'No authentication token found') {
-            window.location.href = '/auth/signin'
+            // Don't redirect immediately, let the component handle it
         }
         throw error
     }

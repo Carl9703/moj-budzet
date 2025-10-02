@@ -41,6 +41,12 @@ export function useDashboard() {
         } catch (error) {
             console.error('Error fetching dashboard:', error)
             setData(null)
+            
+            // Handle authentication errors
+            if (error instanceof Error && error.message === 'Authentication required') {
+                // Redirect to login page
+                window.location.href = '/auth/signin'
+            }
         } finally {
             setLoading(false)
         }
