@@ -28,7 +28,7 @@ interface ExpenseData {
     includeInStats?: boolean
 }
 
-export const createIncomeHandler = (refetch: () => void) => {
+export const createIncomeHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (incomeData: IncomeData) => {
         try {
             const response = await fetch('/api/income', {
@@ -44,17 +44,17 @@ export const createIncomeHandler = (refetch: () => void) => {
             if (response.ok) {
                 refetch()
                 const result = await response.json()
-                alert(result.message || 'Zapisano!')
+                showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
             } else {
-                alert('Błąd podczas zapisywania')
+                showToast('Błąd podczas zapisywania przychodu', 'error')
             }
         } catch {
-            alert('Błąd podczas zapisywania')
+            showToast('Błąd podczas zapisywania przychodu', 'error')
         }
     }
 }
 
-export const createBonusHandler = (refetch: () => void) => {
+export const createBonusHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (bonusData: BonusData) => {
         try {
             const response = await fetch('/api/income', {
@@ -68,20 +68,20 @@ export const createBonusHandler = (refetch: () => void) => {
 
             if (response.ok) {
                 refetch()
-                alert('Premia została rozdzielona na koperty roczne!')
+                showToast('Premia została rozdzielona na koperty roczne!', 'success')
             } else {
-                alert('Błąd podczas zapisywania')
+                showToast('Błąd podczas zapisywania premii', 'error')
             }
         } catch {
-            alert('Błąd podczas zapisywania')
+            showToast('Błąd podczas zapisywania premii', 'error')
         }
     }
 }
 
-export const createExpenseHandler = (refetch: () => void) => {
+export const createExpenseHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (expenseData: ExpenseData) => {
         try {
-            await fetch('/api/transactions', {
+            const response = await fetch('/api/transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -95,10 +95,14 @@ export const createExpenseHandler = (refetch: () => void) => {
                 })
             })
 
-            refetch()
-            alert('Wydatek zapisany!')
+            if (response.ok) {
+                refetch()
+                showToast('Wydatek zapisany pomyślnie!', 'success')
+            } else {
+                showToast('Błąd podczas zapisywania wydatku', 'error')
+            }
         } catch {
-            alert('Błąd podczas zapisywania')
+            showToast('Błąd podczas zapisywania wydatku', 'error')
         }
     }
 }

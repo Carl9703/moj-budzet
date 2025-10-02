@@ -68,7 +68,7 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
     }
 
     return (
-        <div style={{
+        <div className="envelope-card smooth-all" style={{
             backgroundColor: 'white',
             border: isOverBudget ? '2px solid #ef4444' : '1px solid #e5e7eb',
             borderRadius: '12px',

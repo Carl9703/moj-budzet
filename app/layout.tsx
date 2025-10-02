@@ -1,4 +1,5 @@
 import './globals.css'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export const metadata = {
     title: 'Budżet Domowy',
@@ -13,7 +14,9 @@ export default function RootLayout({
     return (
         <html lang="pl" suppressHydrationWarning>
             <body className="bg-gray-50" suppressHydrationWarning>
-                {children}
+                <ToastProvider>
+                    {children}
+                </ToastProvider>
             </body>
         </html>
     )
