@@ -6,15 +6,27 @@ export function useConfig() {
 
     useEffect(() => {
         const loadConfig = async () => {
+            // Check if token exists before making request
+            const token = localStorage.getItem('authToken')
+            if (!token) {
+                console.log('❌ No token found, skipping config fetch')
+                return
+            }
+            
             try {
+                console.log('🔧 Loading config...')
                 const data = await authenticatedRequest<{config: any}>('/api/config')
                 setConfig(data?.config)
-            } catch {
+            } catch (error) {
+                console.error('❌ Config fetch error:', error)
                 // ignore
             }
         }
         
-        loadConfig()
+        // Add delay to ensure token is saved after login
+        const timer = setTimeout(loadConfig, 300)
+        
+        return () => clearTimeout(timer)
     }, [])
 
     return config

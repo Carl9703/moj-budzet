@@ -59,6 +59,7 @@ export default function SignInPage() {
     setError('')
 
     try {
+      console.log('🌐 Making fetch request to /api/auth/signin')
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -69,11 +70,15 @@ export default function SignInPage() {
           password: 'demo123',
         }),
       })
+      console.log('📡 Fetch response received:', response.status)
 
       const data = await response.json()
+      console.log('📦 API Response:', data)
 
       if (response.ok) {
         console.log('✅ Demo login successful, saving token')
+        console.log('🔑 Token:', data.token)
+        console.log('👤 User:', data.user)
         localStorage.setItem('authToken', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
         console.log('🔄 Redirecting to dashboard...')
