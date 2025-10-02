@@ -79,8 +79,19 @@ export default function SignInPage() {
         console.log('✅ Demo login successful, saving token')
         console.log('🔑 Token:', data.token)
         console.log('👤 User:', data.user)
-        localStorage.setItem('authToken', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        
+        try {
+          localStorage.setItem('authToken', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
+          console.log('💾 Token saved to localStorage')
+          
+          // Test if token was saved
+          const savedToken = localStorage.getItem('authToken')
+          console.log('🔍 Saved token check:', savedToken ? 'OK' : 'FAILED')
+        } catch (error) {
+          console.error('❌ localStorage error:', error)
+        }
+        
         console.log('🔄 Redirecting to dashboard...')
         router.push('/')
       } else {
