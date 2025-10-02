@@ -18,15 +18,15 @@ export function AutoTransfers({ totalIncome, config }: Props) {
     const totalTransfers = transfers.reduce((sum, t) => sum + t.amount, 0)
 
     return (
-        <div className="bg-white rounded-lg p-6" style={{
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #f3f4f6'
+        <div className="bg-theme-secondary card rounded-lg p-6" style={{
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--border-primary)'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                <h3 className="section-header" style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     💰 Stałe przelewy
                 </h3>
-                <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
+                <span className="text-theme-secondary" style={{ fontSize: '12px', fontWeight: '500' }}>
                     {totalTransfers.toLocaleString()} zł
                 </span>
             </div>
@@ -37,15 +37,15 @@ export function AutoTransfers({ totalIncome, config }: Props) {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         padding: '8px',
-                        backgroundColor: transfer.status === 'completed' ? '#f0fdf4' : '#f9fafb',
+                        backgroundColor: transfer.status === 'completed' ? 'var(--bg-success)' : 'var(--bg-tertiary)',
                         borderRadius: '4px',
                         fontSize: '13px'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
                             <span style={{ fontSize: '16px' }}>{transfer.icon}</span>
                             <div>
-                                <div style={{ fontWeight: '500', marginBottom: '2px' }}>{transfer.name}</div>
-                                <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: '1.2' }}>
+                                <div className="text-theme-primary" style={{ fontWeight: '500', marginBottom: '2px' }}>{transfer.name}</div>
+                                <div className="text-theme-secondary" style={{ fontSize: '11px', lineHeight: '1.2' }}>
                                     {transfer.description}
                                 </div>
                             </div>
@@ -53,7 +53,7 @@ export function AutoTransfers({ totalIncome, config }: Props) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
                             <span style={{ fontWeight: '600' }}>{transfer.amount.toLocaleString()} zł</span>
                             <span style={{
-                                color: transfer.status === 'completed' ? '#10b981' : '#6b7280',
+                                color: transfer.status === 'completed' ? 'var(--accent-success)' : 'var(--text-secondary)',
                                 fontSize: '14px',
                                 minWidth: '16px',
                                 textAlign: 'center'
@@ -68,11 +68,12 @@ export function AutoTransfers({ totalIncome, config }: Props) {
                 <div style={{
                     marginTop: '12px',
                     padding: '8px',
-                    backgroundColor: '#fef3c7',
+                    backgroundColor: 'var(--bg-warning)',
                     borderRadius: '4px',
                     fontSize: '12px',
-                    color: '#92400e',
-                    textAlign: 'center'
+                    color: 'var(--text-primary)',
+                    textAlign: 'center',
+                    border: '1px solid var(--accent-warning)'
                 }}>
                     💡 Przelewy zostaną wykonane po dodaniu wypłaty
                 </div>

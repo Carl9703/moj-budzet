@@ -40,7 +40,7 @@ export function SavingsGoals({ goals }: Props) {
                                     <span style={{ fontSize: '20px' }}>{goal.icon}</span>
                                     {goal.name}
                                 </h4>
-                                <span style={{ fontSize: '18px', fontWeight: 'bold', color: isCompleted ? '#10b981' : '#059669' }}>
+                                <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-success)' }}>
                                     {progress}%{isCompleted && ' ✓'}
                                 </span>
                             </div>
@@ -61,17 +61,16 @@ export function SavingsGoals({ goals }: Props) {
                                     <span>{monthsLeft === 1 ? '1 miesiąc' : monthsLeft < 5 ? `${monthsLeft} miesiące` : `${monthsLeft} miesięcy`}</span>
                                 )}
                                 {isCompleted && (
-                                    <span style={{ color: '#10b981', fontWeight: '600' }}>Cel osiągnięty! 🎉</span>
+                                    <span style={{ color: 'var(--accent-success)', fontWeight: '600' }}>Cel osiągnięty! 🎉</span>
                                 )}
                             </div>
 
-                            <div style={{
+                            <div className="text-theme-tertiary" style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 fontSize: '12px',
-                                color: '#9ca3af',
-                                backgroundColor: '#f9fafb',
+                                backgroundColor: 'var(--bg-tertiary)',
                                 padding: '8px',
                                 borderRadius: '4px'
                             }}>
@@ -85,10 +84,10 @@ export function SavingsGoals({ goals }: Props) {
                                 <div style={{
                                     marginTop: '8px',
                                     padding: '6px 8px',
-                                    backgroundColor: '#d1fae5',
+                                    backgroundColor: 'var(--bg-success)',
                                     borderRadius: '4px',
                                     fontSize: '12px',
-                                    color: '#065f46',
+                                    color: 'var(--accent-success)',
                                     textAlign: 'center'
                                 }}>
                                     💰 Nadwyżka: {(goal.current - goal.target).toLocaleString()} zł

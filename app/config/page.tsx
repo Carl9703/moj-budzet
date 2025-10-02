@@ -85,70 +85,72 @@ export default function ConfigPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        Ładowanie konfiguracji...
+      <div className="min-h-screen bg-theme-primary">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+          <div className="text-theme-secondary" style={{ fontSize: '24px' }}>⚙️ Ładowanie konfiguracji...</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-theme-primary">
       <TopNavigation />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '16px' }}>⚙️ Konfigurator budżetu</h1>
+        <h1 className="section-header" style={{ fontSize: '22px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>⚙️ Konfigurator budżetu</h1>
 
-      <div className="bg-white rounded-lg shadow p-4" style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Wypłata (pensja) i stałe przelewy</h2>
+      <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
+        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Wypłata (pensja) i stałe przelewy</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span>💼 Domyślna wypłata</span>
-            <input type="number" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+            <span className="text-theme-primary">💼 Domyślna wypłata</span>
+            <input type="number" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span>👫 Konto wspólne</span>
-            <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+            <span className="text-theme-primary">👫 Konto wspólne</span>
+            <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span>💍 Wesele (cel)</span>
-            <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+            <span className="text-theme-primary">💍 Wesele (cel)</span>
+            <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span>✈️ Wakacje (koperta)</span>
-            <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+            <span className="text-theme-primary">✈️ Wakacje (koperta)</span>
+            <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span>📈 Inwestycje</span>
-            <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+            <span className="text-theme-primary">📈 Inwestycje</span>
+            <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
         </div>
         {warnings.length > 0 && (
-          <div style={{ marginTop: 12, padding: 8, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, color: '#9a3412', fontSize: 12 }}>
+          <div style={{ marginTop: 12, padding: 8, backgroundColor: 'var(--bg-warning)', border: '1px solid var(--accent-warning)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}>
             {warnings.map((w, i) => <div key={i}>⚠️ {w}</div>)}
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4" style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Domyślne kwoty kopert miesięcznych</h2>
+      <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
+        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Domyślne kwoty kopert miesięcznych</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {envelopes.map((e, idx) => (
             <div key={e.id} style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '12px', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{e.icon || '📦'}</span>
-                <span style={{ fontWeight: 500 }}>{e.name}</span>
+                <span className="text-theme-primary" style={{ fontWeight: 500 }}>{e.name}</span>
               </div>
               <input type="number" value={e.plannedAmount} onChange={(ev)=>{
                 const v = Number((ev.target as HTMLInputElement).value || 0)
                 setEnvelopes(prev => prev.map((row,i)=> i===idx ? { ...row, plannedAmount: v } : row))
-              }} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid #ddd', borderRadius: 6 }} />
+              }} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
             </div>
           ))}
         </div>
       </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={()=>{ window.location.href='/' }} style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: 6, background: 'white', cursor: 'pointer' }}>Anuluj</button>
-          <button onClick={handleSave} disabled={saving} style={{ padding: '8px 16px', border: 'none', borderRadius: 6, background: '#3b82f6', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{saving ? 'Zapisywanie...' : 'Zapisz konfigurację'}</button>
+          <button onClick={()=>{ window.location.href='/' }} className="nav-button" style={{ padding: '8px 16px', border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}>Anuluj</button>
+          <button onClick={handleSave} disabled={saving} className="nav-button" style={{ padding: '8px 16px', border: 'none', borderRadius: 6, backgroundColor: 'var(--accent-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{saving ? 'Zapisywanie...' : 'Zapisz konfigurację'}</button>
         </div>
       </div>
     </div>

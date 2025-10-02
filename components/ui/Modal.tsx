@@ -27,7 +27,7 @@ export function Modal({ title, children, onClose }: Props) {
             <div 
                 className="modal-content smooth-all"
                 style={{
-                    backgroundColor: 'white',
+                    backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '12px',
                     padding: '24px',
                     maxWidth: '500px',
@@ -36,7 +36,8 @@ export function Modal({ title, children, onClose }: Props) {
                     overflow: 'auto',
                     position: 'relative',
                     zIndex: 51,
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                    boxShadow: 'var(--shadow-lg)',
+                    border: '1px solid var(--border-primary)'
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -46,7 +47,7 @@ export function Modal({ title, children, onClose }: Props) {
                     alignItems: 'center',
                     marginBottom: '16px'
                 }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{title}</h2>
+                    <h2 className="section-header" style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{title}</h2>
                     <button
                         onClick={onClose}
                         className="btn-animate smooth-colors"
@@ -57,7 +58,7 @@ export function Modal({ title, children, onClose }: Props) {
                             cursor: 'pointer',
                             padding: '8px',
                             borderRadius: '6px',
-                            color: '#6b7280',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -65,12 +66,12 @@ export function Modal({ title, children, onClose }: Props) {
                             height: '32px'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f3f4f6'
-                            e.currentTarget.style.color = '#374151'
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.color = 'var(--text-primary)'
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = '#6b7280'
+                            e.currentTarget.style.color = 'var(--text-secondary)'
                         }}
                     >
                         ✕

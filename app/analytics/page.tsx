@@ -111,13 +111,13 @@ export default function AnalyticsPage() {
     }
 
     const getChangeColor = (change: number, isExpense: boolean = true) => {
-        if (change === 0) return '#6b7280'
+        if (change === 0) return 'var(--text-secondary)'
         // Dla wydatków: zmniejszenie (ujemne) = dobre (zielone)
         // Dla przychodów: zwiększenie (dodatnie) = dobre (zielone)
         if (isExpense) {
-            return change < 0 ? '#059669' : '#dc2626'
+            return change < 0 ? 'var(--accent-success)' : 'var(--accent-error)'
         } else {
-            return change > 0 ? '#059669' : '#dc2626'
+            return change > 0 ? 'var(--accent-success)' : 'var(--accent-error)'
         }
     }
 
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             height: '100%',
-                                            color: '#6b7280',
+                                            color: 'var(--text-secondary)',
                                             fontSize: '16px'
                                         }}>
                                             📊 Brak danych do wyświetlenia
@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             height: '100%',
-                                            color: '#6b7280',
+                                            color: 'var(--text-secondary)',
                                             fontSize: '16px'
                                         }}>
                                             📈 Potrzeba więcej danych do wyświetlenia wykresu (minimum 2 miesiące)
@@ -305,7 +305,7 @@ export default function AnalyticsPage() {
                                                         y1={gridY}
                                                         x2={padding.left + plotWidth}
                                                         y2={gridY}
-                                                        stroke="#f1f5f9"
+                                                        stroke="var(--chart-grid)"
                                                         strokeDasharray="3,3"
                                                     />
                                                     <text
@@ -313,7 +313,7 @@ export default function AnalyticsPage() {
                                                         y={gridY + 4}
                                                         textAnchor="end"
                                                         fontSize="12"
-                                                        fill="#64748b"
+                                                        fill="var(--chart-text)"
                                                     >
                                                         {labelValue}k
                                                     </text>
@@ -329,7 +329,7 @@ export default function AnalyticsPage() {
                                         <polyline
                                             points={incomePoints}
                                             fill="none"
-                                            stroke="#10b981"
+                                            stroke="var(--accent-success)"
                                             strokeWidth="3"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
@@ -337,7 +337,7 @@ export default function AnalyticsPage() {
                                         <polyline
                                             points={expensePoints}
                                             fill="none"
-                                            stroke="#ef4444"
+                                            stroke="var(--accent-error)"
                                             strokeWidth="3"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
@@ -364,7 +364,7 @@ export default function AnalyticsPage() {
                                                         cy={incomeY}
                                                         r="6"
                                                         fill="white"
-                                                        stroke="#10b981"
+                                                        stroke="var(--accent-success)"
                                                         strokeWidth="3"
                                                         style={{ cursor: 'pointer' }}
                                                     />
@@ -374,7 +374,7 @@ export default function AnalyticsPage() {
                                                         cy={expenseY}
                                                         r="6"
                                                         fill="white"
-                                                        stroke="#ef4444"
+                                                        stroke="var(--accent-error)"
                                                         strokeWidth="3"
                                                         style={{ cursor: 'pointer' }}
                                                     />
@@ -394,7 +394,7 @@ export default function AnalyticsPage() {
                                                     y={chartHeight - 10}
                                                     textAnchor="middle"
                                                     fontSize="12"
-                                                    fill="#64748b"
+                                                    fill="var(--chart-text)"
                                                     fontWeight="500"
                                                 >
                                                     {month.month.slice(0, 3)}
@@ -417,7 +417,7 @@ export default function AnalyticsPage() {
                                     border: '3px solid white',
                                     boxShadow: '0 0 0 2px #10b981'
                                 }} />
-                                <span style={{ color: '#374151', fontWeight: '500' }}>💰 Przychody</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>💰 Przychody</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <div style={{
@@ -428,7 +428,7 @@ export default function AnalyticsPage() {
                                     border: '3px solid white',
                                     boxShadow: '0 0 0 2px #ef4444'
                                 }} />
-                                <span style={{ color: '#374151', fontWeight: '500' }}>💸 Wydatki</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>💸 Wydatki</span>
                             </div>
                         </div>
 
@@ -537,7 +537,7 @@ export default function AnalyticsPage() {
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
+                        border: '1px solid var(--border-primary)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h2 style={{ fontSize: '20px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -546,7 +546,7 @@ export default function AnalyticsPage() {
 
                             {/* SELECTOR OKRESU */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontSize: '14px', color: '#6b7280' }}>📅</span>
+                                <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>📅</span>
                                 <select
                                     value={selectedPeriod}
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -576,7 +576,7 @@ export default function AnalyticsPage() {
 
                                 return (
                                     <div key={envelope.name} style={{
-                                        border: '1px solid #e5e7eb',
+                                        border: '1px solid var(--border-primary)',
                                         borderRadius: '8px',
                                         backgroundColor: 'var(--bg-tertiary)'
                                     }}>
@@ -600,7 +600,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>
                                                         #{index + 1} {envelope.name}
                                                     </div>
-                                                    <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                                                         {selectedPeriod === '1month'
                                                             ? `W tym miesiącu`
                                                             : `Średnio: ${formatMoney(envelope.avgMonthlySpent)}/miesiąc`
@@ -614,11 +614,11 @@ export default function AnalyticsPage() {
                                                     <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>
                                                         {formatMoney(envelope.totalSpent)}
                                                     </div>
-                                                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                                                         {envelopePercentage}% wszystkich wydatków
                                                     </div>
                                                 </div>
-                                                <div style={{ fontSize: '18px', color: '#6b7280' }}>
+                                                <div style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>
                                                     {isExpanded ? '▼' : '▶'}
                                                 </div>
                                             </div>
@@ -663,7 +663,7 @@ export default function AnalyticsPage() {
                                                                         <span style={{ fontWeight: '500' }}>{comparison.categoryName}:</span>
                                                                     </div>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span style={{ color: '#6b7280' }}>
+                                                                        <span style={{ color: 'var(--text-secondary)' }}>
                                                                             {formatMoney(comparison.previousAmount)}→{formatMoney(comparison.currentAmount)}
                                                                         </span>
                                                                         <span style={{
@@ -689,7 +689,7 @@ export default function AnalyticsPage() {
                                                             }}>
                                                                 <span>📈 Razem:</span>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <span style={{ color: '#6b7280' }}>
+                                                                    <span style={{ color: 'var(--text-secondary)' }}>
                                                                         {formatMoney(envelope.monthlyComparison.previousTotal)}→{formatMoney(envelope.monthlyComparison.currentTotal)}
                                                                     </span>
                                                                     <span style={{
@@ -709,7 +709,7 @@ export default function AnalyticsPage() {
                                                     <div>
                                                         <h4 style={{
                                                             fontSize: '12px',
-                                                            color: '#6b7280',
+                                                            color: 'var(--text-secondary)',
                                                             marginBottom: '8px',
                                                             fontWeight: '500'
                                                         }}>
@@ -722,7 +722,7 @@ export default function AnalyticsPage() {
                                                                     justifyContent: 'space-between',
                                                                     alignItems: 'center',
                                                                     padding: '8px 12px',
-                                                                    backgroundColor: '#f3f4f6',
+                                                                    backgroundColor: 'var(--bg-tertiary)',
                                                                     borderRadius: '4px',
                                                                     marginLeft: '20px',
                                                                     fontSize: '14px'
@@ -738,7 +738,7 @@ export default function AnalyticsPage() {
                                                                         </span>
                                                                         <span style={{
                                                                             fontSize: '12px',
-                                                                            color: '#6b7280',
+                                                                            color: 'var(--text-secondary)',
                                                                             minWidth: '40px',
                                                                             textAlign: 'right'
                                                                         }}>
@@ -763,7 +763,7 @@ export default function AnalyticsPage() {
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
+                        border: '1px solid var(--border-primary)'
                     }}>
                         <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             🔄 Transfery i oszczędności
@@ -810,7 +810,7 @@ export default function AnalyticsPage() {
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
+                        border: '1px solid var(--border-primary)'
                     }}>
                         <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             📊 Porównania Okresowe
@@ -822,16 +822,16 @@ export default function AnalyticsPage() {
                             {data.monthComparison && (
                                 <div style={{
                                     padding: '16px',
-                                    backgroundColor: '#f9fafb',
+                                    backgroundColor: 'var(--bg-tertiary)',
                                     borderRadius: '6px',
-                                    border: '1px solid #f3f4f6'
+                                    border: '1px solid var(--border-tertiary)'
                                 }}>
                                     <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
                                         📅 Miesiąc do miesiąca
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
                                         <div>
-                                            <span style={{ color: '#6b7280' }}>Przychody: </span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Przychody: </span>
                                             <span style={{
                                                 fontWeight: '600',
                                                 color: getChangeColor(data.monthComparison.incomeChange, false)
@@ -841,7 +841,7 @@ export default function AnalyticsPage() {
                                             </span>
                                         </div>
                                         <div>
-                                            <span style={{ color: '#6b7280' }}>Wydatki: </span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Wydatki: </span>
                                             <span style={{
                                                 fontWeight: '600',
                                                 color: getChangeColor(data.monthComparison.expenseChange, true)
@@ -851,7 +851,7 @@ export default function AnalyticsPage() {
                                             </span>
                                         </div>
                                         <div>
-                                            <span style={{ color: '#6b7280' }}>Bilans: </span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>Bilans: </span>
                                             <span style={{
                                                 fontWeight: '600',
                                                 color: getChangeColor(data.monthComparison.savingsChange, false)
@@ -866,28 +866,28 @@ export default function AnalyticsPage() {
                             {/* Średnie ruchome */}
                             <div style={{
                                 padding: '16px',
-                                backgroundColor: '#f9fafb',
+                                backgroundColor: 'var(--bg-tertiary)',
                                 borderRadius: '6px',
-                                border: '1px solid #f3f4f6'
+                                border: '1px solid var(--border-tertiary)'
                             }}>
                                 <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
                                     📈 Średnie ruchome (3 miesiące)
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
                                     <div>
-                                        <span style={{ color: '#6b7280' }}>Śr. przychody: </span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. przychody: </span>
                                         <span style={{ fontWeight: '600', color: '#059669' }}>
                                             {formatMoney(data.movingAverages.avgIncome)}
                                         </span>
                                     </div>
                                     <div>
-                                        <span style={{ color: '#6b7280' }}>Śr. wydatki: </span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. wydatki: </span>
                                         <span style={{ fontWeight: '600', color: '#dc2626' }}>
                                             {formatMoney(data.movingAverages.avgExpenses)}
                                         </span>
                                     </div>
                                     <div>
-                                        <span style={{ color: '#6b7280' }}>Śr. bilans: </span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Śr. bilans: </span>
                                         <span style={{
                                             fontWeight: '600',
                                             color: data.movingAverages.avgSavings >= 0 ? '#059669' : '#dc2626'
@@ -910,12 +910,12 @@ export default function AnalyticsPage() {
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
                                     <div>
-                                        <span style={{ color: '#6b7280' }}>Przy obecnym tempie: </span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Przy obecnym tempie: </span>
                                         <span style={{ fontWeight: '600', color: '#0369a1' }}>
                                             {formatMoney(data.movingAverages.avgSavings * 6)}
                                         </span>
                                     </div>
-                                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                                         Przewidywany bilans za 6 miesięcy
                                     </div>
                                 </div>

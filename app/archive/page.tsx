@@ -160,13 +160,12 @@ export default function ArchivePage() {
                     alignItems: 'center',
                     height: '100vh'
                 }}>
-                    <div style={{
-                        backgroundColor: 'white',
+                    <div className="bg-theme-secondary card" style={{
                         padding: '32px',
                         borderRadius: '8px',
                         textAlign: 'center',
-                        color: '#dc2626',
-                        border: '1px solid #fecaca',
+                        color: 'var(--accent-error)',
+                        border: '1px solid var(--accent-error)',
                         maxWidth: '400px'
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
@@ -174,9 +173,10 @@ export default function ArchivePage() {
                         <p style={{ fontSize: '14px', marginBottom: '16px' }}>{error}</p>
                         <button
                             onClick={fetchMonthsData}
+                            className="nav-button"
                             style={{
                                 padding: '8px 16px',
-                                backgroundColor: '#dc2626',
+                                backgroundColor: 'var(--accent-error)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '6px',
@@ -202,13 +202,12 @@ export default function ArchivePage() {
                 </h1>
 
                 {monthsData.length === 0 ? (
-                    <div style={{
-                        backgroundColor: 'white',
+                    <div className="bg-theme-secondary card" style={{
                         padding: '48px',
                         borderRadius: '8px',
                         textAlign: 'center',
-                        color: '#6b7280',
-                        border: '1px solid #e5e7eb'
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-primary)'
                     }}>
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📂</div>
                         <p style={{ fontSize: '20px', marginBottom: '8px', fontWeight: '600' }}>
@@ -222,11 +221,11 @@ export default function ArchivePage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '24px' }}>
                         {/* Lista miesięcy */}
                         <div>
-                            <h2 style={{
+                            <h2 className="section-header" style={{
                                 fontSize: '18px',
                                 fontWeight: '600',
                                 marginBottom: '16px',
-                                color: '#374151',
+                                color: 'var(--text-primary)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px'
@@ -242,14 +241,14 @@ export default function ArchivePage() {
                                         <div
                                             key={`${month.year}-${month.month}`}
                                             onClick={() => setSelectedMonth(`${month.year}-${month.month}`)}
+                                            className="bg-theme-secondary card hover-lift"
                                             style={{
-                                                backgroundColor: 'white',
                                                 padding: '20px',
                                                 borderRadius: '8px',
                                                 cursor: 'pointer',
-                                                border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                                                border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
                                                 transition: 'all 0.2s',
-                                                boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                                boxShadow: isSelected ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
                                                 transform: isSelected ? 'translateY(-2px)' : 'none'
                                             }}
                                         >
@@ -257,21 +256,21 @@ export default function ArchivePage() {
                                                 fontWeight: '700',
                                                 marginBottom: '12px',
                                                 fontSize: '18px',
-                                                color: isSelected ? '#3b82f6' : '#111827'
+                                                color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)'
                                             }}>
                                                 {month.month} {month.year}
                                             </h3>
 
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <span style={{ color: '#6b7280' }}>Przychody:</span>
-                                                    <span style={{ color: '#059669', fontWeight: '600' }}>
+                                                    <span className="text-theme-secondary">Przychody:</span>
+                                                    <span style={{ color: 'var(--accent-success)', fontWeight: '600' }}>
                                                         +{formatMoney(month.income)}
                                                     </span>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <span style={{ color: '#6b7280' }}>Wydatki:</span>
-                                                    <span style={{ color: '#dc2626', fontWeight: '600' }}>
+                                                    <span className="text-theme-secondary">Wydatki:</span>
+                                                    <span style={{ color: 'var(--accent-error)', fontWeight: '600' }}>
                                                         -{formatMoney(month.expenses)}
                                                     </span>
                                                 </div>
@@ -279,11 +278,11 @@ export default function ArchivePage() {
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     paddingTop: '6px',
-                                                    borderTop: '1px solid #f3f4f6'
+                                                    borderTop: '1px solid var(--border-tertiary)'
                                                 }}>
-                                                    <span style={{ color: '#6b7280', fontWeight: '500' }}>Bilans:</span>
+                                                    <span className="text-theme-secondary" style={{ fontWeight: '500' }}>Bilans:</span>
                                                     <span style={{
-                                                        color: month.balance >= 0 ? '#059669' : '#dc2626',
+                                                        color: month.balance >= 0 ? 'var(--accent-success)' : 'var(--accent-error)',
                                                         fontWeight: '700',
                                                         fontSize: '16px'
                                                     }}>
@@ -295,11 +294,11 @@ export default function ArchivePage() {
                                                     justifyContent: 'space-between',
                                                     marginTop: '4px'
                                                 }}>
-                                                    <span style={{ color: '#6b7280', fontSize: '13px' }}>Oszczędności:</span>
+                                                    <span className="text-theme-secondary" style={{ fontSize: '13px' }}>Oszczędności:</span>
                                                     <span style={{
                                                         fontWeight: '600',
                                                         fontSize: '13px',
-                                                        color: savingsRate >= 20 ? '#059669' : savingsRate >= 10 ? '#f59e0b' : '#dc2626'
+                                                        color: savingsRate >= 20 ? 'var(--accent-success)' : savingsRate >= 10 ? 'var(--accent-warning)' : 'var(--accent-error)'
                                                     }}>
                                                         {savingsRate}%
                                                     </span>
@@ -316,11 +315,10 @@ export default function ArchivePage() {
                             {selectedMonth && monthData ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     {/* Header miesiąca */}
-                                    <div style={{
-                                        backgroundColor: 'white',
+                                    <div className="card" style={{
                                         padding: '24px',
                                         borderRadius: '8px',
-                                        border: '1px solid #e5e7eb',
+                                        border: '1px solid var(--border-primary)',
                                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                         color: 'white'
                                     }}>
@@ -345,62 +343,58 @@ export default function ArchivePage() {
                                         gridTemplateColumns: 'repeat(4, 1fr)',
                                         gap: '16px'
                                     }}>
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb',
+                                            border: '1px solid var(--border-primary)',
                                             textAlign: 'center'
                                         }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>💰</div>
-                                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Przychody</div>
-                                            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#059669' }}>
+                                            <div className="text-theme-secondary" style={{ fontSize: '12px', marginBottom: '4px' }}>Przychody</div>
+                                            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-success)' }}>
                                                 +{formatMoney(monthData.income)}
                                             </div>
                                         </div>
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb',
+                                            border: '1px solid var(--border-primary)',
                                             textAlign: 'center'
                                         }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>💸</div>
-                                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Wydatki</div>
-                                            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626' }}>
+                                            <div className="text-theme-secondary" style={{ fontSize: '12px', marginBottom: '4px' }}>Wydatki</div>
+                                            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                                                 -{formatMoney(monthData.expenses)}
                                             </div>
                                         </div>
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb',
+                                            border: '1px solid var(--border-primary)',
                                             textAlign: 'center'
                                         }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>⚖️</div>
-                                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Bilans</div>
+                                            <div className="text-theme-secondary" style={{ fontSize: '12px', marginBottom: '4px' }}>Bilans</div>
                                             <div style={{
                                                 fontSize: '20px',
                                                 fontWeight: 'bold',
-                                                color: monthData.balance >= 0 ? '#059669' : '#dc2626'
+                                                color: monthData.balance >= 0 ? 'var(--accent-success)' : 'var(--accent-error)'
                                             }}>
                                                 {monthData.balance >= 0 ? '+' : ''}{formatMoney(monthData.balance)}
                                             </div>
                                         </div>
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb',
+                                            border: '1px solid var(--border-primary)',
                                             textAlign: 'center'
                                         }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>📊</div>
-                                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Oszczędności</div>
+                                            <div className="text-theme-secondary" style={{ fontSize: '12px', marginBottom: '4px' }}>Oszczędności</div>
                                             <div style={{
                                                 fontSize: '20px',
                                                 fontWeight: 'bold',
-                                                color: monthData.income > 0 ? (Math.round((monthData.balance / monthData.income) * 100) >= 20 ? '#059669' : Math.round((monthData.balance / monthData.income) * 100) >= 10 ? '#f59e0b' : '#dc2626') : '#dc2626'
+                                                color: monthData.income > 0 ? (Math.round((monthData.balance / monthData.income) * 100) >= 20 ? 'var(--accent-success)' : Math.round((monthData.balance / monthData.income) * 100) >= 10 ? 'var(--accent-warning)' : 'var(--accent-error)') : 'var(--accent-error)'
                                             }}>
                                                 {monthData.income > 0 ? Math.round((monthData.balance / monthData.income) * 100) : 0}%
                                             </div>
@@ -409,19 +403,19 @@ export default function ArchivePage() {
 
                                     {/* KOPERTY */}
                                     {monthData.envelopes.length > 0 && (
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '24px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb'
+                                            border: '1px solid var(--border-primary)'
                                         }}>
-                                            <h3 style={{
+                                            <h3 className="section-header" style={{
                                                 fontSize: '18px',
                                                 fontWeight: '600',
                                                 marginBottom: '16px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px'
+                                                gap: '8px',
+                                                color: 'var(--text-primary)'
                                             }}>
                                                 📦 Wydatki z kopert ({monthData.envelopes.length})
                                             </h3>
@@ -581,19 +575,19 @@ export default function ArchivePage() {
 
                                     {/* TRANSFERY */}
                                     {monthData.transfers.length > 0 && (
-                                        <div style={{
-                                            backgroundColor: 'white',
+                                        <div className="bg-theme-secondary card" style={{
                                             padding: '24px',
                                             borderRadius: '8px',
-                                            border: '1px solid #e5e7eb'
+                                            border: '1px solid var(--border-primary)'
                                         }}>
-                                            <h3 style={{
+                                            <h3 className="section-header" style={{
                                                 fontSize: '18px',
                                                 fontWeight: '600',
                                                 marginBottom: '16px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px'
+                                                gap: '8px',
+                                                color: 'var(--text-primary)'
                                             }}>
                                                 🔄 Transfery i przelewy ({monthData.transfers.length})
                                             </h3>
@@ -690,19 +684,18 @@ export default function ArchivePage() {
                                     )}
                                 </div>
                             ) : (
-                                <div style={{
-                                    backgroundColor: 'white',
+                                <div className="bg-theme-secondary card" style={{
                                     padding: '48px',
                                     borderRadius: '8px',
                                     textAlign: 'center',
-                                    color: '#6b7280',
-                                    border: '1px solid #e5e7eb'
+                                    color: 'var(--text-secondary)',
+                                    border: '1px solid var(--border-primary)'
                                 }}>
                                     <div style={{ fontSize: '64px', marginBottom: '16px' }}>👈</div>
-                                    <p style={{ fontSize: '18px', marginBottom: '8px', fontWeight: '600' }}>
+                                    <p className="text-theme-primary" style={{ fontSize: '18px', marginBottom: '8px', fontWeight: '600' }}>
                                         Wybierz miesiąc z listy
                                     </p>
-                                    <p style={{ fontSize: '14px' }}>
+                                    <p className="text-theme-secondary" style={{ fontSize: '14px' }}>
                                         aby zobaczyć hierarchiczne podsumowanie wydatków
                                     </p>
                                 </div>

@@ -52,10 +52,10 @@ export function TransactionHistory({ transactions }: Props) {
 
     const getTypeColor = (type: string) => {
         switch (type) {
-            case 'income': return '#059669'
-            case 'expense': return '#dc2626'
-            case 'transfer': return '#6366f1'
-            default: return '#6b7280'
+            case 'income': return 'var(--accent-success)'
+            case 'expense': return 'var(--accent-error)'
+            case 'transfer': return 'var(--accent-info)'
+            default: return 'var(--text-secondary)'
         }
     }
 
@@ -125,26 +125,25 @@ export function TransactionHistory({ transactions }: Props) {
     }, {})
 
     return (
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '16px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
+        <div className="bg-theme-secondary card" style={{ borderRadius: '8px', boxShadow: 'var(--shadow-md)', padding: '16px', border: '1px solid var(--border-primary)' }}>
+            <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                 📜 Historia transakcji
             </h2>
 
             {Object.keys(groupedTransactions).length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#6b7280', padding: '24px' }}>
+                <p className="text-theme-secondary" style={{ textAlign: 'center', padding: '24px' }}>
                     Brak transakcji
                 </p>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {Object.entries(groupedTransactions).map(([date, dayTransactions]: [string, Transaction[]]) => (
                         <div key={date}>
-                            <div style={{
+                            <div className="text-theme-secondary" style={{
                                 fontSize: '13px',
                                 fontWeight: '600',
-                                color: '#6b7280',
                                 marginBottom: '6px',
                                 paddingBottom: '4px',
-                                borderBottom: '1px solid #e5e7eb'
+                                borderBottom: '1px solid var(--border-primary)'
                             }}>
                                 {date}
                             </div>
@@ -158,7 +157,7 @@ export function TransactionHistory({ transactions }: Props) {
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
                                             padding: '8px',
-                                            backgroundColor: '#f9fafb',
+                                            backgroundColor: 'var(--bg-tertiary)',
                                             borderRadius: '4px',
                                             fontSize: '14px'
                                         }}
@@ -171,11 +170,11 @@ export function TransactionHistory({ transactions }: Props) {
                                                     {transaction.category && (
                                                         <span style={{
                                                             marginRight: '8px',
-                                                            backgroundColor: '#e0e7ff',
+                                                            backgroundColor: 'var(--bg-info)',
                                                             padding: '2px 6px',
                                                             borderRadius: '4px',
                                                             fontSize: '12px',
-                                                            color: '#3730a3'
+                                                            color: 'var(--accent-info)'
                                                         }}>
                                                             {getCategoryIcon(transaction.category)} {getCategoryName(transaction.category)}
                                                         </span>
@@ -185,11 +184,11 @@ export function TransactionHistory({ transactions }: Props) {
                                                     {transaction.envelope && (
                                                         <span style={{
                                                             marginRight: '8px',
-                                                            backgroundColor: '#f0fdf4',
+                                                            backgroundColor: 'var(--bg-success)',
                                                             padding: '2px 6px',
                                                             borderRadius: '4px',
                                                             fontSize: '12px',
-                                                            color: '#14532d'
+                                                            color: 'var(--accent-success)'
                                                         }}>
                                                             {transaction.envelope.icon} {transaction.envelope.name}
                                                         </span>
@@ -201,14 +200,14 @@ export function TransactionHistory({ transactions }: Props) {
                                                                 {transaction.amount.toLocaleString()} zł
                                                             </span>
                                                             {transaction.description && (
-                                                                <span style={{ color: '#6b7280', marginLeft: '8px' }}>
+                                                                <span className="text-theme-secondary" style={{ marginLeft: '8px' }}>
                                                                     - {transaction.description}
                                                                 </span>
                                                             )}
                                                         </>
                                                     )}
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
+                                                <div className="text-theme-tertiary" style={{ fontSize: '11px', marginTop: '2px' }}>
                                                     {formatTime(transaction.date)}
                                                 </div>
                                             </div>
@@ -225,18 +224,21 @@ export function TransactionHistory({ transactions }: Props) {
                                                         style={{
                                                             width: '100px',
                                                             padding: '4px 8px',
-                                                            border: '1px solid #ddd',
+                                                            border: '1px solid var(--border-primary)',
                                                             borderRadius: '4px',
-                                                            fontSize: '14px'
+                                                            fontSize: '14px',
+                                                            backgroundColor: 'var(--bg-primary)',
+                                                            color: 'var(--text-primary)'
                                                         }}
                                                         autoFocus
                                                     />
-                                                    <span style={{ color: '#6b7280' }}>zł</span>
+                                                    <span className="text-theme-secondary">zł</span>
                                                     <button
                                                         onClick={() => handleEdit(transaction.id, transaction.amount)}
+                                                        className="nav-button"
                                                         style={{
                                                             padding: '4px 8px',
-                                                            backgroundColor: '#10b981',
+                                                            backgroundColor: 'var(--accent-success)',
                                                             color: 'white',
                                                             border: 'none',
                                                             borderRadius: '4px',
@@ -249,9 +251,10 @@ export function TransactionHistory({ transactions }: Props) {
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingId(null)}
+                                                        className="nav-button"
                                                         style={{
                                                             padding: '4px 8px',
-                                                            backgroundColor: '#ef4444',
+                                                            backgroundColor: 'var(--accent-error)',
                                                             color: 'white',
                                                             border: 'none',
                                                             borderRadius: '4px',
@@ -279,14 +282,15 @@ export function TransactionHistory({ transactions }: Props) {
                                                     <div style={{ display: 'flex', gap: '4px' }}>
                                                         <button
                                                             onClick={() => handleEdit(transaction.id, transaction.amount)}
+                                                            className="nav-button"
                                                             style={{
                                                                 padding: '4px 8px',
-                                                                backgroundColor: '#f3f4f6',
-                                                                border: '1px solid #e5e7eb',
+                                                                backgroundColor: 'var(--bg-tertiary)',
+                                                                border: '1px solid var(--border-primary)',
                                                                 borderRadius: '4px',
                                                                 fontSize: '11px',
                                                                 cursor: 'pointer',
-                                                                color: '#4b5563'
+                                                                color: 'var(--text-primary)'
                                                             }}
                                                             title="Edytuj kwotę"
                                                         >
@@ -294,14 +298,15 @@ export function TransactionHistory({ transactions }: Props) {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(transaction.id)}
+                                                            className="nav-button"
                                                             style={{
                                                                 padding: '4px 8px',
-                                                                backgroundColor: '#fee2e2',
-                                                                border: '1px solid #fecaca',
+                                                                backgroundColor: 'var(--bg-error)',
+                                                                border: '1px solid var(--accent-error)',
                                                                 borderRadius: '4px',
                                                                 fontSize: '11px',
                                                                 cursor: 'pointer',
-                                                                color: '#dc2626'
+                                                                color: 'var(--accent-error)'
                                                             }}
                                                             title="Usuń transakcję"
                                                         >
