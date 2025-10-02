@@ -32,16 +32,25 @@ git checkout main
 # 2. Merge dev do main
 git merge dev
 
-# 3. Wygeneruj Prisma client
+# 3. WAŻNE: Zmień DATABASE_URL_DEV na DATABASE_URL w schema.prisma
+# Otwórz prisma/schema.prisma i zmień linię 7:
+# z: url = env("DATABASE_URL_DEV")
+# na: url = env("DATABASE_URL")
+
+# 4. Commit zmiany
+git add prisma/schema.prisma
+git commit -m "fix: use DATABASE_URL for main branch"
+
+# 5. Wygeneruj Prisma client
 npx prisma generate
 
-# 4. Sprawdź czy schema się zgadza z bazą
+# 6. Sprawdź czy schema się zgadza z bazą
 npx prisma db pull  # To pokaże różnice jeśli są
 
-# 5. Push na main
+# 7. Push na main
 git push origin main
 
-# 6. Deploy na Vercel (main branch)
+# 8. Deploy na Vercel (main branch)
 ```
 
 ### KROK 4: Weryfikacja
