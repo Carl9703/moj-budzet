@@ -456,17 +456,17 @@ export default function AnalyticsPage() {
                                         e.currentTarget.style.transform = 'translateY(0)'
                                     }}
                                 >
-                                    <div style={{ fontWeight: '600', marginBottom: '4px', color: '#1e293b' }}>
+                                    <div style={{ fontWeight: '600', marginBottom: '4px', color: 'var(--text-primary)' }}>
                                         {month.month.slice(0, 3)} {month.year}
                                     </div>
-                                    <div style={{ color: '#10b981', fontWeight: '500' }}>
+                                    <div style={{ color: 'var(--accent-success)', fontWeight: '500' }}>
                                         💰 {formatMoney(month.income)}
                                     </div>
-                                    <div style={{ color: '#ef4444', fontWeight: '500' }}>
+                                    <div style={{ color: 'var(--accent-error)', fontWeight: '500' }}>
                                         💸 {formatMoney(month.expenses)}
                                     </div>
                                     <div style={{
-                                        color: month.savings >= 0 ? '#3b82f6' : '#dc2626',
+                                        color: month.savings >= 0 ? 'var(--accent-primary)' : 'var(--accent-error)',
                                         fontWeight: '600',
                                         marginTop: '2px',
                                         fontSize: '12px'
@@ -493,36 +493,36 @@ export default function AnalyticsPage() {
 
                                 return (
                                     <>
-                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
-                                            <div style={{ fontSize: '12px', color: '#166534', marginBottom: '4px' }}>Średnie przychody</div>
-                                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#15803d' }}>
+                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-success)', borderRadius: '8px' }}>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>Średnie przychody</div>
+                                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-success)' }}>
                                                 {formatMoney(Math.round(avgIncome))}
                                             </div>
-                                            <div style={{ fontSize: '11px', color: '#22c55e', marginTop: '2px' }}>
+                                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                                                 ostatnie 6 miesięcy
                                             </div>
                                         </div>
 
-                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: '#fef2f2', borderRadius: '8px' }}>
-                                            <div style={{ fontSize: '12px', color: '#991b1b', marginBottom: '4px' }}>Średnie wydatki</div>
-                                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>
+                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-error)', borderRadius: '8px' }}>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>Średnie wydatki</div>
+                                            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                                                 {formatMoney(Math.round(avgExpenses))}
                                             </div>
-                                            <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '2px' }}>
+                                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                                                 ostatnie 6 miesięcy
                                             </div>
                                         </div>
 
-                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
-                                            <div style={{ fontSize: '12px', color: '#1e40af', marginBottom: '4px' }}>Średni bilans</div>
+                                        <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-info)', borderRadius: '8px' }}>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>Średni bilans</div>
                                             <div style={{
                                                 fontSize: '18px',
                                                 fontWeight: 'bold',
-                                                color: avgSavings >= 0 ? '#2563eb' : '#dc2626'
+                                                color: avgSavings >= 0 ? 'var(--accent-primary)' : 'var(--accent-error)'
                                             }}>
                                                 {avgSavings >= 0 ? '+' : ''}{formatMoney(Math.round(avgSavings))}
                                             </div>
-                                            <div style={{ fontSize: '11px', color: '#3b82f6', marginTop: '2px' }}>
+                                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                                                 ostatnie 6 miesięcy
                                             </div>
                                         </div>
@@ -597,7 +597,7 @@ export default function AnalyticsPage() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <span style={{ fontSize: '24px' }}>{envelope.icon}</span>
                                                 <div>
-                                                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>
+                                                    <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                                         #{index + 1} {envelope.name}
                                                     </div>
                                                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
@@ -611,7 +611,7 @@ export default function AnalyticsPage() {
 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                                 <div style={{ textAlign: 'right' }}>
-                                                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>
+                                                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                                                         {formatMoney(envelope.totalSpent)}
                                                     </div>
                                                     <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
@@ -633,15 +633,15 @@ export default function AnalyticsPage() {
                                                     <div style={{
                                                         marginBottom: '16px',
                                                         padding: '12px',
-                                                        backgroundColor: '#f0f9ff',
+                                                        backgroundColor: 'var(--bg-info)',
                                                         borderRadius: '6px',
-                                                        border: '1px solid #bae6fd'
+                                                        border: '1px solid var(--accent-primary)'
                                                     }}>
                                                         <h4 style={{
                                                             fontSize: '14px',
                                                             fontWeight: '600',
                                                             marginBottom: '8px',
-                                                            color: '#0c4a6e',
+                                                            color: 'var(--text-primary)',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             gap: '6px'
@@ -678,7 +678,7 @@ export default function AnalyticsPage() {
 
                                                             {/* SUMA PORÓWNANIA */}
                                                             <div style={{
-                                                                borderTop: '1px solid #bae6fd',
+                                                                borderTop: '1px solid var(--border-primary)',
                                                                 paddingTop: '6px',
                                                                 marginTop: '4px',
                                                                 display: 'flex',
@@ -728,12 +728,12 @@ export default function AnalyticsPage() {
                                                                     fontSize: '14px'
                                                                 }}>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span style={{ color: '#9ca3af' }}>├─</span>
+                                                                        <span style={{ color: 'var(--text-secondary)' }}>├─</span>
                                                                         <span style={{ fontSize: '16px' }}>{category.categoryIcon}</span>
                                                                         <span style={{ fontWeight: '500' }}>{category.categoryName}</span>
                                                                     </div>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                                        <span style={{ color: '#dc2626', fontWeight: '600' }}>
+                                                                        <span style={{ color: 'var(--accent-error)', fontWeight: '600' }}>
                                                                             {formatMoney(category.amount)}
                                                                         </span>
                                                                         <span style={{
