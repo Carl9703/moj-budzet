@@ -55,8 +55,15 @@ interface TransferAnalysis {
     percentage: number
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
 
