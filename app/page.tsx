@@ -48,14 +48,9 @@ export default function HomePage() {
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
 
-    // Sprawdź autoryzację
+    // Bez autoryzacji - zawsze zalogowany
     useEffect(() => {
-        const token = localStorage.getItem('authToken')
-        if (!token) {
-            router.push('/auth/signin')
-        } else {
-            setIsAuthenticated(true)
-        }
+        setIsAuthenticated(true)
         setIsCheckingAuth(false)
     }, [])
 

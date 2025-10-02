@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { initializeUserData } from '@/lib/db/seed'
-import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
+
+const USER_ID = 'default-user'
 
 interface Transaction {
     id: string
@@ -13,38 +14,27 @@ interface Transaction {
     envelopeId: string | null
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
-        console.log('🏠 Dashboard API called')
-        
-        // Pobierz aktualnego użytkownika z JWT
-        const currentUser = await getCurrentUser(request)
-        console.log('👤 Current user:', currentUser ? 'found' : 'not found')
-        
-        if (!currentUser) {
-            console.log('❌ No user found, returning 401')
-            return createAuthResponse('Token required')
-        }
-
-        const userId = currentUser.userId
-
-        // Sprawdź czy użytkownik istnieje w bazie
+        // Sprawdź czy użytkownik istnieje, jeśli nie - utwórz
         let user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: USER_ID }
         })
 
         if (!user) {
-            return createAuthResponse('User not found')
+            user = await prisma.user.create({
+                data: {
+                    id: USER_ID,
+                    email: 'user@example.com',
+                    name: 'Użytkownik'
+                }
+            })
+
+            // Zainicjalizuj dane
+            await initializeUserData(USER_ID)
         }
 
-        // Sprawdź czy użytkownik ma koperty, jeśli nie - zainicjalizuj
-        const existingEnvelopes = await prisma.envelope.findMany({
-            where: { userId }
-        })
-
-        if (existingEnvelopes.length === 0) {
-            await initializeUserData(userId)
-        }
+        const userId = USER_ID
 
         // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({

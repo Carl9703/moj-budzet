@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { authenticatedRequest } from '@/lib/utils/api'
 
 interface DashboardData {
     balance: number
@@ -35,48 +34,20 @@ export function useDashboard() {
     const [loading, setLoading] = useState(true)
 
     const fetchData = async () => {
-        // Check if token exists before making request
-        const token = localStorage.getItem('authToken')
-        if (!token) {
-            console.log('No token found, skipping dashboard fetch')
-            setLoading(false)
-            return
-        }
-
         try {
-            const data = await authenticatedRequest<DashboardData>('/api/dashboard')
+            const response = await fetch('/api/dashboard')
+            const data = await response.json()
             setData(data)
         } catch (error) {
             console.error('Error fetching dashboard:', error)
             setData(null)
-            
-            // Handle authentication errors
-            if (error instanceof Error && error.message === 'Authentication required') {
-                // Redirect to login page
-                window.location.href = '/auth/signin'
-            }
         } finally {
             setLoading(false)
         }
     }
 
     useEffect(() => {
-        // Check if token exists before making request
-        const checkTokenAndFetch = () => {
-            const token = localStorage.getItem('authToken')
-            if (token) {
-                console.log('🔑 Token found, fetching dashboard data')
-                fetchData()
-            } else {
-                console.log('❌ No token found, skipping dashboard fetch')
-                setLoading(false)
-            }
-        }
-        
-        // Add delay to ensure token is saved after login
-        const timer = setTimeout(checkTokenAndFetch, 200)
-        
-        return () => clearTimeout(timer)
+        fetchData()
     }, [])
 
     return { data, loading, refetch: fetchData }
