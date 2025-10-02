@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { initializeUserData } from '@/lib/db/seed'
-
-const USER_ID = 'default-user'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
 interface Transaction {
     id: string
@@ -14,36 +13,45 @@ interface Transaction {
     envelopeId: string | null
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        // Sprawdź czy użytkownik istnieje, jeśli nie - utwórz
+        // Pobierz aktualnego użytkownika z JWT
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
+
+        // Sprawdź czy użytkownik istnieje w bazie
         let user = await prisma.user.findUnique({
-            where: { id: USER_ID }
+            where: { id: userId }
         })
 
         if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    id: USER_ID,
-                    email: 'user@example.com',
-                    name: 'Użytkownik'
-                }
-            })
+            return createAuthResponse('User not found')
+        }
 
-            // Zainicjalizuj dane
-            await initializeUserData(USER_ID)
+        // Sprawdź czy użytkownik ma koperty, jeśli nie - zainicjalizuj
+        const existingEnvelopes = await prisma.envelope.findMany({
+            where: { userId }
+        })
+
+        if (existingEnvelopes.length === 0) {
+            await initializeUserData(userId)
         }
 
         // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({
-            where: { userId: USER_ID },
+            where: { userId },
             orderBy: { name: 'asc' }
         })
 
         // Pobierz WSZYSTKIE transakcje do obliczenia salda (wykluczając operacje zamknięcia)
         const allTransactions = await prisma.transaction.findMany({
             where: {
-                userId: USER_ID,
+                userId,
                 type: { in: ['income', 'expense'] },
                 NOT: [
                     {
@@ -79,7 +87,7 @@ export async function GET() {
         // Sprawdź czy istnieje transakcja zamknięcia miesiąca
         const monthCloseTransaction = await prisma.transaction.findFirst({
             where: {
-                userId: USER_ID,
+                userId,
                 description: {
                     contains: 'Zamknięcie miesiąca'
                 },
@@ -97,7 +105,7 @@ export async function GET() {
             // Jeśli miesiąc był zamknięty, pokaż tylko transakcje AFTER zamknięcia
             monthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: USER_ID,
+                    userId: userId,
                     date: {
                         gt: monthCloseTransaction.date, // Po dacie zamknięcia (większe niż)
                         lte: endOfMonth
@@ -114,7 +122,7 @@ export async function GET() {
             // Jeśli miesiąc NIE był zamknięty, pokaż wszystkie transakcje
             monthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: USER_ID,
+                    userId: userId,
                     date: {
                         gte: startOfMonth,
                         lte: endOfMonth

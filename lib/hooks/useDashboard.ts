@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { authenticatedRequest } from '@/lib/utils/api'
 
 interface DashboardData {
     balance: number
@@ -35,11 +36,11 @@ export function useDashboard() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/dashboard')
-            const json = await response.json()
-            setData(json)
+            const data = await authenticatedRequest<DashboardData>('/api/dashboard')
+            setData(data)
         } catch (error) {
             console.error('Error fetching dashboard:', error)
+            setData(null)
         } finally {
             setLoading(false)
         }

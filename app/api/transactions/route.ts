@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
-const USER_ID = 'default-user'
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
+
         const transactions = await prisma.transaction.findMany({
-            where: { userId: USER_ID },
+            where: { userId },
             include: {
                 envelope: true
             },
@@ -74,7 +82,7 @@ export async function POST(request: Request) {
         // Utwórz transakcję
         const transaction = await prisma.transaction.create({
             data: {
-                userId: USER_ID,
+                userId: userId,
                 type: data.type,
                 amount: data.amount,
                 description: data.description || '',

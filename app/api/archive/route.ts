@@ -1,9 +1,9 @@
 // app/api/archive/route.ts - POPRAWIONA WERSJA z kategoriami
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
+import { getCategoryIco
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'n, getCategoryName } from '@/lib/constants/categories'
 
-const USER_ID = 'default-user'
 
 interface TransactionData {
     id: string
@@ -41,12 +41,20 @@ interface MonthData {
     transactions: TransactionData[]
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
+
         // Pobierz wszystkie transakcje WŁĄCZAJĄC POLE includeInStats
         const allTransactions = await prisma.transaction.findMany({
             where: {
-                userId: USER_ID,
+                userId: userId,
                 type: { in: ['income', 'expense'] }
             },
             include: {
@@ -57,7 +65,7 @@ export async function GET() {
 
         // Pobierz wszystkie koperty
         const allEnvelopes = await prisma.envelope.findMany({
-            where: { userId: USER_ID }
+            where: { userId: userId }
         })
 
         // Grupuj transakcje po miesiącach

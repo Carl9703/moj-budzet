@@ -1,10 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 
-const USER_ID = 'default-user'
+co
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'nst userId = 'default-user'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        const currentUser = await getCurrentUser(request)
+        
+        if (!currentUser) {
+            return createAuthResponse('Token required')
+        }
+
+        const userId = currentUser.userId
+
         let body = null
         try {
             body = await request.json()
@@ -32,7 +41,7 @@ export async function POST(request: Request) {
         
         const monthTransactions = await prisma.transaction.findMany({
             where: {
-                userId: USER_ID,
+                userId: userId,
                 date: {
                     gte: startOfMonth,
                     lte: endOfMonth
@@ -84,7 +93,7 @@ export async function POST(request: Request) {
         // Pobierz koperty miesięczne (tylko do informacji o stanie)
         const monthlyEnvelopes = await prisma.envelope.findMany({
             where: {
-                userId: USER_ID,
+                userId: userId,
                 type: 'monthly'
             }
         })
@@ -116,7 +125,7 @@ export async function POST(request: Request) {
         if (totalToTransfer > 0) {
             const freedomEnvelope = await prisma.envelope.findFirst({
                 where: {
-                    userId: USER_ID,
+                    userId: userId,
                     name: 'Wolne środki (roczne)',
                     type: 'yearly'
                 }
@@ -144,7 +153,7 @@ export async function POST(request: Request) {
 
                 await prisma.transaction.create({
                     data: {
-                        userId: USER_ID,
+                        userId: userId,
                         type: 'expense',
                         amount: totalToTransfer,
                         description: description,

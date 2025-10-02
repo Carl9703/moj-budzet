@@ -1,8 +1,9 @@
 // app/api/transactions/[id]/route.ts - NAPRAWIONY dla Next.js 15
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 
-const USER_ID = 'default-user'
+co
+import { getCurrentUser, createAuthResponse } from '@/lib/auth/getCurrentUser'nst userId = 'default-user'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
@@ -14,7 +15,7 @@ export async function GET(
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId: userId
             },
             include: {
                 envelope: true
@@ -51,7 +52,7 @@ export async function PATCH(
         const originalTransaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId: userId
             }
         })
 
@@ -134,7 +135,7 @@ export async function DELETE(
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId: userId
             }
         })
 

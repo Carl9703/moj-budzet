@@ -9,17 +9,16 @@ export async function initializeUserData(userId: string) {
         return
     }
 
-    // ✅ KOPERTY MIESIĘCZNE - startują z plannedAmount (nie 0)
-    // To sprawia, że wyglądają jak 300/300 zł dopóki nie ma wypłaty
+    // ✅ KOPERTY MIESIĘCZNE - startują z 0 zł (użytkownik musi dodać wypłatę)
     const monthlyEnvelopes = [
-        { name: 'Jedzenie', icon: '🍔', plannedAmount: 300, currentAmount: 300 },
-        { name: 'Transport', icon: '🚗', plannedAmount: 300, currentAmount: 300 },
-        { name: 'Telekom/Subskrypcje', icon: '📱', plannedAmount: 100, currentAmount: 100 },
-        { name: 'Higiena/Zdrowie', icon: '💊', plannedAmount: 200, currentAmount: 200 },
-        { name: 'Rozrywka', icon: '🎮', plannedAmount: 100, currentAmount: 100 },
-        { name: 'Ubrania', icon: '👕', plannedAmount: 150, currentAmount: 150 },
-        { name: 'Dom', icon: '🏠', plannedAmount: 110, currentAmount: 110 },
-        { name: 'Nieprzewidziane', icon: '⚠️', plannedAmount: 350, currentAmount: 350 },
+        { name: 'Jedzenie', icon: '🍔', plannedAmount: 300, currentAmount: 0 },
+        { name: 'Transport', icon: '🚗', plannedAmount: 300, currentAmount: 0 },
+        { name: 'Telekom/Subskrypcje', icon: '📱', plannedAmount: 100, currentAmount: 0 },
+        { name: 'Higiena/Zdrowie', icon: '💊', plannedAmount: 200, currentAmount: 0 },
+        { name: 'Rozrywka', icon: '🎮', plannedAmount: 100, currentAmount: 0 },
+        { name: 'Ubrania', icon: '👕', plannedAmount: 150, currentAmount: 0 },
+        { name: 'Dom', icon: '🏠', plannedAmount: 110, currentAmount: 0 },
+        { name: 'Nieprzewidziane', icon: '⚠️', plannedAmount: 350, currentAmount: 0 },
     ]
 
     // Koperty roczne - pozostają bez zmian
