@@ -61,10 +61,20 @@ export function useDashboard() {
     }
 
     useEffect(() => {
-        // Add small delay to ensure token is saved after login
-        const timer = setTimeout(() => {
-            fetchData()
-        }, 100)
+        // Check if token exists before making request
+        const checkTokenAndFetch = () => {
+            const token = localStorage.getItem('authToken')
+            if (token) {
+                console.log('🔑 Token found, fetching dashboard data')
+                fetchData()
+            } else {
+                console.log('❌ No token found, skipping dashboard fetch')
+                setLoading(false)
+            }
+        }
+        
+        // Add delay to ensure token is saved after login
+        const timer = setTimeout(checkTokenAndFetch, 200)
         
         return () => clearTimeout(timer)
     }, [])
