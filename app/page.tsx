@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { IncomeModal } from '../components/modals/IncomeModal'
 import { ExpenseModal } from '../components/modals/ExpenseModal'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
@@ -31,6 +32,10 @@ interface SavingsGoal {
 
 
 export default function HomePage() {
+    const router = useRouter()
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+    
     const { data, loading, refetch } = useDashboard()
     const config = useConfig()
     const { previousMonthStatus, setPreviousMonthStatus } = usePreviousMonth()
@@ -39,6 +44,17 @@ export default function HomePage() {
     const [showBonusModal, setShowBonusModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
+
+    // Sprawdź autoryzację
+    useEffect(() => {
+        const token = localStorage.getItem('authToken')
+        if (!token) {
+            router.push('/auth/signin')
+        } else {
+            setIsAuthenticated(true)
+        }
+        setIsCheckingAuth(false)
+    }, [])
 
 
     const calculateDaysLeft = () => {
@@ -117,6 +133,20 @@ export default function HomePage() {
         }
     }
 
+
+    // Sprawdzanie autoryzacji
+    if (isCheckingAuth) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <LoadingSpinner size="large" text="Sprawdzanie autoryzacji..." />
+            </div>
+        )
+    }
+
+    // Jeśli nie zalogowany, nie renderuj nic (przekierowanie w useEffect)
+    if (!isAuthenticated) {
+        return null
+    }
 
     if (loading) {
         return (

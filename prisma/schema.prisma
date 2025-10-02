@@ -7,14 +7,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// NextAuth.js wymagane modele
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Rozszerzony model User
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   DateTime?
+  name            String?
+  image           String?
+  hashedPassword  String?   // Dla credentials login
+  role            String    @default("USER") // USER, ADMIN
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   
-  envelopes    Envelope[]
-  transactions Transaction[]
+  // NextAuth relations
+  accounts        Account[]
+  sessions        Session[]
+  
+  // App relations
+  envelopes       Envelope[]
+  transactions    Transaction[]
+  userConfig      UserConfig?
+  
+  // Nowe pola bezpieczeństwa
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  loginAttempts   Int       @default(0)
+  lockedUntil     DateTime?
 }
 
 model Envelope {
@@ -26,7 +80,7 @@ model Envelope {
   currentAmount Float
   icon          String?
   
-  user         User          @relation(fields: [userId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 }
 
@@ -44,7 +98,7 @@ model Transaction {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
-  user         User      @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   envelope     Envelope? @relation(fields: [envelopeId], references: [id])
 }
 
@@ -59,4 +113,6 @@ model UserConfig {
   defaultToInvestment Float   @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
