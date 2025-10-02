@@ -103,11 +103,11 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
     const getToastStyles = () => {
         const baseStyles = {
-            backgroundColor: 'white',
+            backgroundColor: 'var(--bg-secondary)',
             border: '1px solid',
             borderRadius: '8px',
             padding: '16px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+            boxShadow: 'var(--shadow-lg)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -120,13 +120,33 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
         switch (toast.type) {
             case 'success':
-                return { ...baseStyles, borderColor: '#10b981', backgroundColor: '#f0fdf4' }
+                return { 
+                    ...baseStyles, 
+                    borderColor: 'var(--accent-success)', 
+                    backgroundColor: 'var(--bg-secondary)',
+                    className: 'toast-success'
+                }
             case 'error':
-                return { ...baseStyles, borderColor: '#ef4444', backgroundColor: '#fef2f2' }
+                return { 
+                    ...baseStyles, 
+                    borderColor: 'var(--accent-error)', 
+                    backgroundColor: 'var(--bg-secondary)',
+                    className: 'toast-error'
+                }
             case 'warning':
-                return { ...baseStyles, borderColor: '#f59e0b', backgroundColor: '#fffbeb' }
+                return { 
+                    ...baseStyles, 
+                    borderColor: 'var(--accent-warning)', 
+                    backgroundColor: 'var(--bg-secondary)',
+                    className: 'toast-warning'
+                }
             default:
-                return { ...baseStyles, borderColor: '#3b82f6', backgroundColor: '#eff6ff' }
+                return { 
+                    ...baseStyles, 
+                    borderColor: 'var(--accent-primary)', 
+                    backgroundColor: 'var(--bg-secondary)',
+                    className: 'toast-info'
+                }
         }
     }
 
@@ -140,12 +160,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
     }
 
     const getTextColor = () => {
-        switch (toast.type) {
-            case 'success': return '#065f46'
-            case 'error': return '#991b1b'
-            case 'warning': return '#92400e'
-            default: return '#1e40af'
-        }
+        return 'var(--text-primary)'
     }
 
     return (

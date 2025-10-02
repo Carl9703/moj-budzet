@@ -30,9 +30,9 @@ export function ThemeToggle({ size = 'medium', showLabel = false }: ThemeToggleP
                 className="btn-animate smooth-all"
                 style={{
                     ...sizeStyles,
-                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
-                    color: isDark ? '#f9fafb' : '#374151',
-                    border: `1px solid ${isDark ? '#4b5563' : '#e5e7eb'}`,
+                    backgroundColor: isDark ? '#4a9eff' : '#f59e0b',
+                    color: '#ffffff',
+                    border: `2px solid ${isDark ? '#4a9eff' : '#f59e0b'}`,
                     borderRadius: '50%',
                     cursor: 'pointer',
                     display: 'flex',
@@ -40,22 +40,22 @@ export function ThemeToggle({ size = 'medium', showLabel = false }: ThemeToggleP
                     justifyContent: 'center',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     boxShadow: isDark 
-                        ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
-                        : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        ? '0 2px 12px rgba(74, 158, 255, 0.4)' 
+                        : '0 2px 12px rgba(245, 158, 11, 0.4)',
                     position: 'relative',
                     overflow: 'hidden'
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)'
+                    e.currentTarget.style.transform = 'scale(1.1)'
                     e.currentTarget.style.boxShadow = isDark 
-                        ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.15)'
+                        ? '0 4px 16px rgba(74, 158, 255, 0.6)' 
+                        : '0 4px 16px rgba(245, 158, 11, 0.6)'
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)'
                     e.currentTarget.style.boxShadow = isDark 
-                        ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
-                        : '0 2px 8px rgba(0, 0, 0, 0.1)'
+                        ? '0 2px 12px rgba(74, 158, 255, 0.4)' 
+                        : '0 2px 12px rgba(245, 158, 11, 0.4)'
                 }}
                 title={isDark ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
                 aria-label={isDark ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}

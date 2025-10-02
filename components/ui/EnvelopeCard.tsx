@@ -112,9 +112,9 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
             </div>
 
             {/* PASEK POSTĘPU - zawsze pokazuj */}
-            <div style={{
+            <div className="progress-bar-bg" style={{
                 width: '100%',
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--bg-tertiary)',
                 borderRadius: '6px',
                 height: '6px',
                 marginBottom: '8px',

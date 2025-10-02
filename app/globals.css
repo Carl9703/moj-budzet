@@ -19,22 +19,22 @@
 }
 
 [data-theme="dark"] {
-    /* Dark Theme */
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-tertiary: #94a3b8;
-    --border-primary: #334155;
-    --border-secondary: #475569;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.35);
-    --accent-primary: #60a5fa;
-    --accent-success: #34d399;
-    --accent-warning: #fbbf24;
-    --accent-error: #f87171;
+    /* Dark Theme - Improved */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #b0b0b0;
+    --border-primary: #404040;
+    --border-secondary: #555555;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --accent-primary: #4a9eff;
+    --accent-success: #00d084;
+    --accent-warning: #ffb800;
+    --accent-error: #ff5757;
 }
 
 body {
@@ -123,6 +123,58 @@ body {
 
 .bg-theme-tertiary {
     background-color: var(--bg-tertiary);
+}
+
+/* Dark Mode Specific Improvements */
+[data-theme="dark"] .card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-secondary);
+}
+
+/* Better progress bars in dark mode */
+[data-theme="dark"] .progress-bar-bg {
+    background-color: #333333 !important;
+}
+
+/* Better button styles in dark mode */
+[data-theme="dark"] button {
+    border-color: var(--border-primary);
+}
+
+[data-theme="dark"] button:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+}
+
+/* Toast improvements for dark mode */
+[data-theme="dark"] .toast-success {
+    background-color: #1a2e1a;
+    border-color: var(--accent-success);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .toast-error {
+    background-color: #2e1a1a;
+    border-color: var(--accent-error);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .toast-warning {
+    background-color: #2e2a1a;
+    border-color: var(--accent-warning);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .toast-info {
+    background-color: #1a1e2e;
+    border-color: var(--accent-primary);
+    color: #ffffff;
 }
 
 .p-4 {
