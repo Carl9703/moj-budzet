@@ -3,7 +3,7 @@ import { prisma } from '@/lib/utils/prisma'
 
 export async function GET() {
   try {
-    console.log('🔍 DEBUG: Sprawdzam zawartość bazy danych (DEV BRANCH)...')
+    console.log('🔍 DEBUG: Sprawdzam zawartość bazy danych (DEV BRANCH v2)...')
     
     // Sprawdź wszystkich użytkowników
     const users = await prisma.user.findMany()
