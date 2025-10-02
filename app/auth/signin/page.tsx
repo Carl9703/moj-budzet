@@ -50,11 +50,36 @@ export default function SignInPage() {
     setEmail('demo@example.com')
     setPassword('demo123')
     
-    // Automatycznie wyślij formularz
-    setTimeout(() => {
-      const form = document.querySelector('form') as HTMLFormElement
-      form.requestSubmit()
-    }, 100)
+    // Wyślij request bezpośrednio
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'demo@example.com',
+          password: 'demo123',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        localStorage.setItem('authToken', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        router.push('/')
+      } else {
+        setError(data.error || 'Nieprawidłowy email lub hasło')
+      }
+    } catch (error) {
+      setError('Wystąpił błąd podczas logowania')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
