@@ -15,10 +15,14 @@ interface Transaction {
 
 export async function GET(request: NextRequest) {
     try {
+        console.log('🏠 Dashboard API called')
+        
         // Pobierz aktualnego użytkownika z JWT
         const currentUser = await getCurrentUser(request)
+        console.log('👤 Current user:', currentUser ? 'found' : 'not found')
         
         if (!currentUser) {
+            console.log('❌ No user found, returning 401')
             return createAuthResponse('Token required')
         }
 
