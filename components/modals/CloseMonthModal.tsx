@@ -1,4 +1,3 @@
-// components/modals/CloseMonthModal.tsx - NAPRAWIONY
 'use client'
 
 import { Modal } from '@/components/ui/Modal'
@@ -22,7 +21,7 @@ interface Props {
         expenses: number
         savings: number
     }
-    monthName?: string  // DODANE - nazwa miesiąca do zamknięcia
+    monthName?: string
 }
 
 export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, monthName }: Props) {

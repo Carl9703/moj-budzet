@@ -1,4 +1,3 @@
-// app/api/transactions/route.ts - NAPRAWIONY
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 const USER_ID = 'default-user'
@@ -16,8 +15,7 @@ export async function GET() {
 
         // Formatuj dane
         const formatted = transactions.map(t => {
-            // ✅ NAPRAWKA: poprawne typowanie
-            let category: string | undefined = t.category || undefined // Konwersja null na undefined
+            let category: string | undefined = t.category || undefined
 
             // Jeśli nie ma zapisanej kategorii, spróbuj wyprowadzić z opisu
             if (!category && t.description) {

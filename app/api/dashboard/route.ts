@@ -1,4 +1,3 @@
-// app/api/dashboard/route.ts - Z OBSŁUGĄ ZAMKNIĘTEGO MIESIĄCA
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { initializeUserData } from '@/lib/db/seed'

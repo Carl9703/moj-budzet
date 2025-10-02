@@ -1,4 +1,3 @@
-// app/api/close-month/route.ts - ZAKTUALIZOWANY z obsługą includeInStats
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 
@@ -53,15 +52,17 @@ export async function POST(request: Request) {
             }
         })
 
-        console.log('=== DEBUG CLOSE MONTH - NOWA LOGIKA ===')
-
-        // NOWA LOGIKA - Osobno przychody w statystykach i poza nimi
+        // Osobno przychody w statystykach i poza nimi
         const statsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean }) => t.type === 'income' && t.includeInStats !== false)
+            .filter((t: { type: string; includeInStats?: boolean }) => 
+                t.type === 'income' && t.includeInStats !== false
+            )
             .reduce((sum, t) => sum + t.amount, 0)
 
         const nonStatsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean }) => t.type === 'income' && t.includeInStats === false)
+            .filter((t: { type: string; includeInStats?: boolean }) => 
+                t.type === 'income' && t.includeInStats === false
+            )
             .reduce((sum, t) => sum + t.amount, 0)
 
         const totalExpenses = monthTransactions
@@ -165,8 +166,6 @@ export async function POST(request: Request) {
             })
         }
 
-        console.log('All monthly envelopes reset to 0')
-        console.log('=== END DEBUG NOWA LOGIKA ===')
 
         const monthName = startOfMonth.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
 
