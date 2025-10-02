@@ -73,14 +73,18 @@ export default function SignInPage() {
       const data = await response.json()
 
       if (response.ok) {
+        console.log('✅ Demo login successful, saving token')
         localStorage.setItem('authToken', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
+        console.log('🔄 Redirecting to dashboard...')
         router.push('/')
       } else {
+        console.error('❌ Demo login failed:', data.error)
         setError(data.error || 'Nieprawidłowy email lub hasło')
       }
     } catch (error) {
-      setError('Wystąpił błąd podczas logowania')
+      console.error('❌ Demo login error:', error)
+      setError('Wystąpił błąd podczas logowania: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsLoading(false)
     }
