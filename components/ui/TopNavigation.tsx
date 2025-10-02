@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { ThemeToggle } from './ThemeToggle'
 
 export function TopNavigation() {
     const router = useRouter()
@@ -13,15 +14,14 @@ export function TopNavigation() {
     ]
 
     return (
-        <div style={{
+        <div className="bg-theme-secondary border-theme shadow-md" style={{
             position: 'sticky',
             top: 0,
             zIndex: 100,
-            backgroundColor: 'white',
-            borderBottom: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            borderBottom: '1px solid var(--border-primary)',
             padding: '12px 0',
-            marginBottom: '24px'
+            marginBottom: '24px',
+            transition: 'all 0.3s ease'
         }}>
             <div style={{
                 maxWidth: '1200px',
@@ -52,11 +52,11 @@ export function TopNavigation() {
                         e.currentTarget.style.transform = 'translateY(0)'
                     }}
                 >
-                    <h1 style={{
+                    <h1 className="text-theme-primary" style={{
                         fontSize: '20px',
                         fontWeight: '700',
-                        color: '#1f2937',
-                        margin: 0
+                        margin: 0,
+                        transition: 'color 0.3s ease'
                     }}>
                         💰 Budżet Domowy
                     </h1>
@@ -72,29 +72,29 @@ export function TopNavigation() {
                         <button
                             key={item.path}
                             onClick={() => router.push(item.path)}
+                            className="text-theme-secondary border-theme smooth-all"
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
                                 padding: '8px 16px',
                                 backgroundColor: 'transparent',
-                                border: '1px solid #e5e7eb',
+                                border: '1px solid var(--border-primary)',
                                 borderRadius: '8px',
                                 fontSize: '14px',
                                 fontWeight: '500',
-                                color: '#374151',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
                                 textDecoration: 'none'
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#f9fafb'
-                                e.currentTarget.style.borderColor = '#d1d5db'
+                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                e.currentTarget.style.borderColor = 'var(--border-secondary)'
                                 e.currentTarget.style.transform = 'translateY(-1px)'
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = 'transparent'
-                                e.currentTarget.style.borderColor = '#e5e7eb'
+                                e.currentTarget.style.borderColor = 'var(--border-primary)'
                                 e.currentTarget.style.transform = 'translateY(0)'
                             }}
                         >
@@ -102,6 +102,11 @@ export function TopNavigation() {
                             <span>{item.label}</span>
                         </button>
                     ))}
+                    
+                    {/* Theme Toggle */}
+                    <div style={{ marginLeft: '12px' }}>
+                        <ThemeToggle size="small" />
+                    </div>
                 </nav>
             </div>
         </div>

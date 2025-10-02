@@ -273,7 +273,7 @@ export default function HomePage() {
     ) || []
 
             return (
-                <div className="min-h-screen fade-in-up" style={{ backgroundColor: '#f9fafb' }}>
+                <div className="min-h-screen fade-in-up bg-theme-primary">
                     <TopNavigation />
                     <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
 

@@ -68,15 +68,14 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
     }
 
     return (
-        <div className="envelope-card smooth-all" style={{
-            backgroundColor: 'white',
-            border: isOverBudget ? '2px solid #ef4444' : '1px solid #e5e7eb',
+        <div className="envelope-card smooth-all bg-theme-secondary" style={{
+            border: isOverBudget ? '2px solid var(--accent-error)' : '1px solid var(--border-primary)',
             borderRadius: '12px',
             padding: '16px',
             transition: 'all 0.3s ease',
             boxShadow: isOverBudget 
                 ? '0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(239, 68, 68, 0.1)' 
-                : '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+                : 'var(--shadow-md)',
             cursor: 'pointer'
         }}
         onMouseEnter={(e) => {
@@ -99,10 +98,10 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '20px' }}>{icon}</span>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{name}</span>
+                    <span className="text-theme-primary" style={{ fontWeight: '500', fontSize: '14px', transition: 'color 0.3s ease' }}>{name}</span>
                     <span style={{ fontSize: '16px', marginLeft: '4px' }}>{getStatusIcon()}</span>
                 </div>
-                <span style={{ fontSize: '13px', color: isOverBudget ? '#dc2626' : '#6b7280' }}>
+                <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease' }}>
                     {type === 'monthly' ?
                         `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
                         isFreedomFunds ?
