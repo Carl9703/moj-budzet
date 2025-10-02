@@ -439,7 +439,7 @@ export default function AnalyticsPage() {
                                     key={`tooltip-${index}`}
                                     style={{
                                         padding: '8px',
-                                        backgroundColor: '#f8fafc',
+                                        backgroundColor: 'var(--bg-tertiary)',
                                         borderRadius: '6px',
                                         border: '1px solid #e2e8f0',
                                         textAlign: 'center',
@@ -534,7 +534,7 @@ export default function AnalyticsPage() {
 
                     {/* WYDATKI WG KOPERT Z WYBOREM OKRESU */}
                     <div style={{
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid #e5e7eb'
@@ -555,7 +555,7 @@ export default function AnalyticsPage() {
                                         border: '1px solid #d1d5db',
                                         borderRadius: '6px',
                                         fontSize: '14px',
-                                        backgroundColor: 'white',
+                                        backgroundColor: 'var(--bg-secondary)',
                                         cursor: 'pointer'
                                     }}
                                 >
@@ -578,7 +578,7 @@ export default function AnalyticsPage() {
                                     <div key={envelope.name} style={{
                                         border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
-                                        backgroundColor: '#f9fafb'
+                                        backgroundColor: 'var(--bg-tertiary)'
                                     }}>
                                         {/* GŁÓWNY RZĄD KOPERTY */}
                                         <div
@@ -590,7 +590,7 @@ export default function AnalyticsPage() {
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
                                                 borderRadius: '8px',
-                                                backgroundColor: 'white',
+                                                backgroundColor: 'var(--bg-secondary)',
                                                 transition: 'background-color 0.2s'
                                             }}
                                         >
@@ -760,7 +760,7 @@ export default function AnalyticsPage() {
 
                     {/* TRANSFERY I OSZCZĘDNOŚCI */}
                     <div style={{
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid #e5e7eb'
@@ -807,7 +807,7 @@ export default function AnalyticsPage() {
 
                     {/* PORÓWNANIA OKRESOWE */}
                     <div style={{
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         border: '1px solid #e5e7eb'
