@@ -6,13 +6,19 @@ interface Props {
 
 export function MainBalance({ balance }: Props) {
     return (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-4 text-white">
+        <div className="main-balance-card rounded-lg shadow-lg p-4" style={{
+            background: 'linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%)',
+            color: '#ffffff',
+            boxShadow: 'var(--shadow-lg)'
+        }}>
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-blue-100 text-xs">Konto główne</p>
-                    <p className="text-2xl font-bold mt-1">{formatMoney(balance)}</p>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px', fontWeight: '500' }}>Konto główne</p>
+                    <p style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '4px', textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)' }}>
+                        {formatMoney(balance)}
+                    </p>
                 </div>
-                <div className="text-3xl opacity-50">💳</div>
+                <div style={{ fontSize: '32px', opacity: 0.7 }}>💳</div>
             </div>
         </div>
     )

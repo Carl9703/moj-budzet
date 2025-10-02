@@ -44,7 +44,7 @@ export function TopNavigation() {
                         transition: 'all 0.2s ease'
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f9fafb'
+                        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
                         e.currentTarget.style.transform = 'translateY(-1px)'
                     }}
                     onMouseLeave={(e) => {
@@ -72,30 +72,36 @@ export function TopNavigation() {
                         <button
                             key={item.path}
                             onClick={() => router.push(item.path)}
-                            className="text-theme-secondary border-theme smooth-all"
+                            className="nav-button smooth-all"
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                padding: '8px 16px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid var(--border-primary)',
+                                padding: '10px 16px',
+                                backgroundColor: 'var(--bg-tertiary)',
+                                border: '2px solid var(--border-primary)',
                                 borderRadius: '8px',
                                 fontSize: '14px',
-                                fontWeight: '500',
+                                fontWeight: '600',
+                                color: 'var(--text-primary)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                textDecoration: 'none'
+                                textDecoration: 'none',
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.borderColor = 'var(--border-secondary)'
-                                e.currentTarget.style.transform = 'translateY(-1px)'
+                                e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                e.currentTarget.style.color = '#ffffff'
+                                e.currentTarget.style.transform = 'translateY(-2px)'
+                                e.currentTarget.style.boxShadow = 'var(--shadow-md)'
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent'
+                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
                                 e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                e.currentTarget.style.color = 'var(--text-primary)'
                                 e.currentTarget.style.transform = 'translateY(0)'
+                                e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
                             }}
                         >
                             <span style={{ fontSize: '16px' }}>{item.icon}</span>

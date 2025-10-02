@@ -15,12 +15,12 @@ export function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
 
     return (
-        <div className="bg-white rounded-lg p-6" style={{
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #f3f4f6'
+        <div className="bg-theme-secondary card rounded-lg p-6" style={{
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--border-primary)'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h2 style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                <h2 className="section-header" style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     📊 Status miesiąca
                 </h2>
                 <button

@@ -5,11 +5,11 @@ interface Props {
 
 export function QuickActions({ onAddIncome, onAddExpense }: Props) {
     return (
-        <div className="bg-white rounded-lg p-6" style={{
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #f3f4f6'
+        <div className="bg-theme-secondary card rounded-lg p-6" style={{
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--border-primary)'
         }}>
-            <h2 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#374151' }}>
+            <h2 className="section-header" style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                 ⚡ Szybkie akcje
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
