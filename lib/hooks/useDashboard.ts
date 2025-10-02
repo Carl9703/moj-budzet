@@ -35,6 +35,14 @@ export function useDashboard() {
     const [loading, setLoading] = useState(true)
 
     const fetchData = async () => {
+        // Check if token exists before making request
+        const token = localStorage.getItem('authToken')
+        if (!token) {
+            console.log('No token found, skipping dashboard fetch')
+            setLoading(false)
+            return
+        }
+
         try {
             const data = await authenticatedRequest<DashboardData>('/api/dashboard')
             setData(data)
@@ -53,7 +61,12 @@ export function useDashboard() {
     }
 
     useEffect(() => {
-        fetchData()
+        // Add small delay to ensure token is saved after login
+        const timer = setTimeout(() => {
+            fetchData()
+        }, 100)
+        
+        return () => clearTimeout(timer)
     }, [])
 
     return { data, loading, refetch: fetchData }
