@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { authorizedFetch } from '@/lib/utils/api'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface MonthlyEnvelopeRow {
   id: string
@@ -13,6 +14,7 @@ interface MonthlyEnvelopeRow {
 }
 
 export default function ConfigPage() {
+  const { isAuthenticated, isCheckingAuth } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [defaultSalary, setDefaultSalary] = useState<string>('0')
@@ -23,6 +25,7 @@ export default function ConfigPage() {
   const [envelopes, setEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
 
   useEffect(() => {
+    if (!isAuthenticated) return
     let mounted = true
     const load = async () => {
       try {
@@ -53,7 +56,19 @@ export default function ConfigPage() {
     }
     load()
     return () => { mounted = false }
-  }, [])
+  }, [isAuthenticated])
+  
+  if (isCheckingAuth || loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>Ładowanie...</p>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
 
   const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToInvestment||0)
   const warnings: string[] = []

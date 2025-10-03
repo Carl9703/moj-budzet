@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { TransactionHistory } from '@/components/transactions/TransactionHistory'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { authorizedFetch } from '@/lib/utils/api'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 interface Transaction {
   id: string
@@ -18,10 +20,12 @@ interface Transaction {
 }
 
 export default function HistoryPage() {
+  const { isAuthenticated, isCheckingAuth } = useAuth()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
+    if (!isAuthenticated) return
     authorizedFetch('/api/transactions')
       .then(res => res.json())
       .then(data => {
@@ -32,8 +36,20 @@ export default function HistoryPage() {
         console.error('Error:', err)
         setLoading(false)
       })
-  }, [])
-  
+  }, [isAuthenticated])
+
+  if (isCheckingAuth) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <LoadingSpinner size="large" text="Sprawdzanie autoryzacji..." />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-theme-primary" style={{ 

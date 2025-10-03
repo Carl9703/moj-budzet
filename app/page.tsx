@@ -22,6 +22,7 @@ import { useDashboard } from '../lib/hooks/useDashboard'
 import { authorizedFetch } from '../lib/utils/api'
 import { useConfig } from '../lib/hooks/useConfig'
 import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
+import { useAuth } from '../lib/hooks/useAuth'
 import { createIncomeHandler, createBonusHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
 
 interface SavingsGoal {
@@ -36,8 +37,7 @@ interface SavingsGoal {
 
 export default function HomePage() {
     const router = useRouter()
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+    const { isAuthenticated, isCheckingAuth } = useAuth()
     
     const { data, loading, refetch } = useDashboard()
     const config = useConfig()
