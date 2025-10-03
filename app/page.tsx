@@ -49,18 +49,6 @@ export default function HomePage() {
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
 
-    // Sprawdź autoryzację
-    useEffect(() => {
-        const token = localStorage.getItem('authToken')
-        if (!token) {
-            router.push('/auth/signin')
-        } else {
-            setIsAuthenticated(true)
-        }
-        setIsCheckingAuth(false)
-    }, [])
-
-
     const calculateDaysLeft = () => {
         const now = new Date()
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
