@@ -10,31 +10,26 @@ interface EnvelopeProps {
 }
 
 export function EnvelopeCard({ name, icon, spent, planned, current, type }: EnvelopeProps) {
-    // Sprawdź czy to "Wolne środki" - dla nich nie pokazujemy celu
     const isFreedomFunds = name.toLowerCase().includes('wolne środki')
 
-    // Dla miesięcznych: procent wydatków, dla rocznych: procent zebrany
     const percentage = type === 'monthly'
         ? (planned > 0 ? Math.round((spent / planned) * 100) : 0)
         : isFreedomFunds
-            ? 100 // Wolne środki zawsze 100% (bez celu)
+            ? 100
             : (planned > 0 ? Math.round((current / planned) * 100) : 0)
 
-    // Dla miesięcznych: planned - spent, dla rocznych: planned - current (lub brak dla wolnych środków)
     const remaining = Math.round(((type === 'monthly' ? planned - spent : planned - current) * 100)) / 100
 
-    // Sprawdź czy przekroczono budżet (tylko dla miesięcznych)
     const isOverBudget = type === 'monthly' && spent > planned
 
-    // Status koperty dla ikon i dodatkowych informacji
     const getEnvelopeStatus = () => {
         if (type === 'monthly') {
-            if (isOverBudget) return 'over' // przekroczono
-            if (percentage >= 80) return 'warning' // ostrzeżenie
-            return 'good' // OK
+            if (isOverBudget) return 'over'
+            if (percentage >= 80) return 'warning'
+            return 'good'
         } else {
-            if (percentage >= 100) return 'completed' // cel osiągnięty
-            return 'progress' // w trakcie
+            if (percentage >= 100) return 'completed'
+            return 'progress'
         }
     }
 
@@ -53,17 +48,17 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
 
     const getProgressColor = () => {
         if (type === 'monthly') {
-            if (percentage > 100) return '#991b1b' // ciemnoczerwony
-            if (percentage >= 90) return '#ef4444' // czerwony
-            if (percentage >= 75) return '#f59e0b' // żółty
-            if (percentage >= 50) return '#3b82f6' // niebieski
-            return '#10b981' // zielony
+            if (percentage > 100) return '#991b1b'
+            if (percentage >= 90) return '#ef4444'
+            if (percentage >= 75) return '#f59e0b'
+            if (percentage >= 50) return '#3b82f6'
+            return '#10b981'
         } else {
-            if (isFreedomFunds) return '#6366f1' // fioletowy dla wolnych środków
-            if (percentage >= 100) return '#10b981' // zielony
-            if (percentage >= 75) return '#3b82f6' // niebieski
-            if (percentage >= 50) return '#f59e0b' // żółty
-            return '#ef4444' // czerwony
+            if (isFreedomFunds) return '#6366f1'
+            if (percentage >= 100) return '#10b981'
+            if (percentage >= 75) return '#3b82f6'
+            if (percentage >= 50) return '#f59e0b'
+            return '#ef4444'
         }
     }
 
@@ -105,13 +100,12 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
                     {type === 'monthly' ?
                         `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
                         isFreedomFunds ?
-                            formatMoney(current) : // Tylko aktualna kwota dla wolnych środków
+                            formatMoney(current) :
                             `${formatMoney(current, false)}/${formatMoney(planned, false)} zł`
                     }
                 </span>
             </div>
 
-            {/* PASEK POSTĘPU - zawsze pokazuj */}
             <div className="progress-bar-bg" style={{
                 width: '100%',
                 backgroundColor: 'var(--bg-tertiary)',
@@ -128,7 +122,6 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
                     transition: 'width 0.3s ease, background-color 0.3s ease',
                     position: 'relative'
                 }}>
-                    {/* Efekt świecenia dla lepszego wyglądu */}
                     <div style={{
                         position: 'absolute',
                         top: 0,
@@ -140,7 +133,6 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
                     }} />
                 </div>
             </div>
-
 
             <div style={{
                 display: 'flex',
@@ -161,16 +153,16 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
                     color: type === 'monthly' ?
                         (isOverBudget ? '#dc2626' : (remaining > 0 ? '#059669' : '#6b7280')) :
                         isFreedomFunds ?
-                            '#6366f1' : // Fioletowy dla wolnych środków
+                            '#6366f1' :
                             (percentage >= 100 ? '#059669' : '#6b7280'),
-                    marginLeft: isFreedomFunds ? 'auto' : '0' // Wyśrodkuj tekst dla wolnych środków
+                    marginLeft: isFreedomFunds ? 'auto' : '0'
                 }}>
                     {type === 'monthly' ?
                         (isOverBudget ?
                             `⚠️ Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100)}` :
                             `Zostało: ${formatMoney(remaining)}`) :
                         isFreedomFunds ?
-                            `💰 Dostępne środki` : // Specjalny tekst dla wolnych środków
+                            `💰 Dostępne środki` :
                             (percentage >= 100 ?
                                 `Zebrano! +${formatMoney(Math.abs(remaining))}` :
                                 `Brakuje: ${formatMoney(Math.abs(remaining))}`)

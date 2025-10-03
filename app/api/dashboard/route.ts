@@ -72,12 +72,10 @@ export async function GET(request: NextRequest) {
 
         const balance = Math.round((totalAllIncome - totalAllExpenses) * 100) / 100
 
-        // ✅ SPRAWDŹ CZY MIESIĄC ZOSTAŁ ZAMKNIĘTY
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-        // Sprawdź czy istnieje transakcja zamknięcia miesiąca
         const monthCloseTransaction = await prisma.transaction.findFirst({
             where: {
                 userId,
@@ -91,16 +89,14 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // ✅ POPRAWKA: Pobierz transakcje z bieżącego miesiąca
         let monthTransactions: Transaction[] = []
 
         if (monthCloseTransaction) {
-            // Jeśli miesiąc był zamknięty, pokaż tylko transakcje AFTER zamknięcia
             monthTransactions = await prisma.transaction.findMany({
                 where: {
                     userId,
                     date: {
-                        gt: monthCloseTransaction.date, // Po dacie zamknięcia (większe niż)
+                        gt: monthCloseTransaction.date,
                         lte: endOfMonth
                     },
                     type: { in: ['income', 'expense'] },
@@ -112,7 +108,6 @@ export async function GET(request: NextRequest) {
                 }
             })
         } else {
-            // Jeśli miesiąc NIE był zamknięty, pokaż wszystkie transakcje
             monthTransactions = await prisma.transaction.findMany({
                 where: {
                     userId,
@@ -130,8 +125,6 @@ export async function GET(request: NextRequest) {
             })
         }
 
-        // Oblicz statystyki miesięczne
-        // Oblicz statystyki miesięczne - TYLKO transakcje ze statystykami
         const totalIncome = Math.round(monthTransactions
             .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
@@ -140,17 +133,8 @@ export async function GET(request: NextRequest) {
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        // ✅ DEBUG - sprawdź co się dzieje
-        console.log('=== DASHBOARD DEBUG ===')
-        console.log('Month close transaction:', monthCloseTransaction ? 'EXISTS' : 'NONE')
-        console.log('Month transactions count:', monthTransactions.length)
-        console.log('Total income:', totalIncome)
-        console.log('Total expenses:', totalExpenses)
-        console.log('========================')
-
         const isMonthClosed = !!monthCloseTransaction
 
-        // POLICZ AKTYWNOŚĆ KOPERT - ile transakcji miała każda koperta w tym miesiącu
         const envelopeActivity: { [key: string]: number } = {}
 
         monthTransactions
@@ -163,7 +147,6 @@ export async function GET(request: NextRequest) {
         const monthlyEnvelopes = envelopes
             .filter(e => e.type === 'monthly')
             .map(e => {
-                // Oblicz rzeczywiste wydatki z transakcji dla tej koperty w tym miesiącu
                 const envelopeTransactions = monthTransactions.filter(t => 
                     t.type === 'expense' && t.envelopeId === e.id
                 )
@@ -205,7 +188,7 @@ export async function GET(request: NextRequest) {
             monthlyEnvelopes,
             yearlyEnvelopes,
             transactions: monthTransactions.slice(0, 10),
-            isMonthClosed // ✅ DODANA INFORMACJA O STANIE MIESIĄCA
+            isMonthClosed
         })
 
     } catch (error) {
