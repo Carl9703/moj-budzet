@@ -7,7 +7,7 @@ import { authorizedFetch } from '@/lib/utils/api'
 interface Props {
     onClose: () => void
     onSave: (data: IncomeData) => void
-    onSwitchToBonus: () => void
+    onSwitchToBonus?: () => void // Deprecated - nie używamy już
 }
 
 interface IncomeData {
@@ -23,8 +23,8 @@ interface IncomeData {
     date?: string  // DODANE!
 }
 
-export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
-    const [incomeType, setIncomeType] = useState<'salary' | 'other'>('salary')
+export function IncomeModal({ onClose, onSave }: Props) {
+    const [incomeType, setIncomeType] = useState<'salary' | 'other' | 'bonus'>('salary')
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
     const [includeInStats, setIncludeInStats] = useState(true)
@@ -33,6 +33,14 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
     const [toInvestment, setToInvestment] = useState('600')
     const [toJoint, setToJoint] = useState('1500')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+    
+    // Stany dla premii
+    const [bonusPercentages, setBonusPercentages] = useState({
+        gifts: 20,
+        insurance: 15,
+        holidays: 20,
+        freedom: 45
+    })
 
     useEffect(() => {
         let isMounted = true
@@ -59,6 +67,8 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
 
         if (incomeType === 'salary') {
             loadDefaults()
+        } else if (incomeType === 'bonus') {
+            setAmount('1300')
         } else {
             setAmount('')
         }
@@ -66,8 +76,34 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
         return () => { isMounted = false }
     }, [incomeType])
 
+    const calculateBonusAmount = (percentage: number) => {
+        return Math.round((Number(amount) * percentage) / 100)
+    }
+
+    const totalBonusPercentage = Object.values(bonusPercentages).reduce((a, b) => a + b, 0)
+
     const handleSubmit = () => {
         const amountNum = Number(amount || 0)
+
+        if (incomeType === 'bonus') {
+            if (totalBonusPercentage !== 100) {
+                alert('Suma procentów musi wynosić 100%!')
+                return
+            }
+
+            onSave({
+                amount: amountNum,
+                toSavings: 0,
+                toVacation: 0,
+                toInvestment: 0,
+                toJoint: 0,
+                forExpenses: 0,
+                type: 'bonus',
+                date: date
+            })
+            onClose()
+            return
+        }
 
         if (incomeType === 'other') {
             if (amountNum <= 0) {
@@ -132,7 +168,9 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
 
     const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toInvestment) + Number(toJoint)
     const forExpenses = Number(amount || 0) - totalAllocated
-    const canSubmit = incomeType === 'other' ?
+    const canSubmit = incomeType === 'bonus' ?
+        (Number(amount || 0) > 0 && totalBonusPercentage === 100) :
+        incomeType === 'other' ?
         Number(amount || 0) > 0 :
         (Number(amount || 0) > 0 && totalAllocated <= Number(amount || 0))
 
@@ -180,16 +218,17 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     💵 Inne
                 </button>
                 <button
-                    onClick={onSwitchToBonus}
+                    onClick={() => setIncomeType('bonus')}
                     style={{
                         flex: 1,
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: 'transparent',
+                        backgroundColor: incomeType === 'bonus' ? 'var(--bg-secondary)' : 'transparent',
                         color: 'var(--text-primary)',
-                        fontWeight: '400',
-                        cursor: 'pointer'
+                        fontWeight: incomeType === 'bonus' ? '600' : '400',
+                        cursor: 'pointer',
+                        boxShadow: incomeType === 'bonus' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     🎁 Premia
@@ -204,7 +243,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                 border: canSubmit ? '1px solid var(--success-border)' : '1px solid var(--error-border)'
             }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: canSubmit ? 'var(--success-dark)' : 'var(--error-dark)' }}>
-                    {incomeType === 'salary' ? 'Kwota wypłaty' : 'Kwota przychodu'}
+                    {incomeType === 'bonus' ? 'Kwota premii kwartalnej' : incomeType === 'salary' ? 'Kwota wypłaty' : 'Kwota przychodu'}
                 </label>
                 <input
                     type="number"
@@ -444,6 +483,135 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                 </>
             )}
 
+            {incomeType === 'bonus' && (
+                <div style={{ marginBottom: '20px' }}>
+                    <h3 style={{ fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Prezenty */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>🎁</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.gifts}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, gifts: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.gifts)} zł
+                            </span>
+                        </div>
+
+                        {/* OC */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>📋</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>OC</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.insurance}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, insurance: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.insurance)} zł
+                            </span>
+                        </div>
+
+                        {/* Święta */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>🎄</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Święta</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.holidays}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, holidays: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.holidays)} zł
+                            </span>
+                        </div>
+
+                        {/* Wolne środki */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>💰</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Wolne środki</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.freedom}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, freedom: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.freedom)} zł
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style={{
+                        marginTop: '12px',
+                        padding: '8px',
+                        backgroundColor: totalBonusPercentage === 100 ? 'var(--bg-success)' : 'var(--error-light)',
+                        borderRadius: '6px',
+                        textAlign: 'center',
+                        border: `1px solid ${totalBonusPercentage === 100 ? 'var(--success-border)' : 'var(--error-border)'}`
+                    }}>
+                        <span style={{
+                            fontWeight: '600',
+                            color: totalBonusPercentage === 100 ? 'var(--success-primary)' : 'var(--error-primary)'
+                        }}>
+                            Suma: {totalBonusPercentage}%
+                            {totalBonusPercentage !== 100 && ' (musi być 100%)'}
+                        </span>
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
                     onClick={onClose}
@@ -471,7 +639,8 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         fontWeight: '500'
                     }}
                 >
-                    ✓ {incomeType === 'salary' ? 'ZATWIERDŹ PODZIAŁ' :
+                    ✓ {incomeType === 'bonus' ? 'ZATWIERDŹ PODZIAŁ' :
+                        incomeType === 'salary' ? 'ZATWIERDŹ PODZIAŁ' :
                         includeInStats ? 'DODAJ PRZYCHÓD' : 'DODAJ ZWROT'}
                 </button>
             </div>

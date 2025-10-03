@@ -81,7 +81,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* KWOTA */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
                         Kwota
                     </label>
                     <input
@@ -93,21 +93,23 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         style={{
                             width: '100%',
                             padding: '12px',
-                            border: '2px solid #e5e7eb',
+                            border: '2px solid var(--border-primary)',
                             borderRadius: '8px',
                             fontSize: '24px',
                             fontWeight: 'bold',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     />
                 </div>
 
                 {/* KATEGORIE */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--text-primary)' }}>
                         Wybierz kategorię
                         {!showAllCategories && (
-                            <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: '8px' }}>
+                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginLeft: '8px' }}>
                                 (najpopularniejsze)
                             </span>
                         )}
@@ -116,7 +118,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     {/* Kategorie miesięczne */}
                     {monthlyCategories.length > 0 && (
                         <>
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                                 📅 Miesięczne
                             </div>
                             <div style={{
@@ -131,9 +133,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         onClick={() => handleCategorySelect(cat.id)}
                                         style={{
                                             padding: '10px 8px',
-                                            border: selectedCategory === cat.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
                                             borderRadius: '8px',
-                                            backgroundColor: selectedCategory === cat.id ? '#dbeafe' : 'white',
+                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
@@ -143,7 +145,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         }}
                                     >
                                         <span style={{ fontSize: '20px' }}>{cat.icon}</span>
-                                        <span style={{ fontSize: '11px', textAlign: 'center' }}>{cat.name}</span>
+                                        <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
                                     </button>
                                 ))}
                             </div>
@@ -153,7 +155,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     {/* Kategorie roczne */}
                     {yearlyCategories.length > 0 && (
                         <>
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                                 📆 Roczne
                             </div>
                             <div style={{
@@ -168,9 +170,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         onClick={() => handleCategorySelect(cat.id)}
                                         style={{
                                             padding: '10px 8px',
-                                            border: selectedCategory === cat.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
                                             borderRadius: '8px',
-                                            backgroundColor: selectedCategory === cat.id ? '#dbeafe' : '#f9fafb',
+                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
@@ -180,7 +182,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         }}
                                     >
                                         <span style={{ fontSize: '20px' }}>{cat.icon}</span>
-                                        <span style={{ fontSize: '11px', textAlign: 'center' }}>{cat.name}</span>
+                                        <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
                                     </button>
                                 ))}
                             </div>
@@ -194,10 +196,10 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             style={{
                                 width: '100%',
                                 padding: '8px',
-                                border: '1px dashed #d1d5db',
+                                border: '1px dashed var(--border-secondary)',
                                 borderRadius: '8px',
                                 backgroundColor: 'transparent',
-                                color: '#6b7280',
+                                color: 'var(--text-secondary)',
                                 cursor: 'pointer',
                                 fontSize: '13px'
                             }}
@@ -209,14 +211,14 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
                 {/* KOPERTA */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
                         Koperta
                         {selectedCategoryData && (
                             <span style={{
                                 fontSize: '12px',
-                                color: '#059669',
+                                color: 'var(--success-primary)',
                                 marginLeft: '8px',
-                                backgroundColor: '#d1fae5',
+                                backgroundColor: 'var(--bg-success)',
                                 padding: '2px 6px',
                                 borderRadius: '4px'
                             }}>
@@ -230,10 +232,11 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         style={{
                             width: '100%',
                             padding: '10px',
-                            border: '1px solid #e5e7eb',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '8px',
                             fontSize: '14px',
-                            backgroundColor: selectedEnvelope ? '#f0fdf4' : 'white'
+                            backgroundColor: selectedEnvelope ? 'var(--bg-success)' : 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     >
                         <option value="">Wybierz kopertę</option>
@@ -256,7 +259,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
                 {/* OPIS */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
                         Opis (opcjonalnie)
                     </label>
                     <input
@@ -267,16 +270,18 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #e5e7eb',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '8px',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     />
                 </div>
 
                 {/* DATA */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
                         Data
                     </label>
                     <input
@@ -286,9 +291,11 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #e5e7eb',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '8px',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     />
                 </div>
@@ -300,9 +307,10 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     onClick={onClose}
                     style={{
                         padding: '10px 20px',
-                        border: '1px solid #e5e7eb',
+                        border: '1px solid var(--border-primary)',
                         borderRadius: '8px',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
                         cursor: 'pointer',
                         fontSize: '14px'
                     }}
@@ -316,8 +324,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         padding: '10px 20px',
                         border: 'none',
                         borderRadius: '8px',
-                        backgroundColor: amount && selectedCategory && selectedEnvelope ? '#ef4444' : '#d1d5db',
-                        color: amount && selectedCategory && selectedEnvelope ? 'white' : '#6b7280',
+                        backgroundColor: amount && selectedCategory && selectedEnvelope ? 'var(--accent-error)' : 'var(--border-secondary)',
+                        color: amount && selectedCategory && selectedEnvelope ? 'white' : 'var(--text-secondary)',
                         cursor: amount && selectedCategory && selectedEnvelope ? 'pointer' : 'not-allowed',
                         fontWeight: '600',
                         fontSize: '14px'

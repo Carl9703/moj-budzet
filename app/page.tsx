@@ -6,7 +6,6 @@ import { IncomeModal } from '../components/modals/IncomeModal'
 import { ExpenseModal } from '../components/modals/ExpenseModal'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
 import { CloseMonthModal } from '../components/modals/CloseMonthModal'
-import { BonusModal } from '../components/modals/BonusModal'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { QuickActions } from '../components/dashboard/QuickActions'
@@ -23,7 +22,7 @@ import { authorizedFetch } from '../lib/utils/api'
 import { useConfig } from '../lib/hooks/useConfig'
 import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
 import { useAuth } from '../lib/hooks/useAuth'
-import { createIncomeHandler, createBonusHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
+import { createIncomeHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
 
 interface SavingsGoal {
     id: string
@@ -45,7 +44,6 @@ export default function HomePage() {
     const { showToast } = useToast()
     
     const [showIncomeModal, setShowIncomeModal] = useState(false)
-    const [showBonusModal, setShowBonusModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
 
@@ -57,7 +55,6 @@ export default function HomePage() {
     }
 
     const handleIncomeSave = createIncomeHandler(refetch, showToast)
-    const handleBonusSave = createBonusHandler(refetch, showToast)
     const handleExpenseSave = createExpenseHandler(refetch, showToast)
 
     const handleCloseMonth = async () => {
@@ -358,11 +355,7 @@ export default function HomePage() {
                 <IncomeModal
                     onClose={() => setShowIncomeModal(false)}
                     onSave={handleIncomeSave}
-                    onSwitchToBonus={() => { setShowIncomeModal(false); setShowBonusModal(true) }}
                 />
-            )}
-            {showBonusModal && (
-                <BonusModal onClose={() => setShowBonusModal(false)} onSave={handleBonusSave} />
             )}
             {showExpenseModal && (
                 <ExpenseModal
@@ -401,7 +394,7 @@ export default function HomePage() {
             <FloatingActionButton
                 onAddIncome={() => setShowIncomeModal(true)}
                 onAddExpense={() => setShowExpenseModal(true)}
-                onAddBonus={() => setShowBonusModal(true)}
+                onAddBonus={() => setShowIncomeModal(true)}
             />
         </div>
     )
