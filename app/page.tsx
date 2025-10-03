@@ -19,6 +19,7 @@ import { TopNavigation } from '../components/ui/TopNavigation'
 import { EnvelopeCardSkeleton, MainBalanceSkeleton, MonthStatusSkeleton, QuickActionsSkeleton } from '../components/ui/SkeletonLoader'
 import { useToast } from '../components/ui/Toast'
 import { useDashboard } from '../lib/hooks/useDashboard'
+import { authorizedFetch } from '../lib/utils/api'
 import { useConfig } from '../lib/hooks/useConfig'
 import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
 import { createIncomeHandler, createBonusHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
@@ -78,9 +79,8 @@ export default function HomePage() {
         }
 
         try {
-            const response = await fetch('/api/close-month', {
+            const response = await authorizedFetch('/api/close-month', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ month: previousMonthStatus.monthStr }),
                 cache: 'no-store'
             })

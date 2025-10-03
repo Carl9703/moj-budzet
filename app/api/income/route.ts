@@ -1,17 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
-const USER_ID = 'default-user'
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const data = await request.json()
 
         if (data.type === 'salary') {
             // Zapisz wypłatę - DODAJ includeInStats
             await prisma.transaction.create({
                 data: {
-                    userId: USER_ID,
+                    userId: userId,
                     type: 'income',
                     amount: data.amount,
                     description: data.description || 'Wypłata miesięczna',
@@ -24,7 +31,7 @@ export async function POST(request: Request) {
             if (data.toSavings > 0) {
                 const weseLeEnvelope = await prisma.envelope.findFirst({
                     where: {
-                        userId: USER_ID,
+                        userId: userId,
                         name: 'Wesele',
                         type: 'yearly'
                     }
@@ -40,7 +47,7 @@ export async function POST(request: Request) {
 
                     await prisma.transaction.create({
                         data: {
-                            userId: USER_ID,
+                            userId: userId,
                             type: 'expense',
                             amount: data.toSavings,
                             description: 'Transfer: Wesele',
@@ -56,7 +63,7 @@ export async function POST(request: Request) {
             if (data.toVacation > 0) {
                 const vacationEnvelope = await prisma.envelope.findFirst({
                     where: {
-                        userId: USER_ID,
+                        userId: userId,
                         name: 'Wakacje',
                         type: 'yearly'
                     }
@@ -72,7 +79,7 @@ export async function POST(request: Request) {
 
                     await prisma.transaction.create({
                         data: {
-                            userId: USER_ID,
+                            userId: userId,
                             type: 'expense',
                             amount: data.toVacation,
                             description: 'Transfer: Wakacje',
@@ -88,7 +95,7 @@ export async function POST(request: Request) {
             if (data.toJoint > 0) {
                 await prisma.transaction.create({
                     data: {
-                        userId: USER_ID,
+                        userId: userId,
                         type: 'expense',
                         amount: data.toJoint,
                         description: 'Transfer: Konto wspólne',
@@ -101,7 +108,7 @@ export async function POST(request: Request) {
             if (data.toInvestment > 0) {
                 await prisma.transaction.create({
                     data: {
-                        userId: USER_ID,
+                        userId: userId,
                         type: 'expense',
                         amount: data.toInvestment,
                         description: 'Transfer: Inwestycje',
@@ -114,7 +121,7 @@ export async function POST(request: Request) {
             // Reszta kodu bez zmian...
             const monthlyEnvelopes = await prisma.envelope.findMany({
                 where: {
-                    userId: USER_ID,
+                    userId: userId,
                     type: 'monthly'
                 },
                 orderBy: { name: 'asc' }
@@ -153,7 +160,7 @@ export async function POST(request: Request) {
             // ZAKTUALIZOWANE - obsługa includeInStats
             await prisma.transaction.create({
                 data: {
-                    userId: USER_ID,
+                    userId: userId,
                     type: 'income',
                     amount: data.amount,
                     description: data.description || (data.includeInStats ? 'Inny przychód' : 'Zwrot/Refundacja'),
@@ -173,7 +180,7 @@ export async function POST(request: Request) {
             // Zapisz premię - DODAJ includeInStats
             await prisma.transaction.create({
                 data: {
-                    userId: USER_ID,
+                    userId: userId,
                     type: 'income',
                     amount: data.amount,
                     description: 'Premia kwartalna',
@@ -194,7 +201,7 @@ export async function POST(request: Request) {
                 if (update.amount > 0) {
                     const envelope = await prisma.envelope.findFirst({
                         where: {
-                            userId: USER_ID,
+                            userId: userId,
                             name: update.name,
                             type: 'yearly'
                         }

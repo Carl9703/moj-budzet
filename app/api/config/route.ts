@@ -1,17 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
-const USER_ID = 'default-user'
-
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        let config = await prisma.userConfig.findUnique({ where: { userId: USER_ID } })
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
+        let config = await prisma.userConfig.findUnique({ where: { userId } })
 
         if (!config) {
             // utwórz pustą konfigurację, jeśli brak
             config = await prisma.userConfig.create({
                 data: {
-                    userId: USER_ID,
+                    userId,
                     defaultSalary: 0,
                     defaultToJoint: 0,
                     defaultToSavings: 0,
@@ -23,7 +30,7 @@ export async function GET() {
 
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
         const monthlyEnvelopes = await prisma.envelope.findMany({
-            where: { userId: USER_ID, type: 'monthly' },
+            where: { userId, type: 'monthly' },
             orderBy: { name: 'asc' },
             select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true },
         })
@@ -35,8 +42,16 @@ export async function GET() {
     }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const body = await request.json()
         const {
             defaultSalary,
@@ -55,7 +70,7 @@ export async function PUT(request: Request) {
         }
 
         const updated = await prisma.userConfig.upsert({
-            where: { userId: USER_ID },
+            where: { userId },
             update: {
                 defaultSalary: defaultSalary ?? undefined,
                 defaultToJoint: defaultToJoint ?? undefined,
@@ -64,7 +79,7 @@ export async function PUT(request: Request) {
                 defaultToInvestment: defaultToInvestment ?? undefined,
             },
             create: {
-                userId: USER_ID,
+                userId,
                 defaultSalary: defaultSalary ?? 0,
                 defaultToJoint: defaultToJoint ?? 0,
                 defaultToSavings: defaultToSavings ?? 0,

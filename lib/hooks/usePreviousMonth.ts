@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { authorizedFetch } from '../utils/api'
 
 interface PreviousMonthStatus {
     isClosed: boolean
@@ -29,9 +30,8 @@ export function usePreviousMonth() {
                 const monthName = previousMonthStart.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
                 
                 // Sprawdź czy poprzedni miesiąc był zamknięty
-                const checkResponse = await fetch('/api/transactions', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+                const checkResponse = await authorizedFetch('/api/transactions', {
+                    method: 'GET'
                 }).then(res => res.json())
                 
                 const isClosed = checkResponse.some((t: any) => 

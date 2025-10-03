@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { authorizedFetch } from '../utils/api'
 
 interface DashboardData {
     balance: number
@@ -35,7 +36,7 @@ export function useDashboard() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/dashboard')
+            const response = await authorizedFetch('/api/dashboard')
             const json = await response.json()
             setData(json)
         } catch (error) {

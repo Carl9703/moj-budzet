@@ -1,9 +1,8 @@
 // app/api/analytics/route.ts - Z OBSŁUGĄ OKRESÓW I PORÓWNANIAMI
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 interface MonthlyData {
     month: string
@@ -55,8 +54,16 @@ interface TransferAnalysis {
     percentage: number
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
 
@@ -80,7 +87,7 @@ export async function GET(request: Request) {
 
         // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({
-            where: { userId: USER_ID }
+            where: { userId: userId }
         })
 
         // === TRENDY MIESIĘCZNE - OSTATNIE 12 MIESIĘCY ===
@@ -98,7 +105,7 @@ export async function GET(request: Request) {
             // Pobierz transakcje z miesiąca - ZAWSZE wszystkie transakcje z miesiąca
             const monthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: USER_ID,
+                    userId: userId,
                     date: { gte: startOfMonth, lte: endOfMonth },
                     type: { in: ['income', 'expense'] },
                     NOT: [
@@ -137,7 +144,7 @@ export async function GET(request: Request) {
         // === ANALIZA WYDATKÓW DLA WYBRANEGO OKRESU ===
         const allTransactions = await prisma.transaction.findMany({
             where: {
-                userId: USER_ID,
+                userId: userId,
                 type: { in: ['income', 'expense'] },
                 date: { gte: startDate },
                 NOT: [
@@ -242,7 +249,7 @@ export async function GET(request: Request) {
                 // Pobierz transakcje z bieżącego miesiąca dla tej koperty
                 const currentMonthTransactions = await prisma.transaction.findMany({
                     where: {
-                        userId: USER_ID,
+                        userId: userId,
                         type: 'expense',
                         envelope: { name: envelopeName },
                         date: {
@@ -265,7 +272,7 @@ export async function GET(request: Request) {
                 // Pobierz transakcje z poprzedniego miesiąca dla tej koperty
                 const previousMonthTransactions = await prisma.transaction.findMany({
                     where: {
-                        userId: USER_ID,
+                        userId: userId,
                         type: 'expense',
                         envelope: { name: envelopeName },
                         date: {

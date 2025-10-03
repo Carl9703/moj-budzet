@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/Modal'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface Props {
     onClose: () => void
@@ -38,7 +39,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
 
         const loadDefaults = async () => {
             try {
-                const res = await fetch('/api/config', { cache: 'no-store' })
+                const res = await authorizedFetch('/api/config', { cache: 'no-store' })
                 if (!res.ok) return
                 const data = await res.json()
                 const cfg = data?.config

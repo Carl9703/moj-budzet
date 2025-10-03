@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface TransactionData {
     id: string
@@ -58,7 +59,7 @@ export default function ArchivePage() {
     const fetchMonthsData = async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/archive', {
+            const response = await authorizedFetch('/api/archive', {
                 cache: 'no-store'
             })
 

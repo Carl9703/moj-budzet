@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const transactions = await prisma.transaction.findMany({
-            where: { userId: USER_ID },
+            where: { userId },
             include: {
                 envelope: true
             },
@@ -56,8 +64,16 @@ export async function GET() {
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const data = await request.json()
 
         // Użyj daty z frontendu lub aktualnej z prawidłową godziną
@@ -74,7 +90,7 @@ export async function POST(request: Request) {
         // Utwórz transakcję
         const transaction = await prisma.transaction.create({
             data: {
-                userId: USER_ID,
+                userId,
                 type: data.type,
                 amount: data.amount,
                 description: data.description || '',

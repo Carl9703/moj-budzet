@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface MonthlyData {
     month: string
@@ -91,7 +92,7 @@ export default function AnalyticsPage() {
     ]
 
     useEffect(() => {
-        fetch(`/api/analytics?period=${selectedPeriod}`)
+        authorizedFetch(`/api/analytics?period=${selectedPeriod}`)
             .then(res => res.json())
             .then(data => {
                 setData(data)

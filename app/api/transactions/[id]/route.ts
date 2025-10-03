@@ -1,20 +1,27 @@
 // app/api/transactions/[id]/route.ts - NAPRAWIONY dla Next.js 15
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId
             },
             include: {
                 envelope: true
@@ -40,10 +47,18 @@ export async function GET(
 
 // PATCH - edytuj transakcję (obsługa zwrotów i zwiększenia kwoty)
 export async function PATCH(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const params = await context.params
         const data = await request.json()
 
@@ -51,7 +66,7 @@ export async function PATCH(
         const originalTransaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId
             }
         })
 
@@ -126,15 +141,23 @@ export async function PATCH(
 
 // DELETE - usuń transakcję
 export async function DELETE(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const params = await context.params
         const transaction = await prisma.transaction.findUnique({
             where: {
                 id: params.id,
-                userId: USER_ID
+                userId
             }
         })
 

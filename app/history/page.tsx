@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { TransactionHistory } from '@/components/transactions/TransactionHistory'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface Transaction {
   id: string
@@ -21,7 +22,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    fetch('/api/transactions')
+    authorizedFetch('/api/transactions')
       .then(res => res.json())
       .then(data => {
         setTransactions(data)

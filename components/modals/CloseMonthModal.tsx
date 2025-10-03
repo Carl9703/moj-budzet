@@ -3,6 +3,7 @@
 import { Modal } from '@/components/ui/Modal'
 import { useState, useEffect } from 'react'
 import { formatMoney } from '@/lib/utils/money'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface EnvelopeStatus {
     name: string
@@ -33,7 +34,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
     const balance = surplus !== undefined ? surplus : (monthSummary.income - monthSummary.expenses)
 
     useEffect(() => {
-        fetch('/api/dashboard')
+        authorizedFetch('/api/dashboard')
             .then(res => res.json())
             .then(data => {
                 const status = data.monthlyEnvelopes?.map((e: EnvelopeStatus) => ({

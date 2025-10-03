@@ -1,3 +1,5 @@
+import { authorizedFetch } from '../utils/api'
+
 interface IncomeData {
     amount: number
     toSavings: number
@@ -31,9 +33,8 @@ interface ExpenseData {
 export const createIncomeHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (incomeData: IncomeData) => {
         try {
-            const response = await fetch('/api/income', {
+            const response = await authorizedFetch('/api/income', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: incomeData.type || 'salary',
                     date: incomeData.date || new Date().toISOString().split('T')[0],
@@ -57,9 +58,8 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
 export const createBonusHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (bonusData: BonusData) => {
         try {
-            const response = await fetch('/api/income', {
+            const response = await authorizedFetch('/api/income', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'bonus',
                     ...bonusData
@@ -81,9 +81,8 @@ export const createBonusHandler = (refetch: () => void, showToast: (message: str
 export const createExpenseHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (expenseData: ExpenseData) => {
         try {
-            const response = await fetch('/api/transactions', {
+            const response = await authorizedFetch('/api/transactions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'expense',
                     amount: expenseData.amount,
