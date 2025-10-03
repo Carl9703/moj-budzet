@@ -123,9 +123,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
     const inputStyle = {
         width: '100px',
         padding: '8px',
-        border: '1px solid #ddd',
+        border: '1px solid var(--border-primary)',
         borderRadius: '4px',
-        textAlign: 'right' as const
+        textAlign: 'right' as const,
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--text-primary)'
     }
 
     const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toInvestment) + Number(toJoint)
@@ -142,7 +144,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                 gap: '8px',
                 marginBottom: '20px',
                 padding: '4px',
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--bg-tertiary)',
                 borderRadius: '8px'
             }}>
                 <button
@@ -152,10 +154,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: incomeType === 'salary' ? 'white' : 'transparent',
+                        backgroundColor: incomeType === 'salary' ? 'var(--bg-secondary)' : 'transparent',
+                        color: 'var(--text-primary)',
                         fontWeight: incomeType === 'salary' ? '600' : '400',
                         cursor: 'pointer',
-                        boxShadow: incomeType === 'salary' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        boxShadow: incomeType === 'salary' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     💼 Wypłata
@@ -167,10 +170,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: incomeType === 'other' ? 'white' : 'transparent',
+                        backgroundColor: incomeType === 'other' ? 'var(--bg-secondary)' : 'transparent',
+                        color: 'var(--text-primary)',
                         fontWeight: incomeType === 'other' ? '600' : '400',
                         cursor: 'pointer',
-                        boxShadow: incomeType === 'other' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        boxShadow: incomeType === 'other' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     💵 Inne
@@ -183,6 +187,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         border: 'none',
                         borderRadius: '6px',
                         backgroundColor: 'transparent',
+                        color: 'var(--text-primary)',
                         fontWeight: '400',
                         cursor: 'pointer'
                     }}
@@ -192,13 +197,13 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
             </div>
 
             <div style={{
-                backgroundColor: canSubmit ? '#dbeafe' : '#fee2e2',
+                backgroundColor: canSubmit ? 'var(--success-light)' : 'var(--error-light)',
                 padding: '16px',
                 borderRadius: '8px',
                 marginBottom: '16px',
-                border: canSubmit ? '1px solid #93c5fd' : '1px solid #fca5a5'
+                border: canSubmit ? '1px solid var(--success-border)' : '1px solid var(--error-border)'
             }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: canSubmit ? '#1e40af' : '#991b1b' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: canSubmit ? 'var(--success-dark)' : 'var(--error-dark)' }}>
                     {incomeType === 'salary' ? 'Kwota wypłaty' : 'Kwota przychodu'}
                 </label>
                 <input
@@ -212,15 +217,17 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         fontSize: '20px',
                         fontWeight: 'bold',
                         border: '2px solid',
-                        borderColor: canSubmit ? '#3b82f6' : '#ef4444',
+                        borderColor: canSubmit ? 'var(--accent-primary)' : 'var(--error-primary)',
                         borderRadius: '6px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        backgroundColor: 'var(--bg-primary)',
+                        color: 'var(--text-primary)'
                     }}
                 />
                 
                 {/* Pole daty */}
                 <div style={{ marginTop: '12px' }}>
-                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                         Data przychodu
                     </label>
                     <input
@@ -230,9 +237,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #ddd',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '4px',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     />
                 </div>
@@ -245,9 +254,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #ddd',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '4px',
                             marginTop: '8px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
                             fontSize: '14px'
                         }}
                     />
@@ -304,10 +315,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         <div style={{
                             marginTop: '8px',
                             padding: '8px',
-                            backgroundColor: '#fee2e2',
+                            backgroundColor: 'var(--error-light)',
                             borderRadius: '4px',
                             fontSize: '12px',
-                            color: '#dc2626',
+                            color: 'var(--error-primary)',
                             textAlign: 'center'
                         }}>
                             ⚠️ Suma przelewów ({totalAllocated} zł) przekracza wypłatę!
@@ -315,10 +326,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     )}
 
                     <div style={{
-                        borderTop: '1px solid #ddd',
+                        borderTop: '1px solid var(--border-primary)',
                         marginTop: '16px',
                         paddingTop: '16px',
-                        backgroundColor: forExpenses >= 0 ? '#f0fdf4' : '#fee2e2',
+                        backgroundColor: forExpenses >= 0 ? 'var(--bg-success)' : 'var(--error-light)',
                         padding: '12px',
                         borderRadius: '6px'
                     }}>
@@ -330,12 +341,12 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                             fontWeight: 'bold'
                         }}>
                             <span>💳 Na wydatki:</span>
-                            <span style={{ color: forExpenses >= 0 ? '#059669' : '#dc2626' }}>
+                            <span style={{ color: forExpenses >= 0 ? 'var(--success-primary)' : 'var(--error-primary)' }}>
                                 {forExpenses} zł
                             </span>
                         </div>
                         {forExpenses < 0 && (
-                            <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--error-primary)', marginTop: '4px', textAlign: 'center' }}>
                                 Zmniejsz przelewy lub zwiększ kwotę wypłaty
                             </div>
                         )}
@@ -349,9 +360,9 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     <div style={{
                         marginBottom: '16px',
                         padding: '16px',
-                        backgroundColor: includeInStats ? '#f0fdf4' : '#fef3c7',
+                        backgroundColor: includeInStats ? 'var(--bg-success)' : 'var(--bg-warning)',
                         borderRadius: '8px',
-                        border: `1px solid ${includeInStats ? '#bbf7d0' : '#fde68a'}`
+                        border: `1px solid ${includeInStats ? 'var(--success-border)' : 'var(--accent-warning)'}`
                     }}>
                         <label style={{
                             display: 'flex',
@@ -369,7 +380,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                                 </div>
                                 <div style={{
                                     fontSize: '12px',
-                                    color: '#6b7280'
+                                    color: 'var(--text-secondary)'
                                 }}>
                                     {includeInStats
                                         ? "✓ Przychód - wpłynie na bilans i stopę oszczędności"
@@ -383,7 +394,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                                 position: 'relative',
                                 width: '48px',
                                 height: '24px',
-                                backgroundColor: includeInStats ? '#10b981' : '#d1d5db',
+                                backgroundColor: includeInStats ? 'var(--success-primary)' : 'var(--border-secondary)',
                                 borderRadius: '12px',
                                 transition: 'background-color 0.2s'
                             }}>
@@ -416,17 +427,17 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     {/* Informacja o przeznaczeniu */}
                     <div style={{
                         padding: '16px',
-                        backgroundColor: '#f0fdf4',
+                        backgroundColor: 'var(--bg-success)',
                         borderRadius: '8px',
                         marginBottom: '16px',
                         textAlign: 'center'
                     }}>
-                        <div style={{ fontSize: '14px', color: '#059669', marginBottom: '8px' }}>
+                        <div style={{ fontSize: '14px', color: 'var(--success-primary)', marginBottom: '8px' }}>
                             {includeInStats
                                 ? '💵 Przychód zostanie wliczony do statystyk'
                                 : '↩️ Zwrot - tylko zwiększy saldo konta'}
                         </div>
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#059669' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--success-primary)' }}>
                             Kwota: {Number(amount || 0).toLocaleString()} zł
                         </div>
                     </div>
@@ -438,9 +449,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     onClick={onClose}
                     style={{
                         padding: '8px 16px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border-primary)',
                         borderRadius: '4px',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
                         cursor: 'pointer'
                     }}
                 >
@@ -453,8 +465,8 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px 16px',
                         border: 'none',
                         borderRadius: '4px',
-                        backgroundColor: canSubmit ? '#3b82f6' : '#d1d5db',
-                        color: canSubmit ? 'white' : '#6b7280',
+                        backgroundColor: canSubmit ? 'var(--accent-primary)' : 'var(--border-secondary)',
+                        color: canSubmit ? 'white' : 'var(--text-secondary)',
                         cursor: canSubmit ? 'pointer' : 'not-allowed',
                         fontWeight: '500'
                     }}
