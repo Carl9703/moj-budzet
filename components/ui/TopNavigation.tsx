@@ -39,35 +39,40 @@ export function TopNavigation() {
                 alignItems: 'center',
                 justifyContent: 'space-between'
             }}>
-                {/* Logo/Tytuł - klikalny */}
-                <div 
-                    onClick={() => router.push('/')}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        cursor: 'pointer',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.transform = 'translateY(0)'
-                    }}
-                >
-                    <h1 className="text-theme-primary" style={{
-                        fontSize: '20px',
-                        fontWeight: '700',
-                        margin: 0,
-                        transition: 'color 0.3s ease'
-                    }}>
-                        💰 Budżet Domowy
-                    </h1>
+                {/* Logo/Tytuł + Dark Mode */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div 
+                        onClick={() => router.push('/')}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.transform = 'translateY(-1px)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                        }}
+                    >
+                        <h1 className="text-theme-primary" style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            margin: 0,
+                            transition: 'color 0.3s ease'
+                        }}>
+                            💰 Budżet Domowy
+                        </h1>
+                    </div>
+                    
+                    {/* Theme Toggle - obok logo */}
+                    <ThemeToggle size="small" />
                 </div>
 
                 {/* Nawigacja */}
@@ -123,11 +128,6 @@ export function TopNavigation() {
                                 <span>{item.label}</span>
                             </button>
                         ))}
-                    </div>
-                    
-                    {/* Theme Toggle - przenieś na koniec */}
-                    <div style={{ marginLeft: '8px' }}>
-                        <ThemeToggle size="small" />
                     </div>
 
                     {/* Logout Button */}

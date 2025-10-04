@@ -83,8 +83,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
             <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '16px',
-                maxHeight: '80vh',
+                gap: '12px',
+                maxHeight: '75vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
@@ -141,16 +141,17 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         key={cat.id}
                                         onClick={() => handleCategorySelect(cat.id)}
                                         style={{
-                                            padding: '10px 8px',
+                                            padding: '6px 4px',
                                             border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                            borderRadius: '8px',
+                                            borderRadius: '6px',
                                             backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
-                                            gap: '4px',
-                                            transition: 'all 0.2s'
+                                            gap: '2px',
+                                            transition: 'all 0.2s',
+                                            fontSize: '11px'
                                         }}
                                     >
                                         <span style={{ fontSize: '20px' }}>{cat.icon}</span>

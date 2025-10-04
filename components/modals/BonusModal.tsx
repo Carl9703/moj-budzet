@@ -73,7 +73,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
     return (
         <Modal title="💰 WPŁYNĘŁA PREMIA" onClose={onClose}>
             <div style={{ 
-                maxHeight: '80vh',
+                maxHeight: '75vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
@@ -119,103 +119,103 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
             <div style={{ marginBottom: '20px' }}>
                 <h3 style={{ fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 80px 100px',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '8px',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '6px'
+                        gap: '8px',
+                        padding: '6px 8px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        borderRadius: '6px',
+                        fontSize: '13px'
                     }}>
-                        <span style={{ fontSize: '20px' }}>🎁</span>
-                        <span style={{ fontWeight: '500' }}>Prezenty</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '16px' }}>🎁</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Prezenty</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
                                 value={percentages.gifts}
                                 onChange={(e) => handlePercentageChange('gifts', e.target.value)}
-                                style={inputStyle}
+                                style={{...inputStyle, width: '40px', padding: '2px 4px', fontSize: '12px'}}
                             />
-                            <span>%</span>
+                            <span style={{ fontSize: '11px' }}>%</span>
                         </div>
-                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669' }}>
+                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669', fontSize: '12px', minWidth: '50px' }}>
                             {calculateAmount(percentages.gifts)} zł
                         </span>
                     </div>
 
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 80px 100px',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '8px',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '6px'
+                        gap: '8px',
+                        padding: '6px 8px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        borderRadius: '6px',
+                        fontSize: '13px'
                     }}>
-                        <span style={{ fontSize: '20px' }}>📋</span>
-                        <span style={{ fontWeight: '500' }}>OC</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '16px' }}>📋</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>OC</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
                                 value={percentages.insurance}
                                 onChange={(e) => handlePercentageChange('insurance', e.target.value)}
-                                style={inputStyle}
+                                style={{...inputStyle, width: '40px', padding: '2px 4px', fontSize: '12px'}}
                             />
-                            <span>%</span>
+                            <span style={{ fontSize: '11px' }}>%</span>
                         </div>
-                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669' }}>
+                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669', fontSize: '12px', minWidth: '50px' }}>
                             {calculateAmount(percentages.insurance)} zł
                         </span>
                     </div>
 
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 80px 100px',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '8px',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '6px'
+                        gap: '8px',
+                        padding: '6px 8px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        borderRadius: '6px',
+                        fontSize: '13px'
                     }}>
-                        <span style={{ fontSize: '20px' }}>🎄</span>
-                        <span style={{ fontWeight: '500' }}>Święta</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '16px' }}>🎄</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Święta</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
                                 value={percentages.holidays}
                                 onChange={(e) => handlePercentageChange('holidays', e.target.value)}
-                                style={inputStyle}
+                                style={{...inputStyle, width: '40px', padding: '2px 4px', fontSize: '12px'}}
                             />
-                            <span>%</span>
+                            <span style={{ fontSize: '11px' }}>%</span>
                         </div>
-                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669' }}>
+                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669', fontSize: '12px', minWidth: '50px' }}>
                             {calculateAmount(percentages.holidays)} zł
                         </span>
                     </div>
 
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 80px 100px',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '12px',
-                        padding: '8px',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '6px'
+                        gap: '8px',
+                        padding: '6px 8px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        borderRadius: '6px',
+                        fontSize: '13px'
                     }}>
-                        <span style={{ fontSize: '20px' }}>💰</span>
-                        <span style={{ fontWeight: '500' }}>Wolne środki</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '16px' }}>💰</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Wolne środki</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
                                 value={percentages.freedom}
                                 onChange={(e) => handlePercentageChange('freedom', e.target.value)}
-                                style={inputStyle}
+                                style={{...inputStyle, width: '40px', padding: '2px 4px', fontSize: '12px'}}
                             />
-                            <span>%</span>
+                            <span style={{ fontSize: '11px' }}>%</span>
                         </div>
-                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669' }}>
+                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669', fontSize: '12px', minWidth: '50px' }}>
                             {calculateAmount(percentages.freedom)} zł
                         </span>
                     </div>
