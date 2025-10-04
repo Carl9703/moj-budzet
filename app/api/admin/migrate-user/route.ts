@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Zabezpieczenie - nie przenoś jeśli target już ma dane
-        if (targetUser._count.transactions > 0 || targetUser._count.envelopes > 0) {
+        // Zabezpieczenie - nie przenoś jeśli target ma TRANSAKCJE (koperty mogą być puste z rejestracji)
+        if (targetUser._count.transactions > 0) {
             return NextResponse.json({
-                error: 'Docelowy użytkownik już ma dane! Nie można nadpisać.',
+                error: 'Docelowy użytkownik już ma transakcje! Nie można nadpisać.',
                 targetUser: {
                     email: targetUser.email,
                     transactions: targetUser._count.transactions,
@@ -77,6 +77,13 @@ export async function POST(request: NextRequest) {
 
         // 🔄 WYKONAJ MIGRACJĘ W TRANSAKCJI
         const result = await prisma.$transaction(async (tx) => {
+            // 0. Usuń puste koperty z target user (utworzone przy rejestracji)
+            await tx.envelope.deleteMany({
+                where: {
+                    userId: targetUser.id,
+                }
+            })
+
             // 1. Przenieś transakcje
             const transactionsUpdated = await tx.transaction.updateMany({
                 where: { userId: userWithData.id },
@@ -93,16 +100,6 @@ export async function POST(request: NextRequest) {
             const configUpdated = await tx.userConfig.updateMany({
                 where: { userId: userWithData.id },
                 data: { userId: targetUser.id }
-            })
-
-            // 4. Usuń duplikaty kopert (nowy user mógł mieć puste koperty z rejestracji)
-            // Najpierw usuń puste koperty nowego użytkownika
-            await tx.envelope.deleteMany({
-                where: {
-                    userId: targetUser.id,
-                    currentAmount: 0,
-                    id: { not: { in: [] } } // Hack żeby wziąć wszystkie
-                }
             })
 
             return {
