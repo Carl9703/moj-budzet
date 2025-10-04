@@ -1,9 +1,8 @@
 // app/api/analytics/route.ts - Z OBSŁUGĄ OKRESÓW I PORÓWNANIAMI
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 
 interface MonthlyData {
@@ -56,8 +55,16 @@ interface TransferAnalysis {
     percentage: number
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
         const userId = USER_ID

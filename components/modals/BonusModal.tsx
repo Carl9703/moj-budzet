@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal'
 interface Props {
     onClose: () => void
     onSave: (data: BonusData) => void
+    onSwitchToIncome?: () => void
 }
 
 interface BonusData {
@@ -16,7 +17,7 @@ interface BonusData {
     toFreedom: number
 }
 
-export function BonusModal({ onClose, onSave }: Props) {
+export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
     const [amount, setAmount] = useState('1300')
     const [percentages, setPercentages] = useState({
         gifts: 20,
@@ -60,15 +61,36 @@ export function BonusModal({ onClose, onSave }: Props) {
     const inputStyle = {
         width: '60px',
         padding: '4px 8px',
-        border: '1px solid #ddd',
+        border: '1px solid var(--border-primary)',
         borderRadius: '4px',
-        textAlign: 'center' as const
+        textAlign: 'center' as const,
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--text-primary)'
     }
 
     return (
         <Modal title="💰 WPŁYNĘŁA PREMIA" onClose={onClose}>
-            <div style={{ backgroundColor: '#d1fae5', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#065f46' }}>
+            {/* Przycisk powrotu */}
+            {onSwitchToIncome && (
+                <button
+                    onClick={onSwitchToIncome}
+                    style={{
+                        marginBottom: '16px',
+                        padding: '8px 12px',
+                        border: '1px solid var(--border-primary)',
+                        borderRadius: '6px',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                >
+                    ← Powrót do wyboru typu przychodu
+                </button>
+            )}
+            
+            <div style={{ backgroundColor: 'var(--bg-success)', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--success-border)' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--success-dark)' }}>
                     Kwota premii kwartalnej
                 </label>
                 <input
@@ -88,7 +110,7 @@ export function BonusModal({ onClose, onSave }: Props) {
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontWeight: '600', marginBottom: '16px' }}>PODZIAŁ PROCENTOWY:</h3>
+                <h3 style={{ fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{

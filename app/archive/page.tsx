@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface TransactionData {
     id: string
@@ -41,6 +43,7 @@ interface MonthData {
 }
 
 export default function ArchivePage() {
+    const { isAuthenticated, isCheckingAuth } = useAuth()
     const [monthsData, setMonthsData] = useState<MonthData[]>([])
     const [selectedMonth, setSelectedMonth] = useState<string>('')
     const [loading, setLoading] = useState(true)
@@ -52,13 +55,27 @@ export default function ArchivePage() {
     const [expandedTransfers, setExpandedTransfers] = useState<Set<string>>(new Set())
 
     useEffect(() => {
-        fetchMonthsData()
-    }, [])
+        if (isAuthenticated) {
+            fetchMonthsData()
+        }
+    }, [isAuthenticated])
+    
+    if (isCheckingAuth) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <p>Sprawdzanie autoryzacji...</p>
+            </div>
+        )
+    }
+
+    if (!isAuthenticated) {
+        return null
+    }
 
     const fetchMonthsData = async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/archive', {
+            const response = await authorizedFetch('/api/archive', {
                 cache: 'no-store'
             })
 

@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
     try {
-        const userId = USER_ID
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
 
-        let config = await prisma.userConfig.findUnique({ where: { userId: userId } })
+        let config = await prisma.userConfig.findUnique({ where: { userId } })
 
         if (!config) {
             // utwórz pustą konfigurację, jeśli brak
             config = await prisma.userConfig.create({
                 data: {
-                    userId: userId,
+                    userId,
                     defaultSalary: 0,
                     defaultToJoint: 0,
                     defaultToSavings: 0,
@@ -25,21 +30,26 @@ export async function GET(request: NextRequest) {
 
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
         const monthlyEnvelopes = await prisma.envelope.findMany({
-            where: { userId: userId, type: 'monthly' },
+            where: { userId, type: 'monthly' },
             orderBy: { name: 'asc' },
             select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true },
         })
 
         return NextResponse.json({ config, monthlyEnvelopes })
     } catch (error) {
-        console.error('Config GET error:', error)
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }
 
 export async function PUT(request: NextRequest) {
     try {
-        const userId = USER_ID
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
 
         const body = await request.json()
         const {
@@ -59,7 +69,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const updated = await prisma.userConfig.upsert({
-            where: { userId: userId },
+            where: { userId },
             update: {
                 defaultSalary: defaultSalary ?? undefined,
                 defaultToJoint: defaultToJoint ?? undefined,
@@ -68,7 +78,7 @@ export async function PUT(request: NextRequest) {
                 defaultToInvestment: defaultToInvestment ?? undefined,
             },
             create: {
-                userId: userId,
+                userId,
                 defaultSalary: defaultSalary ?? 0,
                 defaultToJoint: defaultToJoint ?? 0,
                 defaultToSavings: defaultToSavings ?? 0,
@@ -89,7 +99,6 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({ success: true, config: updated })
     } catch (error) {
-        console.error('Config PUT error:', error)
         return NextResponse.json({ error: 'Błąd zapisu konfiguracji' }, { status: 500 })
     }
 }

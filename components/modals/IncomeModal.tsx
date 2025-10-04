@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/Modal'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface Props {
     onClose: () => void
     onSave: (data: IncomeData) => void
-    onSwitchToBonus: () => void
+    onSwitchToBonus?: () => void // Deprecated - nie używamy już
 }
 
 interface IncomeData {
@@ -22,8 +23,8 @@ interface IncomeData {
     date?: string  // DODANE!
 }
 
-export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
-    const [incomeType, setIncomeType] = useState<'salary' | 'other'>('salary')
+export function IncomeModal({ onClose, onSave }: Props) {
+    const [incomeType, setIncomeType] = useState<'salary' | 'other' | 'bonus'>('salary')
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
     const [includeInStats, setIncludeInStats] = useState(true)
@@ -32,13 +33,21 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
     const [toInvestment, setToInvestment] = useState('600')
     const [toJoint, setToJoint] = useState('1500')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+    
+    // Stany dla premii
+    const [bonusPercentages, setBonusPercentages] = useState({
+        gifts: 20,
+        insurance: 15,
+        holidays: 20,
+        freedom: 45
+    })
 
     useEffect(() => {
         let isMounted = true
 
         const loadDefaults = async () => {
             try {
-                const res = await fetch('/api/config', { cache: 'no-store' })
+                const res = await authorizedFetch('/api/config', { cache: 'no-store' })
                 if (!res.ok) return
                 const data = await res.json()
                 const cfg = data?.config
@@ -58,6 +67,8 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
 
         if (incomeType === 'salary') {
             loadDefaults()
+        } else if (incomeType === 'bonus') {
+            setAmount('1300')
         } else {
             setAmount('')
         }
@@ -65,8 +76,34 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
         return () => { isMounted = false }
     }, [incomeType])
 
+    const calculateBonusAmount = (percentage: number) => {
+        return Math.round((Number(amount) * percentage) / 100)
+    }
+
+    const totalBonusPercentage = Object.values(bonusPercentages).reduce((a, b) => a + b, 0)
+
     const handleSubmit = () => {
         const amountNum = Number(amount || 0)
+
+        if (incomeType === 'bonus') {
+            if (totalBonusPercentage !== 100) {
+                alert('Suma procentów musi wynosić 100%!')
+                return
+            }
+
+            onSave({
+                amount: amountNum,
+                toSavings: 0,
+                toVacation: 0,
+                toInvestment: 0,
+                toJoint: 0,
+                forExpenses: 0,
+                type: 'bonus',
+                date: date
+            })
+            onClose()
+            return
+        }
 
         if (incomeType === 'other') {
             if (amountNum <= 0) {
@@ -122,14 +159,18 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
     const inputStyle = {
         width: '100px',
         padding: '8px',
-        border: '1px solid #ddd',
+        border: '1px solid var(--border-primary)',
         borderRadius: '4px',
-        textAlign: 'right' as const
+        textAlign: 'right' as const,
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--text-primary)'
     }
 
     const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toInvestment) + Number(toJoint)
     const forExpenses = Number(amount || 0) - totalAllocated
-    const canSubmit = incomeType === 'other' ?
+    const canSubmit = incomeType === 'bonus' ?
+        (Number(amount || 0) > 0 && totalBonusPercentage === 100) :
+        incomeType === 'other' ?
         Number(amount || 0) > 0 :
         (Number(amount || 0) > 0 && totalAllocated <= Number(amount || 0))
 
@@ -141,7 +182,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                 gap: '8px',
                 marginBottom: '20px',
                 padding: '4px',
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--bg-tertiary)',
                 borderRadius: '8px'
             }}>
                 <button
@@ -151,10 +192,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: incomeType === 'salary' ? 'white' : 'transparent',
+                        backgroundColor: incomeType === 'salary' ? 'var(--bg-secondary)' : 'transparent',
+                        color: 'var(--text-primary)',
                         fontWeight: incomeType === 'salary' ? '600' : '400',
                         cursor: 'pointer',
-                        boxShadow: incomeType === 'salary' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        boxShadow: incomeType === 'salary' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     💼 Wypłata
@@ -166,24 +208,27 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: incomeType === 'other' ? 'white' : 'transparent',
+                        backgroundColor: incomeType === 'other' ? 'var(--bg-secondary)' : 'transparent',
+                        color: 'var(--text-primary)',
                         fontWeight: incomeType === 'other' ? '600' : '400',
                         cursor: 'pointer',
-                        boxShadow: incomeType === 'other' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        boxShadow: incomeType === 'other' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     💵 Inne
                 </button>
                 <button
-                    onClick={onSwitchToBonus}
+                    onClick={() => setIncomeType('bonus')}
                     style={{
                         flex: 1,
                         padding: '8px',
                         border: 'none',
                         borderRadius: '6px',
-                        backgroundColor: 'transparent',
-                        fontWeight: '400',
-                        cursor: 'pointer'
+                        backgroundColor: incomeType === 'bonus' ? 'var(--bg-secondary)' : 'transparent',
+                        color: 'var(--text-primary)',
+                        fontWeight: incomeType === 'bonus' ? '600' : '400',
+                        cursor: 'pointer',
+                        boxShadow: incomeType === 'bonus' ? 'var(--shadow-sm)' : 'none'
                     }}
                 >
                     🎁 Premia
@@ -191,14 +236,14 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
             </div>
 
             <div style={{
-                backgroundColor: canSubmit ? '#dbeafe' : '#fee2e2',
+                backgroundColor: canSubmit ? 'var(--success-light)' : 'var(--error-light)',
                 padding: '16px',
                 borderRadius: '8px',
                 marginBottom: '16px',
-                border: canSubmit ? '1px solid #93c5fd' : '1px solid #fca5a5'
+                border: canSubmit ? '1px solid var(--success-border)' : '1px solid var(--error-border)'
             }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: canSubmit ? '#1e40af' : '#991b1b' }}>
-                    {incomeType === 'salary' ? 'Kwota wypłaty' : 'Kwota przychodu'}
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: canSubmit ? 'var(--success-dark)' : 'var(--error-dark)' }}>
+                    {incomeType === 'bonus' ? 'Kwota premii kwartalnej' : incomeType === 'salary' ? 'Kwota wypłaty' : 'Kwota przychodu'}
                 </label>
                 <input
                     type="number"
@@ -211,15 +256,17 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         fontSize: '20px',
                         fontWeight: 'bold',
                         border: '2px solid',
-                        borderColor: canSubmit ? '#3b82f6' : '#ef4444',
+                        borderColor: canSubmit ? 'var(--accent-primary)' : 'var(--error-primary)',
                         borderRadius: '6px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        backgroundColor: 'var(--bg-primary)',
+                        color: 'var(--text-primary)'
                     }}
                 />
                 
                 {/* Pole daty */}
                 <div style={{ marginTop: '12px' }}>
-                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                         Data przychodu
                     </label>
                     <input
@@ -229,9 +276,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #ddd',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '4px',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     />
                 </div>
@@ -244,9 +293,11 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         style={{
                             width: '100%',
                             padding: '8px',
-                            border: '1px solid #ddd',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '4px',
                             marginTop: '8px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
                             fontSize: '14px'
                         }}
                     />
@@ -303,10 +354,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         <div style={{
                             marginTop: '8px',
                             padding: '8px',
-                            backgroundColor: '#fee2e2',
+                            backgroundColor: 'var(--error-light)',
                             borderRadius: '4px',
                             fontSize: '12px',
-                            color: '#dc2626',
+                            color: 'var(--error-primary)',
                             textAlign: 'center'
                         }}>
                             ⚠️ Suma przelewów ({totalAllocated} zł) przekracza wypłatę!
@@ -314,10 +365,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     )}
 
                     <div style={{
-                        borderTop: '1px solid #ddd',
+                        borderTop: '1px solid var(--border-primary)',
                         marginTop: '16px',
                         paddingTop: '16px',
-                        backgroundColor: forExpenses >= 0 ? '#f0fdf4' : '#fee2e2',
+                        backgroundColor: forExpenses >= 0 ? 'var(--bg-success)' : 'var(--error-light)',
                         padding: '12px',
                         borderRadius: '6px'
                     }}>
@@ -329,12 +380,12 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                             fontWeight: 'bold'
                         }}>
                             <span>💳 Na wydatki:</span>
-                            <span style={{ color: forExpenses >= 0 ? '#059669' : '#dc2626' }}>
+                            <span style={{ color: forExpenses >= 0 ? 'var(--success-primary)' : 'var(--error-primary)' }}>
                                 {forExpenses} zł
                             </span>
                         </div>
                         {forExpenses < 0 && (
-                            <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--error-primary)', marginTop: '4px', textAlign: 'center' }}>
                                 Zmniejsz przelewy lub zwiększ kwotę wypłaty
                             </div>
                         )}
@@ -348,9 +399,9 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     <div style={{
                         marginBottom: '16px',
                         padding: '16px',
-                        backgroundColor: includeInStats ? '#f0fdf4' : '#fef3c7',
+                        backgroundColor: includeInStats ? 'var(--bg-success)' : 'var(--bg-warning)',
                         borderRadius: '8px',
-                        border: `1px solid ${includeInStats ? '#bbf7d0' : '#fde68a'}`
+                        border: `1px solid ${includeInStats ? 'var(--success-border)' : 'var(--accent-warning)'}`
                     }}>
                         <label style={{
                             display: 'flex',
@@ -368,7 +419,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                                 </div>
                                 <div style={{
                                     fontSize: '12px',
-                                    color: '#6b7280'
+                                    color: 'var(--text-secondary)'
                                 }}>
                                     {includeInStats
                                         ? "✓ Przychód - wpłynie na bilans i stopę oszczędności"
@@ -382,7 +433,7 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                                 position: 'relative',
                                 width: '48px',
                                 height: '24px',
-                                backgroundColor: includeInStats ? '#10b981' : '#d1d5db',
+                                backgroundColor: includeInStats ? 'var(--success-primary)' : 'var(--border-secondary)',
                                 borderRadius: '12px',
                                 transition: 'background-color 0.2s'
                             }}>
@@ -415,21 +466,150 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     {/* Informacja o przeznaczeniu */}
                     <div style={{
                         padding: '16px',
-                        backgroundColor: '#f0fdf4',
+                        backgroundColor: 'var(--bg-success)',
                         borderRadius: '8px',
                         marginBottom: '16px',
                         textAlign: 'center'
                     }}>
-                        <div style={{ fontSize: '14px', color: '#059669', marginBottom: '8px' }}>
+                        <div style={{ fontSize: '14px', color: 'var(--success-primary)', marginBottom: '8px' }}>
                             {includeInStats
                                 ? '💵 Przychód zostanie wliczony do statystyk'
                                 : '↩️ Zwrot - tylko zwiększy saldo konta'}
                         </div>
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#059669' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--success-primary)' }}>
                             Kwota: {Number(amount || 0).toLocaleString()} zł
                         </div>
                     </div>
                 </>
+            )}
+
+            {incomeType === 'bonus' && (
+                <div style={{ marginBottom: '20px' }}>
+                    <h3 style={{ fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Prezenty */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>🎁</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.gifts}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, gifts: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.gifts)} zł
+                            </span>
+                        </div>
+
+                        {/* OC */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>📋</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>OC</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.insurance}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, insurance: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.insurance)} zł
+                            </span>
+                        </div>
+
+                        {/* Święta */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>🎄</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Święta</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.holidays}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, holidays: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.holidays)} zł
+                            </span>
+                        </div>
+
+                        {/* Wolne środki */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '40px 1fr 80px 100px',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '8px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            borderRadius: '6px'
+                        }}>
+                            <span style={{ fontSize: '20px' }}>💰</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Wolne środki</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <input
+                                    type="number"
+                                    value={bonusPercentages.freedom}
+                                    onChange={(e) => setBonusPercentages(prev => ({...prev, freedom: parseInt(e.target.value) || 0}))}
+                                    style={inputStyle}
+                                />
+                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            </div>
+                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                {calculateBonusAmount(bonusPercentages.freedom)} zł
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style={{
+                        marginTop: '12px',
+                        padding: '8px',
+                        backgroundColor: totalBonusPercentage === 100 ? 'var(--bg-success)' : 'var(--error-light)',
+                        borderRadius: '6px',
+                        textAlign: 'center',
+                        border: `1px solid ${totalBonusPercentage === 100 ? 'var(--success-border)' : 'var(--error-border)'}`
+                    }}>
+                        <span style={{
+                            fontWeight: '600',
+                            color: totalBonusPercentage === 100 ? 'var(--success-primary)' : 'var(--error-primary)'
+                        }}>
+                            Suma: {totalBonusPercentage}%
+                            {totalBonusPercentage !== 100 && ' (musi być 100%)'}
+                        </span>
+                    </div>
+                </div>
             )}
 
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -437,9 +617,10 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                     onClick={onClose}
                     style={{
                         padding: '8px 16px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border-primary)',
                         borderRadius: '4px',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
                         cursor: 'pointer'
                     }}
                 >
@@ -452,13 +633,14 @@ export function IncomeModal({ onClose, onSave, onSwitchToBonus }: Props) {
                         padding: '8px 16px',
                         border: 'none',
                         borderRadius: '4px',
-                        backgroundColor: canSubmit ? '#3b82f6' : '#d1d5db',
-                        color: canSubmit ? 'white' : '#6b7280',
+                        backgroundColor: canSubmit ? 'var(--accent-primary)' : 'var(--border-secondary)',
+                        color: canSubmit ? 'white' : 'var(--text-secondary)',
                         cursor: canSubmit ? 'pointer' : 'not-allowed',
                         fontWeight: '500'
                     }}
                 >
-                    ✓ {incomeType === 'salary' ? 'ZATWIERDŹ PODZIAŁ' :
+                    ✓ {incomeType === 'bonus' ? 'ZATWIERDŹ PODZIAŁ' :
+                        incomeType === 'salary' ? 'ZATWIERDŹ PODZIAŁ' :
                         includeInStats ? 'DODAJ PRZYCHÓD' : 'DODAJ ZWROT'}
                 </button>
             </div>

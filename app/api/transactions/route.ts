@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { createTransactionSchema } from '@/lib/validations/transaction'
+import { z } from 'zod'
 
 export async function GET(request: NextRequest) {
     try {
-        const userId = USER_ID
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
 
         const transactions = await prisma.transaction.findMany({
             where: { userId },
@@ -51,7 +58,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(formatted)
 
     } catch (error) {
-        console.error('Transactions API error:', error)
         return NextResponse.json(
             { error: 'Błąd pobierania transakcji' },
             { status: 500 }
@@ -61,24 +67,32 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const userId = USER_ID
-        const data = await request.json()
-
-        // Użyj daty z frontendu lub aktualnej z prawidłową godziną
-        const transactionDate = data.date ? new Date(data.date) : new Date()
-
-        // Jeśli data przyszła bez godziny, ustaw aktualną godzinę
-        if (data.date && !data.date.includes('T')) {
-            const now = new Date()
-            transactionDate.setHours(now.getHours())
-            transactionDate.setMinutes(now.getMinutes())
-            transactionDate.setSeconds(now.getSeconds())
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        // Utwórz transakcję
+        const body = await request.json()
+
+        // Walidacja danych wejściowych
+        const validation = createTransactionSchema.safeParse(body)
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: 'Nieprawidłowe dane', details: validation.error.issues },
+                { status: 400 }
+            )
+        }
+
+        const data = validation.data
+
+        const transactionDate = data.date ? new Date(data.date) : new Date()
+
         const transaction = await prisma.transaction.create({
             data: {
-                userId: userId,
+                userId,
                 type: data.type,
                 amount: data.amount,
                 description: data.description || '',
@@ -125,7 +139,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(transaction)
 
     } catch (error) {
-        console.error('Transaction API error:', error)
         return NextResponse.json(
             { error: 'Błąd zapisywania transakcji' },
             { status: 500 }

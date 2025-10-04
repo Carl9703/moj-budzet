@@ -6,6 +6,14 @@ import { ThemeToggle } from './ThemeToggle'
 export function TopNavigation() {
     const router = useRouter()
 
+    const handleLogout = () => {
+        // Usuń token i dane użytkownika
+        localStorage.removeItem('authToken')
+        localStorage.removeItem('user')
+        // Przekieruj do strony logowania
+        router.push('/auth/signin')
+    }
+
     const navItems = [
         { label: 'Analizy', path: '/analytics', icon: '📊' },
         { label: 'Archiwum', path: '/archive', icon: '📁' },
@@ -113,6 +121,46 @@ export function TopNavigation() {
                     <div style={{ marginLeft: '12px' }}>
                         <ThemeToggle size="small" />
                     </div>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={handleLogout}
+                        className="nav-button smooth-all"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '10px 16px',
+                            backgroundColor: '#fee',
+                            border: '2px solid #fcc',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#c33',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            marginLeft: '12px',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#dc3545'
+                            e.currentTarget.style.borderColor = '#dc3545'
+                            e.currentTarget.style.color = '#ffffff'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fee'
+                            e.currentTarget.style.borderColor = '#fcc'
+                            e.currentTarget.style.color = '#c33'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
+                        title="Wyloguj się"
+                    >
+                        <span style={{ fontSize: '16px' }}>🚪</span>
+                        <span>Wyloguj</span>
+                    </button>
                 </nav>
             </div>
         </div>

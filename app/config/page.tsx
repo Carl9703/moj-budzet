@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface MonthlyEnvelopeRow {
   id: string
@@ -12,6 +14,7 @@ interface MonthlyEnvelopeRow {
 }
 
 export default function ConfigPage() {
+  const { isAuthenticated, isCheckingAuth } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [defaultSalary, setDefaultSalary] = useState<string>('0')
@@ -22,10 +25,11 @@ export default function ConfigPage() {
   const [envelopes, setEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
 
   useEffect(() => {
+    if (!isAuthenticated) return
     let mounted = true
     const load = async () => {
       try {
-        const res = await fetch('/api/config', { cache: 'no-store' })
+        const res = await authorizedFetch('/api/config', { cache: 'no-store' })
         const data = await res.json()
         if (!mounted) return
 
@@ -52,7 +56,19 @@ export default function ConfigPage() {
     }
     load()
     return () => { mounted = false }
-  }, [])
+  }, [isAuthenticated])
+  
+  if (isCheckingAuth || loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>Ładowanie...</p>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
 
   const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToInvestment||0)
   const warnings: string[] = []
@@ -70,7 +86,7 @@ export default function ConfigPage() {
         defaultToInvestment: Number(defaultToInvestment||0),
         monthlyEnvelopes: envelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
       }
-      const res = await fetch('/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const res = await authorizedFetch('/api/config', { method: 'PUT', body: JSON.stringify(payload) })
       if (res.ok) {
         alert('Zapisano konfigurację')
       } else {

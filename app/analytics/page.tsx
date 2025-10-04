@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { authorizedFetch } from '@/lib/utils/api'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface MonthlyData {
     month: string
@@ -78,6 +80,7 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
+    const { isAuthenticated, isCheckingAuth } = useAuth()
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
     const [expandedEnvelopes, setExpandedEnvelopes] = useState<Set<string>>(new Set())
@@ -91,7 +94,8 @@ export default function AnalyticsPage() {
     ]
 
     useEffect(() => {
-        fetch(`/api/analytics?period=${selectedPeriod}`)
+        if (!isAuthenticated) return
+        authorizedFetch(`/api/analytics?period=${selectedPeriod}`)
             .then(res => res.json())
             .then(data => {
                 setData(data)
@@ -101,7 +105,19 @@ export default function AnalyticsPage() {
                 console.error('Analytics error:', err)
                 setLoading(false)
             })
-    }, [selectedPeriod])
+    }, [selectedPeriod, isAuthenticated])
+    
+    if (isCheckingAuth) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <p>Sprawdzanie autoryzacji...</p>
+            </div>
+        )
+    }
+
+    if (!isAuthenticated) {
+        return null
+    }
 
     const formatMoney = (amount: number) => amount.toLocaleString('pl-PL') + ' zł'
 

@@ -6,7 +6,6 @@ import { IncomeModal } from '../components/modals/IncomeModal'
 import { ExpenseModal } from '../components/modals/ExpenseModal'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
 import { CloseMonthModal } from '../components/modals/CloseMonthModal'
-import { BonusModal } from '../components/modals/BonusModal'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { QuickActions } from '../components/dashboard/QuickActions'
@@ -19,9 +18,11 @@ import { TopNavigation } from '../components/ui/TopNavigation'
 import { EnvelopeCardSkeleton, MainBalanceSkeleton, MonthStatusSkeleton, QuickActionsSkeleton } from '../components/ui/SkeletonLoader'
 import { useToast } from '../components/ui/Toast'
 import { useDashboard } from '../lib/hooks/useDashboard'
+import { authorizedFetch } from '../lib/utils/api'
 import { useConfig } from '../lib/hooks/useConfig'
 import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
-import { createIncomeHandler, createBonusHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
+import { useAuth } from '../lib/hooks/useAuth'
+import { createIncomeHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
 
 interface SavingsGoal {
     id: string
@@ -35,8 +36,7 @@ interface SavingsGoal {
 
 export default function HomePage() {
     const router = useRouter()
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+    const { isAuthenticated, isCheckingAuth } = useAuth()
     
     const { data, loading, refetch } = useDashboard()
     const config = useConfig()
@@ -44,16 +44,8 @@ export default function HomePage() {
     const { showToast } = useToast()
     
     const [showIncomeModal, setShowIncomeModal] = useState(false)
-    const [showBonusModal, setShowBonusModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
-
-    // Bez autoryzacji - zawsze zalogowany
-    useEffect(() => {
-        setIsAuthenticated(true)
-        setIsCheckingAuth(false)
-    }, [])
-
 
     const calculateDaysLeft = () => {
         const now = new Date()
@@ -63,7 +55,6 @@ export default function HomePage() {
     }
 
     const handleIncomeSave = createIncomeHandler(refetch, showToast)
-    const handleBonusSave = createBonusHandler(refetch, showToast)
     const handleExpenseSave = createExpenseHandler(refetch, showToast)
 
     const handleCloseMonth = async () => {
@@ -73,9 +64,8 @@ export default function HomePage() {
         }
 
         try {
-            const response = await fetch('/api/close-month', {
+            const response = await authorizedFetch('/api/close-month', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ month: previousMonthStatus.monthStr }),
                 cache: 'no-store'
             })
@@ -92,7 +82,6 @@ export default function HomePage() {
                     window.location.reload()
                 }, 500)
 
-                // Podsumowanie zamykania poprzedniego miesiąca
                 const summary = result.summary
                 
                 let alertMessage = `✅ Zamknięto ${previousMonthStatus.monthName}\n\n📊 SZCZEGÓŁY ZAMKNIĘCIA:\n`
@@ -131,8 +120,6 @@ export default function HomePage() {
                 }
     }
 
-
-    // Sprawdzanie autoryzacji
     if (isCheckingAuth) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -141,102 +128,95 @@ export default function HomePage() {
         )
     }
 
-    // Jeśli nie zalogowany, nie renderuj nic (przekierowanie w useEffect)
     if (!isAuthenticated) {
         return null
     }
 
-            if (loading) {
-                return (
-                    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-                        <TopNavigation />
-                        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                            {/* GÓRNY RZĄD - skeleton */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                                <MainBalanceSkeleton />
-                                <MonthStatusSkeleton />
-                                <QuickActionsSkeleton />
+    if (loading) {
+        return (
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+                <TopNavigation />
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                        <MainBalanceSkeleton />
+                        <MonthStatusSkeleton />
+                        <QuickActionsSkeleton />
+                    </div>
+
+                    <div className="grid-responsive" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '20px'
+                    }}>
+                        <div>
+                            <div style={{ 
+                                width: '150px', 
+                                height: '20px', 
+                                backgroundColor: 'var(--bg-tertiary)', 
+                                borderRadius: '4px', 
+                                marginBottom: '12px' 
+                            }} />
+                            <div style={{ display: 'grid', gap: '10px' }}>
+                                {[1, 2, 3, 4].map(i => <EnvelopeCardSkeleton key={i} />)}
                             </div>
+                        </div>
 
-                            {/* GŁÓWNY LAYOUT - skeleton */}
-                            <div className="grid-responsive" style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                                gap: '20px'
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{ 
+                                backgroundColor: 'white', 
+                                padding: '20px', 
+                                borderRadius: '12px',
+                                border: '1px solid #e5e7eb'
                             }}>
-                                {/* LEWA - koperty miesięczne skeleton */}
-                                <div>
-                                    <div style={{ 
-                                        width: '150px', 
-                                        height: '20px', 
-                                        backgroundColor: 'var(--bg-tertiary)', 
-                                        borderRadius: '4px', 
-                                        marginBottom: '12px' 
-                                    }} />
-                                    <div style={{ display: 'grid', gap: '10px' }}>
-                                        {[1, 2, 3, 4].map(i => <EnvelopeCardSkeleton key={i} />)}
-                                    </div>
-                                </div>
-
-                                {/* ŚRODEK - skeleton */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <div style={{ 
-                                        backgroundColor: 'white', 
-                                        padding: '20px', 
-                                        borderRadius: '12px',
-                                        border: '1px solid #e5e7eb'
-                                    }}>
+                                <div style={{ 
+                                    width: '120px', 
+                                    height: '20px', 
+                                    backgroundColor: 'var(--bg-tertiary)', 
+                                    borderRadius: '4px', 
+                                    marginBottom: '16px' 
+                                }} />
+                                {[1, 2].map(i => (
+                                    <div key={i} style={{ marginBottom: '12px' }}>
                                         <div style={{ 
-                                            width: '120px', 
-                                            height: '20px', 
+                                            width: '100px', 
+                                            height: '16px', 
                                             backgroundColor: 'var(--bg-tertiary)', 
                                             borderRadius: '4px', 
-                                            marginBottom: '16px' 
+                                            marginBottom: '8px' 
                                         }} />
-                                        {[1, 2].map(i => (
-                                            <div key={i} style={{ marginBottom: '12px' }}>
-                                                <div style={{ 
-                                                    width: '100px', 
-                                                    height: '16px', 
-                                                    backgroundColor: 'var(--bg-tertiary)', 
-                                                    borderRadius: '4px', 
-                                                    marginBottom: '8px' 
-                                                }} />
-                                                <div style={{ 
-                                                    width: '100%', 
-                                                    height: '8px', 
-                                                    backgroundColor: 'var(--bg-tertiary)', 
-                                                    borderRadius: '4px' 
-                                                }} />
-                                            </div>
-                                        ))}
+                                        <div style={{ 
+                                            width: '100%', 
+                                            height: '8px', 
+                                            backgroundColor: 'var(--bg-tertiary)', 
+                                            borderRadius: '4px' 
+                                        }} />
                                     </div>
-                                </div>
+                                ))}
+                            </div>
+                        </div>
 
-                                {/* PRAWA - koperty roczne skeleton */}
-                                <div>
-                                    <div style={{ 
-                                        width: '120px', 
-                                        height: '20px', 
-                                        backgroundColor: 'var(--bg-tertiary)', 
-                                        borderRadius: '4px', 
-                                        marginBottom: '12px' 
-                                    }} />
-                                    <div style={{ display: 'grid', gap: '10px' }}>
-                                        {[1, 2, 3].map(i => <EnvelopeCardSkeleton key={i} />)}
-                                    </div>
-                                </div>
+                        <div>
+                            <div style={{ 
+                                width: '120px', 
+                                height: '20px', 
+                                backgroundColor: 'var(--bg-tertiary)', 
+                                borderRadius: '4px', 
+                                marginBottom: '12px' 
+                            }} />
+                            <div style={{ display: 'grid', gap: '10px' }}>
+                                {[1, 2, 3].map(i => <EnvelopeCardSkeleton key={i} />)}
                             </div>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            </div>
+        )
+    }
 
     if (!data) {
         return <div>Błąd ładowania danych</div>
     }
 
-    // Przygotuj dane dla celów oszczędnościowych - WESELE + WAKACJE
     const weseLeEnvelope = data.yearlyEnvelopes?.find(e => e.name === 'Wesele')
     const wakacjeEnvelope = data.yearlyEnvelopes?.find(e => e.name === 'Wakacje')
 
@@ -262,114 +242,102 @@ export default function HomePage() {
         })
     }
 
-    // Koperty roczne BEZ Wesela i Wakacji
     const filteredYearlyEnvelopes = data.yearlyEnvelopes?.filter(e =>
         e.name !== 'Wesele' && e.name !== 'Wakacje'
     ) || []
 
-            return (
-                <div className="min-h-screen fade-in-up bg-theme-primary">
-                    <TopNavigation />
-                    <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+    return (
+        <div className="min-h-screen fade-in-up bg-theme-primary">
+            <TopNavigation />
+            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+                <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div className="smooth-all hover-lift">
+                        <MainBalance balance={data.balance || 0} />
+                    </div>
+                    <div className="smooth-all hover-lift">
+                        <MonthStatus
+                            totalIncome={data.totalIncome || 0}
+                            totalExpenses={data.totalExpenses || 0}
+                            daysLeft={calculateDaysLeft()}
+                            onCloseMonth={() => setShowCloseMonthModal(true)}
+                            previousMonthStatus={previousMonthStatus}
+                        />
+                    </div>
+                    <div className="smooth-all hover-lift">
+                        <QuickActions
+                            onAddIncome={() => setShowIncomeModal(true)}
+                            onAddExpense={() => setShowExpenseModal(true)}
+                        />
+                    </div>
+                </div>
 
-                        {/* GÓRNY RZĄD - saldo, status, akcje */}
-                        <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                            <div className="smooth-all hover-lift">
-                                <MainBalance balance={data.balance || 0} />
-                            </div>
-                            <div className="smooth-all hover-lift">
-                                <MonthStatus
-                                    totalIncome={data.totalIncome || 0}
-                                    totalExpenses={data.totalExpenses || 0}
-                                    daysLeft={calculateDaysLeft()}
-                                    onCloseMonth={() => setShowCloseMonthModal(true)}
-                                    previousMonthStatus={previousMonthStatus}
-                                />
-                            </div>
-                            <div className="smooth-all hover-lift">
-                                <QuickActions
-                                    onAddIncome={() => setShowIncomeModal(true)}
-                                    onAddExpense={() => setShowExpenseModal(true)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* GŁÓWNY LAYOUT - Responsywny */}
-                        <div className="grid-responsive" style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                            gap: '20px'
-                        }}>
-                            {/* LEWA - koperty miesięczne */}
-                            <div className="slide-in-left">
-                                <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
-                                    📅 Koperty miesięczne
-                                </h2>
-                                <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
-                                    {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
-                                        data.monthlyEnvelopes.map((envelope, index) => (
-                                            <div key={`${envelope.id}-${envelope.current}`} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                                                <EnvelopeCard {...envelope} type="monthly" />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <EmptyState
-                                            icon="📦"
-                                            title="Brak kopert miesięcznych"
-                                            description="Skontaktuj się z administratorem, aby skonfigurować koperty miesięczne."
-                                            variant="warning"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* ŚRODEK - cele oszczędnościowe + stałe przelewy */}
-                            <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                {savingsGoals.length > 0 && (
-                                    <div className="smooth-all hover-lift">
-                                        <SavingsGoals goals={savingsGoals} />
+                <div className="grid-responsive" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '20px'
+                }}>
+                    <div className="slide-in-left">
+                        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
+                            📅 Koperty miesięczne
+                        </h2>
+                        <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
+                            {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
+                                data.monthlyEnvelopes.map((envelope, index) => (
+                                    <div key={`${envelope.id}-${envelope.current}`} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                                        <EnvelopeCard {...envelope} type="monthly" />
                                     </div>
-                                )}
-                                <div className="smooth-all hover-lift">
-                                    <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
-                                </div>
-                            </div>
+                                ))
+                            ) : (
+                                <EmptyState
+                                    icon="📦"
+                                    title="Brak kopert miesięcznych"
+                                    description="Skontaktuj się z administratorem, aby skonfigurować koperty miesięczne."
+                                    variant="warning"
+                                />
+                            )}
+                        </div>
+                    </div>
 
-                            {/* PRAWA - koperty roczne (bez Wesela i Wakacji) */}
-                            <div className="slide-in-right">
-                                <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
-                                    📆 Koperty roczne
-                                </h2>
-                                <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
-                                    {filteredYearlyEnvelopes && filteredYearlyEnvelopes.length > 0 ? (
-                                        filteredYearlyEnvelopes.map((envelope, index) => (
-                                            <div key={envelope.id} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                                                <EnvelopeCard {...envelope} type="yearly" />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <EmptyState
-                                            icon="📆"
-                                            title="Brak kopert rocznych"
-                                            description="Skontaktuj się z administratorem, aby skonfigurować koperty roczne."
-                                            variant="warning"
-                                        />
-                                    )}
-                                </div>
+                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {savingsGoals.length > 0 && (
+                            <div className="smooth-all hover-lift">
+                                <SavingsGoals goals={savingsGoals} />
                             </div>
+                        )}
+                        <div className="smooth-all hover-lift">
+                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
+                        </div>
+                    </div>
+
+                    <div className="slide-in-right">
+                        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
+                            📆 Koperty roczne
+                        </h2>
+                        <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
+                            {filteredYearlyEnvelopes && filteredYearlyEnvelopes.length > 0 ? (
+                                filteredYearlyEnvelopes.map((envelope, index) => (
+                                    <div key={envelope.id} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                                        <EnvelopeCard {...envelope} type="yearly" />
+                                    </div>
+                                ))
+                            ) : (
+                                <EmptyState
+                                    icon="📆"
+                                    title="Brak kopert rocznych"
+                                    description="Skontaktuj się z administratorem, aby skonfigurować koperty roczne."
+                                    variant="warning"
+                                />
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* MODAŁY */}
             {showIncomeModal && (
                 <IncomeModal
                     onClose={() => setShowIncomeModal(false)}
                     onSave={handleIncomeSave}
-                    onSwitchToBonus={() => { setShowIncomeModal(false); setShowBonusModal(true) }}
                 />
-            )}
-            {showBonusModal && (
-                <BonusModal onClose={() => setShowBonusModal(false)} onSave={handleBonusSave} />
             )}
             {showExpenseModal && (
                 <ExpenseModal
@@ -404,11 +372,10 @@ export default function HomePage() {
                 />
             )}
 
-            {/* Floating Action Button */}
             <FloatingActionButton
                 onAddIncome={() => setShowIncomeModal(true)}
                 onAddExpense={() => setShowExpenseModal(true)}
-                onAddBonus={() => setShowBonusModal(true)}
+                onAddBonus={() => setShowIncomeModal(true)}
             />
         </div>
     )

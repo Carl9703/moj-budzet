@@ -1,8 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { initializeUserData } from '@/lib/db/seed'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 interface Transaction {
     id: string
@@ -14,24 +12,26 @@ interface Transaction {
     envelopeId: string | null
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        // Sprawdź czy użytkownik istnieje, jeśli nie - utwórz
-        let user = await prisma.user.findUnique({
-            where: { id: USER_ID }
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
+
+        // Sprawdź czy użytkownik istnieje
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
         })
 
         if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    id: USER_ID,
-                    email: 'user@example.com',
-                    name: 'Użytkownik'
-                }
-            })
-
-            // Zainicjalizuj dane
-            await initializeUserData(USER_ID)
+            return NextResponse.json(
+                { error: 'Użytkownik nie znaleziony' },
+                { status: 404 }
+            )
         }
 
         const userId = USER_ID
@@ -73,12 +73,10 @@ export async function GET() {
 
         const balance = Math.round((totalAllIncome - totalAllExpenses) * 100) / 100
 
-        // ✅ SPRAWDŹ CZY MIESIĄC ZOSTAŁ ZAMKNIĘTY
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-        // Sprawdź czy istnieje transakcja zamknięcia miesiąca
         const monthCloseTransaction = await prisma.transaction.findFirst({
             where: {
                 userId,
@@ -92,16 +90,14 @@ export async function GET() {
             }
         })
 
-        // ✅ POPRAWKA: Pobierz transakcje z bieżącego miesiąca
         let monthTransactions: Transaction[] = []
 
         if (monthCloseTransaction) {
-            // Jeśli miesiąc był zamknięty, pokaż tylko transakcje AFTER zamknięcia
             monthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: userId,
+                    userId,
                     date: {
-                        gt: monthCloseTransaction.date, // Po dacie zamknięcia (większe niż)
+                        gt: monthCloseTransaction.date,
                         lte: endOfMonth
                     },
                     type: { in: ['income', 'expense'] },
@@ -113,10 +109,9 @@ export async function GET() {
                 }
             })
         } else {
-            // Jeśli miesiąc NIE był zamknięty, pokaż wszystkie transakcje
             monthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: userId,
+                    userId,
                     date: {
                         gte: startOfMonth,
                         lte: endOfMonth
@@ -131,8 +126,6 @@ export async function GET() {
             })
         }
 
-        // Oblicz statystyki miesięczne
-        // Oblicz statystyki miesięczne - TYLKO transakcje ze statystykami
         const totalIncome = Math.round(monthTransactions
             .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
@@ -141,17 +134,8 @@ export async function GET() {
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        // ✅ DEBUG - sprawdź co się dzieje
-        console.log('=== DASHBOARD DEBUG ===')
-        console.log('Month close transaction:', monthCloseTransaction ? 'EXISTS' : 'NONE')
-        console.log('Month transactions count:', monthTransactions.length)
-        console.log('Total income:', totalIncome)
-        console.log('Total expenses:', totalExpenses)
-        console.log('========================')
-
         const isMonthClosed = !!monthCloseTransaction
 
-        // POLICZ AKTYWNOŚĆ KOPERT - ile transakcji miała każda koperta w tym miesiącu
         const envelopeActivity: { [key: string]: number } = {}
 
         monthTransactions
@@ -164,7 +148,6 @@ export async function GET() {
         const monthlyEnvelopes = envelopes
             .filter(e => e.type === 'monthly')
             .map(e => {
-                // Oblicz rzeczywiste wydatki z transakcji dla tej koperty w tym miesiącu
                 const envelopeTransactions = monthTransactions.filter(t => 
                     t.type === 'expense' && t.envelopeId === e.id
                 )
@@ -206,11 +189,10 @@ export async function GET() {
             monthlyEnvelopes,
             yearlyEnvelopes,
             transactions: monthTransactions.slice(0, 10),
-            isMonthClosed // ✅ DODANA INFORMACJA O STANIE MIESIĄCA
+            isMonthClosed
         })
 
     } catch (error) {
-        console.error('Dashboard API error:', error)
         return NextResponse.json(
             { error: 'Błąd pobierania danych' },
             { status: 500 }

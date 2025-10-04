@@ -2,8 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
-
-const USER_ID = 'default-user'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 
 interface TransactionData {
@@ -44,12 +43,18 @@ interface MonthData {
 
 export async function GET(request: NextRequest) {
     try {
-        const userId = USER_ID
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
 
         // Pobierz wszystkie transakcje WŁĄCZAJĄC POLE includeInStats
         const allTransactions = await prisma.transaction.findMany({
             where: {
-                userId: userId,
+                userId,
                 type: { in: ['income', 'expense'] }
             },
             include: {
@@ -60,7 +65,7 @@ export async function GET(request: NextRequest) {
 
         // Pobierz wszystkie koperty
         const allEnvelopes = await prisma.envelope.findMany({
-            where: { userId: userId }
+            where: { userId }
         })
 
         // Grupuj transakcje po miesiącach
