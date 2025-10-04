@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         const validation = createTransactionSchema.safeParse(body)
         if (!validation.success) {
             return NextResponse.json(
-                { error: 'Nieprawidłowe dane', details: validation.error.errors },
+                { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
         }
