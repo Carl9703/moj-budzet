@@ -63,6 +63,7 @@ model User {
   envelopes       Envelope[]
   transactions    Transaction[]
   userConfig      UserConfig?
+  userCategories  UserCategory[]
   
   // Nowe pola bezpieczeństwa
   isActive        Boolean   @default(true)
@@ -82,6 +83,7 @@ model Envelope {
   
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  userCategories UserCategory[]
 
   @@index([userId, type])
 }
@@ -108,17 +110,62 @@ model Transaction {
   @@index([envelopeId])
 }
 
-// Konfiguracja użytkownika dla wypłaty i stałych transferów (tylko dla pensji)
+// Konfiguracja użytkownika - rozbudowana
 model UserConfig {
   id                 String   @id @default(cuid())
   userId             String   @unique
+  
+  // Podstawowe dane finansowe
   defaultSalary      Float    @default(0)
+  salaryComment      String?  // Opcjonalny komentarz do wypłaty
+  
+  // Stałe przelewy (max 4)
+  transfer1Name      String?
+  transfer1Amount    Float    @default(0)
+  transfer1Icon      String?
+  transfer1Active    Boolean  @default(false)
+  
+  transfer2Name      String?
+  transfer2Amount    Float    @default(0)
+  transfer2Icon      String?
+  transfer2Active    Boolean  @default(false)
+  
+  transfer3Name      String?
+  transfer3Amount    Float    @default(0)
+  transfer3Icon      String?
+  transfer3Active    Boolean  @default(false)
+  
+  transfer4Name      String?
+  transfer4Amount    Float    @default(0)
+  transfer4Icon      String?
+  transfer4Active    Boolean  @default(false)
+  
+  // Legacy fields (dla kompatybilności)
   defaultToJoint     Float    @default(0)
   defaultToSavings   Float    @default(0)
   defaultToVacation  Float    @default(0)
   defaultToInvestment Float   @default(0)
+  
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Własne kategorie wydatków użytkownika
+model UserCategory {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  icon          String
+  envelopeId    String?  // Domyślna koperta
+  type          String   // 'monthly' lub 'yearly'
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  envelope Envelope? @relation(fields: [envelopeId], references: [id])
+  
+  @@index([userId, type])
 }
