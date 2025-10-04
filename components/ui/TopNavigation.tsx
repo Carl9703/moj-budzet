@@ -172,10 +172,10 @@ export function TopNavigation() {
                         </span>
                     </button>
 
-                    {/* Logout Button */}
+                    {/* Logout Button - tylko na PC */}
                     <button
                         onClick={handleLogout}
-                        className="nav-button smooth-all"
+                        className="nav-button smooth-all hidden-mobile"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -209,7 +209,7 @@ export function TopNavigation() {
                         title="Wyloguj się"
                     >
                         <span style={{ fontSize: '16px' }}>🚪</span>
-                        <span className="hidden-mobile">Wyloguj</span>
+                        <span>Wyloguj</span>
                     </button>
                 </nav>
             </div>
@@ -268,6 +268,43 @@ export function TopNavigation() {
                                 <span>{item.label}</span>
                             </button>
                         ))}
+                        
+                        {/* Wyloguj w menu mobile */}
+                        <button
+                            onClick={() => {
+                                handleLogout()
+                                setIsMobileMenuOpen(false)
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px 16px',
+                                backgroundColor: '#fee',
+                                border: '1px solid #fcc',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#c33',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                textAlign: 'left',
+                                marginTop: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#dc3545'
+                                e.currentTarget.style.borderColor = '#dc3545'
+                                e.currentTarget.style.color = '#ffffff'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#fee'
+                                e.currentTarget.style.borderColor = '#fcc'
+                                e.currentTarget.style.color = '#c33'
+                            }}
+                        >
+                            <span style={{ fontSize: '18px' }}>🚪</span>
+                            <span>Wyloguj</span>
+                        </button>
                     </div>
                 </div>
             )}
