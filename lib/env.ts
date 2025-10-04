@@ -1,14 +1,10 @@
 import { z } from 'zod'
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().optional(),
-  DATABASE_URL_MAIN: z.string().optional(),
+  DATABASE_URL_DEV: z.string().min(1, 'DATABASE_URL_DEV is required for dev branch'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-}).refine(
-  (data) => data.DATABASE_URL || data.DATABASE_URL_MAIN,
-  { message: 'Either DATABASE_URL or DATABASE_URL_MAIN must be provided' }
-)
+})
 
 function validateEnv() {
   try {
