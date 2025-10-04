@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
 
 export function TopNavigation() {
     const router = useRouter()
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     const handleLogout = () => {
         // Usuń token i dane użytkownika
@@ -12,6 +14,11 @@ export function TopNavigation() {
         localStorage.removeItem('user')
         // Przekieruj do strony logowania
         router.push('/auth/signin')
+    }
+
+    const handleNavClick = (path: string) => {
+        router.push(path)
+        setIsMobileMenuOpen(false)
     }
 
     const navItems = [
@@ -83,7 +90,7 @@ export function TopNavigation() {
                     flexWrap: 'wrap'
                 }}>
                     {/* Nawigacja - ukryj na małych ekranach */}
-                    <div style={{
+                    <div className="hidden-mobile" style={{
                         display: 'flex',
                         gap: '8px',
                         alignItems: 'center'
@@ -130,6 +137,41 @@ export function TopNavigation() {
                         ))}
                     </div>
 
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="mobile-only"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '40px',
+                            height: '40px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            border: '2px solid var(--border-primary)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                            e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.borderColor = 'var(--border-primary)'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>
+                            {isMobileMenuOpen ? '✕' : '☰'}
+                        </span>
+                    </button>
+
                     {/* Logout Button */}
                     <button
                         onClick={handleLogout}
@@ -171,6 +213,64 @@ export function TopNavigation() {
                     </button>
                 </nav>
             </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border-primary)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    boxShadow: 'var(--shadow-lg)',
+                    zIndex: 1000,
+                    padding: '8px'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                    }}>
+                        {navItems.map((item) => (
+                            <button
+                                key={item.path}
+                                onClick={() => handleNavClick(item.path)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '12px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--border-primary)',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                }}
+                            >
+                                <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
