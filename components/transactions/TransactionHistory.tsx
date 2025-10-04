@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authorizedFetch } from '@/lib/utils/api'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface Transaction {
@@ -65,9 +66,8 @@ export function TransactionHistory({ transactions }: Props) {
             const newAmount = parseFloat(editAmount)
             if (newAmount >= 0 && newAmount !== currentAmount) {
                 try {
-                    const response = await fetch(`/api/transactions/${transactionId}`, {
+                    const response = await authorizedFetch(`/api/transactions/${transactionId}`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             amount: newAmount,
                             reason: newAmount < currentAmount ? 'Zwrot częściowy' : 'Korekta'
@@ -94,7 +94,7 @@ export function TransactionHistory({ transactions }: Props) {
     const handleDelete = async (transactionId: string) => {
         if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
             try {
-                const response = await fetch(`/api/transactions/${transactionId}`, {
+                const response = await authorizedFetch(`/api/transactions/${transactionId}`, {
                     method: 'DELETE'
                 })
 
