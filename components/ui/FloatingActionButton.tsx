@@ -7,9 +7,12 @@ interface Props {
     onAddExpense: () => void
     onAddBonus?: () => void
     onAnalytics?: () => void
+    onHistory?: () => void
+    onArchive?: () => void
+    onConfig?: () => void
 }
 
-export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, onAnalytics }: Props) {
+export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, onAnalytics, onHistory, onArchive, onConfig }: Props) {
     const [isOpen, setIsOpen] = useState(false)
 
     return (

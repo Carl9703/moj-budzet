@@ -380,6 +380,9 @@ export default function HomePage() {
                 onAddExpense={() => setShowExpenseModal(true)}
                 onAddBonus={() => setShowIncomeModal(true)}
                 onAnalytics={() => router.push('/analytics')}
+                onHistory={() => router.push('/history')}
+                onArchive={() => router.push('/archive')}
+                onConfig={() => router.push('/config')}
             />
         </div>
     )
