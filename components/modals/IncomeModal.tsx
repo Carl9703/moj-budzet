@@ -179,7 +179,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
     return (
         <Modal title="💰 DODAJ PRZYCHÓD" onClose={onClose}>
             <div style={{ 
-                maxHeight: '80vh',
+                maxHeight: '85vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>

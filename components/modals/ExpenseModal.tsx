@@ -83,8 +83,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
             <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '12px',
-                maxHeight: '75vh',
+                gap: '8px',
+                maxHeight: '85vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
@@ -136,10 +136,10 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
                 {/* KATEGORIE */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
                         Wybierz kategorię
                         {!showAllCategories && (
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
                                 (najpopularniejsze)
                             </span>
                         )}
@@ -148,7 +148,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     {/* Kategorie miesięczne */}
                     {monthlyCategories.length > 0 && (
                         <>
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
                                 📅 Miesięczne
                             </div>
                             <div style={{
@@ -186,7 +186,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     {/* Kategorie roczne */}
                     {yearlyCategories.length > 0 && (
                         <>
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
                                 📆 Roczne
                             </div>
                             <div style={{
@@ -226,13 +226,13 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             onClick={() => setShowAllCategories(true)}
                             style={{
                                 width: '100%',
-                                padding: '8px',
+                                padding: '6px',
                                 border: '1px dashed var(--border-secondary)',
-                                borderRadius: '8px',
+                                borderRadius: '6px',
                                 backgroundColor: 'transparent',
                                 color: 'var(--text-secondary)',
                                 cursor: 'pointer',
-                                fontSize: '13px'
+                                fontSize: '12px'
                             }}
                         >
                             Pokaż wszystkie kategorie →
