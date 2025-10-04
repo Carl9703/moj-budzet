@@ -32,9 +32,9 @@ export function TopNavigation() {
             transition: 'all 0.3s ease'
         }}>
             <div style={{
-                maxWidth: '1200px',
+                maxWidth: '1400px',
                 margin: '0 auto',
-                padding: '0 20px',
+                padding: '0 24px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
@@ -82,7 +82,7 @@ export function TopNavigation() {
                         display: 'flex',
                         gap: '8px',
                         alignItems: 'center'
-                    }} className="hidden-mobile">
+                    }}>
                         {navItems.map((item) => (
                             <button
                                 key={item.path}

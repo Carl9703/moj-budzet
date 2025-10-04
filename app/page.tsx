@@ -379,6 +379,7 @@ export default function HomePage() {
                 onAddIncome={() => setShowIncomeModal(true)}
                 onAddExpense={() => setShowExpenseModal(true)}
                 onAddBonus={() => setShowIncomeModal(true)}
+                onAnalytics={() => router.push('/analytics')}
             />
         </div>
     )

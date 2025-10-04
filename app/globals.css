@@ -335,6 +335,10 @@ body {
     display: none !important;
   }
   
+  .mobile-only {
+    display: flex !important;
+  }
+  
   .container-wide {
     padding: 8px !important;
   }
@@ -347,6 +351,12 @@ body {
   .grid-responsive {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
   }
 }
 

@@ -6,9 +6,10 @@ interface Props {
     onAddIncome: () => void
     onAddExpense: () => void
     onAddBonus?: () => void
+    onAnalytics?: () => void
 }
 
-export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus }: Props) {
+export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, onAnalytics }: Props) {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
@@ -105,6 +106,7 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus }: 
                                 onAddBonus()
                                 setIsOpen(false)
                             }}
+                            className="hidden-mobile"
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
