@@ -1,26 +1,22 @@
-// app/api/auth/signup/route.ts - Prosty endpoint rejestracji
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import bcrypt from 'bcryptjs'
+import { signupSchema } from '@/lib/validations/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json()
+    const body = await req.json()
 
-    // Podstawowa walidacja
-    if (!email || !password || !name) {
+    // Walidacja z Zod
+    const validation = signupSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Wszystkie pola są wymagane' },
+        { error: validation.error.errors[0].message },
         { status: 400 }
       )
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Hasło musi mieć co najmniej 6 znaków' },
-        { status: 400 }
-      )
-    }
+    const { email, password, name } = validation.data
 
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await prisma.user.findUnique({
@@ -74,7 +70,6 @@ export async function POST(req: NextRequest) {
     )
 
   } catch (error) {
-    console.error('Registration error:', error)
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas tworzenia konta' },
       { status: 500 }

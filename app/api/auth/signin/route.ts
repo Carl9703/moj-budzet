@@ -1,65 +1,51 @@
-// app/api/auth/signin/route.ts - Prosty endpoint logowania
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { env } from '@/lib/env'
+import { signinSchema } from '@/lib/validations/auth'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-change-in-production'
+const JWT_SECRET = env.JWT_SECRET
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('🔐 Signin API called')
-    const { email, password } = await req.json()
-    console.log('📧 Email:', email)
+    const body = await req.json()
 
-    // Podstawowa walidacja
-    if (!email || !password) {
-      console.log('❌ Missing email or password')
+    // Walidacja z Zod (pomiń dla demo user)
+    const validation = signinSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Email i hasło są wymagane' },
+        { error: validation.error.errors[0].message },
         { status: 400 }
       )
     }
 
+    const { email, password } = validation.data
+
     // Demo użytkownik
     if (email === 'demo@example.com' && password === 'demo123') {
-      console.log('🚀 Demo user login attempt')
-      console.log('🔗 DATABASE_URL exists:', !!process.env.DATABASE_URL)
-      console.log('🔗 DATABASE_URL_DEV exists:', !!process.env.DATABASE_URL_DEV)
-      
       let user = await prisma.user.findUnique({
         where: { email: 'demo@example.com' }
       })
 
       if (!user) {
-        console.log('👤 Creating demo user')
-        // Stwórz demo użytkownika
         user = await prisma.user.create({
           data: {
             email: 'demo@example.com',
             name: 'Demo User',
           }
         })
-        console.log('✅ Demo user created:', user.id)
 
-        // Stwórz podstawowe koperty dla demo użytkownika
-        console.log('📦 Creating envelopes')
         await createDefaultEnvelopes(user.id)
-        console.log('⚙️ Creating config')
         await createDemoConfig(user.id)
-        console.log('✅ Demo setup complete')
-      } else {
-        console.log('👤 Demo user found:', user.id)
       }
 
-      console.log('🔑 Creating JWT token')
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         JWT_SECRET,
         { expiresIn: '7d' }
       )
 
-      console.log('✅ Demo login successful')
       return NextResponse.json({
         token,
         user: {
@@ -109,10 +95,8 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Login error:', error)
-    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas logowania: ' + (error instanceof Error ? error.message : 'Unknown error') },
+      { error: 'Wystąpił błąd podczas logowania' },
       { status: 500 }
     )
   }

@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ config, monthlyEnvelopes })
     } catch (error) {
-        console.error('Config GET error:', error)
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }
@@ -100,7 +99,6 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({ success: true, config: updated })
     } catch (error) {
-        console.error('Config PUT error:', error)
         return NextResponse.json({ error: 'Błąd zapisu konfiguracji' }, { status: 500 })
     }
 }

@@ -192,7 +192,6 @@ export async function GET(request: NextRequest) {
         })
 
     } catch (error) {
-        console.error('Dashboard API error:', error)
         return NextResponse.json(
             { error: 'Błąd pobierania danych' },
             { status: 500 }

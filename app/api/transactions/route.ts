@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { createTransactionSchema } from '@/lib/validations/transaction'
+import { z } from 'zod'
 
 export async function GET(request: NextRequest) {
     try {
@@ -56,7 +58,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(formatted)
 
     } catch (error) {
-        console.error('Transactions API error:', error)
         return NextResponse.json(
             { error: 'Błąd pobierania transakcji' },
             { status: 500 }
@@ -74,20 +75,21 @@ export async function POST(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        const data = await request.json()
+        const body = await request.json()
 
-        // Użyj daty z frontendu lub aktualnej z prawidłową godziną
-        const transactionDate = data.date ? new Date(data.date) : new Date()
-
-        // Jeśli data przyszła bez godziny, ustaw aktualną godzinę
-        if (data.date && !data.date.includes('T')) {
-            const now = new Date()
-            transactionDate.setHours(now.getHours())
-            transactionDate.setMinutes(now.getMinutes())
-            transactionDate.setSeconds(now.getSeconds())
+        // Walidacja danych wejściowych
+        const validation = createTransactionSchema.safeParse(body)
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: 'Nieprawidłowe dane', details: validation.error.errors },
+                { status: 400 }
+            )
         }
 
-        // Utwórz transakcję
+        const data = validation.data
+
+        const transactionDate = data.date ? new Date(data.date) : new Date()
+
         const transaction = await prisma.transaction.create({
             data: {
                 userId,
@@ -137,7 +139,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(transaction)
 
     } catch (error) {
-        console.error('Transaction API error:', error)
         return NextResponse.json(
             { error: 'Błąd zapisywania transakcji' },
             { status: 500 }

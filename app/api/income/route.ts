@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { incomeSchema } from '@/lib/validations/transaction'
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,144 +13,159 @@ export async function POST(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        const data = await request.json()
+        const body = await request.json()
+
+        // Walidacja danych wejściowych
+        const validation = incomeSchema.safeParse(body)
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: 'Nieprawidłowe dane', details: validation.error.errors },
+                { status: 400 }
+            )
+        }
+
+        const data = validation.data
 
         if (data.type === 'salary') {
-            // Zapisz wypłatę - DODAJ includeInStats
-            await prisma.transaction.create({
-                data: {
-                    userId: userId,
-                    type: 'income',
-                    amount: data.amount,
-                    description: data.description || 'Wypłata miesięczna',
-                    date: data.date ? new Date(data.date) : new Date(),
-                    includeInStats: true  // DODANE - wypłata zawsze w statystykach
-                }
-            })
-
-            // Transfer do Wesela
-            if (data.toSavings > 0) {
-                const weseLeEnvelope = await prisma.envelope.findFirst({
-                    where: {
+            // Użyj database transaction dla atomowości
+            await prisma.$transaction(async (tx) => {
+                // Zapisz wypłatę
+                await tx.transaction.create({
+                    data: {
                         userId: userId,
-                        name: 'Wesele',
-                        type: 'yearly'
+                        type: 'income',
+                        amount: data.amount,
+                        description: data.description || 'Wypłata miesięczna',
+                        date: data.date ? new Date(data.date) : new Date(),
+                        includeInStats: true
                     }
                 })
 
-                if (weseLeEnvelope) {
-                    await prisma.envelope.update({
-                        where: { id: weseLeEnvelope.id },
-                        data: {
-                            currentAmount: weseLeEnvelope.currentAmount + data.toSavings
+                // Transfer do Wesela
+                if (data.toSavings && data.toSavings > 0) {
+                    const weseLeEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Wesele',
+                            type: 'yearly'
                         }
                     })
 
-                    await prisma.transaction.create({
+                    if (weseLeEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: weseLeEnvelope.id },
+                            data: {
+                                currentAmount: weseLeEnvelope.currentAmount + data.toSavings
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toSavings,
+                                description: 'Transfer: Wesele',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: weseLeEnvelope.id,
+                                includeInStats: true
+                            }
+                        })
+                    }
+                }
+
+                // Transfer do Wakacji
+                if (data.toVacation && data.toVacation > 0) {
+                    const vacationEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Wakacje',
+                            type: 'yearly'
+                        }
+                    })
+
+                    if (vacationEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: vacationEnvelope.id },
+                            data: {
+                                currentAmount: vacationEnvelope.currentAmount + data.toVacation
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toVacation,
+                                description: 'Transfer: Wakacje',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: vacationEnvelope.id,
+                                includeInStats: true
+                            }
+                        })
+                    }
+                }
+
+                // Konto wspólne
+                if (data.toJoint && data.toJoint > 0) {
+                    await tx.transaction.create({
                         data: {
                             userId: userId,
                             type: 'expense',
-                            amount: data.toSavings,
-                            description: 'Transfer: Wesele',
+                            amount: data.toJoint,
+                            description: 'Transfer: Konto wspólne',
                             date: data.date ? new Date(data.date) : new Date(),
-                            envelopeId: weseLeEnvelope.id,
-                            includeInStats: true  // DODANE
+                            includeInStats: true
                         }
                     })
                 }
-            }
 
-            // Transfer do Wakacji
-            if (data.toVacation > 0) {
-                const vacationEnvelope = await prisma.envelope.findFirst({
-                    where: {
-                        userId: userId,
-                        name: 'Wakacje',
-                        type: 'yearly'
-                    }
-                })
-
-                if (vacationEnvelope) {
-                    await prisma.envelope.update({
-                        where: { id: vacationEnvelope.id },
-                        data: {
-                            currentAmount: vacationEnvelope.currentAmount + data.toVacation
-                        }
-                    })
-
-                    await prisma.transaction.create({
+                // Inwestycje
+                if (data.toInvestment && data.toInvestment > 0) {
+                    await tx.transaction.create({
                         data: {
                             userId: userId,
                             type: 'expense',
-                            amount: data.toVacation,
-                            description: 'Transfer: Wakacje',
+                            amount: data.toInvestment,
+                            description: 'Transfer: Inwestycje',
                             date: data.date ? new Date(data.date) : new Date(),
-                            envelopeId: vacationEnvelope.id,
-                            includeInStats: true  // DODANE
+                            includeInStats: true
                         }
                     })
                 }
-            }
 
-            // Konto wspólne i Inwestycje
-            if (data.toJoint > 0) {
-                await prisma.transaction.create({
-                    data: {
+                // Alokacja do kopert miesięcznych
+                const monthlyEnvelopes = await tx.envelope.findMany({
+                    where: {
                         userId: userId,
-                        type: 'expense',
-                        amount: data.toJoint,
-                        description: 'Transfer: Konto wspólne',
-                        date: data.date ? new Date(data.date) : new Date(),
-                        includeInStats: true  // DODANE
-                    }
+                        type: 'monthly'
+                    },
+                    orderBy: { name: 'asc' }
                 })
-            }
 
-            if (data.toInvestment > 0) {
-                await prisma.transaction.create({
-                    data: {
-                        userId: userId,
-                        type: 'expense',
-                        amount: data.toInvestment,
-                        description: 'Transfer: Inwestycje',
-                        date: data.date ? new Date(data.date) : new Date(),
-                        includeInStats: true  // DODANE
+                const allocations: { [key: string]: number } = {
+                    'Jedzenie': 500,
+                    'Transport': 300,
+                    'Telekom/Subskrypcje': 100,
+                    'Higiena/Zdrowie': 100,
+                    'Rozrywka': 100,
+                    'Ubrania': 150,
+                    'Dom': 110,
+                    'Nieprzewidziane': 150
+                }
+
+                for (const envelope of monthlyEnvelopes) {
+                    const allocationAmount = allocations[envelope.name] || 0
+
+                    if (allocationAmount > 0) {
+                        await tx.envelope.update({
+                            where: { id: envelope.id },
+                            data: {
+                                currentAmount: allocationAmount
+                            }
+                        })
                     }
-                })
-            }
-
-            // Reszta kodu bez zmian...
-            const monthlyEnvelopes = await prisma.envelope.findMany({
-                where: {
-                    userId: userId,
-                    type: 'monthly'
-                },
-                orderBy: { name: 'asc' }
+                }
             })
-
-            const allocations: { [key: string]: number } = {
-                'Jedzenie': 500,
-                'Transport': 300,
-                'Telekom/Subskrypcje': 100,
-                'Higiena/Zdrowie': 100,
-                'Rozrywka': 100,
-                'Ubrania': 150,
-                'Dom': 110,
-                'Nieprzewidziane': 150
-            }
-
-            for (const envelope of monthlyEnvelopes) {
-                const allocationAmount = allocations[envelope.name] || 0
-
-                if (allocationAmount > 0) {
-                    await prisma.envelope.update({
-                        where: { id: envelope.id },
-                        data: {
-                            currentAmount: allocationAmount
-                        }
-                    })
-                }
-            }
 
             return NextResponse.json({
                 success: true,
@@ -230,12 +246,8 @@ export async function POST(request: NextRequest) {
         )
 
     } catch (error) {
-        console.error('Income API error details:', error)
         return NextResponse.json(
-            {
-                error: 'Błąd zapisywania przychodu',
-                details: error instanceof Error ? error.message : 'Nieznany błąd'
-            },
+            { error: 'Błąd zapisywania przychodu' },
             { status: 500 }
         )
     }
