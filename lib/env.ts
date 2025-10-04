@@ -12,7 +12,7 @@ function validateEnv() {
     return envSchema.parse(process.env)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map(e => `  ❌ ${e.path.join('.')}: ${e.message}`).join('\n')
+      const missingVars = error.issues.map(e => `  ❌ ${e.path.join('.')}: ${e.message}`).join('\n')
       throw new Error(
         `\n🔴 Invalid environment variables:\n${missingVars}\n\n` +
         `💡 Create .env.local file with:\n` +
