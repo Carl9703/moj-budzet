@@ -34,9 +34,6 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const userId = USER_ID
-
-        // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({
             where: { userId },
             orderBy: { name: 'asc' }

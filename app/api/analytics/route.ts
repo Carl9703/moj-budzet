@@ -67,9 +67,7 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
-        const userId = USER_ID
 
-        // Określ zakres dat na podstawie okresu
         const now = new Date()
         let startDate: Date
 
