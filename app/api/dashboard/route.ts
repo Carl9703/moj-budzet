@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { initializeUserData } from '@/lib/db/seed'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 interface Transaction {
