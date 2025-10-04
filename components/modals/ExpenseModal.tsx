@@ -153,9 +153,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             </div>
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                gap: '8px',
-                                marginBottom: '12px'
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '6px',
+                                marginBottom: '8px'
                             }}>
                                 {monthlyCategories.map((cat) => (
                                     <button
@@ -191,9 +191,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             </div>
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                gap: '8px',
-                                marginBottom: '12px'
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '6px',
+                                marginBottom: '8px'
                             }}>
                                 {yearlyCategories.map((cat) => (
                                     <button
