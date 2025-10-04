@@ -38,16 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     padding: '24px',
                     textAlign: 'center'
                 }}>
-<<<<<<< HEAD
-                    <div style={{
-                        fontSize: '64px',
-                        marginBottom: '24px'
-                    }}>
-                        😵
-                    </div>
-=======
                     <div style={{ fontSize: '64px', marginBottom: '24px' }}>😵</div>
->>>>>>> dev
                     <h1 style={{
                         fontSize: '24px',
                         fontWeight: 'bold',
@@ -64,36 +55,6 @@ export class ErrorBoundary extends Component<Props, State> {
                     }}>
                         Aplikacja napotkała nieoczekiwany błąd. Spróbuj odświeżyć stronę.
                     </p>
-<<<<<<< HEAD
-                    {this.state.error && (
-                        <details style={{
-                            marginBottom: '24px',
-                            padding: '16px',
-                            backgroundColor: 'var(--bg-error)',
-                            borderRadius: '8px',
-                            border: '1px solid var(--error-border)',
-                            maxWidth: '600px',
-                            textAlign: 'left'
-                        }}>
-                            <summary style={{
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                color: 'var(--error-primary)',
-                                marginBottom: '8px'
-                            }}>
-                                Szczegóły błędu (dla dewelopera)
-                            </summary>
-                            <pre style={{
-                                fontSize: '12px',
-                                overflow: 'auto',
-                                color: 'var(--text-secondary)'
-                            }}>
-                                {this.state.error.message}
-                            </pre>
-                        </details>
-                    )}
-=======
->>>>>>> dev
                     <button
                         onClick={() => window.location.reload()}
                         style={{

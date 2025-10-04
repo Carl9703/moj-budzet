@@ -4,11 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-<<<<<<< HEAD
   url      = env("DATABASE_URL_MAIN")
-=======
-  url      = env("DATABASE_URL_DEV")
->>>>>>> dev
 }
 
 // NextAuth.js wymagane modele
