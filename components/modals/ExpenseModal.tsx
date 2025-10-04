@@ -111,6 +111,27 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             color: 'var(--text-primary)'
                         }}
                     />
+                    
+                    {/* DATA - pod kwotą */}
+                    <div style={{ marginTop: '8px' }}>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            Data wydatku
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                border: '1px solid var(--border-primary)',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)'
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* KATEGORIE */}
@@ -289,26 +310,6 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     />
                 </div>
 
-                {/* DATA */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Data
-                    </label>
-                    <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: '1px solid var(--border-primary)',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
-                        }}
-                    />
-                </div>
             </div>
 
             {/* PRZYCISKI - sticky na dole */}
