@@ -1,11 +1,8 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
-import { IncomeModal } from '../components/modals/IncomeModal'
-import { ExpenseModal } from '../components/modals/ExpenseModal'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
-import { CloseMonthModal } from '../components/modals/CloseMonthModal'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { QuickActions } from '../components/dashboard/QuickActions'
@@ -23,6 +20,10 @@ import { useConfig } from '../lib/hooks/useConfig'
 import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
 import { useAuth } from '../lib/hooks/useAuth'
 import { createIncomeHandler, createExpenseHandler } from '../lib/handlers/modalHandlers'
+
+const IncomeModal = lazy(() => import('../components/modals/IncomeModal').then(m => ({ default: m.IncomeModal })))
+const ExpenseModal = lazy(() => import('../components/modals/ExpenseModal').then(m => ({ default: m.ExpenseModal })))
+const CloseMonthModal = lazy(() => import('../components/modals/CloseMonthModal').then(m => ({ default: m.CloseMonthModal })))
 
 interface SavingsGoal {
     id: string
@@ -333,44 +334,46 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {showIncomeModal && (
-                <IncomeModal
-                    onClose={() => setShowIncomeModal(false)}
-                    onSave={handleIncomeSave}
-                />
-            )}
-            {showExpenseModal && (
-                <ExpenseModal
-                    onClose={() => setShowExpenseModal(false)}
-                    onSave={handleExpenseSave}
-                    envelopes={[
-                        ...(data.monthlyEnvelopes?.map(e => ({
-                            id: e.id,
-                            name: e.name,
-                            icon: e.icon,
-                            type: 'monthly'
-                        })) || []),
-                        ...(data.yearlyEnvelopes?.map(e => ({
-                            id: e.id,
-                            name: e.name,
-                            icon: e.icon,
-                            type: 'yearly'
-                        })) || [])
-                    ]}
-                />
-            )}
-            {showCloseMonthModal && (
-                <CloseMonthModal
-                    onClose={() => setShowCloseMonthModal(false)}
-                    onConfirm={handleCloseMonth}
-                    monthName={previousMonthStatus.monthName}
-                    monthSummary={{
-                        income: data.totalIncome || 0,
-                        expenses: data.totalExpenses || 0,
-                        savings: (data.totalIncome || 0) - (data.totalExpenses || 0)
-                    }}
-                />
-            )}
+            <Suspense fallback={<div />}>
+                {showIncomeModal && (
+                    <IncomeModal
+                        onClose={() => setShowIncomeModal(false)}
+                        onSave={handleIncomeSave}
+                    />
+                )}
+                {showExpenseModal && (
+                    <ExpenseModal
+                        onClose={() => setShowExpenseModal(false)}
+                        onSave={handleExpenseSave}
+                        envelopes={[
+                            ...(data.monthlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                type: 'monthly'
+                            })) || []),
+                            ...(data.yearlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                type: 'yearly'
+                            })) || [])
+                        ]}
+                    />
+                )}
+                {showCloseMonthModal && (
+                    <CloseMonthModal
+                        onClose={() => setShowCloseMonthModal(false)}
+                        onConfirm={handleCloseMonth}
+                        monthName={previousMonthStatus.monthName}
+                        monthSummary={{
+                            income: data.totalIncome || 0,
+                            expenses: data.totalExpenses || 0,
+                            savings: (data.totalIncome || 0) - (data.totalExpenses || 0)
+                        }}
+                    />
+                )}
+            </Suspense>
 
             <FloatingActionButton
                 onAddIncome={() => setShowIncomeModal(true)}

@@ -1,6 +1,7 @@
 import './globals.css'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ThemeProvider } from '@/lib/contexts/ThemeContext'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata = {
     title: 'Budżet Domowy',
@@ -15,11 +16,13 @@ export default function RootLayout({
     return (
         <html lang="pl" suppressHydrationWarning>
             <body className="bg-gray-50" suppressHydrationWarning>
-                <ThemeProvider>
-                    <ToastProvider>
-                        {children}
-                    </ToastProvider>
-                </ThemeProvider>
+                <ErrorBoundary>
+                    <ThemeProvider>
+                        <ToastProvider>
+                            {children}
+                        </ToastProvider>
+                    </ThemeProvider>
+                </ErrorBoundary>
             </body>
         </html>
     )

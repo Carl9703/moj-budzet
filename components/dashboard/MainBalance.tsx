@@ -1,10 +1,11 @@
 ﻿import { formatMoney } from '@/lib/utils/money'
+import { memo } from 'react'
 
 interface Props {
     balance: number
 }
 
-export function MainBalance({ balance }: Props) {
+export const MainBalance = memo(function MainBalance({ balance }: Props) {
     return (
         <div className="main-balance-card rounded-lg shadow-lg p-4" style={{
             background: 'linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%)',
@@ -22,4 +23,4 @@ export function MainBalance({ balance }: Props) {
             </div>
         </div>
     )
-}
+})

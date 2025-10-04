@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { EXPENSE_CATEGORIES, getPopularCategories, trackCategoryUsage, findEnvelopeForCategory } from '@/lib/constants/categories'
+import { useToast } from '@/components/ui/Toast'
 
 interface Props {
     onClose: () => void
@@ -19,6 +20,7 @@ interface ExpenseData {
 }
 
 export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
+    const { showToast } = useToast()
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('')
@@ -55,7 +57,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
     const handleSubmit = () => {
         if (!amount || !selectedEnvelope || !selectedCategory) {
-            alert('Wypełnij wszystkie pola!')
+            showToast('Wypełnij wszystkie pola!', 'warning')
             return
         }
 
