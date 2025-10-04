@@ -80,7 +80,14 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
     return (
         <Modal title="💸 DODAJ WYDATEK" onClose={onClose}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '16px',
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                paddingRight: '8px'
+            }}>
                 {/* KWOTA */}
                 <div>
                     <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
@@ -303,18 +310,29 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                 </div>
             </div>
 
-            {/* PRZYCISKI */}
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '24px' }}>
+            {/* PRZYCISKI - sticky na dole */}
+            <div style={{ 
+                position: 'sticky',
+                bottom: 0,
+                backgroundColor: 'var(--bg-primary)',
+                padding: '16px 0 0 0',
+                marginTop: '24px',
+                borderTop: '1px solid var(--border-primary)',
+                display: 'flex', 
+                gap: '8px', 
+                justifyContent: 'flex-end'
+            }}>
                 <button
                     onClick={onClose}
                     style={{
-                        padding: '10px 20px',
+                        padding: '12px 24px',
                         border: '1px solid var(--border-primary)',
                         borderRadius: '8px',
                         backgroundColor: 'var(--bg-secondary)',
                         color: 'var(--text-primary)',
                         cursor: 'pointer',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        fontWeight: '600'
                     }}
                 >
                     Anuluj
@@ -323,7 +341,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     onClick={handleSubmit}
                     disabled={!amount || !selectedCategory || !selectedEnvelope}
                     style={{
-                        padding: '10px 20px',
+                        padding: '12px 24px',
                         border: 'none',
                         borderRadius: '8px',
                         backgroundColor: amount && selectedCategory && selectedEnvelope ? 'var(--accent-error)' : 'var(--border-secondary)',

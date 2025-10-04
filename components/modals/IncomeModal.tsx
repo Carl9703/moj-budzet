@@ -178,15 +178,20 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
     return (
         <Modal title="💰 DODAJ PRZYCHÓD" onClose={onClose}>
-            {/* Wybór typu przychodu */}
-            <div style={{
-                display: 'flex',
-                gap: '8px',
-                marginBottom: '20px',
-                padding: '4px',
-                backgroundColor: 'var(--bg-tertiary)',
-                borderRadius: '8px'
+            <div style={{ 
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                paddingRight: '8px'
             }}>
+                {/* Wybór typu przychodu */}
+                <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '20px',
+                    padding: '4px',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: '8px'
+                }}>
                 <button
                     onClick={() => setIncomeType('salary')}
                     style={{
@@ -614,16 +619,31 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            </div>
+            
+            {/* PRZYCISKI - sticky na dole */}
+            <div style={{ 
+                position: 'sticky',
+                bottom: 0,
+                backgroundColor: 'var(--bg-primary)',
+                padding: '16px 0 0 0',
+                marginTop: '24px',
+                borderTop: '1px solid var(--border-primary)',
+                display: 'flex', 
+                gap: '8px', 
+                justifyContent: 'flex-end'
+            }}>
                 <button
                     onClick={onClose}
                     style={{
-                        padding: '8px 16px',
+                        padding: '12px 24px',
                         border: '1px solid var(--border-primary)',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         backgroundColor: 'var(--bg-secondary)',
                         color: 'var(--text-primary)',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '600'
                     }}
                 >
                     Anuluj
@@ -632,13 +652,14 @@ export function IncomeModal({ onClose, onSave }: Props) {
                     onClick={handleSubmit}
                     disabled={!canSubmit}
                     style={{
-                        padding: '8px 16px',
+                        padding: '12px 24px',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         backgroundColor: canSubmit ? 'var(--accent-primary)' : 'var(--border-secondary)',
                         color: canSubmit ? 'white' : 'var(--text-secondary)',
                         cursor: canSubmit ? 'pointer' : 'not-allowed',
-                        fontWeight: '500'
+                        fontWeight: '600',
+                        fontSize: '14px'
                     }}
                 >
                     ✓ {incomeType === 'bonus' ? 'ZATWIERDŹ PODZIAŁ' :

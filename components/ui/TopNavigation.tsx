@@ -74,51 +74,59 @@ export function TopNavigation() {
                 <nav style={{
                     display: 'flex',
                     gap: '8px',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
                 }}>
-                    {navItems.map((item) => (
-                        <button
-                            key={item.path}
-                            onClick={() => router.push(item.path)}
-                            className="nav-button smooth-all"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                padding: '10px 16px',
-                                backgroundColor: 'var(--bg-tertiary)',
-                                border: '2px solid var(--border-primary)',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                fontWeight: '600',
-                                color: 'var(--text-primary)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                textDecoration: 'none',
-                                boxShadow: 'var(--shadow-sm)'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
-                                e.currentTarget.style.borderColor = 'var(--accent-primary)'
-                                e.currentTarget.style.color = '#ffffff'
-                                e.currentTarget.style.transform = 'translateY(-2px)'
-                                e.currentTarget.style.boxShadow = 'var(--shadow-md)'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.borderColor = 'var(--border-primary)'
-                                e.currentTarget.style.color = 'var(--text-primary)'
-                                e.currentTarget.style.transform = 'translateY(0)'
-                                e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
-                            }}
-                        >
-                            <span style={{ fontSize: '16px' }}>{item.icon}</span>
-                            <span>{item.label}</span>
-                        </button>
-                    ))}
+                    {/* Nawigacja - ukryj na małych ekranach */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center'
+                    }} className="hidden-mobile">
+                        {navItems.map((item) => (
+                            <button
+                                key={item.path}
+                                onClick={() => router.push(item.path)}
+                                className="nav-button smooth-all"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '10px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '2px solid var(--border-primary)',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textDecoration: 'none',
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                    e.currentTarget.style.transform = 'translateY(-2px)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                    e.currentTarget.style.transform = 'translateY(0)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                                }}
+                            >
+                                <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
                     
-                    {/* Theme Toggle */}
-                    <div style={{ marginLeft: '12px' }}>
+                    {/* Theme Toggle - przenieś na koniec */}
+                    <div style={{ marginLeft: '8px' }}>
                         <ThemeToggle size="small" />
                     </div>
 
@@ -139,7 +147,7 @@ export function TopNavigation() {
                             color: '#c33',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
-                            marginLeft: '12px',
+                            marginLeft: '8px',
                             boxShadow: 'var(--shadow-sm)'
                         }}
                         onMouseEnter={(e) => {
@@ -159,7 +167,7 @@ export function TopNavigation() {
                         title="Wyloguj się"
                     >
                         <span style={{ fontSize: '16px' }}>🚪</span>
-                        <span>Wyloguj</span>
+                        <span className="hidden-mobile">Wyloguj</span>
                     </button>
                 </nav>
             </div>

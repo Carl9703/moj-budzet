@@ -330,6 +330,26 @@ body {
 }
 
 /* Responsywność */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+  
+  .container-wide {
+    padding: 8px !important;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
 /* Mobile First - Small devices (phones, 576px and down) */
 @media (max-width: 576px) {
     .grid-responsive {

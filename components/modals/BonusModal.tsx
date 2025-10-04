@@ -72,26 +72,31 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
 
     return (
         <Modal title="💰 WPŁYNĘŁA PREMIA" onClose={onClose}>
-            {/* Przycisk powrotu */}
-            {onSwitchToIncome && (
-                <button
-                    onClick={onSwitchToIncome}
-                    style={{
-                        marginBottom: '16px',
-                        padding: '8px 12px',
-                        border: '1px solid var(--border-primary)',
-                        borderRadius: '6px',
-                        backgroundColor: 'var(--bg-tertiary)',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                    }}
-                >
-                    ← Powrót do wyboru typu przychodu
-                </button>
-            )}
-            
-            <div style={{ backgroundColor: 'var(--bg-success)', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--success-border)' }}>
+            <div style={{ 
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                paddingRight: '8px'
+            }}>
+                {/* Przycisk powrotu */}
+                {onSwitchToIncome && (
+                    <button
+                        onClick={onSwitchToIncome}
+                        style={{
+                            marginBottom: '16px',
+                            padding: '8px 12px',
+                            border: '1px solid var(--border-primary)',
+                            borderRadius: '6px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            color: 'var(--text-primary)',
+                            cursor: 'pointer',
+                            fontSize: '14px'
+                        }}
+                    >
+                        ← Powrót do wyboru typu przychodu
+                    </button>
+                )}
+                
+                <div style={{ backgroundColor: 'var(--bg-success)', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--success-border)' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--success-dark)' }}>
                     Kwota premii kwartalnej
                 </label>
@@ -233,16 +238,31 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            </div>
+            
+            {/* PRZYCISKI - sticky na dole */}
+            <div style={{ 
+                position: 'sticky',
+                bottom: 0,
+                backgroundColor: 'var(--bg-primary)',
+                padding: '16px 0 0 0',
+                marginTop: '24px',
+                borderTop: '1px solid var(--border-primary)',
+                display: 'flex', 
+                gap: '8px', 
+                justifyContent: 'flex-end'
+            }}>
                 <button
                     onClick={onClose}
                     style={{
-                        padding: '10px 20px',
-                        border: '1px solid #ddd',
-                        borderRadius: '6px',
-                        backgroundColor: 'white',
+                        padding: '12px 24px',
+                        border: '1px solid var(--border-primary)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
                         cursor: 'pointer',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        fontWeight: '600'
                     }}
                 >
                     Anuluj
@@ -251,9 +271,9 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                     onClick={handleSubmit}
                     disabled={totalPercentage !== 100}
                     style={{
-                        padding: '10px 20px',
+                        padding: '12px 24px',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: '8px',
                         backgroundColor: totalPercentage === 100 ? '#10b981' : '#d1d5db',
                         color: totalPercentage === 100 ? 'white' : '#6b7280',
                         cursor: totalPercentage === 100 ? 'pointer' : 'not-allowed',
