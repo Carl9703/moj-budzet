@@ -38,12 +38,16 @@ export class ErrorBoundary extends Component<Props, State> {
                     padding: '24px',
                     textAlign: 'center'
                 }}>
+<<<<<<< HEAD
                     <div style={{
                         fontSize: '64px',
                         marginBottom: '24px'
                     }}>
                         😵
                     </div>
+=======
+                    <div style={{ fontSize: '64px', marginBottom: '24px' }}>😵</div>
+>>>>>>> dev
                     <h1 style={{
                         fontSize: '24px',
                         fontWeight: 'bold',
@@ -60,6 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     }}>
                         Aplikacja napotkała nieoczekiwany błąd. Spróbuj odświeżyć stronę.
                     </p>
+<<<<<<< HEAD
                     {this.state.error && (
                         <details style={{
                             marginBottom: '24px',
@@ -87,6 +92,8 @@ export class ErrorBoundary extends Component<Props, State> {
                             </pre>
                         </details>
                     )}
+=======
+>>>>>>> dev
                     <button
                         onClick={() => window.location.reload()}
                         style={{

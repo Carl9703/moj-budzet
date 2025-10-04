@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
             ]
 
             for (const update of updates) {
-                if (update.amount > 0) {
+                if (update.amount && update.amount > 0) {
                     const envelope = await prisma.envelope.findFirst({
                         where: {
                             userId: userId,
