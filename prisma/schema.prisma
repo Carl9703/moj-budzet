@@ -82,6 +82,8 @@ model Envelope {
   
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+
+  @@index([userId, type])
 }
 
 model Transaction {
@@ -100,6 +102,10 @@ model Transaction {
   
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   envelope     Envelope? @relation(fields: [envelopeId], references: [id])
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([envelopeId])
 }
 
 // Konfiguracja użytkownika dla wypłaty i stałych transferów (tylko dla pensji)

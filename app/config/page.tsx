@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useToast } from '@/components/ui/Toast'
 
 interface MonthlyEnvelopeRow {
   id: string
@@ -15,6 +16,7 @@ interface MonthlyEnvelopeRow {
 
 export default function ConfigPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
+  const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [defaultSalary, setDefaultSalary] = useState<string>('0')
@@ -88,12 +90,12 @@ export default function ConfigPage() {
       }
       const res = await authorizedFetch('/api/config', { method: 'PUT', body: JSON.stringify(payload) })
       if (res.ok) {
-        alert('Zapisano konfigurację')
+        showToast('Zapisano konfigurację pomyślnie!', 'success')
       } else {
-        alert('Błąd zapisu konfiguracji')
+        showToast('Błąd zapisu konfiguracji', 'error')
       }
     } catch {
-      alert('Błąd zapisu konfiguracji')
+      showToast('Błąd zapisu konfiguracji', 'error')
     } finally {
       setSaving(false)
     }

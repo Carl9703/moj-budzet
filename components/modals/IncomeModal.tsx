@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { authorizedFetch } from '@/lib/utils/api'
+import { useToast } from '@/components/ui/Toast'
 
 interface Props {
     onClose: () => void
@@ -24,6 +25,7 @@ interface IncomeData {
 }
 
 export function IncomeModal({ onClose, onSave }: Props) {
+    const { showToast } = useToast()
     const [incomeType, setIncomeType] = useState<'salary' | 'other' | 'bonus'>('salary')
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
@@ -87,7 +89,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
         if (incomeType === 'bonus') {
             if (totalBonusPercentage !== 100) {
-                alert('Suma procentów musi wynosić 100%!')
+                showToast('Suma procentów musi wynosić 100%!', 'warning')
                 return
             }
 
@@ -107,7 +109,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
         if (incomeType === 'other') {
             if (amountNum <= 0) {
-                alert('Wprowadź prawidłową kwotę!')
+                showToast('Wprowadź prawidłową kwotę!', 'warning')
                 return
             }
 
@@ -128,17 +130,17 @@ export function IncomeModal({ onClose, onSave }: Props) {
             const forExpenses = amountNum - totalAllocated
 
             if (amountNum <= 0) {
-                alert('Wprowadź prawidłową kwotę wypłaty!')
+                showToast('Wprowadź prawidłową kwotę wypłaty!', 'warning')
                 return
             }
 
             if (totalAllocated > amountNum) {
-                alert('Suma przelewów przekracza kwotę wypłaty!')
+                showToast('Suma przelewów przekracza kwotę wypłaty!', 'warning')
                 return
             }
 
             if (forExpenses < 0) {
-                alert('Kwota na wydatki nie może być ujemna!')
+                showToast('Kwota na wydatki nie może być ujemna!', 'error')
                 return
             }
 

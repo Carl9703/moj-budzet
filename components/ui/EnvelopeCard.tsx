@@ -1,4 +1,5 @@
 import { formatMoney } from '@/lib/utils/money'
+import { memo } from 'react'
 
 interface EnvelopeProps {
     name: string
@@ -9,7 +10,7 @@ interface EnvelopeProps {
     type: 'monthly' | 'yearly'
 }
 
-export function EnvelopeCard({ name, icon, spent, planned, current, type }: EnvelopeProps) {
+export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, planned, current, type }: EnvelopeProps) {
     const isFreedomFunds = name.toLowerCase().includes('wolne środki')
 
     const percentage = type === 'monthly'
@@ -171,4 +172,4 @@ export function EnvelopeCard({ name, icon, spent, planned, current, type }: Enve
             </div>
         </div>
     )
-}
+})

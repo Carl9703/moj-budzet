@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 interface Props {
     totalIncome: number
     totalExpenses: number
@@ -10,7 +12,7 @@ interface Props {
     }
 }
 
-export function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus }: Props) {
+export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
 
@@ -79,4 +81,4 @@ export function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth
             </div>
         </div>
     )
-}
+})

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
+import { useToast } from '@/components/ui/Toast'
 
 interface Props {
     onClose: () => void
@@ -18,6 +19,7 @@ interface BonusData {
 }
 
 export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
+    const { showToast } = useToast()
     const [amount, setAmount] = useState('1300')
     const [percentages, setPercentages] = useState({
         gifts: 20,
@@ -44,7 +46,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
 
     const handleSubmit = () => {
         if (totalPercentage !== 100) {
-            alert('Suma procentów musi wynosić 100%!')
+            showToast('Suma procentów musi wynosić 100%!', 'warning')
             return
         }
 
