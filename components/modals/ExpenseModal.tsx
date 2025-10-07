@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/Modal'
-import { EXPENSE_CATEGORIES, getExpenseCategories, getPopularExpenseCategories, trackCategoryUsage, findEnvelopeForCategory } from '@/lib/constants/categories'
+import { EXPENSE_CATEGORIES, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage } from '@/lib/constants/categories'
 import { useToast } from '@/components/ui/Toast'
 
 interface Props {
@@ -30,12 +30,11 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
     const amountInputRef = useRef<HTMLInputElement>(null)
 
-    // Pobierz tylko kategorie wydatków
-    const expenseCategories = getExpenseCategories()
-    const popularCategories = getPopularExpenseCategories(9)
-
-    // Filtruj kategorie do wyświetlenia
-    const displayCategories = showAllCategories ? expenseCategories : popularCategories
+    // Pobierz kategorie dla wybranej koperty
+    const selectedEnvelopeData = envelopes.find(e => e.id === selectedEnvelope)
+    const envelopeCategories = selectedEnvelopeData 
+        ? getCategoriesForEnvelope(selectedEnvelopeData.name)
+        : []
 
     useEffect(() => {
         if (amountInputRef.current) {
@@ -43,17 +42,15 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         }
     }, [])
 
+    const handleEnvelopeSelect = (envelopeId: string) => {
+        setSelectedEnvelope(envelopeId)
+        setSelectedCategory('') // Reset kategorii przy zmianie koperty
+    }
+
     const handleCategorySelect = (categoryId: string) => {
         setSelectedCategory(categoryId)
-
         // Zapisz użycie kategorii
         trackCategoryUsage(categoryId)
-
-        // Automatycznie wybierz kopertę
-        const envelopeId = findEnvelopeForCategory(categoryId, envelopes)
-        if (envelopeId) {
-            setSelectedEnvelope(envelopeId)
-        }
     }
 
     const handleSubmit = () => {
@@ -73,78 +70,79 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     }
 
     // Znajdź wybraną kategorię
-    const selectedCategoryData = expenseCategories.find(c => c.id === selectedCategory)
+    const selectedCategoryData = envelopeCategories.find(c => c.id === selectedCategory)
 
     // Grupuj kategorie według typu (miesięczne/roczne)
-    const monthlyCategories = displayCategories.filter(c => c.type === 'monthly')
-    const yearlyCategories = displayCategories.filter(c => c.type === 'yearly')
+    const monthlyCategories = envelopeCategories.filter(c => c.type === 'monthly')
+    const yearlyCategories = envelopeCategories.filter(c => c.type === 'yearly')
 
     return (
         <Modal title="💸 DODAJ WYDATEK" onClose={onClose}>
             <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '8px',
+                gap: '12px',
                 maxHeight: '85vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
-                {/* KWOTA */}
+                {/* KOPERTA - PIERWSZY KROK */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Kwota
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
+                        📁 Wybierz kopertę
                     </label>
-                    <input
-                        ref={amountInputRef}
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.00"
+                    <select
+                        value={selectedEnvelope}
+                        onChange={(e) => handleEnvelopeSelect(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '12px',
                             border: '2px solid var(--border-primary)',
                             borderRadius: '8px',
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
+                            fontSize: '16px',
+                            backgroundColor: selectedEnvelope ? 'var(--success-light)' : 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontWeight: '500'
                         }}
-                    />
-                    
-                    {/* DATA - pod kwotą */}
-                    <div style={{ marginTop: '8px' }}>
-                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            Data wydatku
-                        </label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)'
-                            }}
-                        />
-                    </div>
+                    >
+                        <option value="">Wybierz kopertę</option>
+                        <optgroup label="📅 Koperty miesięczne">
+                            {envelopes.filter(e => e.type === 'monthly').map((env) => (
+                                <option key={env.id} value={env.id}>
+                                    {env.icon} {env.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                        <optgroup label="📆 Koperty roczne">
+                            {envelopes.filter(e => e.type === 'yearly').map((env) => (
+                                <option key={env.id} value={env.id}>
+                                    {env.icon} {env.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                    </select>
                 </div>
 
-                {/* KATEGORIE */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
-                        Wybierz kategorię
-                        {!showAllCategories && (
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
-                                (najpopularniejsze)
-                            </span>
-                        )}
-                    </label>
+                {/* KATEGORIE - POKAZUJ TYLKO PO WYBORZE KOPERTY */}
+                {selectedEnvelope && (
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
+                            🏷️ Wybierz kategorię
+                        </label>
+                        
+                        {envelopeCategories.length === 0 ? (
+                            <div style={{ 
+                                padding: '20px', 
+                                textAlign: 'center', 
+                                color: 'var(--text-secondary)',
+                                backgroundColor: 'var(--bg-secondary)',
+                                borderRadius: '8px',
+                                border: '1px dashed var(--border-primary)'
+                            }}>
+                                Brak kategorii dla tej koperty
+                            </div>
+                        ) : (
+                            <>
 
                     {/* Kategorie miesięczne */}
                     {monthlyCategories.length > 0 && (
@@ -239,61 +237,67 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             Pokaż wszystkie kategorie →
                         </button>
                     )}
-                </div>
-
-                {/* KOPERTA */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Koperta
-                        {selectedCategoryData && (
-                            <span style={{
-                                fontSize: '12px',
-                                color: 'var(--success-primary)',
-                                marginLeft: '8px',
-                                backgroundColor: 'var(--bg-success)',
-                                padding: '2px 6px',
-                                borderRadius: '4px'
-                            }}>
-                                ✓ Auto: {selectedCategoryData.defaultEnvelope}
-                            </span>
+                            </>
                         )}
-                    </label>
-                    <select
-                        value={selectedEnvelope}
-                        onChange={(e) => setSelectedEnvelope(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '1px solid var(--border-primary)',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            backgroundColor: selectedEnvelope ? 'var(--bg-success)' : 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
-                        }}
-                    >
-                        <option value="">Wybierz kopertę</option>
-                        <optgroup label="📅 Koperty miesięczne">
-                            {envelopes.filter(e => e.type === 'monthly').map((env) => (
-                                <option key={env.id} value={env.id}>
-                                    {env.icon} {env.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                        <optgroup label="📆 Koperty roczne">
-                            {envelopes.filter(e => e.type === 'yearly').map((env) => (
-                                <option key={env.id} value={env.id}>
-                                    {env.icon} {env.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                    </select>
-                </div>
+                    </div>
+                )}
 
-                {/* OPIS */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Opis (opcjonalnie)
-                    </label>
+                {/* KWOTA - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
+                {selectedCategory && (
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
+                            💰 Kwota
+                        </label>
+                        <input
+                            ref={amountInputRef}
+                            type="number"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder="0.00"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '2px solid var(--border-primary)',
+                                borderRadius: '8px',
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)'
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* DATA - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
+                {selectedCategory && (
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
+                            📅 Data wydatku
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid var(--border-primary)',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)'
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* OPIS - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
+                {selectedCategory && (
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
+                            📝 Opis (opcjonalnie)
+                        </label>
                     <input
                         type="text"
                         value={description}
@@ -309,7 +313,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             color: 'var(--text-primary)'
                         }}
                     />
-                </div>
+                    </div>
+                )}
 
             </div>
 

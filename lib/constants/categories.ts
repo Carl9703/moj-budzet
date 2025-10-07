@@ -128,3 +128,8 @@ export function getExpenseCategories(): Category[] {
 export function getIncomeCategories(): Category[] {
     return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === '')
 }
+
+// Filtruj kategorie dla konkretnej koperty
+export function getCategoriesForEnvelope(envelopeName: string): Category[] {
+    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === envelopeName)
+}
