@@ -39,7 +39,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     // Wszystkie kategorie wydatków (dla opcji "Pokaż wszystkie")
     const allExpenseCategories = getExpenseCategories()
     
-    // Kategorie do wyświetlenia (domyślnie dla koperty, lub wszystkie)
+    // Kategorie do wyświetlenia (domyślnie wszystkie, lub dla koperty)
     const displayCategories = showAllCategories ? allExpenseCategories : envelopeCategories
 
     useEffect(() => {
@@ -57,6 +57,15 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         setSelectedCategory(categoryId)
         // Zapisz użycie kategorii
         trackCategoryUsage(categoryId)
+        
+        // Automatycznie wybierz kopertę na podstawie kategorii
+        const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+        if (category && category.defaultEnvelope) {
+            const envelope = envelopes.find(e => e.name === category.defaultEnvelope)
+            if (envelope) {
+                setSelectedEnvelope(envelope.id)
+            }
+        }
     }
 
     const handleSubmit = () => {
@@ -87,28 +96,85 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
             <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '12px',
+                gap: '8px',
                 maxHeight: '85vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
-                {/* KOPERTA - PIERWSZY KROK */}
+                {/* KWOTA */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
-                        📁 Wybierz kopertę
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                        Kwota
+                    </label>
+                    <input
+                        ref={amountInputRef}
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="0.00"
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid var(--border-primary)',
+                            borderRadius: '8px',
+                            fontSize: '24px',
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
+                        }}
+                    />
+                    
+                    {/* DATA - pod kwotą */}
+                    <div style={{ marginTop: '8px' }}>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            Data wydatku
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                border: '1px solid var(--border-primary)',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)'
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* KOPERTA */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                        Koperta
+                        {selectedCategoryData && (
+                            <span style={{
+                                fontSize: '12px',
+                                color: 'var(--success-primary)',
+                                marginLeft: '8px',
+                                backgroundColor: 'var(--bg-success)',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                            }}>
+                                ✓ Auto: {selectedCategoryData.defaultEnvelope}
+                            </span>
+                        )}
                     </label>
                     <select
                         value={selectedEnvelope}
                         onChange={(e) => handleEnvelopeSelect(e.target.value)}
                         style={{
                             width: '100%',
-                            padding: '12px',
-                            border: '2px solid var(--border-primary)',
+                            padding: '10px',
+                            border: '1px solid var(--border-primary)',
                             borderRadius: '8px',
-                            fontSize: '16px',
-                            backgroundColor: selectedEnvelope ? 'var(--success-light)' : 'var(--bg-primary)',
-                            color: 'var(--text-primary)',
-                            fontWeight: '500'
+                            fontSize: '14px',
+                            backgroundColor: selectedEnvelope ? 'var(--bg-success)' : 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
                         }}
                     >
                         <option value="">Wybierz kopertę</option>
@@ -129,42 +195,16 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     </select>
                 </div>
 
-                {/* KATEGORIE - POKAZUJ TYLKO PO WYBORZE KOPERTY */}
-                {selectedEnvelope && (
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
-                            🏷️ Wybierz kategorię
-                        </label>
-                        
-                        {envelopeCategories.length === 0 ? (
-                            <div style={{ 
-                                padding: '20px', 
-                                textAlign: 'center', 
-                                color: 'var(--text-secondary)',
-                                backgroundColor: 'var(--bg-secondary)',
-                                borderRadius: '8px',
-                                border: '1px dashed var(--border-primary)'
-                            }}>
-                                Brak kategorii dla tej koperty
-                                <br />
-                                <button
-                                    onClick={() => setShowAllCategories(true)}
-                                    style={{
-                                        marginTop: '8px',
-                                        padding: '8px 16px',
-                                        border: '1px solid var(--accent-primary)',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'transparent',
-                                        color: 'var(--accent-primary)',
-                                        cursor: 'pointer',
-                                        fontSize: '12px'
-                                    }}
-                                >
-                                    Pokaż wszystkie kategorie →
-                                </button>
-                            </div>
-                        ) : (
-                            <>
+                {/* KATEGORIE */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
+                        Wybierz kategorię
+                        {!showAllCategories && (
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
+                                (najpopularniejsze)
+                            </span>
+                        )}
+                    </label>
 
                     {/* Kategorie miesięczne */}
                     {monthlyCategories.length > 0 && (
@@ -299,62 +339,11 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     </div>
                 )}
 
-                {/* KWOTA - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
-                {selectedCategory && (
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: 'var(--text-primary)', fontSize: '16px' }}>
-                            💰 Kwota
-                        </label>
-                        <input
-                            ref={amountInputRef}
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0.00"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '2px solid var(--border-primary)',
-                                borderRadius: '8px',
-                                fontSize: '24px',
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)'
-                            }}
-                        />
-                    </div>
-                )}
-
-                {/* DATA - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
-                {selectedCategory && (
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
-                            📅 Data wydatku
-                        </label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)'
-                            }}
-                        />
-                    </div>
-                )}
-
-                {/* OPIS - POKAZUJ TYLKO PO WYBORZE KATEGORII */}
-                {selectedCategory && (
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
-                            📝 Opis (opcjonalnie)
-                        </label>
+                {/* OPIS */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                        Opis (opcjonalnie)
+                    </label>
                     <input
                         type="text"
                         value={description}
@@ -370,8 +359,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             color: 'var(--text-primary)'
                         }}
                     />
-                    </div>
-                )}
+                </div>
 
             </div>
 
