@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/Modal'
-import { EXPENSE_CATEGORIES, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage } from '@/lib/constants/categories'
+import { EXPENSE_CATEGORIES, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage, trackEnvelopeUsage, getPopularEnvelopes } from '@/lib/constants/categories'
 import { useToast } from '@/components/ui/Toast'
 
 interface Props {
@@ -51,6 +51,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const handleEnvelopeSelect = (envelopeId: string) => {
         setSelectedEnvelope(envelopeId)
         setSelectedCategory('') // Reset kategorii przy zmianie koperty
+        
+        // Śledź użycie koperty
+        trackEnvelopeUsage(envelopeId)
     }
 
     const handleCategorySelect = (categoryId: string) => {
@@ -147,10 +150,15 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     </div>
                 </div>
 
-                {/* KOPERTA */}
+                {/* KOPERTY */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Koperta
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
+                        Wybierz kopertę
+                        {!showAllCategories && (
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
+                                (najpopularniejsze)
+                            </span>
+                        )}
                         {selectedCategoryData && (
                             <span style={{
                                 fontSize: '12px',
@@ -164,35 +172,111 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             </span>
                         )}
                     </label>
-                    <select
-                        value={selectedEnvelope}
-                        onChange={(e) => handleEnvelopeSelect(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '1px solid var(--border-primary)',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            backgroundColor: selectedEnvelope ? 'var(--bg-success)' : 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
-                        }}
-                    >
-                        <option value="">Wybierz kopertę</option>
-                        <optgroup label="📅 Koperty miesięczne">
-                            {envelopes.filter(e => e.type === 'monthly').map((env) => (
-                                <option key={env.id} value={env.id}>
-                                    {env.icon} {env.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                        <optgroup label="📆 Koperty roczne">
-                            {envelopes.filter(e => e.type === 'yearly').map((env) => (
-                                <option key={env.id} value={env.id}>
-                                    {env.icon} {env.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                    </select>
+
+                    {/* Pobierz popularne koperty */}
+                    {(() => {
+                        const popularEnvelopes = getPopularEnvelopes(envelopes, 8)
+                        const monthlyEnvelopes = popularEnvelopes.filter(e => e.type === 'monthly')
+                        const yearlyEnvelopes = popularEnvelopes.filter(e => e.type === 'yearly')
+                        
+                        return (
+                            <>
+                                {/* Koperty miesięczne */}
+                                {monthlyEnvelopes.length > 0 && (
+                                    <>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                                            📅 Miesięczne
+                                        </div>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(4, 1fr)',
+                                            gap: '6px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            {monthlyEnvelopes.map((env) => (
+                                                <button
+                                                    key={env.id}
+                                                    onClick={() => handleEnvelopeSelect(env.id)}
+                                                    style={{
+                                                        padding: '6px 4px',
+                                                        border: selectedEnvelope === env.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                        borderRadius: '6px',
+                                                        backgroundColor: selectedEnvelope === env.id ? 'var(--success-light)' : 'var(--bg-secondary)',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '2px',
+                                                        transition: 'all 0.2s',
+                                                        fontSize: '11px'
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: '20px' }}>{env.icon}</span>
+                                                    <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{env.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Koperty roczne */}
+                                {yearlyEnvelopes.length > 0 && (
+                                    <>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                                            📆 Roczne
+                                        </div>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(4, 1fr)',
+                                            gap: '6px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            {yearlyEnvelopes.map((env) => (
+                                                <button
+                                                    key={env.id}
+                                                    onClick={() => handleEnvelopeSelect(env.id)}
+                                                    style={{
+                                                        padding: '10px 8px',
+                                                        border: selectedEnvelope === env.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                        borderRadius: '8px',
+                                                        backgroundColor: selectedEnvelope === env.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: '20px' }}>{env.icon}</span>
+                                                    <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{env.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Przycisk pokaż wszystkie koperty */}
+                                {!showAllCategories && (
+                                    <button
+                                        onClick={() => setShowAllCategories(true)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '6px',
+                                            border: '1px dashed var(--border-secondary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'transparent',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            fontSize: '12px'
+                                        }}
+                                    >
+                                        Pokaż wszystkie koperty →
+                                    </button>
+                                )}
+                            </>
+                        )
+                    })()}
                 </div>
 
                 {/* KATEGORIE */}

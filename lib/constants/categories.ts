@@ -94,6 +94,32 @@ export function trackCategoryUsage(categoryId: string): void {
     }
 }
 
+// Śledź użycie kopert
+export function trackEnvelopeUsage(envelopeId: string): void {
+    if (typeof window !== 'undefined') {
+        const usage = JSON.parse(localStorage.getItem('envelopeUsage') || '{}')
+        usage[envelopeId] = (usage[envelopeId] || 0) + 1
+        localStorage.setItem('envelopeUsage', JSON.stringify(usage))
+    }
+}
+
+// Pobierz popularne koperty
+export function getPopularEnvelopes(envelopes: { id: string; name: string; icon: string; type: string }[], limit: number = 8): { id: string; name: string; icon: string; type: string }[] {
+    if (typeof window !== 'undefined') {
+        const usage = JSON.parse(localStorage.getItem('envelopeUsage') || '{}')
+
+        const sorted = [...envelopes].sort((a, b) => {
+            const usageA = usage[a.id] || 0
+            const usageB = usage[b.id] || 0
+            return usageB - usageA
+        })
+
+        return sorted.slice(0, limit)
+    }
+
+    return envelopes.slice(0, limit)
+}
+
 export function findEnvelopeForCategory(
     categoryId: string,
     envelopes: { id: string; name: string }[]
