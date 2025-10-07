@@ -33,17 +33,13 @@ export const EXPENSE_CATEGORIES: Category[] = [
     { id: 'flights', name: 'Loty', icon: '✈️', defaultEnvelope: 'Wakacje', type: 'yearly' },
     { id: 'hotel', name: 'Hotel', icon: '🏨', defaultEnvelope: 'Wakacje', type: 'yearly' },
     { id: 'vacation-expenses', name: 'Wydatki wakacyjne', icon: '🏖️', defaultEnvelope: 'Wakacje', type: 'yearly' },
-    { id: 'birthday-gift', name: 'Prezent urodzinowy', icon: '🎁', defaultEnvelope: 'Prezenty', type: 'yearly' },
-    { id: 'wedding-gift', name: 'Prezent ślubny', icon: '💑', defaultEnvelope: 'Prezenty', type: 'yearly' },
-    { id: 'other-gift', name: 'Prezent inny', icon: '🎀', defaultEnvelope: 'Prezenty', type: 'yearly' },
+    { id: 'gifts', name: 'Prezenty', icon: '🎁', defaultEnvelope: 'Prezenty', type: 'yearly' },
     { id: 'insurance', name: 'Ubezpieczenie OC', icon: '📋', defaultEnvelope: 'OC', type: 'yearly' },
-    { id: 'christmas-gifts', name: 'Prezenty świąteczne', icon: '🎄', defaultEnvelope: 'Święta', type: 'yearly' },
     { id: 'christmas-expenses', name: 'Wydatki świąteczne', icon: '🎅', defaultEnvelope: 'Święta', type: 'yearly' },
     { id: 'salary', name: 'Wypłata', icon: '💼', defaultEnvelope: '', type: 'monthly' },
     { id: 'bonus', name: 'Premia', icon: '🎁', defaultEnvelope: '', type: 'yearly' },
     { id: 'other-income', name: 'Inne przychody', icon: '💵', defaultEnvelope: '', type: 'monthly' },
-    { id: 'joint-account', name: 'Konto wspólne', icon: '👫', defaultEnvelope: '', type: 'monthly' },
-    { id: 'investments', name: 'Inwestycje', icon: '📈', defaultEnvelope: '', type: 'monthly' },
+    { id: 'investments', name: 'Inwestycje', icon: '📈', defaultEnvelope: 'Inwestycje', type: 'monthly' },
     { id: 'wedding-expenses', name: 'Wydatki weselne', icon: '💍', defaultEnvelope: 'Wesele', type: 'yearly' },
 ]
 
@@ -69,6 +65,25 @@ export function getPopularCategories(limit: number = 9): Category[] {
     }
 
     return EXPENSE_CATEGORIES.slice(0, limit)
+}
+
+// Pobierz popularne kategorie wydatków
+export function getPopularExpenseCategories(limit: number = 9): Category[] {
+    const expenseCategories = getExpenseCategories()
+    
+    if (typeof window !== 'undefined') {
+        const usage = JSON.parse(localStorage.getItem('categoryUsage') || '{}')
+
+        const sorted = [...expenseCategories].sort((a, b) => {
+            const usageA = usage[a.id] || 0
+            const usageB = usage[b.id] || 0
+            return usageB - usageA
+        })
+
+        return sorted.slice(0, limit)
+    }
+
+    return expenseCategories.slice(0, limit)
 }
 
 export function trackCategoryUsage(categoryId: string): void {
@@ -102,4 +117,14 @@ export function getCategoryIcon(categoryId: string): string {
 export function getCategoryName(categoryId: string): string {
     const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
     return category?.name || 'Inne'
+}
+
+// Filtruj kategorie wydatków (z przypisanymi kopertami)
+export function getExpenseCategories(): Category[] {
+    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope !== '')
+}
+
+// Filtruj kategorie przychodów (bez przypisanych kopert)
+export function getIncomeCategories(): Category[] {
+    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === '')
 }

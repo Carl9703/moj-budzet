@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/Modal'
-import { EXPENSE_CATEGORIES, getPopularCategories, trackCategoryUsage, findEnvelopeForCategory } from '@/lib/constants/categories'
+import { EXPENSE_CATEGORIES, getExpenseCategories, getPopularExpenseCategories, trackCategoryUsage, findEnvelopeForCategory } from '@/lib/constants/categories'
 import { useToast } from '@/components/ui/Toast'
 
 interface Props {
@@ -30,11 +30,12 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
     const amountInputRef = useRef<HTMLInputElement>(null)
 
-    // Pobierz popularne kategorie
-    const popularCategories = getPopularCategories(9)
+    // Pobierz tylko kategorie wydatków
+    const expenseCategories = getExpenseCategories()
+    const popularCategories = getPopularExpenseCategories(9)
 
     // Filtruj kategorie do wyświetlenia
-    const displayCategories = showAllCategories ? EXPENSE_CATEGORIES : popularCategories
+    const displayCategories = showAllCategories ? expenseCategories : popularCategories
 
     useEffect(() => {
         if (amountInputRef.current) {
@@ -72,7 +73,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     }
 
     // Znajdź wybraną kategorię
-    const selectedCategoryData = EXPENSE_CATEGORIES.find(c => c.id === selectedCategory)
+    const selectedCategoryData = expenseCategories.find(c => c.id === selectedCategory)
 
     // Grupuj kategorie według typu (miesięczne/roczne)
     const monthlyCategories = displayCategories.filter(c => c.type === 'monthly')
