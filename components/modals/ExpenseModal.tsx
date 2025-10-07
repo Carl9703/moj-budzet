@@ -175,9 +175,13 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
 
                     {/* Pobierz popularne koperty */}
                     {(() => {
-                        const popularEnvelopes = getPopularEnvelopes(envelopes, 8)
+                        const popularEnvelopes = getPopularEnvelopes(envelopes, 12) // Zwiększ limit
                         const monthlyEnvelopes = popularEnvelopes.filter(e => e.type === 'monthly')
                         const yearlyEnvelopes = popularEnvelopes.filter(e => e.type === 'yearly')
+                        
+                        // Jeśli brak rocznych w popularnych, dodaj wszystkie roczne
+                        const allYearlyEnvelopes = envelopes.filter(e => e.type === 'yearly')
+                        const finalYearlyEnvelopes = yearlyEnvelopes.length > 0 ? yearlyEnvelopes : allYearlyEnvelopes
                         
                         return (
                             <>
@@ -220,7 +224,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                 )}
 
                                 {/* Koperty roczne */}
-                                {yearlyEnvelopes.length > 0 && (
+                                {finalYearlyEnvelopes.length > 0 && (
                                     <>
                                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
                                             📆 Roczne
@@ -231,7 +235,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                             gap: '6px',
                                             marginBottom: '8px'
                                         }}>
-                                            {yearlyEnvelopes.map((env) => (
+                                            {finalYearlyEnvelopes.map((env) => (
                                                 <button
                                                     key={env.id}
                                                     onClick={() => handleEnvelopeSelect(env.id)}
