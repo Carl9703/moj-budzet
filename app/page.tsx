@@ -289,12 +289,58 @@ export default function HomePage() {
                                     </div>
                                 ))
                             ) : (
-                                <EmptyState
-                                    icon="📦"
-                                    title="Brak kopert miesięcznych"
-                                    description="Skontaktuj się z administratorem, aby skonfigurować koperty miesięczne."
-                                    variant="warning"
-                                />
+                                <div style={{ 
+                                    padding: '20px', 
+                                    backgroundColor: 'var(--bg-secondary)', 
+                                    borderRadius: '8px', 
+                                    border: '1px solid var(--border-primary)',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '24px', marginBottom: '12px' }}>📦</div>
+                                    <h3 style={{ 
+                                        fontSize: '16px', 
+                                        fontWeight: '600', 
+                                        marginBottom: '8px', 
+                                        color: 'var(--text-primary)' 
+                                    }}>
+                                        Brak kopert miesięcznych
+                                    </h3>
+                                    <p style={{ 
+                                        fontSize: '14px', 
+                                        color: 'var(--text-secondary)', 
+                                        marginBottom: '16px' 
+                                    }}>
+                                        Utwórz koperty miesięczne, aby rozpocząć zarządzanie budżetem.
+                                    </p>
+                                    <button 
+                                        onClick={async () => {
+                                            try {
+                                                const response = await authorizedFetch('/api/setup-envelopes', {
+                                                    method: 'POST'
+                                                })
+                                                if (response.ok) {
+                                                    showToast('Koperty zostały utworzone pomyślnie!', 'success')
+                                                    refetch()
+                                                } else {
+                                                    showToast('Błąd tworzenia kopert', 'error')
+                                                }
+                                            } catch {
+                                                showToast('Błąd tworzenia kopert', 'error')
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: 'var(--accent-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        Utwórz koperty
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
