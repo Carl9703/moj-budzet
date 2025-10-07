@@ -334,10 +334,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             ← Pokaż tylko kategorie dla {selectedEnvelopeData?.name}
                         </button>
                     )}
-                            </>
-                        )}
-                    </div>
-                )}
+                </div>
 
                 {/* OPIS */}
                 <div>
