@@ -35,6 +35,12 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const envelopeCategories = selectedEnvelopeData 
         ? getCategoriesForEnvelope(selectedEnvelopeData.name)
         : []
+    
+    // Wszystkie kategorie wydatków (dla opcji "Pokaż wszystkie")
+    const allExpenseCategories = getExpenseCategories()
+    
+    // Kategorie do wyświetlenia (domyślnie dla koperty, lub wszystkie)
+    const displayCategories = showAllCategories ? allExpenseCategories : envelopeCategories
 
     useEffect(() => {
         if (amountInputRef.current) {
@@ -73,8 +79,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const selectedCategoryData = envelopeCategories.find(c => c.id === selectedCategory)
 
     // Grupuj kategorie według typu (miesięczne/roczne)
-    const monthlyCategories = envelopeCategories.filter(c => c.type === 'monthly')
-    const yearlyCategories = envelopeCategories.filter(c => c.type === 'yearly')
+    const monthlyCategories = displayCategories.filter(c => c.type === 'monthly')
+    const yearlyCategories = displayCategories.filter(c => c.type === 'yearly')
 
     return (
         <Modal title="💸 DODAJ WYDATEK" onClose={onClose}>
@@ -140,6 +146,22 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                 border: '1px dashed var(--border-primary)'
                             }}>
                                 Brak kategorii dla tej koperty
+                                <br />
+                                <button
+                                    onClick={() => setShowAllCategories(true)}
+                                    style={{
+                                        marginTop: '8px',
+                                        padding: '8px 16px',
+                                        border: '1px solid var(--accent-primary)',
+                                        borderRadius: '6px',
+                                        backgroundColor: 'transparent',
+                                        color: 'var(--accent-primary)',
+                                        cursor: 'pointer',
+                                        fontSize: '12px'
+                                    }}
+                                >
+                                    Pokaż wszystkie kategorie →
+                                </button>
                             </div>
                         ) : (
                             <>
@@ -156,28 +178,37 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                 gap: '6px',
                                 marginBottom: '8px'
                             }}>
-                                {monthlyCategories.map((cat) => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => handleCategorySelect(cat.id)}
-                                        style={{
-                                            padding: '6px 4px',
-                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                            borderRadius: '6px',
-                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            gap: '2px',
-                                            transition: 'all 0.2s',
-                                            fontSize: '11px'
-                                        }}
-                                    >
-                                        <span style={{ fontSize: '20px' }}>{cat.icon}</span>
-                                        <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                    </button>
-                                ))}
+                                {monthlyCategories.map((cat) => {
+                                    const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => handleCategorySelect(cat.id)}
+                                            style={{
+                                                padding: '6px 4px',
+                                                border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                borderRadius: '6px',
+                                                backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '2px',
+                                                transition: 'all 0.2s',
+                                                fontSize: '11px',
+                                                opacity: isFromSelectedEnvelope ? 1 : 0.7
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '20px' }}>{cat.icon}</span>
+                                            <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
+                                            {!isFromSelectedEnvelope && (
+                                                <span style={{ fontSize: '8px', color: 'var(--text-secondary)' }}>
+                                                    {cat.defaultEnvelope}
+                                                </span>
+                                            )}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </>
                     )}
@@ -194,33 +225,42 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                 gap: '6px',
                                 marginBottom: '8px'
                             }}>
-                                {yearlyCategories.map((cat) => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => handleCategorySelect(cat.id)}
-                                        style={{
-                                            padding: '10px 8px',
-                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                            borderRadius: '8px',
-                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            gap: '4px',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        <span style={{ fontSize: '20px' }}>{cat.icon}</span>
-                                        <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                    </button>
-                                ))}
+                                {yearlyCategories.map((cat) => {
+                                    const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => handleCategorySelect(cat.id)}
+                                            style={{
+                                                padding: '10px 8px',
+                                                border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                borderRadius: '8px',
+                                                backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                transition: 'all 0.2s',
+                                                opacity: isFromSelectedEnvelope ? 1 : 0.7
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '20px' }}>{cat.icon}</span>
+                                            <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
+                                            {!isFromSelectedEnvelope && (
+                                                <span style={{ fontSize: '8px', color: 'var(--text-secondary)' }}>
+                                                    {cat.defaultEnvelope}
+                                                </span>
+                                            )}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </>
                     )}
 
-                    {/* Przycisk pokaż wszystkie */}
-                    {!showAllCategories && (
+                    {/* Przyciski przełączania widoku kategorii */}
+                    {!showAllCategories ? (
                         <button
                             onClick={() => setShowAllCategories(true)}
                             style={{
@@ -235,6 +275,23 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                             }}
                         >
                             Pokaż wszystkie kategorie →
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowAllCategories(false)}
+                            style={{
+                                width: '100%',
+                                padding: '6px',
+                                border: '1px solid var(--accent-primary)',
+                                borderRadius: '6px',
+                                backgroundColor: 'var(--accent-light)',
+                                color: 'var(--accent-primary)',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '500'
+                            }}
+                        >
+                            ← Pokaż tylko kategorie dla {selectedEnvelopeData?.name}
                         </button>
                     )}
                             </>
