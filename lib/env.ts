@@ -4,8 +4,10 @@ import { z } from 'zod'
 function isMainBranch() {
   // W Vercel, sprawdzamy VERCEL_GIT_COMMIT_REF
   if (process.env.VERCEL_GIT_COMMIT_REF === 'main') return true
-  // W development, sprawdzamy NODE_ENV
-  if (process.env.NODE_ENV === 'production') return true
+  // W Vercel, sprawdzamy VERCEL_GIT_COMMIT_REF dla dev
+  if (process.env.VERCEL_GIT_COMMIT_REF === 'dev') return false
+  // Lokalnie, sprawdzamy NODE_ENV
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_GIT_COMMIT_REF) return true
   // Domyślnie false (dev branch)
   return false
 }
@@ -14,9 +16,19 @@ function isMainBranch() {
 function getDatabaseUrl() {
   const isMain = isMainBranch()
   
+  // Debug logging
+  console.log('🔍 Environment Debug:')
+  console.log('  VERCEL_GIT_COMMIT_REF:', process.env.VERCEL_GIT_COMMIT_REF)
+  console.log('  NODE_ENV:', process.env.NODE_ENV)
+  console.log('  isMain:', isMain)
+  console.log('  DATABASE_URL_MAIN exists:', !!process.env.DATABASE_URL_MAIN)
+  console.log('  DATABASE_URL_DEV exists:', !!process.env.DATABASE_URL_DEV)
+  
   if (isMain) {
+    console.log('  Using DATABASE_URL_MAIN')
     return process.env.DATABASE_URL_MAIN
   } else {
+    console.log('  Using DATABASE_URL_DEV')
     return process.env.DATABASE_URL_DEV
   }
 }
