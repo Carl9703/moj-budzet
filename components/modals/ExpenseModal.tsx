@@ -28,7 +28,6 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     const [showAllCategories, setShowAllCategories] = useState(false)
     const [showAllEnvelopes, setShowAllEnvelopes] = useState(false)
-    const [useFreeFunds, setUseFreeFunds] = useState(false)
 
     const amountInputRef = useRef<HTMLInputElement>(null)
 
@@ -53,7 +52,6 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const handleEnvelopeSelect = (envelopeId: string) => {
         setSelectedEnvelope(envelopeId)
         setSelectedCategory('') // Reset kategorii przy zmianie koperty
-        setUseFreeFunds(false) // Odznacz wolne środki
         
         // Śledź użycie koperty
         trackEnvelopeUsage(envelopeId)
@@ -75,19 +73,16 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     }
 
     const handleSubmit = () => {
-        if (!amount || (!useFreeFunds && !selectedEnvelope) || (!useFreeFunds && !selectedCategory)) {
+        if (!amount || !selectedEnvelope || !selectedCategory) {
             showToast('Wypełnij wszystkie pola!', 'warning')
             return
         }
 
-        // Znajdź kopertę "Wolne środki (roczne)" jeśli używamy wolnych środków
-        const freeFundsEnvelope = useFreeFunds ? envelopes.find(e => e.name === 'Wolne środki (roczne)') : null
-
         onSave({
             amount: Number(amount),
             description,
-            envelopeId: useFreeFunds ? (freeFundsEnvelope?.id || null) : selectedEnvelope,
-            category: useFreeFunds ? 'Wolne środki' : selectedCategory,
+            envelopeId: selectedEnvelope,
+            category: selectedCategory,
             date
         })
         onClose()
@@ -179,58 +174,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         )}
                     </label>
 
-                    {/* Opcja Wolne środki */}
-                    <div style={{ marginBottom: '12px' }}>
-                        <button
-                            onClick={() => {
-                                setUseFreeFunds(true)
-                                setSelectedEnvelope('')
-                                setSelectedCategory('')
-                            }}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: useFreeFunds ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                borderRadius: '8px',
-                                backgroundColor: useFreeFunds ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                transition: 'all 0.2s',
-                                fontSize: '14px',
-                                fontWeight: '500'
-                            }}
-                        >
-                            <span style={{ fontSize: '20px' }}>💰</span>
-                            <span>Wolne środki</span>
-                            {useFreeFunds && (
-                                <span style={{ 
-                                    fontSize: '12px', 
-                                    color: 'var(--success-primary)',
-                                    backgroundColor: 'var(--bg-success)',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    marginLeft: 'auto'
-                                }}>
-                                    ✓ Wybrane
-                                </span>
-                            )}
-                        </button>
-                        {useFreeFunds && (
-                            <div style={{ 
-                                fontSize: '11px', 
-                                color: 'var(--text-secondary)', 
-                                marginTop: '4px',
-                                textAlign: 'center'
-                            }}>
-                                Wydatek bez przypisania do koperty
-                            </div>
-                        )}
-                    </div>
-
                     {/* Pobierz popularne koperty */}
-                    {!useFreeFunds && (() => {
+                    {(() => {
                         const popularEnvelopes = getPopularEnvelopes(envelopes, 12) // Zwiększ limit
                         const monthlyEnvelopes = popularEnvelopes.filter(e => e.type === 'monthly')
                         const yearlyEnvelopes = popularEnvelopes.filter(e => e.type === 'yearly')
@@ -356,8 +301,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                     })()}
                 </div>
 
-                {/* KATEGORIE - tylko gdy nie używamy wolnych środków */}
-                {!useFreeFunds && (
+                {/* KATEGORIE */}
                 <div>
                     <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
                         Wybierz kategorię
@@ -497,7 +441,6 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         </button>
                     )}
                 </div>
-                )}
 
                 {/* OPIS */}
                 <div>
@@ -552,14 +495,14 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                 </button>
                 <button
                     onClick={handleSubmit}
-                    disabled={!amount || (!useFreeFunds && (!selectedCategory || !selectedEnvelope))}
+                    disabled={!amount || !selectedCategory || !selectedEnvelope}
                     style={{
                         padding: '12px 24px',
                         border: 'none',
                         borderRadius: '8px',
-                        backgroundColor: amount && (useFreeFunds || (selectedCategory && selectedEnvelope)) ? 'var(--accent-error)' : 'var(--border-secondary)',
-                        color: amount && (useFreeFunds || (selectedCategory && selectedEnvelope)) ? 'white' : 'var(--text-secondary)',
-                        cursor: amount && (useFreeFunds || (selectedCategory && selectedEnvelope)) ? 'pointer' : 'not-allowed',
+                        backgroundColor: amount && selectedCategory && selectedEnvelope ? 'var(--accent-error)' : 'var(--border-secondary)',
+                        color: amount && selectedCategory && selectedEnvelope ? 'white' : 'var(--text-secondary)',
+                        cursor: amount && selectedCategory && selectedEnvelope ? 'pointer' : 'not-allowed',
                         fontWeight: '600',
                         fontSize: '14px'
                     }}
