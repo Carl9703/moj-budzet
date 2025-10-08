@@ -109,7 +109,8 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Prezenty', plannedAmount: 2000, icon: '🎁' },
     { name: 'OC', plannedAmount: 800, icon: '📋' },
     { name: 'Święta', plannedAmount: 1500, icon: '🎄' },
-    { name: 'Awaryjne', plannedAmount: 10000, icon: '🚨' }
+    { name: 'Awaryjne', plannedAmount: 10000, icon: '🚨' },
+    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '💰' }
   ]
 
   for (const envelope of yearlyEnvelopes) {

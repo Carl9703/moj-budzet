@@ -180,9 +180,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         const monthlyEnvelopes = popularEnvelopes.filter(e => e.type === 'monthly')
                         const yearlyEnvelopes = popularEnvelopes.filter(e => e.type === 'yearly')
                         
-                        // Jeśli brak rocznych w popularnych, dodaj wszystkie roczne
+                        // Zawsze pokazuj wszystkie koperty roczne, nie tylko popularne
                         const allYearlyEnvelopes = envelopes.filter(e => e.type === 'yearly')
-                        const finalYearlyEnvelopes = yearlyEnvelopes.length > 0 ? yearlyEnvelopes : allYearlyEnvelopes
+                        const finalYearlyEnvelopes = allYearlyEnvelopes
                         
                         return (
                             <>
