@@ -24,7 +24,7 @@ interface BonusData {
 interface ExpenseData {
     amount: number
     description: string
-    envelopeId: string
+    envelopeId: string | null
     category: string
     date: string
     includeInStats?: boolean
