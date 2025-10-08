@@ -15,10 +15,15 @@ function getDatabaseUrl() {
   const isMain = isMainBranch()
   
   if (isMain) {
-    return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL
+    return process.env.DATABASE_URL_MAIN
   } else {
-    return process.env.DATABASE_URL_DEV || process.env.DATABASE_URL
+    return process.env.DATABASE_URL_DEV
   }
+}
+
+// Funkcja do sprawdzenia czy jesteśmy w trybie buildowania
+function isBuildTime() {
+  return process.env.NODE_ENV === 'production' && !process.env.VERCEL_GIT_COMMIT_REF
 }
 
 const envSchema = z.object({
@@ -29,6 +34,14 @@ const envSchema = z.object({
 function validateEnv() {
   try {
     const validatedEnv = envSchema.parse(process.env)
+    
+    // Podczas buildowania nie wymagamy DATABASE_URL
+    if (isBuildTime()) {
+      return {
+        ...validatedEnv,
+        DATABASE_URL: 'dummy-url-for-build'
+      }
+    }
     
     // Sprawdzamy czy mamy odpowiednią zmienną DATABASE_URL
     const databaseUrl = getDatabaseUrl()

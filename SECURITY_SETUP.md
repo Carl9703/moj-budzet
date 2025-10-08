@@ -9,7 +9,7 @@
 ```
 
 ```env
-# Database - dla development
+# Database - dla development (lokalnie)
 DATABASE_URL_DEV=postgresql://user:password@localhost:5432/budget_dev
 
 # Security - WYGENERUJ WŁASNY KLUCZ!
@@ -91,7 +91,9 @@ NODE_ENV=production
 ### 🔄 Automatyczne przełączanie baz danych:
 
 Aplikacja automatycznie wybiera odpowiednią bazę danych:
-- **Gałąź `main`** → używa `DATABASE_URL_MAIN`
-- **Gałąź `dev`** → używa `DATABASE_URL_DEV`
+- **Gałąź `main`** → używa `DATABASE_URL_MAIN` (produkcja)
+- **Gałąź `dev`** → używa `DATABASE_URL_DEV` (staging)
 - **Lokalnie** → używa `DATABASE_URL_DEV` z `.env.local`
+
+**Nie potrzebujesz standardowej zmiennej `DATABASE_URL` - aplikacja sama wybiera odpowiednią!**
 
