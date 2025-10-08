@@ -14,7 +14,7 @@ interface Props {
 interface ExpenseData {
     amount: number
     description: string
-    envelopeId: string
+    envelopeId: string | null
     category: string
     date: string
 }
@@ -80,10 +80,13 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
             return
         }
 
+        // Znajdź kopertę "Wolne środki (roczne)" jeśli używamy wolnych środków
+        const freeFundsEnvelope = useFreeFunds ? envelopes.find(e => e.name === 'Wolne środki (roczne)') : null
+
         onSave({
             amount: Number(amount),
             description,
-            envelopeId: useFreeFunds ? null : selectedEnvelope,
+            envelopeId: useFreeFunds ? (freeFundsEnvelope?.id || null) : selectedEnvelope,
             category: useFreeFunds ? 'Wolne środki' : selectedCategory,
             date
         })
