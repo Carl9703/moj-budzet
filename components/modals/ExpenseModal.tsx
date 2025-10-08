@@ -27,6 +27,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const [selectedEnvelope, setSelectedEnvelope] = useState('')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     const [showAllCategories, setShowAllCategories] = useState(false)
+    const [showAllEnvelopes, setShowAllEnvelopes] = useState(false)
 
     const amountInputRef = useRef<HTMLInputElement>(null)
 
@@ -185,7 +186,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         
                         return (
                             <>
-                                {/* Koperty miesięczne */}
+                                {/* Koperty miesięczne - zawsze widoczne */}
                                 {monthlyEnvelopes.length > 0 && (
                                     <>
                                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
@@ -223,8 +224,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                     </>
                                 )}
 
-                                {/* Koperty roczne */}
-                                {finalYearlyEnvelopes.length > 0 && (
+                                {/* Koperty roczne - tylko po rozwinięciu */}
+                                {showAllEnvelopes && finalYearlyEnvelopes.length > 0 && (
                                     <>
                                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
                                             📆 Roczne
@@ -260,10 +261,10 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                     </>
                                 )}
 
-                                {/* Przycisk pokaż wszystkie koperty */}
-                                {!showAllCategories && (
+                                {/* Przyciski przełączania widoku kopert */}
+                                {!showAllEnvelopes ? (
                                     <button
-                                        onClick={() => setShowAllCategories(true)}
+                                        onClick={() => setShowAllEnvelopes(true)}
                                         style={{
                                             width: '100%',
                                             padding: '6px',
@@ -276,6 +277,23 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                                         }}
                                     >
                                         Pokaż wszystkie koperty →
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowAllEnvelopes(false)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '6px',
+                                            border: '1px solid var(--accent-primary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'var(--accent-light)',
+                                            color: 'var(--accent-primary)',
+                                            cursor: 'pointer',
+                                            fontSize: '12px',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        ← Pokaż tylko popularne koperty
                                     </button>
                                 )}
                             </>
