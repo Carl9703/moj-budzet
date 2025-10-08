@@ -9,7 +9,7 @@
 ```
 
 ```env
-# Database
+# Database - dla development
 DATABASE_URL_DEV=postgresql://user:password@localhost:5432/budget_dev
 
 # Security - WYGENERUJ WŁASNY KLUCZ!
@@ -68,15 +68,30 @@ Aplikacja teraz:
 
 ---
 
-## 📝 Dla produkcji (Vercel/Railway):
+## 📝 Dla produkcji (Vercel):
 
-W dashboard swojego providera ustaw zmienne środowiskowe:
+W dashboard Vercel ustaw zmienne środowiskowe dla różnych gałęzi:
 
+**Dla gałęzi `main` (produkcja):**
 ```
-DATABASE_URL=<production-database-url>
+DATABASE_URL_MAIN=<production-database-url>
 JWT_SECRET=<inny-losowy-string-niz-w-dev>
 NODE_ENV=production
 ```
 
+**Dla gałęzi `dev` (staging):**
+```
+DATABASE_URL_DEV=<staging-database-url>
+JWT_SECRET=<inny-losowy-string-niz-w-main>
+NODE_ENV=production
+```
+
 **NIGDY NIE UŻYWAJ TEGO SAMEGO JWT_SECRET w dev i production!**
+
+### 🔄 Automatyczne przełączanie baz danych:
+
+Aplikacja automatycznie wybiera odpowiednią bazę danych:
+- **Gałąź `main`** → używa `DATABASE_URL_MAIN`
+- **Gałąź `dev`** → używa `DATABASE_URL_DEV`
+- **Lokalnie** → używa `DATABASE_URL_DEV` z `.env.local`
 
