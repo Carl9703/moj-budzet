@@ -62,12 +62,14 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         // Zapisz użycie kategorii
         trackCategoryUsage(categoryId)
         
-        // Automatycznie wybierz kopertę na podstawie kategorii
-        const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
-        if (category && category.defaultEnvelope) {
-            const envelope = envelopes.find(e => e.name === category.defaultEnvelope)
-            if (envelope) {
-                setSelectedEnvelope(envelope.id)
+        // Automatycznie wybierz kopertę na podstawie kategorii TYLKO jeśli nie wybrano jeszcze koperty
+        if (!selectedEnvelope) {
+            const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+            if (category && category.defaultEnvelope) {
+                const envelope = envelopes.find(e => e.name === category.defaultEnvelope)
+                if (envelope) {
+                    setSelectedEnvelope(envelope.id)
+                }
             }
         }
     }
