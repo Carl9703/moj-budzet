@@ -90,9 +90,18 @@ export default function ConfigPage() {
   if (salaryNum > 0 && totalTransfers > salaryNum) warnings.push('Suma przelewów przekracza domyślną wypłatę')
 
   const handleEnvelopeChange = (envelopeId: string, plannedAmount: number) => {
-    setEnvelopes(prev => prev.map(e => 
-      e.id === envelopeId ? { ...e, plannedAmount } : e
-    ))
+    // Sprawdź czy to koperta miesięczna czy roczna
+    const isYearly = yearlyEnvelopes.some(e => e.id === envelopeId)
+    
+    if (isYearly) {
+      setYearlyEnvelopes(prev => prev.map(e => 
+        e.id === envelopeId ? { ...e, plannedAmount } : e
+      ))
+    } else {
+      setEnvelopes(prev => prev.map(e => 
+        e.id === envelopeId ? { ...e, plannedAmount } : e
+      ))
+    }
   }
 
   const handleSave = async () => {
@@ -105,6 +114,7 @@ export default function ConfigPage() {
         defaultToVacation: Number(defaultToVacation||0),
         defaultToInvestment: Number(defaultToInvestment||0),
         monthlyEnvelopes: envelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
+        yearlyEnvelopes: yearlyEnvelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
       }
       const res = await authorizedFetch('/api/config', { method: 'PUT', body: JSON.stringify(payload) })
       if (res.ok) {

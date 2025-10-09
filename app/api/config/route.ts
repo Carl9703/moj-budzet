@@ -66,6 +66,7 @@ export async function PUT(request: NextRequest) {
             defaultToVacation,
             defaultToInvestment,
             monthlyEnvelopes,
+            yearlyEnvelopes,
         } = body as {
             defaultSalary?: number
             defaultToJoint?: number
@@ -73,6 +74,7 @@ export async function PUT(request: NextRequest) {
             defaultToVacation?: number
             defaultToInvestment?: number
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
+            yearlyEnvelopes?: { id: string; plannedAmount: number }[]
         }
 
         const updated = await prisma.userConfig.upsert({
@@ -97,6 +99,16 @@ export async function PUT(request: NextRequest) {
         // aktualizuj domyślne plany dla kopert miesięcznych, jeśli podano
         if (Array.isArray(monthlyEnvelopes) && monthlyEnvelopes.length > 0) {
             for (const env of monthlyEnvelopes) {
+                await prisma.envelope.update({
+                    where: { id: env.id },
+                    data: { plannedAmount: env.plannedAmount },
+                })
+            }
+        }
+
+        // aktualizuj domyślne plany dla kopert rocznych, jeśli podano
+        if (Array.isArray(yearlyEnvelopes) && yearlyEnvelopes.length > 0) {
+            for (const env of yearlyEnvelopes) {
                 await prisma.envelope.update({
                     where: { id: env.id },
                     data: { plannedAmount: env.plannedAmount },
