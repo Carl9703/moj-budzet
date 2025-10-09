@@ -138,6 +138,11 @@ export async function POST(request: NextRequest) {
             success: true, 
             message: 'Koperty zostały utworzone pomyślnie' 
         })
+        
+        })() // Zamykamy operationPromise
+        
+        // Uruchom operację z timeoutem
+        await Promise.race([operationPromise, timeoutPromise])
 
     } catch (error) {
         return NextResponse.json(
