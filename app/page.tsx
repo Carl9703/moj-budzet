@@ -269,13 +269,6 @@ export default function HomePage() {
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
                                 type="monthly"
                             />
-
-                            {/* STAŁE PRZELEWY */}
-                            <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div className="smooth-all hover-lift">
-                                    <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
-                                </div>
-                            </div>
                             
                             {/* GRUPA 3: CELE FINANSOWE */}
                             <EnvelopeGroup
@@ -407,6 +400,13 @@ export default function HomePage() {
                             </div>
                         </div>
                     )}
+
+                    {/* STAŁE PRZELEWY */}
+                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div className="smooth-all hover-lift">
+                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
+                        </div>
+                    </div>
 
                     {/* FUNDUSZE CELOWE */}
                     <EnvelopeGroup

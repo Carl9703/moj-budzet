@@ -142,32 +142,65 @@ export async function POST(request: NextRequest) {
                 }
 
 
-                // Konto wspólne
+                // Wspólne opłaty (Mieszkanie)
                 if (data.toJoint && data.toJoint > 0) {
                     await tx.transaction.create({
                         data: {
                             userId: userId,
                             type: 'expense',
                             amount: data.toJoint,
-                            description: 'Transfer: Konto wspólne',
+                            description: 'Wspólne opłaty',
                             date: data.date ? new Date(data.date) : new Date(),
                             includeInStats: true
                         }
                     })
                 }
 
-                // Inwestycje
+                // IKE (Budowanie Przyszłości)
                 if (data.toInvestment && data.toInvestment > 0) {
                     await tx.transaction.create({
                         data: {
                             userId: userId,
                             type: 'expense',
                             amount: data.toInvestment,
-                            description: 'Transfer: Inwestycje',
+                            description: 'IKE',
                             date: data.date ? new Date(data.date) : new Date(),
                             includeInStats: true
                         }
                     })
+                }
+
+                // Fundusz Awaryjny
+                if (data.toSavings && data.toSavings > 0) {
+                    const funduszAwaryjnyEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Fundusz Awaryjny',
+                            type: 'monthly'
+                        }
+                    })
+
+                    if (funduszAwaryjnyEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: funduszAwaryjnyEnvelope.id },
+                            data: {
+                                currentAmount: funduszAwaryjnyEnvelope.currentAmount + data.toSavings
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toSavings,
+                                description: 'Fundusz Awaryjny',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: funduszAwaryjnyEnvelope.id,
+                                category: 'emergency',
+                                includeInStats: true
+                            }
+                        })
+                    }
                 }
 
                 // Alokacja do kopert miesięcznych
