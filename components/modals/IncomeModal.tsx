@@ -317,16 +317,6 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>👫 Konto wspólne:</span>
-                            <input
-                                type="number"
-                                value={toJoint}
-                                onChange={(e) => setToJoint(e.target.value)}
-                                style={inputStyle}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>📈 IKE (Budowanie Przyszłości):</span>
                             <input
                                 type="number"
@@ -352,6 +342,16 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                 type="number"
                                 value={toVacation}
                                 onChange={(e) => setToVacation(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>🚨 Fundusz Awaryjny:</span>
+                            <input
+                                type="number"
+                                value={toSavings}
+                                onChange={(e) => setToSavings(e.target.value)}
                                 style={inputStyle}
                             />
                         </div>

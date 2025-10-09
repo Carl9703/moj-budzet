@@ -401,12 +401,6 @@ export default function HomePage() {
                         </div>
                     )}
 
-                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div className="smooth-all hover-lift">
-                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
-                        </div>
-                    </div>
-
                     {/* FUNDUSZE CELOWE */}
                     <EnvelopeGroup
                         title="🎯 Fundusze celowe"
@@ -415,6 +409,12 @@ export default function HomePage() {
                         envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
                         type="yearly"
                     />
+
+                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div className="smooth-all hover-lift">
+                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
+                        </div>
+                    </div>
                 </div>
             </div>
 

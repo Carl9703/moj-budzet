@@ -27,6 +27,7 @@ export default function ConfigPage() {
   const [defaultToVacation, setDefaultToVacation] = useState<string>('0')
   const [defaultToInvestment, setDefaultToInvestment] = useState<string>('0')
   const [envelopes, setEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
+  const [yearlyEnvelopes, setYearlyEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -51,6 +52,15 @@ export default function ConfigPage() {
           icon: e.icon,
           plannedAmount: e.plannedAmount,
           currentAmount: e.currentAmount,
+          group: e.group
+        })))
+        setYearlyEnvelopes((data?.yearlyEnvelopes || []).map((e: any) => ({
+          id: e.id,
+          name: e.name,
+          icon: e.icon,
+          plannedAmount: e.plannedAmount,
+          currentAmount: e.currentAmount,
+          group: e.group
         })))
       } catch {
         // ignore
@@ -180,6 +190,15 @@ export default function ConfigPage() {
         icon="🎯"
         color="rgba(59, 130, 246, 0.1)"
         envelopes={envelopes.filter(e => e.group === 'financial')}
+        onEnvelopeChange={handleEnvelopeChange}
+      />
+
+      {/* FUNDUSZE CELOWE */}
+      <EnvelopeGroupConfig
+        title="🎯 Fundusze celowe"
+        icon="🎯"
+        color="rgba(245, 158, 11, 0.1)"
+        envelopes={yearlyEnvelopes.filter(e => e.group === 'target')}
         onEnvelopeChange={handleEnvelopeChange}
       />
 

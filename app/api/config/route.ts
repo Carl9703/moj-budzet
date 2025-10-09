@@ -35,7 +35,14 @@ export async function GET(request: NextRequest) {
             select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
         })
 
-        return NextResponse.json({ config, monthlyEnvelopes })
+        // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
+        const yearlyEnvelopes = await prisma.envelope.findMany({
+            where: { userId, type: 'yearly' },
+            orderBy: { name: 'asc' },
+            select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
+        })
+
+        return NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
     } catch (error) {
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
