@@ -6,6 +6,13 @@ export async function POST(request: NextRequest) {
     try {
         console.log('🚀 Rozpoczynam tworzenie kopert...')
         
+        // Timeout dla całej operacji (30 sekund)
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: Operacja trwa zbyt długo')), 30000)
+        })
+        
+        const operationPromise = (async () => {
+        
         // Pobierz userId z JWT tokenu
         let userId: string
         try {
@@ -18,11 +25,17 @@ export async function POST(request: NextRequest) {
 
         // Sprawdź czy użytkownik ma nowe koperty (z grupami)
         console.log('🔍 Sprawdzam istniejące koperty...')
-        const existingEnvelopes = await prisma.envelope.findMany({
-            where: { userId }
-        })
-        console.log('📊 Znaleziono kopert:', existingEnvelopes.length)
-        console.log('📋 Koperty:', existingEnvelopes.map(e => ({ name: e.name, group: e.group })))
+        let existingEnvelopes
+        try {
+            existingEnvelopes = await prisma.envelope.findMany({
+                where: { userId }
+            })
+            console.log('📊 Znaleziono kopert:', existingEnvelopes.length)
+            console.log('📋 Koperty:', existingEnvelopes.map(e => ({ name: e.name, group: e.group })))
+        } catch (error) {
+            console.error('❌ Błąd podczas sprawdzania kopert:', error)
+            throw error
+        }
 
         // Jeśli ma stare koperty (bez group), usuń je i utwórz nowe
         if (existingEnvelopes.length > 0) {

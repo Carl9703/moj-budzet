@@ -9,10 +9,10 @@ export function AutoTransfers({ totalIncome, config }: Props) {
     const hasIncome = totalIncome > 0
     
     const transfers = [
-        { id: 'joint', name: 'Konto wspólne', amount: config?.defaultToJoint || 1500, icon: '👫', status: hasIncome ? 'completed' : 'scheduled', description: 'Wydatki domowe i mieszkaniowe' },
-        { id: 'wesele', name: 'Wesele (cel)', amount: config?.defaultToSavings || 1000, icon: '💍', status: hasIncome ? 'completed' : 'scheduled', description: 'Oszczędności na wesele' },
-        { id: 'vacation', name: 'Wakacje', amount: config?.defaultToVacation || 420, icon: '✈️', status: hasIncome ? 'completed' : 'scheduled', description: 'Koperta wakacyjna' },
-        { id: 'investment', name: 'Inwestycje', amount: config?.defaultToInvestment || 600, icon: '📈', status: hasIncome ? 'completed' : 'scheduled', description: 'Regularne inwestowanie' }
+        { id: 'joint', name: 'Wspólne opłaty (Mieszkanie)', amount: config?.defaultToJoint || 1500, icon: '🏠', status: hasIncome ? 'completed' : 'scheduled', description: 'Wydatki domowe i mieszkaniowe' },
+        { id: 'groceries', name: 'Wspólne zakupy (Żywność)', amount: config?.defaultToVacation || 1200, icon: '🛒', status: hasIncome ? 'completed' : 'scheduled', description: 'Zakupy spożywcze' },
+        { id: 'investment', name: 'IKE (Budowanie Przyszłości)', amount: config?.defaultToInvestment || 600, icon: '📈', status: hasIncome ? 'completed' : 'scheduled', description: 'Regularne inwestowanie' },
+        { id: 'emergency', name: 'Fundusz Awaryjny', amount: config?.defaultToSavings || 1000, icon: '🚨', status: hasIncome ? 'completed' : 'scheduled', description: 'Oszczędności awaryjne' }
     ]
 
     const totalTransfers = transfers.reduce((sum, t) => sum + t.amount, 0)

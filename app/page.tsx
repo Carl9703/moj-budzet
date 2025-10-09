@@ -7,7 +7,6 @@ import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { EnvelopeGroup } from '../components/dashboard/EnvelopeGroup'
 import { QuickActions } from '../components/dashboard/QuickActions'
-import { SavingsGoals } from '../components/dashboard/SavingsGoals'
 import { AutoTransfers } from '../components/dashboard/AutoTransfers'
 import { FloatingActionButton } from '../components/ui/FloatingActionButton'
 import { EmptyState } from '../components/ui/EmptyState'
@@ -219,34 +218,6 @@ export default function HomePage() {
         return <div>Błąd ładowania danych</div>
     }
 
-    const weseLeEnvelope = data.yearlyEnvelopes?.find(e => e.name === 'Wesele')
-    const wakacjeEnvelope = data.yearlyEnvelopes?.find(e => e.name === 'Wakacje')
-
-    const savingsGoals: SavingsGoal[] = []
-    if (weseLeEnvelope) {
-        savingsGoals.push({
-            id: 'wesele',
-            name: 'Wesele',
-            current: weseLeEnvelope.current,
-            target: weseLeEnvelope.planned,
-            monthlyContribution: 1000,
-            icon: '💑'
-        })
-    }
-    if (wakacjeEnvelope) {
-        savingsGoals.push({
-            id: 'wakacje',
-            name: 'Wakacje',
-            current: wakacjeEnvelope.current,
-            target: wakacjeEnvelope.planned,
-            monthlyContribution: 420,
-            icon: '✈️'
-        })
-    }
-
-    const filteredYearlyEnvelopes = data.yearlyEnvelopes?.filter(e =>
-        e.name !== 'Wesele' && e.name !== 'Wakacje'
-    ) || []
 
     return (
         <div className="min-h-screen fade-in-up bg-theme-primary">
@@ -401,11 +372,6 @@ export default function HomePage() {
                     )}
 
                     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {savingsGoals.length > 0 && (
-                            <div className="smooth-all hover-lift">
-                                <SavingsGoals goals={savingsGoals} />
-                            </div>
-                        )}
                         <div className="smooth-all hover-lift">
                             <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
                         </div>
