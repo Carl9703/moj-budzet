@@ -17,24 +17,31 @@ export async function POST(request: NextRequest) {
         }
 
         // Sprawdź czy użytkownik ma nowe koperty (z grupami)
+        console.log('🔍 Sprawdzam istniejące koperty...')
         const existingEnvelopes = await prisma.envelope.findMany({
             where: { userId }
         })
+        console.log('📊 Znaleziono kopert:', existingEnvelopes.length)
+        console.log('📋 Koperty:', existingEnvelopes.map(e => ({ name: e.name, group: e.group })))
 
         // Jeśli ma stare koperty (bez group), usuń je i utwórz nowe
         if (existingEnvelopes.length > 0) {
             const hasNewStructure = existingEnvelopes.some(e => e.group !== null)
+            console.log('🔄 Ma nową strukturę:', hasNewStructure)
             
             if (hasNewStructure) {
+                console.log('❌ Użytkownik już ma nowe koperty - blokuję')
                 return NextResponse.json(
                     { error: 'Użytkownik już ma skonfigurowane koperty' },
                     { status: 400 }
                 )
             } else {
+                console.log('🗑️ Usuwam stare koperty...')
                 // Usuń stare koperty
                 await prisma.envelope.deleteMany({
                     where: { userId }
                 })
+                console.log('✅ Stare koperty usunięte')
             }
         }
 
