@@ -55,17 +55,17 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
     return (
         <Modal title={`🔒 Zamknij miesiąc - ${displayMonth}`} onClose={onClose}>
             <div style={{ marginBottom: '20px' }}>
-                <p style={{ marginBottom: '16px', color: '#4b5563' }}>
+                <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
                     Czy na pewno chcesz zamknąć bieżący miesiąc? Spowoduje to:
                 </p>
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: '#10b981' }}>✓</span>
+                        <span style={{ color: 'var(--success-primary)' }}>✓</span>
                         Reset wszystkich kopert miesięcznych do 0 zł
                     </li>
                     <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: '#10b981' }}>✓</span>
+                        <span style={{ color: 'var(--success-primary)' }}>✓</span>
                         {balance > 0
                             ? `Przeniesienie ${balance} zł (bilans miesiąca) do "Wolnych środków (roczne)"`
                             : balance < 0
@@ -73,24 +73,24 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                                 : 'Bilans miesiąca wynosi 0 zł'}
                     </li>
                     <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: '#10b981' }}>✓</span>
+                        <span style={{ color: 'var(--success-primary)' }}>✓</span>
                         Zapisanie podsumowania miesiąca w historii
                     </li>
                 </ul>
             </div>
 
             {!loading && envelopeStatus.length > 0 && (
-                <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                         Stan kopert (informacyjnie):
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
                         {envelopeStatus.map((e, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{e.icon} {e.name}:</span>
+                                <span style={{ color: 'var(--text-primary)' }}>{e.icon} {e.name}:</span>
                                 <span style={{
                                     fontWeight: '500',
-                                    color: e.current > 0 ? '#059669' : e.current < 0 ? '#dc2626' : '#6b7280'
+                                    color: e.current > 0 ? 'var(--success-primary)' : e.current < 0 ? 'var(--error-primary)' : 'var(--text-secondary)'
                                 }}>
                                     {e.current > 0 ? `Zostało ${formatMoney(e.current, false)}` :
                                         e.current < 0 ? `Przekroczono o ${formatMoney(Math.abs(e.current), false)}` :
@@ -103,39 +103,40 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
             )}
 
             <div style={{
-                backgroundColor: balance >= 0 ? '#d1fae5' : '#fee2e2',
+                backgroundColor: balance >= 0 ? 'var(--bg-success)' : 'var(--bg-error)',
                 padding: '16px',
                 borderRadius: '8px',
-                marginBottom: '20px'
+                marginBottom: '20px',
+                border: `1px solid ${balance >= 0 ? 'var(--success-primary)' : 'var(--error-primary)'}`
             }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
                     Podsumowanie miesiąca:
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Przychody:</span>
-                        <span style={{ fontWeight: '600', color: '#059669' }}>+{monthSummary.income} zł</span>
+                        <span style={{ color: 'var(--text-primary)' }}>Przychody:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--success-primary)' }}>+{monthSummary.income} zł</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Wydatki:</span>
-                        <span style={{ fontWeight: '600', color: '#dc2626' }}>-{monthSummary.expenses} zł</span>
+                        <span style={{ color: 'var(--text-primary)' }}>Wydatki:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--error-primary)' }}>-{monthSummary.expenses} zł</span>
                     </div>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         borderTop: '1px solid',
-                        borderColor: balance >= 0 ? '#86efac' : '#fca5a5',
+                        borderColor: balance >= 0 ? 'var(--success-primary)' : 'var(--error-primary)',
                         paddingTop: '8px',
                         fontWeight: '600'
                     }}>
-                        <span>BILANS (do przeniesienia):</span>
-                        <span style={{ color: balance >= 0 ? '#059669' : '#dc2626', fontSize: '16px' }}>
+                        <span style={{ color: 'var(--text-primary)' }}>BILANS (do przeniesienia):</span>
+                        <span style={{ color: balance >= 0 ? 'var(--success-primary)' : 'var(--error-primary)', fontSize: '16px' }}>
                             {balance >= 0 ? '+' : ''}{balance} zł
                         </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Stopa oszczędności:</span>
-                        <span style={{ fontWeight: '600', color: '#6366f1' }}>
+                        <span style={{ color: 'var(--text-primary)' }}>Stopa oszczędności:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--accent-primary)' }}>
                             {monthSummary.income > 0 ? Math.round((balance / monthSummary.income) * 100) : 0}%
                         </span>
                     </div>
@@ -147,9 +148,10 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                     onClick={onClose}
                     style={{
                         padding: '8px 16px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border-primary)',
                         borderRadius: '4px',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
                         cursor: 'pointer'
                     }}
                 >
@@ -161,7 +163,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                         padding: '8px 16px',
                         border: 'none',
                         borderRadius: '4px',
-                        backgroundColor: '#6366f1',
+                        backgroundColor: 'var(--accent-primary)',
                         color: 'white',
                         cursor: 'pointer',
                         fontWeight: '500'
