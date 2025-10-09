@@ -337,6 +337,36 @@ export default function HomePage() {
                                     
                                     <button 
                                         onClick={async () => {
+                                            try {
+                                                const response = await authorizedFetch('/api/fix-envelope-groups', {
+                                                    method: 'POST'
+                                                })
+                                                if (response.ok) {
+                                                    showToast('Grupy kopert zostały naprawione!', 'success')
+                                                    refetch()
+                                                } else {
+                                                    showToast('Błąd podczas naprawy grup kopert', 'error')
+                                                }
+                                            } catch (error) {
+                                                showToast('Błąd podczas naprawy grup kopert', 'error')
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: 'var(--success-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        🔧 Napraw grupy
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={async () => {
                                             if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane? Ta operacja jest nieodwracalna!')) {
                                                 try {
                                                     const response = await authorizedFetch('/api/reset-database', {
