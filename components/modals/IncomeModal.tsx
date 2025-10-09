@@ -327,31 +327,31 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>💍 Wesele (cel):</span>
-                            <input
-                                type="number"
-                                value={toSavings}
-                                onChange={(e) => setToSavings(e.target.value)}
-                                style={inputStyle}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>✈️ Wakacje (koperta):</span>
-                            <input
-                                type="number"
-                                value={toVacation}
-                                onChange={(e) => setToVacation(e.target.value)}
-                                style={inputStyle}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>📈 Inwestycje:</span>
+                            <span>📈 IKE (Budowanie Przyszłości):</span>
                             <input
                                 type="number"
                                 value={toInvestment}
                                 onChange={(e) => setToInvestment(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>🏠 Wspólne opłaty (Mieszkanie):</span>
+                            <input
+                                type="number"
+                                value={toJoint}
+                                onChange={(e) => setToJoint(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>🛒 Wspólne zakupy (Żywność):</span>
+                            <input
+                                type="number"
+                                value={toVacation}
+                                onChange={(e) => setToVacation(e.target.value)}
                                 style={inputStyle}
                             />
                         </div>

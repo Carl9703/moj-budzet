@@ -41,21 +41,22 @@ export async function POST(request: NextRequest) {
                     }
                 })
 
-                // Transfer do Wesela
-                if (data.toSavings && data.toSavings > 0) {
-                    const weseLeEnvelope = await tx.envelope.findFirst({
+                // Automatyczne wydatki po dodaniu wypłaty
+                // 1. Z koperty "Budowanie Przyszłości" - IKE
+                if (data.toInvestment && data.toInvestment > 0) {
+                    const budowaniePrzyszlosciEnvelope = await tx.envelope.findFirst({
                         where: {
                             userId: userId,
-                            name: 'Wesele',
-                            type: 'yearly'
+                            name: 'Budowanie Przyszłości',
+                            type: 'monthly'
                         }
                     })
 
-                    if (weseLeEnvelope) {
+                    if (budowaniePrzyszlosciEnvelope) {
                         await tx.envelope.update({
-                            where: { id: weseLeEnvelope.id },
+                            where: { id: budowaniePrzyszlosciEnvelope.id },
                             data: {
-                                currentAmount: weseLeEnvelope.currentAmount + data.toSavings
+                                currentAmount: budowaniePrzyszlosciEnvelope.currentAmount + data.toInvestment
                             }
                         })
 
@@ -63,31 +64,65 @@ export async function POST(request: NextRequest) {
                             data: {
                                 userId: userId,
                                 type: 'expense',
-                                amount: data.toSavings,
-                                description: 'Transfer: Wesele',
+                                amount: data.toInvestment,
+                                description: 'IKE',
                                 date: data.date ? new Date(data.date) : new Date(),
-                                envelopeId: weseLeEnvelope.id,
+                                envelopeId: budowaniePrzyszlosciEnvelope.id,
+                                category: 'ike',
                                 includeInStats: true
                             }
                         })
                     }
                 }
 
-                // Transfer do Wakacji
-                if (data.toVacation && data.toVacation > 0) {
-                    const vacationEnvelope = await tx.envelope.findFirst({
+                // 2. Z koperty "Mieszkanie" - Wspólne opłaty
+                if (data.toJoint && data.toJoint > 0) {
+                    const mieszkanieEnvelope = await tx.envelope.findFirst({
                         where: {
                             userId: userId,
-                            name: 'Wakacje',
-                            type: 'yearly'
+                            name: 'Mieszkanie',
+                            type: 'monthly'
                         }
                     })
 
-                    if (vacationEnvelope) {
+                    if (mieszkanieEnvelope) {
                         await tx.envelope.update({
-                            where: { id: vacationEnvelope.id },
+                            where: { id: mieszkanieEnvelope.id },
                             data: {
-                                currentAmount: vacationEnvelope.currentAmount + data.toVacation
+                                currentAmount: mieszkanieEnvelope.currentAmount + data.toJoint
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toJoint,
+                                description: 'Wspólne opłaty',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: mieszkanieEnvelope.id,
+                                category: 'housing-bills',
+                                includeInStats: true
+                            }
+                        })
+                    }
+                }
+
+                // 3. Z koperty "Żywność" - Wspólne zakupy
+                if (data.toVacation && data.toVacation > 0) {
+                    const zywnoscEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Żywność',
+                            type: 'monthly'
+                        }
+                    })
+
+                    if (zywnoscEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: zywnoscEnvelope.id },
+                            data: {
+                                currentAmount: zywnoscEnvelope.currentAmount + data.toVacation
                             }
                         })
 
@@ -96,14 +131,16 @@ export async function POST(request: NextRequest) {
                                 userId: userId,
                                 type: 'expense',
                                 amount: data.toVacation,
-                                description: 'Transfer: Wakacje',
+                                description: 'Wspólne zakupy',
                                 date: data.date ? new Date(data.date) : new Date(),
-                                envelopeId: vacationEnvelope.id,
+                                envelopeId: zywnoscEnvelope.id,
+                                category: 'shared-groceries',
                                 includeInStats: true
                             }
                         })
                     }
                 }
+
 
                 // Konto wspólne
                 if (data.toJoint && data.toJoint > 0) {

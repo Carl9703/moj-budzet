@@ -12,6 +12,8 @@ interface DashboardData {
         spent: number
         planned: number
         current: number
+        activityCount: number
+        group?: string
     }>
     yearlyEnvelopes: Array<{
         id: string
@@ -20,6 +22,7 @@ interface DashboardData {
         spent: number
         planned: number
         current: number
+        group?: string
     }>
     transactions: Array<{
         id: string

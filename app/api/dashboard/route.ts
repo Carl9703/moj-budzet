@@ -157,7 +157,8 @@ export async function GET(request: NextRequest) {
                     spent: spent,
                     planned: e.plannedAmount,
                     current: e.currentAmount,
-                    activityCount: envelopeActivity[e.id] || 0
+                    activityCount: envelopeActivity[e.id] || 0,
+                    group: e.group
                 }
             })
             .sort((a, b) => {
@@ -175,7 +176,8 @@ export async function GET(request: NextRequest) {
                 icon: e.icon,
                 spent: e.currentAmount,
                 planned: e.plannedAmount,
-                current: e.currentAmount
+                current: e.currentAmount,
+                group: e.group
             }))
             .sort((a, b) => a.name.localeCompare(b.name))
 

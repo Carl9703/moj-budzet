@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
+import { EnvelopeGroup } from '../components/dashboard/EnvelopeGroup'
 import { QuickActions } from '../components/dashboard/QuickActions'
 import { SavingsGoals } from '../components/dashboard/SavingsGoals'
 import { AutoTransfers } from '../components/dashboard/AutoTransfers'
@@ -277,73 +278,32 @@ export default function HomePage() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                     gap: '20px'
                 }}>
-                    <div className="slide-in-left">
-                        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
-                            📅 Koperty miesięczne
-                        </h2>
-                        <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
-                            {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
-                                data.monthlyEnvelopes.map((envelope, index) => (
-                                    <div key={`${envelope.id}-${envelope.current}`} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                                        <EnvelopeCard {...envelope} type="monthly" />
-                                    </div>
-                                ))
-                            ) : (
-                                <div style={{ 
-                                    padding: '20px', 
-                                    backgroundColor: 'var(--bg-secondary)', 
-                                    borderRadius: '8px', 
-                                    border: '1px solid var(--border-primary)',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{ fontSize: '24px', marginBottom: '12px' }}>📦</div>
-                                    <h3 style={{ 
-                                        fontSize: '16px', 
-                                        fontWeight: '600', 
-                                        marginBottom: '8px', 
-                                        color: 'var(--text-primary)' 
-                                    }}>
-                                        Brak kopert miesięcznych
-                                    </h3>
-                                    <p style={{ 
-                                        fontSize: '14px', 
-                                        color: 'var(--text-secondary)', 
-                                        marginBottom: '16px' 
-                                    }}>
-                                        Utwórz koperty miesięczne, aby rozpocząć zarządzanie budżetem.
-                                    </p>
-                                    <button 
-                                        onClick={async () => {
-                                            try {
-                                                const response = await authorizedFetch('/api/setup-envelopes', {
-                                                    method: 'POST'
-                                                })
-                                                if (response.ok) {
-                                                    showToast('Koperty zostały utworzone pomyślnie!', 'success')
-                                                    refetch()
-                                                } else {
-                                                    showToast('Błąd tworzenia kopert', 'error')
-                                                }
-                                            } catch {
-                                                showToast('Błąd tworzenia kopert', 'error')
-                                            }
-                                        }}
-                                        style={{
-                                            padding: '8px 16px',
-                                            backgroundColor: 'var(--accent-primary)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            fontWeight: '600'
-                                        }}
-                                    >
-                                        Utwórz koperty
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    {/* GRUPA 1: POTRZEBY */}
+                    <EnvelopeGroup
+                        title="🏡 Potrzeby"
+                        icon="🏡"
+                        color="rgba(34, 197, 94, 0.1)"
+                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'needs') || []}
+                        type="monthly"
+                    />
+                    
+                    {/* GRUPA 2: STYL ŻYCIA */}
+                    <EnvelopeGroup
+                        title="🎉 Styl życia"
+                        icon="🎉"
+                        color="rgba(168, 85, 247, 0.1)"
+                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'lifestyle') || []}
+                        type="monthly"
+                    />
+                    
+                    {/* GRUPA 3: CELE FINANSOWE */}
+                    <EnvelopeGroup
+                        title="🎯 Cele finansowe"
+                        icon="🎯"
+                        color="rgba(59, 130, 246, 0.1)"
+                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'financial') || []}
+                        type="monthly"
+                    />
 
                     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {savingsGoals.length > 0 && (
@@ -356,27 +316,14 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    <div className="slide-in-right">
-                        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>
-                            📆 Koperty roczne
-                        </h2>
-                        <div className="stagger-children" style={{ display: 'grid', gap: '10px' }}>
-                            {filteredYearlyEnvelopes && filteredYearlyEnvelopes.length > 0 ? (
-                                filteredYearlyEnvelopes.map((envelope, index) => (
-                                    <div key={envelope.id} className="smooth-all hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                                        <EnvelopeCard {...envelope} type="yearly" />
-                                    </div>
-                                ))
-                            ) : (
-                                <EmptyState
-                                    icon="📆"
-                                    title="Brak kopert rocznych"
-                                    description="Skontaktuj się z administratorem, aby skonfigurować koperty roczne."
-                                    variant="warning"
-                                />
-                            )}
-                        </div>
-                    </div>
+                    {/* FUNDUSZE CELOWE */}
+                    <EnvelopeGroup
+                        title="🎯 Fundusze celowe"
+                        icon="🎯"
+                        color="rgba(245, 158, 11, 0.1)"
+                        envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
+                        type="yearly"
+                    />
                 </div>
             </div>
 

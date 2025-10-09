@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { EnvelopeGroupConfig } from '@/components/config/EnvelopeGroupConfig'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
@@ -12,6 +13,7 @@ interface MonthlyEnvelopeRow {
   icon: string | null
   plannedAmount: number
   currentAmount: number
+  group?: string
 }
 
 export default function ConfigPage() {
@@ -76,6 +78,12 @@ export default function ConfigPage() {
   const warnings: string[] = []
   const salaryNum = Number(defaultSalary||0)
   if (salaryNum > 0 && totalTransfers > salaryNum) warnings.push('Suma przelewów przekracza domyślną wypłatę')
+
+  const handleEnvelopeChange = (envelopeId: string, plannedAmount: number) => {
+    setEnvelopes(prev => prev.map(e => 
+      e.id === envelopeId ? { ...e, plannedAmount } : e
+    ))
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -148,23 +156,32 @@ export default function ConfigPage() {
         )}
       </div>
 
-      <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
-        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Domyślne kwoty kopert miesięcznych</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {envelopes.map((e, idx) => (
-            <div key={e.id} style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '12px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 18 }}>{e.icon || '📦'}</span>
-                <span className="text-theme-primary" style={{ fontWeight: 500 }}>{e.name}</span>
-              </div>
-              <input type="number" value={e.plannedAmount} onChange={(ev)=>{
-                const v = Number((ev.target as HTMLInputElement).value || 0)
-                setEnvelopes(prev => prev.map((row,i)=> i===idx ? { ...row, plannedAmount: v } : row))
-              }} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* GRUPA 1: POTRZEBY */}
+      <EnvelopeGroupConfig
+        title="🏡 Potrzeby"
+        icon="🏡"
+        color="rgba(34, 197, 94, 0.1)"
+        envelopes={envelopes.filter(e => e.group === 'needs')}
+        onEnvelopeChange={handleEnvelopeChange}
+      />
+      
+      {/* GRUPA 2: STYL ŻYCIA */}
+      <EnvelopeGroupConfig
+        title="🎉 Styl życia"
+        icon="🎉"
+        color="rgba(168, 85, 247, 0.1)"
+        envelopes={envelopes.filter(e => e.group === 'lifestyle')}
+        onEnvelopeChange={handleEnvelopeChange}
+      />
+      
+      {/* GRUPA 3: CELE FINANSOWE */}
+      <EnvelopeGroupConfig
+        title="🎯 Cele finansowe"
+        icon="🎯"
+        color="rgba(59, 130, 246, 0.1)"
+        envelopes={envelopes.filter(e => e.group === 'financial')}
+        onEnvelopeChange={handleEnvelopeChange}
+      />
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={()=>{ window.location.href='/' }} className="nav-button" style={{ padding: '8px 16px', border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}>Anuluj</button>
