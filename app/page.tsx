@@ -278,32 +278,93 @@ export default function HomePage() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                     gap: '20px'
                 }}>
-                    {/* GRUPA 1: POTRZEBY */}
-                    <EnvelopeGroup
-                        title="🏡 Potrzeby"
-                        icon="🏡"
-                        color="rgba(34, 197, 94, 0.1)"
-                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'needs') || []}
-                        type="monthly"
-                    />
-                    
-                    {/* GRUPA 2: STYL ŻYCIA */}
-                    <EnvelopeGroup
-                        title="🎉 Styl życia"
-                        icon="🎉"
-                        color="rgba(168, 85, 247, 0.1)"
-                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'lifestyle') || []}
-                        type="monthly"
-                    />
-                    
-                    {/* GRUPA 3: CELE FINANSOWE */}
-                    <EnvelopeGroup
-                        title="🎯 Cele finansowe"
-                        icon="🎯"
-                        color="rgba(59, 130, 246, 0.1)"
-                        envelopes={data.monthlyEnvelopes?.filter(e => e.group === 'financial') || []}
-                        type="monthly"
-                    />
+                    {/* Sprawdź czy użytkownik ma koperty */}
+                    {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
+                        <>
+                            {/* GRUPA 1: POTRZEBY */}
+                            <EnvelopeGroup
+                                title="🏡 Potrzeby"
+                                icon="🏡"
+                                color="rgba(34, 197, 94, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'needs')}
+                                type="monthly"
+                            />
+                            
+                            {/* GRUPA 2: STYL ŻYCIA */}
+                            <EnvelopeGroup
+                                title="🎉 Styl życia"
+                                icon="🎉"
+                                color="rgba(168, 85, 247, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
+                                type="monthly"
+                            />
+                            
+                            {/* GRUPA 3: CELE FINANSOWE */}
+                            <EnvelopeGroup
+                                title="🎯 Cele finansowe"
+                                icon="🎯"
+                                color="rgba(59, 130, 246, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
+                                type="monthly"
+                            />
+                        </>
+                    ) : (
+                        <div className="slide-in-left">
+                            <div style={{ 
+                                padding: '20px', 
+                                backgroundColor: 'var(--bg-secondary)', 
+                                borderRadius: '8px', 
+                                border: '1px solid var(--border-primary)',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ fontSize: '24px', marginBottom: '12px' }}>📦</div>
+                                <h3 style={{ 
+                                    fontSize: '16px', 
+                                    fontWeight: '600', 
+                                    marginBottom: '8px', 
+                                    color: 'var(--text-primary)' 
+                                }}>
+                                    Brak kopert miesięcznych
+                                </h3>
+                                <p style={{ 
+                                    fontSize: '14px', 
+                                    color: 'var(--text-secondary)', 
+                                    marginBottom: '16px' 
+                                }}>
+                                    Utwórz koperty miesięczne, aby rozpocząć zarządzanie budżetem.
+                                </p>
+                                <button 
+                                    onClick={async () => {
+                                        try {
+                                            const response = await authorizedFetch('/api/setup-envelopes', {
+                                                method: 'POST'
+                                            })
+                                            if (response.ok) {
+                                                showToast('Koperty zostały utworzone pomyślnie!', 'success')
+                                                refetch()
+                                            } else {
+                                                showToast('Błąd podczas tworzenia kopert', 'error')
+                                            }
+                                        } catch (error) {
+                                            showToast('Błąd podczas tworzenia kopert', 'error')
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: 'var(--accent-primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: '500'
+                                    }}
+                                >
+                                    Utwórz koperty
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {savingsGoals.length > 0 && (

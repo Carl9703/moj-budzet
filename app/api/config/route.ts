@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         const monthlyEnvelopes = await prisma.envelope.findMany({
             where: { userId, type: 'monthly' },
             orderBy: { name: 'asc' },
-            select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true },
+            select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
         })
 
         return NextResponse.json({ config, monthlyEnvelopes })
