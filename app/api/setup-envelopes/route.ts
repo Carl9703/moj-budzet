@@ -12,16 +12,26 @@ export async function POST(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        // Sprawdź czy użytkownik już ma koperty
+        // Sprawdź czy użytkownik ma nowe koperty (z grupami)
         const existingEnvelopes = await prisma.envelope.findMany({
             where: { userId }
         })
 
+        // Jeśli ma stare koperty (bez group), usuń je i utwórz nowe
         if (existingEnvelopes.length > 0) {
-            return NextResponse.json(
-                { error: 'Użytkownik już ma skonfigurowane koperty' },
-                { status: 400 }
-            )
+            const hasNewStructure = existingEnvelopes.some(e => e.group !== null)
+            
+            if (hasNewStructure) {
+                return NextResponse.json(
+                    { error: 'Użytkownik już ma skonfigurowane koperty' },
+                    { status: 400 }
+                )
+            } else {
+                // Usuń stare koperty
+                await prisma.envelope.deleteMany({
+                    where: { userId }
+                })
+            }
         }
 
         // GRUPA 1: POTRZEBY (miesięczne)
