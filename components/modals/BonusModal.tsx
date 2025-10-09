@@ -73,7 +73,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
     return (
         <Modal title="💰 WPŁYNĘŁA PREMIA" onClose={onClose}>
             <div style={{ 
-                maxHeight: '85vh',
+                maxHeight: '95vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>

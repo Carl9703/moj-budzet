@@ -103,7 +103,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                 display: 'flex', 
                 flexDirection: 'column', 
                 gap: '8px',
-                maxHeight: '85vh',
+                maxHeight: '95vh',
                 overflowY: 'auto',
                 paddingRight: '8px'
             }}>
