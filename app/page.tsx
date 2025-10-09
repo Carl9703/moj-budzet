@@ -333,35 +333,69 @@ export default function HomePage() {
                                 }}>
                                     Utwórz koperty miesięczne, aby rozpocząć zarządzanie budżetem.
                                 </p>
-                                <button 
-                                    onClick={async () => {
-                                        try {
-                                            const response = await authorizedFetch('/api/setup-envelopes', {
-                                                method: 'POST'
-                                            })
-                                            if (response.ok) {
-                                                showToast('Koperty zostały utworzone pomyślnie!', 'success')
-                                                refetch()
-                                            } else {
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                    <button 
+                                        onClick={async () => {
+                                            try {
+                                                const response = await authorizedFetch('/api/setup-envelopes', {
+                                                    method: 'POST'
+                                                })
+                                                if (response.ok) {
+                                                    showToast('Koperty zostały utworzone pomyślnie!', 'success')
+                                                    refetch()
+                                                } else {
+                                                    showToast('Błąd podczas tworzenia kopert', 'error')
+                                                }
+                                            } catch (error) {
                                                 showToast('Błąd podczas tworzenia kopert', 'error')
                                             }
-                                        } catch (error) {
-                                            showToast('Błąd podczas tworzenia kopert', 'error')
-                                        }
-                                    }}
-                                    style={{
-                                        padding: '8px 16px',
-                                        backgroundColor: 'var(--accent-primary)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: '500'
-                                    }}
-                                >
-                                    Utwórz koperty
-                                </button>
+                                        }}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: 'var(--accent-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        Utwórz koperty
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={async () => {
+                                            if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane? Ta operacja jest nieodwracalna!')) {
+                                                try {
+                                                    const response = await authorizedFetch('/api/reset-database', {
+                                                        method: 'POST'
+                                                    })
+                                                    if (response.ok) {
+                                                        showToast('Dane zostały wyczyszczone!', 'success')
+                                                        refetch()
+                                                    } else {
+                                                        showToast('Błąd podczas czyszczenia danych', 'error')
+                                                    }
+                                                } catch (error) {
+                                                    showToast('Błąd podczas czyszczenia danych', 'error')
+                                                }
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: 'var(--error-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        🗑️ Wyczyść dane
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
