@@ -4,11 +4,15 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function POST(request: NextRequest) {
     try {
+        console.log('🚀 Rozpoczynam tworzenie kopert...')
+        
         // Pobierz userId z JWT tokenu
         let userId: string
         try {
             userId = await getUserIdFromToken(request)
+            console.log('✅ UserId pobrany:', userId)
         } catch (error) {
+            console.error('❌ Błąd autoryzacji:', error)
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
@@ -60,17 +64,24 @@ export async function POST(request: NextRequest) {
         const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...financialGoalsEnvelopes]
         
         for (const envelope of allMonthlyEnvelopes) {
-            await prisma.envelope.create({
-                data: {
-                    userId,
-                    name: envelope.name,
-                    type: 'monthly',
-                    plannedAmount: envelope.plannedAmount,
-                    currentAmount: 0,
-                    icon: envelope.icon,
-                    group: envelope.group
-                }
-            })
+            try {
+                console.log('Tworzenie koperty:', envelope.name, 'group:', envelope.group)
+                await prisma.envelope.create({
+                    data: {
+                        userId,
+                        name: envelope.name,
+                        type: 'monthly',
+                        plannedAmount: envelope.plannedAmount,
+                        currentAmount: 0,
+                        icon: envelope.icon,
+                        group: envelope.group
+                    }
+                })
+                console.log('Koperta utworzona:', envelope.name)
+            } catch (error) {
+                console.error('Błąd podczas tworzenia koperty:', envelope.name, error)
+                throw error
+            }
         }
 
         // FUNDUSZE CELOWE (roczne)
@@ -83,17 +94,24 @@ export async function POST(request: NextRequest) {
         ]
 
         for (const envelope of targetFundsEnvelopes) {
-            await prisma.envelope.create({
-                data: {
-                    userId,
-                    name: envelope.name,
-                    type: 'yearly',
-                    plannedAmount: envelope.plannedAmount,
-                    currentAmount: 0,
-                    icon: envelope.icon,
-                    group: envelope.group
-                }
-            })
+            try {
+                console.log('Tworzenie koperty rocznej:', envelope.name, 'group:', envelope.group)
+                await prisma.envelope.create({
+                    data: {
+                        userId,
+                        name: envelope.name,
+                        type: 'yearly',
+                        plannedAmount: envelope.plannedAmount,
+                        currentAmount: 0,
+                        icon: envelope.icon,
+                        group: envelope.group
+                    }
+                })
+                console.log('Koperta roczna utworzona:', envelope.name)
+            } catch (error) {
+                console.error('Błąd podczas tworzenia koperty rocznej:', envelope.name, error)
+                throw error
+            }
         }
 
         return NextResponse.json({ 
