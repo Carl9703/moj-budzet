@@ -137,16 +137,16 @@ export default function ConfigPage() {
             <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">💍 Wesele (cel)</span>
-            <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">✈️ Wakacje (koperta)</span>
-            <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">📈 Inwestycje</span>
+            <span className="text-theme-primary">📈 IKE (Budowanie Przyszłości)</span>
             <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <span className="text-theme-primary">🏠 Wspólne opłaty (Mieszkanie)</span>
+            <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
+            <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
         </div>
         {warnings.length > 0 && (
