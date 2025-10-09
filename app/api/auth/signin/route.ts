@@ -103,19 +103,41 @@ export async function POST(req: NextRequest) {
 }
 
 async function createDefaultEnvelopes(userId: string) {
-  // Koperty miesięczne
-  const monthlyEnvelopes = [
-    { name: 'Jedzenie', plannedAmount: 1200, icon: '🍕' },
-    { name: 'Transport', plannedAmount: 400, icon: '🚗' },
-    { name: 'Rozrywka', plannedAmount: 300, icon: '🎬' },
-    { name: 'Higiena/Zdrowie', plannedAmount: 200, icon: '💊' },
-    { name: 'Ubrania', plannedAmount: 200, icon: '👕' },
-    { name: 'Dom', plannedAmount: 300, icon: '🏠' },
-    { name: 'Telekom/Subskrypcje', plannedAmount: 150, icon: '📱' },
-    { name: 'Nieprzewidziane', plannedAmount: 250, icon: '⚠️' }
+  // GRUPA 1: POTRZEBY (miesięczne)
+  const needsEnvelopes = [
+    { name: 'Mieszkanie', plannedAmount: 1500, icon: '🏠', group: 'needs' },
+    { name: 'Żywność', plannedAmount: 1200, icon: '🍕', group: 'needs' },
+    { name: 'Transport', plannedAmount: 400, icon: '🚗', group: 'needs' },
+    { name: 'Zdrowie i Higiena', plannedAmount: 300, icon: '💊', group: 'needs' },
+    { name: 'Rachunki i Subskrypcje', plannedAmount: 200, icon: '📱', group: 'needs' }
   ]
 
-  for (const envelope of monthlyEnvelopes) {
+  // GRUPA 2: STYL ŻYCIA (miesięczne)
+  const lifestyleEnvelopes = [
+    { name: 'Wydatki Osobiste', plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
+    { name: 'Gastronomia', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
+    { name: 'Ubrania i Akcesoria', plannedAmount: 200, icon: '👕', group: 'lifestyle' }
+  ]
+
+  // GRUPA 3: CELE FINANSOWE (miesięczne)
+  const financialGoalsEnvelopes = [
+    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'financial' },
+    { name: 'Budowanie Przyszłości', plannedAmount: 800, icon: '📈', group: 'financial' }
+  ]
+
+  // FUNDUSZE CELOWE (roczne)
+  const targetFundsEnvelopes = [
+    { name: 'Auto: Serwis i Ubezpieczenie', plannedAmount: 2000, icon: '🚗', group: 'target' },
+    { name: 'Prezenty i Okazje', plannedAmount: 1500, icon: '🎁', group: 'target' },
+    { name: 'Podróże', plannedAmount: 5000, icon: '✈️', group: 'target' },
+    { name: 'Wesele', plannedAmount: 15000, icon: '💍', group: 'target' },
+    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '🎉', group: 'target' }
+  ]
+
+  // Stwórz wszystkie koperty miesięczne (demo user zaczyna z pełnymi kopertami)
+  const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...financialGoalsEnvelopes]
+  
+  for (const envelope of allMonthlyEnvelopes) {
     await prisma.envelope.create({
       data: {
         userId,
@@ -123,22 +145,14 @@ async function createDefaultEnvelopes(userId: string) {
         type: 'monthly',
         plannedAmount: envelope.plannedAmount,
         currentAmount: envelope.plannedAmount, // Demo user zaczyna z pełnymi kopertami
-        icon: envelope.icon
+        icon: envelope.icon,
+        group: envelope.group
       }
     })
   }
 
-  // Koperty roczne
-  const yearlyEnvelopes = [
-    { name: 'Wesele', plannedAmount: 15000, icon: '💑' },
-    { name: 'Wakacje', plannedAmount: 5000, icon: '✈️' },
-    { name: 'Prezenty', plannedAmount: 2000, icon: '🎁' },
-    { name: 'OC', plannedAmount: 800, icon: '📋' },
-    { name: 'Święta', plannedAmount: 1500, icon: '🎄' },
-    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '💰' }
-  ]
-
-  for (const envelope of yearlyEnvelopes) {
+  // Stwórz wszystkie koperty roczne (demo user ma 30% wypełnienia)
+  for (const envelope of targetFundsEnvelopes) {
     await prisma.envelope.create({
       data: {
         userId,
@@ -146,7 +160,8 @@ async function createDefaultEnvelopes(userId: string) {
         type: 'yearly',
         plannedAmount: envelope.plannedAmount,
         currentAmount: Math.floor(envelope.plannedAmount * 0.3), // 30% wypełnienia
-        icon: envelope.icon
+        icon: envelope.icon,
+        group: envelope.group
       }
     })
   }

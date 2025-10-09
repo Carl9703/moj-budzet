@@ -7,40 +7,61 @@ export interface Category {
 }
 
 export const EXPENSE_CATEGORIES: Category[] = [
-    { id: 'groceries', name: 'Zakupy spożywcze', icon: '🛒', defaultEnvelope: 'Jedzenie', type: 'monthly' },
-    { id: 'restaurants', name: 'Restauracje', icon: '🍕', defaultEnvelope: 'Jedzenie', type: 'monthly' },
+    // GRUPA 1: POTRZEBY - Mieszkanie
+    { id: 'housing-bills', name: 'Wspólne opłaty', icon: '🏠', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
+    { id: 'housing-equipment', name: 'Wyposażenie', icon: '🛋️', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
+    { id: 'housing-repairs', name: 'Naprawy', icon: '🔨', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
+    
+    // GRUPA 1: POTRZEBY - Żywność
+    { id: 'shared-groceries', name: 'Wspólne zakupy', icon: '🛒', defaultEnvelope: 'Żywność', type: 'monthly' },
+    { id: 'personal-groceries', name: 'Moje zakupy', icon: '🥕', defaultEnvelope: 'Żywność', type: 'monthly' },
+    
+    // GRUPA 1: POTRZEBY - Transport
     { id: 'fuel', name: 'Paliwo', icon: '⛽', defaultEnvelope: 'Transport', type: 'monthly' },
-    { id: 'car-service', name: 'Serwis auta', icon: '🔧', defaultEnvelope: 'Transport', type: 'monthly' },
     { id: 'public-transport', name: 'Komunikacja miejska', icon: '🚌', defaultEnvelope: 'Transport', type: 'monthly' },
-    { id: 'parking', name: 'Parking', icon: '🅿️', defaultEnvelope: 'Transport', type: 'monthly' },
-    { id: 'phone', name: 'Telefon', icon: '📱', defaultEnvelope: 'Telekom/Subskrypcje', type: 'monthly' },
-    { id: 'subscriptions', name: 'Subskrypcje', icon: '📺', defaultEnvelope: 'Telekom/Subskrypcje', type: 'monthly' },
-    { id: 'pharmacy', name: 'Apteka', icon: '💊', defaultEnvelope: 'Higiena/Zdrowie', type: 'monthly' },
-    { id: 'doctor', name: 'Lekarz', icon: '👨‍⚕️', defaultEnvelope: 'Higiena/Zdrowie', type: 'monthly' },
-    { id: 'drugstore', name: 'Drogeria', icon: '🧴', defaultEnvelope: 'Higiena/Zdrowie', type: 'monthly' },
-    { id: 'hairdresser', name: 'Fryzjer', icon: '💇', defaultEnvelope: 'Higiena/Zdrowie', type: 'monthly' },
-    { id: 'cinema', name: 'Kino', icon: '🎬', defaultEnvelope: 'Rozrywka', type: 'monthly' },
-    { id: 'hobby', name: 'Hobby', icon: '🎮', defaultEnvelope: 'Rozrywka', type: 'monthly' },
-    { id: 'sport', name: 'Sport', icon: '⚽', defaultEnvelope: 'Rozrywka', type: 'monthly' },
-    { id: 'books', name: 'Książki', icon: '📚', defaultEnvelope: 'Rozrywka', type: 'monthly' },
-    { id: 'clothes', name: 'Odzież', icon: '👕', defaultEnvelope: 'Ubrania', type: 'monthly' },
-    { id: 'shoes', name: 'Obuwie', icon: '👟', defaultEnvelope: 'Ubrania', type: 'monthly' },
-    { id: 'home-equipment', name: 'Wyposażenie', icon: '🏠', defaultEnvelope: 'Dom', type: 'monthly' },
-    { id: 'repairs', name: 'Naprawy', icon: '🔨', defaultEnvelope: 'Dom', type: 'monthly' },
-    { id: 'appliances', name: 'AGD', icon: '🔌', defaultEnvelope: 'Dom', type: 'monthly' },
-    { id: 'emergency', name: 'Nagłe wydatki', icon: '⚠️', defaultEnvelope: 'Nieprzewidziane', type: 'monthly' },
-    { id: 'other', name: 'Inne', icon: '❓', defaultEnvelope: 'Nieprzewidziane', type: 'monthly' },
-    { id: 'flights', name: 'Loty', icon: '✈️', defaultEnvelope: 'Wakacje', type: 'yearly' },
-    { id: 'hotel', name: 'Hotel', icon: '🏨', defaultEnvelope: 'Wakacje', type: 'yearly' },
-    { id: 'vacation-expenses', name: 'Wydatki wakacyjne', icon: '🏖️', defaultEnvelope: 'Wakacje', type: 'yearly' },
-    { id: 'gifts', name: 'Prezenty', icon: '🎁', defaultEnvelope: 'Prezenty', type: 'yearly' },
-    { id: 'insurance', name: 'Ubezpieczenie OC', icon: '📋', defaultEnvelope: 'OC', type: 'yearly' },
-    { id: 'christmas-expenses', name: 'Wydatki świąteczne', icon: '🎅', defaultEnvelope: 'Święta', type: 'yearly' },
+    { id: 'parking', name: 'Parkingi', icon: '🅿️', defaultEnvelope: 'Transport', type: 'monthly' },
+    
+    // GRUPA 1: POTRZEBY - Zdrowie i Higiena
+    { id: 'healthcare', name: 'Lekarz i Leki', icon: '👨‍⚕️', defaultEnvelope: 'Zdrowie i Higiena', type: 'monthly' },
+    { id: 'drugstore', name: 'Drogeria', icon: '🧴', defaultEnvelope: 'Zdrowie i Higiena', type: 'monthly' },
+    
+    // GRUPA 1: POTRZEBY - Rachunki i Subskrypcje
+    { id: 'phone', name: 'Telefon(y)', icon: '📱', defaultEnvelope: 'Rachunki i Subskrypcje', type: 'monthly' },
+    { id: 'subscriptions', name: 'Subskrypcje', icon: '📺', defaultEnvelope: 'Rachunki i Subskrypcje', type: 'monthly' },
+    
+    // GRUPA 2: STYL ŻYCIA - Wydatki Osobiste
+    { id: 'hobby', name: 'Hobby', icon: '🎮', defaultEnvelope: 'Wydatki Osobiste', type: 'monthly' },
+    { id: 'entertainment', name: 'Wyjścia', icon: '🎬', defaultEnvelope: 'Wydatki Osobiste', type: 'monthly' },
+    { id: 'books', name: 'Książki', icon: '📚', defaultEnvelope: 'Wydatki Osobiste', type: 'monthly' },
+    { id: 'sport', name: 'Sport', icon: '⚽', defaultEnvelope: 'Wydatki Osobiste', type: 'monthly' },
+    { id: 'beauty', name: 'Fryzjer/Uroda', icon: '💇', defaultEnvelope: 'Wydatki Osobiste', type: 'monthly' },
+    
+    // GRUPA 2: STYL ŻYCIA - Gastronomia
+    { id: 'restaurants', name: 'Restauracje', icon: '🍕', defaultEnvelope: 'Gastronomia', type: 'monthly' },
+    { id: 'work-lunch', name: 'Lunch w pracy', icon: '🍽️', defaultEnvelope: 'Gastronomia', type: 'monthly' },
+    
+    // GRUPA 2: STYL ŻYCIA - Ubrania i Akcesoria
+    { id: 'clothes', name: 'Odzież', icon: '👕', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
+    { id: 'shoes', name: 'Obuwie', icon: '👟', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
+    { id: 'accessories', name: 'Dodatki', icon: '💍', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
+    
+    // GRUPA 3: CELE FINANSOWE - Budowanie Przyszłości
+    { id: 'ike', name: 'IKE', icon: '📈', defaultEnvelope: 'Budowanie Przyszłości', type: 'monthly' },
+    { id: 'crypto', name: 'Kryptowaluty', icon: '₿', defaultEnvelope: 'Budowanie Przyszłości', type: 'monthly' },
+    
+    // FUNDUSZE CELOWE - Auto: Serwis i Ubezpieczenie
+    { id: 'car-insurance', name: 'Ubezpieczenie', icon: '📋', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },
+    { id: 'car-repairs', name: 'Naprawy', icon: '🔧', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },
+    
+    // FUNDUSZE CELOWE - Podróże
+    { id: 'vacation', name: 'Wakacje', icon: '✈️', defaultEnvelope: 'Podróże', type: 'yearly' },
+    { id: 'weekend-trips', name: 'Wyjazdy Weekendowe', icon: '🏖️', defaultEnvelope: 'Podróże', type: 'yearly' },
+    
+    // PRZYCHODY (bez zmian)
     { id: 'salary', name: 'Wypłata', icon: '💼', defaultEnvelope: '', type: 'monthly' },
     { id: 'bonus', name: 'Premia', icon: '🎁', defaultEnvelope: '', type: 'yearly' },
     { id: 'other-income', name: 'Inne przychody', icon: '💵', defaultEnvelope: '', type: 'monthly' },
-    { id: 'investments', name: 'Inwestycje', icon: '📈', defaultEnvelope: 'Inwestycje', type: 'monthly' },
-    { id: 'wedding-expenses', name: 'Wydatki weselne', icon: '💍', defaultEnvelope: 'Wesele', type: 'yearly' },
+    { id: 'investments', name: 'Inwestycje', icon: '📈', defaultEnvelope: '', type: 'monthly' },
 ]
 
 export const CATEGORY_TO_ENVELOPE_MAP: Record<string, string> = EXPENSE_CATEGORIES.reduce(

@@ -79,11 +79,13 @@ model Envelope {
   plannedAmount Float
   currentAmount Float
   icon          String?
+  group         String?  // 'needs', 'lifestyle', 'financial', 'target'
   
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
   @@index([userId, type])
+  @@index([userId, group])
 }
 
 model Transaction {
