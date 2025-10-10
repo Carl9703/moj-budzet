@@ -15,6 +15,8 @@ interface IncomeData {
     amount: number
     toSavings: number
     toVacation: number
+    toWedding: number
+    toGroceries: number
     toInvestment: number
     toJoint: number
     forExpenses: number
@@ -32,6 +34,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
     const [includeInStats, setIncludeInStats] = useState(true)
     const [toSavings, setToSavings] = useState('1000')
     const [toVacation, setToVacation] = useState('420')
+    const [toWedding, setToWedding] = useState('300')
+    const [toGroceries, setToGroceries] = useState('500')
     const [toInvestment, setToInvestment] = useState('600')
     const [toJoint, setToJoint] = useState('1500')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -61,6 +65,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 setToJoint(String(cfg.defaultToJoint ?? ''))
                 setToSavings(String(cfg.defaultToSavings ?? ''))
                 setToVacation(String(cfg.defaultToVacation ?? ''))
+                setToWedding(String(cfg.defaultToWedding ?? ''))
+                setToGroceries(String(cfg.defaultToGroceries ?? ''))
                 setToInvestment(String(cfg.defaultToInvestment ?? ''))
             } catch {
                 // cicho pomiń, pozostaną wartości domyślne
@@ -126,7 +132,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 date: date
             })
         } else {
-            const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toInvestment) + Number(toJoint)
+            const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toWedding) + Number(toGroceries) + Number(toInvestment) + Number(toJoint)
             const forExpenses = amountNum - totalAllocated
 
             if (amountNum <= 0) {
@@ -148,6 +154,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 amount: amountNum,
                 toSavings: Number(toSavings),
                 toVacation: Number(toVacation),
+                toWedding: Number(toWedding),
+                toGroceries: Number(toGroceries),
                 toInvestment: Number(toInvestment),
                 toJoint: Number(toJoint),
                 forExpenses,
@@ -168,7 +176,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
         color: 'var(--text-primary)'
     }
 
-    const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toInvestment) + Number(toJoint)
+    const totalAllocated = Number(toSavings) + Number(toVacation) + Number(toWedding) + Number(toGroceries) + Number(toInvestment) + Number(toJoint)
     const forExpenses = Number(amount || 0) - totalAllocated
     const canSubmit = incomeType === 'bonus' ?
         (Number(amount || 0) > 0 && totalBonusPercentage === 100) :
@@ -340,8 +348,28 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             <span>🛒 Wspólne zakupy (Żywność):</span>
                             <input
                                 type="number"
+                                value={toGroceries}
+                                onChange={(e) => setToGroceries(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>✈️ Wakacje (Podróże):</span>
+                            <input
+                                type="number"
                                 value={toVacation}
                                 onChange={(e) => setToVacation(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>💍 Wesele:</span>
+                            <input
+                                type="number"
+                                value={toWedding}
+                                onChange={(e) => setToWedding(e.target.value)}
                                 style={inputStyle}
                             />
                         </div>

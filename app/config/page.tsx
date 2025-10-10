@@ -25,6 +25,8 @@ export default function ConfigPage() {
   const [defaultToJoint, setDefaultToJoint] = useState<string>('0')
   const [defaultToSavings, setDefaultToSavings] = useState<string>('0')
   const [defaultToVacation, setDefaultToVacation] = useState<string>('0')
+  const [defaultToWedding, setDefaultToWedding] = useState<string>('0')
+  const [defaultToGroceries, setDefaultToGroceries] = useState<string>('0')
   const [defaultToInvestment, setDefaultToInvestment] = useState<string>('0')
   const [envelopes, setEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
   const [yearlyEnvelopes, setYearlyEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
@@ -44,6 +46,8 @@ export default function ConfigPage() {
           setDefaultToJoint(String(cfg.defaultToJoint ?? 0))
           setDefaultToSavings(String(cfg.defaultToSavings ?? 0))
           setDefaultToVacation(String(cfg.defaultToVacation ?? 0))
+          setDefaultToWedding(String(cfg.defaultToWedding ?? 0))
+          setDefaultToGroceries(String(cfg.defaultToGroceries ?? 0))
           setDefaultToInvestment(String(cfg.defaultToInvestment ?? 0))
         }
         setEnvelopes((data?.monthlyEnvelopes || []).map((e: any) => ({
@@ -84,7 +88,7 @@ export default function ConfigPage() {
     return null
   }
 
-  const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToInvestment||0)
+  const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToWedding||0) + Number(defaultToGroceries||0) + Number(defaultToInvestment||0)
   const warnings: string[] = []
   const salaryNum = Number(defaultSalary||0)
   if (salaryNum > 0 && totalTransfers > salaryNum) warnings.push('Suma przelewów przekracza domyślną wypłatę')
@@ -112,6 +116,8 @@ export default function ConfigPage() {
         defaultToJoint: Number(defaultToJoint||0),
         defaultToSavings: Number(defaultToSavings||0),
         defaultToVacation: Number(defaultToVacation||0),
+        defaultToWedding: Number(defaultToWedding||0),
+        defaultToGroceries: Number(defaultToGroceries||0),
         defaultToInvestment: Number(defaultToInvestment||0),
         monthlyEnvelopes: envelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
         yearlyEnvelopes: yearlyEnvelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
@@ -161,8 +167,16 @@ export default function ConfigPage() {
             <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
+            <span className="text-theme-primary">✈️ Wakacje (Podróże)</span>
             <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <span className="text-theme-primary">💍 Wesele</span>
+            <input type="number" value={defaultToWedding} onChange={e=>setDefaultToWedding(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
+            <input type="number" value={defaultToGroceries} onChange={e=>setDefaultToGroceries(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <span className="text-theme-primary">🚨 Fundusz Awaryjny</span>

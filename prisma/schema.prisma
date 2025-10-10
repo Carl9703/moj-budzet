@@ -118,6 +118,8 @@ model UserConfig {
   defaultToJoint     Float    @default(0)
   defaultToSavings   Float    @default(0)
   defaultToVacation  Float    @default(0)
+  defaultToWedding   Float    @default(0)
+  defaultToGroceries Float    @default(0)
   defaultToInvestment Float   @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt

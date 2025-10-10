@@ -42,8 +42,10 @@ export const incomeSchema = z.object({
   // Dla salary
   toSavings: z.number().nonnegative().optional(),
   toVacation: z.number().nonnegative().optional(),
+  toWedding: z.number().nonnegative().optional(),
   toInvestment: z.number().nonnegative().optional(),
   toJoint: z.number().nonnegative().optional(),
+  toGroceries: z.number().nonnegative().optional(),
   forExpenses: z.number().nonnegative().optional(),
   // Dla bonus
   toGifts: z.number().nonnegative().optional(),

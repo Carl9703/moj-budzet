@@ -170,7 +170,11 @@ export async function GET(request: NextRequest) {
                 desc.includes('transfer:') ||
                 desc.includes('przeniesienie') ||
                 desc.includes('oszczędności') ||
-                ['Wesele', 'Prezenty', 'OC', 'Święta', 'Wolne środki (roczne)'].includes(envelopeName) ||
+                desc.includes('IKE') ||
+                desc.includes('Fundusz Awaryjny') ||
+                desc.includes('Transfer: Wakacje') ||
+                desc.includes('Transfer: Wesele') ||
+                ['Wesele', 'Prezenty', 'OC', 'Święta', 'Wolne środki (roczne)', 'Budowanie Przyszłości', 'Fundusz Awaryjny', 'Podróże'].includes(envelopeName) ||
                 (envelopeName === 'Wakacje' && transaction.amount > 200)
 
             if (isTransfer) {

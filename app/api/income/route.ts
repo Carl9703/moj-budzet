@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
                 }
 
                 // 3. Z koperty "Żywność" - Wspólne zakupy
-                if (data.toVacation && data.toVacation > 0) {
+                if (data.toGroceries && data.toGroceries > 0) {
                     const zywnoscEnvelope = await tx.envelope.findFirst({
                         where: {
                             userId: userId,
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
                         await tx.envelope.update({
                             where: { id: zywnoscEnvelope.id },
                             data: {
-                                currentAmount: zywnoscEnvelope.currentAmount + data.toVacation
+                                currentAmount: zywnoscEnvelope.currentAmount + data.toGroceries
                             }
                         })
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
                             data: {
                                 userId: userId,
                                 type: 'expense',
-                                amount: data.toVacation,
+                                amount: data.toGroceries,
                                 description: 'Wspólne zakupy',
                                 date: data.date ? new Date(data.date) : new Date(),
                                 envelopeId: zywnoscEnvelope.id,
@@ -170,6 +170,72 @@ export async function POST(request: NextRequest) {
                                 date: data.date ? new Date(data.date) : new Date(),
                                 envelopeId: funduszAwaryjnyEnvelope.id,
                                 category: 'emergency',
+                                includeInStats: true
+                            }
+                        })
+                    }
+                }
+
+                // Transfer na Wakacje (koperta roczna)
+                if (data.toVacation && data.toVacation > 0) {
+                    const podrozeEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Podróże',
+                            type: 'yearly'
+                        }
+                    })
+
+                    if (podrozeEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: podrozeEnvelope.id },
+                            data: {
+                                currentAmount: podrozeEnvelope.currentAmount + data.toVacation
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toVacation,
+                                description: 'Transfer: Wakacje',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: podrozeEnvelope.id,
+                                category: 'vacation',
+                                includeInStats: true
+                            }
+                        })
+                    }
+                }
+
+                // Transfer na Wesele (koperta roczna)
+                if (data.toWedding && data.toWedding > 0) {
+                    const weseleEnvelope = await tx.envelope.findFirst({
+                        where: {
+                            userId: userId,
+                            name: 'Wesele',
+                            type: 'yearly'
+                        }
+                    })
+
+                    if (weseleEnvelope) {
+                        await tx.envelope.update({
+                            where: { id: weseleEnvelope.id },
+                            data: {
+                                currentAmount: weseleEnvelope.currentAmount + data.toWedding
+                            }
+                        })
+
+                        await tx.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: data.toWedding,
+                                description: 'Transfer: Wesele',
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: weseleEnvelope.id,
+                                category: 'wedding',
                                 includeInStats: true
                             }
                         })

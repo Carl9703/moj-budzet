@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
                     defaultToJoint: 0,
                     defaultToSavings: 0,
                     defaultToVacation: 0,
+                    defaultToWedding: 0,
+                    defaultToGroceries: 0,
                     defaultToInvestment: 0,
                 },
             })
@@ -64,6 +66,8 @@ export async function PUT(request: NextRequest) {
             defaultToJoint,
             defaultToSavings,
             defaultToVacation,
+            defaultToWedding,
+            defaultToGroceries,
             defaultToInvestment,
             monthlyEnvelopes,
             yearlyEnvelopes,
@@ -72,6 +76,8 @@ export async function PUT(request: NextRequest) {
             defaultToJoint?: number
             defaultToSavings?: number
             defaultToVacation?: number
+            defaultToWedding?: number
+            defaultToGroceries?: number
             defaultToInvestment?: number
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
@@ -84,6 +90,8 @@ export async function PUT(request: NextRequest) {
                 defaultToJoint: defaultToJoint ?? undefined,
                 defaultToSavings: defaultToSavings ?? undefined,
                 defaultToVacation: defaultToVacation ?? undefined,
+                defaultToWedding: defaultToWedding ?? undefined,
+                defaultToGroceries: defaultToGroceries ?? undefined,
                 defaultToInvestment: defaultToInvestment ?? undefined,
             },
             create: {
@@ -92,6 +100,8 @@ export async function PUT(request: NextRequest) {
                 defaultToJoint: defaultToJoint ?? 0,
                 defaultToSavings: defaultToSavings ?? 0,
                 defaultToVacation: defaultToVacation ?? 0,
+                defaultToWedding: defaultToWedding ?? 0,
+                defaultToGroceries: defaultToGroceries ?? 0,
                 defaultToInvestment: defaultToInvestment ?? 0,
             },
         })
