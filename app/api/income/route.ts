@@ -316,8 +316,8 @@ export async function POST(request: NextRequest) {
 
             // Reszta kodu bez zmian...
             const updates = [
-                { name: 'Prezenty i Okazje', amount: (data.toGifts || 0) + (data.toHolidays || 0) },
-                { name: 'Auto: Serwis i Ubezpieczenie', amount: data.toInsurance || 0 },
+                { name: 'Prezenty', amount: data.toGifts || 0 },
+                { name: 'OC', amount: data.toInsurance || 0 },
                 { name: 'Wolne środki (roczne)', amount: data.toFreedom || 0 }
             ]
 

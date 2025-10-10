@@ -26,7 +26,6 @@ interface IncomeData {
     date?: string  // DODANE!
     toGifts?: number  // DODANE dla bonus
     toInsurance?: number  // DODANE dla bonus
-    toHolidays?: number  // DODANE dla bonus
     toFreedom?: number  // DODANE dla bonus
 }
 
@@ -46,9 +45,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
     
     // Stany dla premii
     const [bonusPercentages, setBonusPercentages] = useState({
-        gifts: 20,
+        gifts: 40,
         insurance: 15,
-        holidays: 20,
         freedom: 45
     })
 
@@ -116,7 +114,6 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 date: date,
                 toGifts: calculateAmount(bonusPercentages.gifts),
                 toInsurance: calculateAmount(bonusPercentages.insurance),
-                toHolidays: calculateAmount(bonusPercentages.holidays),
                 toFreedom: calculateAmount(bonusPercentages.freedom)
             })
             onClose()
@@ -587,31 +584,6 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             </span>
                         </div>
 
-                        {/* Prezenty i Okazje (Święta) */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '40px 1fr 80px 100px',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '8px',
-                            backgroundColor: 'var(--bg-tertiary)',
-                            borderRadius: '6px'
-                        }}>
-                            <span style={{ fontSize: '20px' }}>🎄</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty i Okazje</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <input
-                                    type="number"
-                                    value={bonusPercentages.holidays}
-                                    onChange={(e) => setBonusPercentages(prev => ({...prev, holidays: parseInt(e.target.value) || 0}))}
-                                    style={inputStyle}
-                                />
-                                <span style={{ color: 'var(--text-primary)' }}>%</span>
-                            </div>
-                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateAmount(bonusPercentages.holidays)} zł
-                            </span>
-                        </div>
 
                         {/* Wolne środki (roczne) */}
                         <div style={{

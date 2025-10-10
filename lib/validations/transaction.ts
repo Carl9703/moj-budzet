@@ -50,7 +50,6 @@ export const incomeSchema = z.object({
   // Dla bonus
   toGifts: z.number().nonnegative().optional(),
   toInsurance: z.number().nonnegative().optional(),
-  toHolidays: z.number().nonnegative().optional(),
   toFreedom: z.number().nonnegative().optional()
 })
 
