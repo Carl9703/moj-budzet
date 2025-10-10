@@ -22,9 +22,8 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
     const { showToast } = useToast()
     const [amount, setAmount] = useState('1300')
     const [percentages, setPercentages] = useState({
-        gifts: 20,
+        gifts: 40,  // Prezenty + Święta razem
         insurance: 40,
-        holidays: 20,
         freedom: 20
     })
 
@@ -52,9 +51,9 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
 
         onSave({
             amount: Number(amount),
-            toGifts: calculateAmount(percentages.gifts),
+            toGifts: calculateAmount(percentages.gifts), // Prezenty + Święta razem
             toInsurance: calculateAmount(percentages.insurance),
-            toHolidays: calculateAmount(percentages.holidays),
+            toHolidays: 0, // Nie używamy już osobno
             toFreedom: calculateAmount(percentages.freedom)
         })
         onClose()
@@ -119,7 +118,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
             <div style={{ marginBottom: '20px' }}>
                 <h3 style={{ fontWeight: '600', marginBottom: '16px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -170,30 +169,6 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         </span>
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '6px 8px',
-                        backgroundColor: 'var(--bg-tertiary)',
-                        borderRadius: '6px',
-                        fontSize: '13px'
-                    }}>
-                        <span style={{ fontSize: '16px' }}>🎄</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>Święta</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                            <input
-                                type="number"
-                                value={percentages.holidays}
-                                onChange={(e) => handlePercentageChange('holidays', e.target.value)}
-                                style={{...inputStyle, width: '40px', padding: '2px 4px', fontSize: '12px'}}
-                            />
-                            <span style={{ fontSize: '11px' }}>%</span>
-                        </div>
-                        <span style={{ textAlign: 'right', fontWeight: '600', color: '#059669', fontSize: '12px', minWidth: '50px' }}>
-                            {calculateAmount(percentages.holidays)} zł
-                        </span>
-                    </div>
 
                     <div style={{
                         display: 'flex',
