@@ -36,8 +36,11 @@ export default function ConfigPage() {
     let mounted = true
     const load = async () => {
       try {
+        console.log('🔍 Calling /api/config...')
         const res = await authorizedFetch('/api/config', { cache: 'no-store' })
+        console.log('📡 API response status:', res.status)
         const data = await res.json()
+        console.log('📊 Full API response:', data)
         if (!mounted) return
 
         const cfg = data?.config
