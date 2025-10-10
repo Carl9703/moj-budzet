@@ -561,7 +561,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             </span>
                         </div>
 
-                        {/* OC */}
+                        {/* Auto: Serwis i Ubezpieczenie */}
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: '40px 1fr 80px 100px',
@@ -571,8 +571,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             backgroundColor: 'var(--bg-tertiary)',
                             borderRadius: '6px'
                         }}>
-                            <span style={{ fontSize: '20px' }}>📋</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>OC</span>
+                            <span style={{ fontSize: '20px' }}>🚗</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Auto: Serwis i Ubezpieczenie</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <input
                                     type="number"
@@ -587,7 +587,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             </span>
                         </div>
 
-                        {/* Święta */}
+                        {/* Prezenty i Okazje (Święta) */}
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: '40px 1fr 80px 100px',
@@ -598,7 +598,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             borderRadius: '6px'
                         }}>
                             <span style={{ fontSize: '20px' }}>🎄</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Święta</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty i Okazje</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <input
                                     type="number"
@@ -613,7 +613,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             </span>
                         </div>
 
-                        {/* Wolne środki */}
+                        {/* Wolne środki (roczne) */}
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: '40px 1fr 80px 100px',
@@ -624,7 +624,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             borderRadius: '6px'
                         }}>
                             <span style={{ fontSize: '20px' }}>💰</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Wolne środki</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Wolne środki (roczne)</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <input
                                     type="number"
