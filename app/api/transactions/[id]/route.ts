@@ -175,13 +175,22 @@ export async function DELETE(
             })
 
             if (envelope) {
+                let newCurrentAmount: number
+                
+                if (envelope.type === 'monthly') {
+                    // KOPERTY MIESIĘCZNE: przywróć dostępne środki (dodaj)
+                    newCurrentAmount = envelope.currentAmount + transaction.amount
+                } else if (envelope.type === 'yearly') {
+                    // KOPERTY ROCZNE: usuń zebrane środki (odejmij)
+                    newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                } else {
+                    newCurrentAmount = envelope.currentAmount
+                }
+
                 await prisma.envelope.update({
                     where: { id: transaction.envelopeId },
                     data: {
-                        // PRZYWRÓĆ PEŁNĄ KWOTĘ (dodaj z powrotem)
-                        currentAmount: envelope.currentAmount + transaction.amount
-                        // Dla miesięcznych: zwiększ dostępne środki
-                        // Dla rocznych: zmniejsz wydane środki
+                        currentAmount: newCurrentAmount
                     }
                 })
             }
