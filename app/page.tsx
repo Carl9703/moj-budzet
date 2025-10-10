@@ -404,7 +404,7 @@ export default function HomePage() {
                     {/* STAŁE PRZELEWY */}
                     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div className="smooth-all hover-lift">
-                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} />
+                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} transactions={data.transactions || []} />
                         </div>
                     </div>
 
