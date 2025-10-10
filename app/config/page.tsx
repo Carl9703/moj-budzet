@@ -50,6 +50,7 @@ export default function ConfigPage() {
           setDefaultToGroceries(String(cfg.defaultToGroceries ?? 0))
           setDefaultToInvestment(String(cfg.defaultToInvestment ?? 0))
         }
+        console.log('📊 Monthly envelopes from API:', data?.monthlyEnvelopes)
         setEnvelopes((data?.monthlyEnvelopes || []).map((e: any) => ({
           id: e.id,
           name: e.name,
@@ -58,6 +59,7 @@ export default function ConfigPage() {
           currentAmount: e.currentAmount,
           group: e.group
         })))
+        console.log('📊 Yearly envelopes from API:', data?.yearlyEnvelopes)
         setYearlyEnvelopes((data?.yearlyEnvelopes || []).map((e: any) => ({
           id: e.id,
           name: e.name,
@@ -88,6 +90,9 @@ export default function ConfigPage() {
     return null
   }
 
+  console.log('🔍 Current envelopes state:', envelopes)
+  console.log('🔍 Current yearlyEnvelopes state:', yearlyEnvelopes)
+  
   const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToWedding||0) + Number(defaultToGroceries||0) + Number(defaultToInvestment||0)
   const warnings: string[] = []
   const salaryNum = Number(defaultSalary||0)
