@@ -98,11 +98,10 @@ export async function POST(request: NextRequest) {
                 description: data.description || '',
                 date: transactionDate,
                 envelopeId: data.envelopeId || null,
-                category: data.category || null // ✅ Może być null
+                category: data.category || null
             }
         })
 
-        // POPRAWIONA LOGIKA - obsługa wydatków z kopert miesięcznych I rocznych
         if (data.type === 'expense' && data.envelopeId) {
             const envelope = await prisma.envelope.findUnique({
                 where: { id: data.envelopeId }
@@ -110,26 +109,17 @@ export async function POST(request: NextRequest) {
 
             if (envelope) {
                 if (envelope.type === 'monthly') {
-                    // KOPERTY MIESIĘCZNE:
-                    // currentAmount = ile zostało do wydania
-                    // Po wydatku: zmniejsz dostępne środki
                     await prisma.envelope.update({
                         where: { id: data.envelopeId },
                         data: {
                             currentAmount: envelope.currentAmount - data.amount
-                            // Może być ujemne (przekroczenie budżetu)
                         }
                     })
                 } else if (envelope.type === 'yearly') {
-                    // KOPERTY ROCZNE (Wakacje, Wesele, etc.):
-                    // currentAmount = ile mamy zebranego/dostępnego
-                    // Po wydatku: zmniejsz zebraną kwotę
                     await prisma.envelope.update({
                         where: { id: data.envelopeId },
                         data: {
                             currentAmount: envelope.currentAmount - data.amount
-                            // Dla wakacji: 420 - 100 = 320 pozostało
-                            // Może być ujemne jeśli wydamy więcej niż zebrano
                         }
                     })
                 }

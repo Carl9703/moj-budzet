@@ -302,7 +302,6 @@ export async function POST(request: NextRequest) {
             })
 
         } else if (data.type === 'bonus') {
-            // Zapisz premię - DODAJ includeInStats
             await prisma.transaction.create({
                 data: {
                     userId: userId,
@@ -310,13 +309,12 @@ export async function POST(request: NextRequest) {
                     amount: data.amount,
                     description: 'Premia kwartalna',
                     date: data.date ? new Date(data.date) : new Date(),
-                    includeInStats: true  // DODANE - premia zawsze w statystykach
+                    includeInStats: true
                 }
             })
 
-            // Reszta kodu bez zmian...
             const updates = [
-                { name: 'Prezenty i Okazje', amount: (data.toGifts || 0) + (data.toHolidays || 0) }, // "Święta" + "Prezenty" = "Prezenty i Okazje"
+                { name: 'Prezenty i Okazje', amount: (data.toGifts || 0) + (data.toHolidays || 0) },
                 { name: 'Auto: Serwis i Ubezpieczenie', amount: data.toInsurance || 0 },
                 { name: 'Wolne środki (roczne)', amount: data.toFreedom || 0 }
             ]

@@ -25,16 +25,6 @@ const IncomeModal = lazy(() => import('../components/modals/IncomeModal').then(m
 const ExpenseModal = lazy(() => import('../components/modals/ExpenseModal').then(m => ({ default: m.ExpenseModal })))
 const CloseMonthModal = lazy(() => import('../components/modals/CloseMonthModal').then(m => ({ default: m.CloseMonthModal })))
 
-interface SavingsGoal {
-    id: string
-    name: string
-    current: number
-    target: number
-    monthlyContribution: number
-    icon: string
-}
-
-
 export default function HomePage() {
     const router = useRouter()
     const { isAuthenticated, isCheckingAuth } = useAuth()

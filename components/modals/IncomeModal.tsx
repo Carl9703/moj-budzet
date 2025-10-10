@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/Toast'
 interface Props {
     onClose: () => void
     onSave: (data: IncomeData) => void
-    onSwitchToBonus?: () => void // Deprecated - nie używamy już
+    onSwitchToBonus?: () => void
 }
 
 interface IncomeData {
@@ -21,12 +21,12 @@ interface IncomeData {
     toJoint: number
     forExpenses: number
     description?: string
-    includeInStats?: boolean  // DODANE!
-    type?: string  // DODANE!
-    date?: string  // DODANE!
-    toGifts?: number  // DODANE dla bonus
-    toInsurance?: number  // DODANE dla bonus
-    toFreedom?: number  // DODANE dla bonus
+    includeInStats?: boolean
+    type?: string
+    date?: string
+    toGifts?: number
+    toInsurance?: number
+    toFreedom?: number
 }
 
 export function IncomeModal({ onClose, onSave }: Props) {

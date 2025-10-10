@@ -105,16 +105,8 @@ export async function PATCH(
                 let newCurrentAmount = envelope.currentAmount
 
                 if (envelope.type === 'monthly') {
-                    // KOPERTY MIESIĘCZNE:
-                    // currentAmount = ile zostało w kopercie
-                    // Dodatnia różnica = zwrot (dodaj do koperty)
-                    // Ujemna różnica = dodatkowy wydatek (odejmij od koperty)
                     newCurrentAmount = envelope.currentAmount + amountDifference
-
                 } else if (envelope.type === 'yearly') {
-                    // KOPERTY ROCZNE:
-                    // currentAmount = ile zebraliśmy/wydano
-                    // Logika podobna - różnica wpływa na stan koperty
                     newCurrentAmount = envelope.currentAmount + amountDifference
                 }
 
@@ -122,7 +114,6 @@ export async function PATCH(
                     where: { id: originalTransaction.envelopeId },
                     data: {
                         currentAmount: newCurrentAmount
-                        // UWAGA: Może być ujemne (przekroczenie budżetu)
                     }
                 })
             }
@@ -178,10 +169,8 @@ export async function DELETE(
                 let newCurrentAmount: number
                 
                 if (envelope.type === 'monthly') {
-                    // KOPERTY MIESIĘCZNE: przywróć dostępne środki (dodaj)
                     newCurrentAmount = envelope.currentAmount + transaction.amount
                 } else if (envelope.type === 'yearly') {
-                    // KOPERTY ROCZNE: usuń zebrane środki (odejmij)
                     newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
                 } else {
                     newCurrentAmount = envelope.currentAmount
@@ -206,7 +195,6 @@ export async function DELETE(
                 await prisma.envelope.update({
                     where: { id: transaction.envelopeId },
                     data: {
-                        // USUŃ KWOTĘ (odejmij)
                         currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
                     }
                 })
