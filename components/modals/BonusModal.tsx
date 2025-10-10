@@ -22,10 +22,10 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
     const { showToast } = useToast()
     const [amount, setAmount] = useState('1300')
     const [percentages, setPercentages] = useState({
-        gifts: 40,
+        gifts: 20,
         insurance: 40,
         holidays: 20,
-        freedom: 0
+        freedom: 20
     })
 
     const calculateAmount = (percentage: number) => {
