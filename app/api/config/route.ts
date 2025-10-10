@@ -30,12 +30,16 @@ export async function GET(request: NextRequest) {
             })
         }
 
+        console.log('🔍 Config API - userId:', userId)
+        
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
         const monthlyEnvelopes = await prisma.envelope.findMany({
             where: { userId, type: 'monthly' },
             orderBy: { name: 'asc' },
             select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
         })
+        
+        console.log('📊 Monthly envelopes found:', monthlyEnvelopes.length)
 
         // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
         const yearlyEnvelopes = await prisma.envelope.findMany({
@@ -43,6 +47,8 @@ export async function GET(request: NextRequest) {
             orderBy: { name: 'asc' },
             select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
         })
+        
+        console.log('📊 Yearly envelopes found:', yearlyEnvelopes.length)
 
         return NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
     } catch (error) {
