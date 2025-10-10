@@ -187,6 +187,23 @@ export async function DELETE(
             }
         }
 
+        // Jeśli to był przychód, usuń kwotę z koperty (jeśli była przypisana)
+        if (transaction.type === 'income' && transaction.envelopeId) {
+            const envelope = await prisma.envelope.findUnique({
+                where: { id: transaction.envelopeId }
+            })
+
+            if (envelope) {
+                await prisma.envelope.update({
+                    where: { id: transaction.envelopeId },
+                    data: {
+                        // USUŃ KWOTĘ (odejmij)
+                        currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
+                    }
+                })
+            }
+        }
+
         // Usuń transakcję
         await prisma.transaction.delete({
             where: { id: params.id }
