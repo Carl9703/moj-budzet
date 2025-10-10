@@ -239,7 +239,16 @@ export default function HomePage() {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                     gap: '20px'
                 }}>
-                    {/* Sprawdź czy użytkownik ma koperty */}
+                    {/* FUNDUSZE CELOWE - NA GÓRZE */}
+                    <EnvelopeGroup
+                        title="🎯 Fundusze celowe"
+                        icon="🎯"
+                        color="rgba(245, 158, 11, 0.1)"
+                        envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
+                        type="yearly"
+                    />
+
+                    {/* Sprawdź czy użytkownik ma koperty miesięczne */}
                     {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
                         <>
                             {/* GRUPA 1: POTRZEBY */}
@@ -390,22 +399,18 @@ export default function HomePage() {
                             </div>
                         </div>
                     )}
+                </div>
 
-                    {/* STAŁE PRZELEWY */}
-                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div className="smooth-all hover-lift">
-                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} transactions={data.transactions || []} />
-                        </div>
+                {/* STAŁE PRZELEWY - NA DOLE */}
+                <div className="fade-in-up" style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '20px',
+                    marginTop: '20px'
+                }}>
+                    <div className="smooth-all hover-lift">
+                        <AutoTransfers totalIncome={data.totalIncome || 0} config={config} transactions={data.transactions || []} />
                     </div>
-
-                    {/* FUNDUSZE CELOWE */}
-                    <EnvelopeGroup
-                        title="🎯 Fundusze celowe"
-                        icon="🎯"
-                        color="rgba(245, 158, 11, 0.1)"
-                        envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
-                        type="yearly"
-                    />
                 </div>
             </div>
 
