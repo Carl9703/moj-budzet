@@ -142,33 +142,6 @@ export async function POST(request: NextRequest) {
                 }
 
 
-                // Wspólne opłaty (Mieszkanie)
-                if (data.toJoint && data.toJoint > 0) {
-                    await tx.transaction.create({
-                        data: {
-                            userId: userId,
-                            type: 'expense',
-                            amount: data.toJoint,
-                            description: 'Wspólne opłaty',
-                            date: data.date ? new Date(data.date) : new Date(),
-                            includeInStats: true
-                        }
-                    })
-                }
-
-                // IKE (Budowanie Przyszłości)
-                if (data.toInvestment && data.toInvestment > 0) {
-                    await tx.transaction.create({
-                        data: {
-                            userId: userId,
-                            type: 'expense',
-                            amount: data.toInvestment,
-                            description: 'IKE',
-                            date: data.date ? new Date(data.date) : new Date(),
-                            includeInStats: true
-                        }
-                    })
-                }
 
                 // Fundusz Awaryjny
                 if (data.toSavings && data.toSavings > 0) {
