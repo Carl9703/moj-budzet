@@ -46,8 +46,8 @@ export function IncomeModal({ onClose, onSave }: Props) {
     // Stany dla premii
     const [bonusPercentages, setBonusPercentages] = useState({
         gifts: 40,
-        insurance: 15,
-        freedom: 45
+        insurance: 40,
+        freedom: 20
     })
 
     useEffect(() => {
