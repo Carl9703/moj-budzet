@@ -399,12 +399,15 @@ export default function HomePage() {
                             </div>
                         </div>
                     )}
+                </div>
 
-                    {/* STAŁE PRZELEWY - NA DOLE */}
-                    <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div className="smooth-all hover-lift">
-                            <AutoTransfers totalIncome={data.totalIncome || 0} config={config} transactions={data.transactions || []} />
-                        </div>
+                {/* STAŁE PRZELEWY - FULL WIDTH SECTION */}
+                <div className="fade-in-up" style={{ 
+                    marginTop: '24px',
+                    width: '100%'
+                }}>
+                    <div className="smooth-all hover-lift">
+                        <AutoTransfers totalIncome={data.totalIncome || 0} config={config} transactions={data.transactions || []} />
                     </div>
                 </div>
             </div>
