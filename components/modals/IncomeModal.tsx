@@ -557,7 +557,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                 <span style={{ color: 'var(--text-primary)' }}>%</span>
                             </div>
                             <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateBonusAmount(bonusPercentages.gifts)} zł
+                                {calculateAmount(bonusPercentages.gifts)} zł
                             </span>
                         </div>
 
@@ -583,7 +583,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                 <span style={{ color: 'var(--text-primary)' }}>%</span>
                             </div>
                             <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateBonusAmount(bonusPercentages.insurance)} zł
+                                {calculateAmount(bonusPercentages.insurance)} zł
                             </span>
                         </div>
 
@@ -609,7 +609,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                 <span style={{ color: 'var(--text-primary)' }}>%</span>
                             </div>
                             <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateBonusAmount(bonusPercentages.holidays)} zł
+                                {calculateAmount(bonusPercentages.holidays)} zł
                             </span>
                         </div>
 
@@ -635,7 +635,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                 <span style={{ color: 'var(--text-primary)' }}>%</span>
                             </div>
                             <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateBonusAmount(bonusPercentages.freedom)} zł
+                                {calculateAmount(bonusPercentages.freedom)} zł
                             </span>
                         </div>
                     </div>
