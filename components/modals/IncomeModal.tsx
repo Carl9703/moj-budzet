@@ -84,11 +84,11 @@ export function IncomeModal({ onClose, onSave }: Props) {
         return () => { isMounted = false }
     }, [incomeType])
 
-    const calculateBonusAmount = (percentage: number) => {
+    const totalBonusPercentage = Object.values(bonusPercentages).reduce((a, b) => a + b, 0)
+    
+    const calculateAmount = (percentage: number) => {
         return Math.round((Number(amount) * percentage) / 100)
     }
-
-    const totalBonusPercentage = Object.values(bonusPercentages).reduce((a, b) => a + b, 0)
 
     const handleSubmit = () => {
         const amountNum = Number(amount || 0)
@@ -109,7 +109,11 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 toJoint: 0,
                 forExpenses: 0,
                 type: 'bonus',
-                date: date
+                date: date,
+                toGifts: calculateAmount(bonusPercentages.gifts),
+                toInsurance: calculateAmount(bonusPercentages.insurance),
+                toHolidays: calculateAmount(bonusPercentages.holidays),
+                toFreedom: calculateAmount(bonusPercentages.freedom)
             })
             onClose()
             return
