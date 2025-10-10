@@ -24,6 +24,10 @@ interface IncomeData {
     includeInStats?: boolean  // DODANE!
     type?: string  // DODANE!
     date?: string  // DODANE!
+    toGifts?: number  // DODANE dla bonus
+    toInsurance?: number  // DODANE dla bonus
+    toHolidays?: number  // DODANE dla bonus
+    toFreedom?: number  // DODANE dla bonus
 }
 
 export function IncomeModal({ onClose, onSave }: Props) {
