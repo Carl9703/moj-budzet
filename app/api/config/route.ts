@@ -4,11 +4,15 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
     try {
+        console.log('🔍 Config API - Starting request')
+        
         // Pobierz userId z JWT tokenu
         let userId: string
         try {
             userId = await getUserIdFromToken(request)
+            console.log('✅ Config API - userId extracted:', userId)
         } catch (error) {
+            console.log('❌ Config API - Auth error:', error)
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
@@ -33,22 +37,34 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Config API - userId:', userId)
         
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
-        const monthlyEnvelopes = await prisma.envelope.findMany({
-            where: { userId, type: 'monthly' },
-            orderBy: { name: 'asc' },
-            select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
-        })
-        
-        console.log('📊 Monthly envelopes found:', monthlyEnvelopes.length)
+        let monthlyEnvelopes
+        try {
+            monthlyEnvelopes = await prisma.envelope.findMany({
+                where: { userId, type: 'monthly' },
+                orderBy: { name: 'asc' },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
+            })
+            
+            console.log('📊 Monthly envelopes found:', monthlyEnvelopes.length)
+        } catch (dbError) {
+            console.log('❌ Database error for monthly envelopes:', dbError)
+            throw dbError
+        }
 
         // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
-        const yearlyEnvelopes = await prisma.envelope.findMany({
-            where: { userId, type: 'yearly' },
-            orderBy: { name: 'asc' },
-            select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
-        })
-        
-        console.log('📊 Yearly envelopes found:', yearlyEnvelopes.length)
+        let yearlyEnvelopes
+        try {
+            yearlyEnvelopes = await prisma.envelope.findMany({
+                where: { userId, type: 'yearly' },
+                orderBy: { name: 'asc' },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
+            })
+            
+            console.log('📊 Yearly envelopes found:', yearlyEnvelopes.length)
+        } catch (dbError) {
+            console.log('❌ Database error for yearly envelopes:', dbError)
+            throw dbError
+        }
 
         return NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
     } catch (error) {
