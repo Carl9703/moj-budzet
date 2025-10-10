@@ -316,9 +316,8 @@ export async function POST(request: NextRequest) {
 
             // Reszta kodu bez zmian...
             const updates = [
-                { name: 'Prezenty', amount: data.toGifts },
-                { name: 'OC', amount: data.toInsurance },
-                { name: 'Święta', amount: data.toHolidays },
+                { name: 'Prezenty i Okazje', amount: data.toGifts + data.toHolidays },
+                { name: 'Auto: Serwis i Ubezpieczenie', amount: data.toInsurance },
                 { name: 'Wolne środki (roczne)', amount: data.toFreedom }
             ]
 
@@ -337,6 +336,19 @@ export async function POST(request: NextRequest) {
                             where: { id: envelope.id },
                             data: {
                                 currentAmount: envelope.currentAmount + update.amount
+                            }
+                        })
+                        
+                        // Utwórz transakcję do koperty
+                        await prisma.transaction.create({
+                            data: {
+                                userId: userId,
+                                type: 'expense',
+                                amount: update.amount,
+                                description: `Transfer: ${update.name}`,
+                                date: data.date ? new Date(data.date) : new Date(),
+                                envelopeId: envelope.id,
+                                includeInStats: false
                             }
                         })
                     }

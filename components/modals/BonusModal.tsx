@@ -154,7 +154,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         borderRadius: '6px',
                         fontSize: '13px'
                     }}>
-                        <span style={{ fontSize: '16px' }}>📋</span>
+                        <span style={{ fontSize: '16px' }}>🚗</span>
                         <span style={{ fontWeight: '500', flex: 1 }}>Auto: Serwis i Ubezpieczenie</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
@@ -180,7 +180,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         fontSize: '13px'
                     }}>
                         <span style={{ fontSize: '16px' }}>🎄</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>Prezenty i Okazje</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Święta</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
