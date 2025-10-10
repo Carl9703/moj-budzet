@@ -3,6 +3,7 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
+    console.log('🚀 CONFIG API CALLED - Starting request')
     try {
         console.log('🔍 Config API - Starting request')
         
@@ -27,8 +28,6 @@ export async function GET(request: NextRequest) {
                     defaultToJoint: 0,
                     defaultToSavings: 0,
                     defaultToVacation: 0,
-                    defaultToWedding: 0,
-                    defaultToGroceries: 0,
                     defaultToInvestment: 0,
                 },
             })
@@ -68,6 +67,9 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
     } catch (error) {
+        console.log('❌ CONFIG API ERROR:', error)
+        console.log('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
+        console.log('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }

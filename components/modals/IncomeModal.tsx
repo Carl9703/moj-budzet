@@ -538,7 +538,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             borderRadius: '6px'
                         }}>
                             <span style={{ fontSize: '20px' }}>🎁</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty i Okazje</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <input
                                     type="number"

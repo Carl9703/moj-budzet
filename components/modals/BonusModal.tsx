@@ -130,7 +130,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         fontSize: '13px'
                     }}>
                         <span style={{ fontSize: '16px' }}>🎁</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>Prezenty</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Prezenty i Okazje</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
@@ -155,7 +155,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         fontSize: '13px'
                     }}>
                         <span style={{ fontSize: '16px' }}>📋</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>OC</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Auto: Serwis i Ubezpieczenie</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
@@ -180,7 +180,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         fontSize: '13px'
                     }}>
                         <span style={{ fontSize: '16px' }}>🎄</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>Święta</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Prezenty i Okazje</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
@@ -205,7 +205,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         fontSize: '13px'
                     }}>
                         <span style={{ fontSize: '16px' }}>💰</span>
-                        <span style={{ fontWeight: '500', flex: 1 }}>Wolne środki</span>
+                        <span style={{ fontWeight: '500', flex: 1 }}>Wolne środki (roczne)</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <input
                                 type="number"
