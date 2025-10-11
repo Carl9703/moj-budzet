@@ -473,14 +473,14 @@ export default function HomePage() {
                                 name: e.name,
                                 icon: e.icon,
                                 type: 'monthly' as const,
-                                currentAmount: e.currentAmount
+                                currentAmount: e.current
                             })) || []),
                             ...(data.yearlyEnvelopes?.map(e => ({
                                 id: e.id,
                                 name: e.name,
                                 icon: e.icon,
                                 type: 'yearly' as const,
-                                currentAmount: e.currentAmount
+                                currentAmount: e.current
                             })) || [])
                         ]}
                     />
