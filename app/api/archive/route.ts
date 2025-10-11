@@ -10,6 +10,7 @@ interface TransactionData {
     description: string
     date: string
     category: string
+    isTransfer?: boolean
 }
 
 interface ArchiveCategory {
@@ -148,7 +149,8 @@ export async function GET(request: NextRequest) {
                 amount: transaction.amount,
                 description: transaction.description || 'Brak opisu',
                 date: transaction.date.toISOString(),
-                category: categoryName
+                category: categoryName,
+                isTransfer: isTransfer
             }
 
             // Dodaj do głównej listy transakcji (tylko jeśli to nie jest przychód bez koperty)
@@ -190,7 +192,7 @@ export async function GET(request: NextRequest) {
             })
 
             for (const transaction of expenseTransactions) {
-                const isTransfer = ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Transfery', 'Zamknięcie miesiąca'].includes(transaction.category)
+                const isTransfer = transaction.isTransfer || ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Transfery', 'Zamknięcie miesiąca'].includes(transaction.category)
 
                 if (isTransfer) {
                     if (!transferMap.has(transaction.category)) {
