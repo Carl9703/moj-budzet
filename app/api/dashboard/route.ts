@@ -187,17 +187,11 @@ export async function GET(request: NextRequest) {
                 const envelopeTransactions = monthTransactions.filter(t => 
                     t.envelopeId === e.id
                 )
-                const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
-                    // Dla kopert rocznych: income = transfery do koperty (zwiększa spent)
-                    return t.type === 'income' ? sum + t.amount : sum - t.amount
-                }, 0) * 100) / 100
-
-
                 return {
                     id: e.id,
                     name: e.name,
                     icon: e.icon,
-                    spent: spent,
+                    spent: e.currentAmount, // Dla kopert rocznych używamy currentAmount
                     planned: e.plannedAmount,
                     current: e.currentAmount,
                     group: e.group
