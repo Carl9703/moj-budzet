@@ -97,10 +97,10 @@ export async function POST(request: NextRequest) {
                     userId: userId,
                     type: 'expense',
                     amount: data.amount,
-                    description: `Transfer: ${toEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
+                    description: `Transfer: ${toEnvelope.name}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: fromEnvelope.id,
-                    includeInStats: !!data.toCategory, // Transfer z kategorią wpływa na statystyki
+                    includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
                     transferPairId: transferPairId
                 }
             })
@@ -111,14 +111,29 @@ export async function POST(request: NextRequest) {
                     userId: userId,
                     type: 'income',
                     amount: data.amount,
-                    description: `Transfer: ${fromEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
+                    description: `Transfer: ${fromEnvelope.name}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: toEnvelope.id,
-                    includeInStats: !!data.toCategory, // Transfer z kategorią wpływa na statystyki
-                    transferPairId: transferPairId,
-                    category: data.toCategory || null
+                    includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
+                    transferPairId: transferPairId
                 }
             })
+
+            // Jeśli transfer ma kategorię, utwórz dodatkowy wydatek z kategorią
+            if (data.toCategory) {
+                await tx.transaction.create({
+                    data: {
+                        userId: userId,
+                        type: 'expense',
+                        amount: data.amount,
+                        description: data.toCategory,
+                        date: data.date ? new Date(data.date) : new Date(),
+                        envelopeId: toEnvelope.id,
+                        includeInStats: true, // Wydatek z kategorią wpływa na statystyki
+                        category: data.toCategory
+                    }
+                })
+            }
         })
 
         return NextResponse.json({
