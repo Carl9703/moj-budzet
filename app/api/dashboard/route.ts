@@ -208,7 +208,7 @@ export async function GET(request: NextRequest) {
             totalExpenses,
             monthlyEnvelopes,
             yearlyEnvelopes,
-            transactions: monthTransactions.slice(0, 10),
+            transactions: allTransactions.slice(0, 20), // Więcej transakcji dla AutoTransfers
             isMonthClosed
         })
 
