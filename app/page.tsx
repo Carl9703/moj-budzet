@@ -58,11 +58,13 @@ export default function HomePage() {
                 body: JSON.stringify(transferData)
             })
 
-            if (response.success) {
-                showToast(response.message, 'success')
+            const data = await response.json()
+            
+            if (response.ok && data.success) {
+                showToast(data.message, 'success')
                 refetch()
             } else {
-                showToast(response.error || 'Błąd podczas transferu', 'error')
+                showToast(data.error || 'Błąd podczas transferu', 'error')
             }
         } catch (error) {
             console.error('Transfer error:', error)
