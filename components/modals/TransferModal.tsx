@@ -24,6 +24,7 @@ interface TransferData {
     amount: number
     description: string
     date: string
+    toCategory?: string
 }
 
 export function TransferModal({ onClose, onSave, envelopes }: Props) {
@@ -32,6 +33,7 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
     const [toEnvelopeId, setToEnvelopeId] = useState('')
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
+    const [toCategory, setToCategory] = useState('')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     
     const amountInputRef = useRef<HTMLInputElement>(null)
@@ -70,13 +72,29 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
             toEnvelopeId,
             amount: amountNum,
             description: description.trim() || 'Transfer między kopertami',
-            date
+            date,
+            toCategory: toCategory || undefined
         })
         onClose()
     }
 
     const fromEnvelope = envelopes.find(e => e.id === fromEnvelopeId)
     const toEnvelope = envelopes.find(e => e.id === toEnvelopeId)
+    
+    // Kategorie dostępne dla koperty docelowej
+    const getAvailableCategories = (envelopeId: string) => {
+        const envelope = envelopes.find(e => e.id === envelopeId)
+        if (!envelope) return []
+        
+        // Dla koperty "Budowanie Przyszłości" dodaj kategorie
+        if (envelope.name === 'Budowanie Przyszłości') {
+            return ['IKE', 'IKZE', 'PPK']
+        }
+        
+        return []
+    }
+    
+    const availableCategories = getAvailableCategories(toEnvelopeId)
 
     return (
         <Modal title="💸 TRANSFER MIĘDZY KOPERTAMI" onClose={onClose}>
@@ -159,6 +177,41 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
                             ))}
                     </select>
                 </div>
+
+                {/* KATEGORIA (jeśli dostępna) */}
+                {availableCategories.length > 0 && (
+                    <div>
+                        <label style={{ 
+                            display: 'block', 
+                            fontSize: '14px', 
+                            fontWeight: '600', 
+                            marginBottom: '8px',
+                            color: 'var(--text-primary)'
+                        }}>
+                            🏷️ Kategoria:
+                        </label>
+                        <select
+                            value={toCategory}
+                            onChange={(e) => setToCategory(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid var(--border-primary)',
+                                borderRadius: '8px',
+                                backgroundColor: 'var(--bg-secondary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '14px'
+                            }}
+                        >
+                            <option value="">Wybierz kategorię (opcjonalnie)</option>
+                            {availableCategories.map(category => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 {/* KWOTA */}
                 <div>

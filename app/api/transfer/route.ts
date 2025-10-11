@@ -12,7 +12,8 @@ const transferSchema = z.object({
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/
         const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/
         return dateRegex.test(val) || datetimeRegex.test(val) || !isNaN(Date.parse(val))
-    }, 'Nieprawidłowy format daty').optional()
+    }, 'Nieprawidłowy format daty').optional(),
+    toCategory: z.string().optional()
 })
 
 export async function POST(request: NextRequest) {
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
                     userId: userId,
                     type: 'expense',
                     amount: data.amount,
-                    description: `Transfer: ${toEnvelope.name}`,
+                    description: `Transfer: ${toEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: fromEnvelope.id,
                     includeInStats: false, // Transfer nie wpływa na statystyki
@@ -110,11 +111,12 @@ export async function POST(request: NextRequest) {
                     userId: userId,
                     type: 'income',
                     amount: data.amount,
-                    description: `Transfer: ${fromEnvelope.name}`,
+                    description: `Transfer: ${fromEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: toEnvelope.id,
                     includeInStats: false, // Transfer nie wpływa na statystyki
-                    transferPairId: transferPairId
+                    transferPairId: transferPairId,
+                    category: data.toCategory || null
                 }
             })
         })
