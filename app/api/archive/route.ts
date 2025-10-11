@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
             })
 
             for (const transaction of expenseTransactions) {
-                const isTransfer = transaction.isTransfer || ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Transfery', 'Zamknięcie miesiąca'].includes(transaction.category)
+                const isTransfer = transaction.isTransfer || ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Zamknięcie miesiąca'].includes(transaction.category)
 
                 if (isTransfer) {
                     if (!transferMap.has(transaction.category)) {
