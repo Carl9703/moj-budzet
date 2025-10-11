@@ -6,13 +6,14 @@ interface Props {
     onAddIncome: () => void
     onAddExpense: () => void
     onAddBonus?: () => void
+    onTransfer?: () => void
     onAnalytics?: () => void
     onHistory?: () => void
     onArchive?: () => void
     onConfig?: () => void
 }
 
-export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, onAnalytics, onHistory, onArchive, onConfig }: Props) {
+export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, onTransfer, onAnalytics, onHistory, onArchive, onConfig }: Props) {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
@@ -137,6 +138,42 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             }}
                         >
                             🎁 Dodaj premię
+                        </button>
+                    )}
+
+                    {onTransfer && (
+                        <button
+                            onClick={() => {
+                                onTransfer()
+                                setIsOpen(false)
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '12px 16px',
+                                backgroundColor: '#f59e0b',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '25px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                                transition: 'all 0.2s ease',
+                                transform: 'translateX(0)',
+                                opacity: 1
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateX(-4px)'
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateX(0)'
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)'
+                            }}
+                        >
+                            💸 Transfer
                         </button>
                     )}
                 </div>

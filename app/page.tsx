@@ -23,6 +23,7 @@ import { createIncomeHandler, createExpenseHandler } from '../lib/handlers/modal
 
 const IncomeModal = lazy(() => import('../components/modals/IncomeModal').then(m => ({ default: m.IncomeModal })))
 const ExpenseModal = lazy(() => import('../components/modals/ExpenseModal').then(m => ({ default: m.ExpenseModal })))
+const TransferModal = lazy(() => import('../components/modals/TransferModal').then(m => ({ default: m.TransferModal })))
 const CloseMonthModal = lazy(() => import('../components/modals/CloseMonthModal').then(m => ({ default: m.CloseMonthModal })))
 
 export default function HomePage() {
@@ -37,6 +38,7 @@ export default function HomePage() {
     const [showIncomeModal, setShowIncomeModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
+    const [showTransferModal, setShowTransferModal] = useState(false)
 
     const calculateDaysLeft = () => {
         const now = new Date()
@@ -47,6 +49,26 @@ export default function HomePage() {
 
     const handleIncomeSave = createIncomeHandler(refetch, showToast)
     const handleExpenseSave = createExpenseHandler(refetch, showToast)
+    
+    const handleTransferSave = async (transferData: any) => {
+        try {
+            const response = await authorizedFetch('/api/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(transferData)
+            })
+
+            if (response.success) {
+                showToast(response.message, 'success')
+                refetch()
+            } else {
+                showToast(response.error || 'Błąd podczas transferu', 'error')
+            }
+        } catch (error) {
+            console.error('Transfer error:', error)
+            showToast('Błąd podczas wykonywania transferu', 'error')
+        }
+    }
 
     const handleCloseMonth = async () => {
         if (previousMonthStatus.isClosed) {
@@ -439,6 +461,28 @@ export default function HomePage() {
                         ]}
                     />
                 )}
+                {showTransferModal && (
+                    <TransferModal
+                        onClose={() => setShowTransferModal(false)}
+                        onSave={handleTransferSave}
+                        envelopes={[
+                            ...(data.monthlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                type: 'monthly',
+                                currentAmount: e.currentAmount
+                            })) || []),
+                            ...(data.yearlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                type: 'yearly',
+                                currentAmount: e.currentAmount
+                            })) || [])
+                        ]}
+                    />
+                )}
                 {showCloseMonthModal && (
                     <CloseMonthModal
                         onClose={() => setShowCloseMonthModal(false)}
@@ -457,6 +501,7 @@ export default function HomePage() {
                 onAddIncome={() => setShowIncomeModal(true)}
                 onAddExpense={() => setShowExpenseModal(true)}
                 onAddBonus={() => setShowIncomeModal(true)}
+                onTransfer={() => setShowTransferModal(true)}
                 onAnalytics={() => router.push('/analytics')}
                 onHistory={() => router.push('/history')}
                 onArchive={() => router.push('/archive')}
