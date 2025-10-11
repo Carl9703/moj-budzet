@@ -99,7 +99,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
                 </div>
                 <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease' }}>
                     {type === 'monthly' ?
-                        `${formatMoney(current, false)}/${formatMoney(planned, false)} zł` :
+                        `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
                         isFreedomFunds ?
                             formatMoney(current) :
                             `${formatMoney(current, false)}/${formatMoney(planned, false)} zł`
