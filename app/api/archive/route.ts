@@ -99,8 +99,13 @@ export async function GET(request: NextRequest) {
             let categoryName = 'Inne'
             let isTransfer = false
 
-            // NAJPIERW sprawdź opis (transfery mają priorytet)
-            if (transaction.description) {
+            // NAJPIERW sprawdź zapisaną kategorię (transfery z kategoriami mają priorytet)
+            if (transaction.category) {
+                categoryName = getCategoryName(transaction.category)
+                // Transfer z kategorią to prawdziwy wydatek, nie transfer
+                isTransfer = false
+            } else if (transaction.description) {
+                // DOPIERO POTEM sprawdź opis (transfery bez kategorii)
                 const desc = transaction.description.toLowerCase()
                 if (desc.includes('transfer: konto wspólne')) {
                     categoryName = 'Konto wspólne'
@@ -123,13 +128,9 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // DOPIERO POTEM sprawdź zapisaną kategorię lub kopertę (jeśli to nie transfer)
-            if (!isTransfer) {
-                if (transaction.category) {
-                    categoryName = getCategoryName(transaction.category)
-                } else if (transaction.envelope?.name) {
-                    categoryName = transaction.envelope.name
-                }
+            // OSTATECZNIE sprawdź kopertę (jeśli nie ma kategorii i nie jest transferem)
+            if (!transaction.category && !isTransfer && transaction.envelope?.name) {
+                categoryName = transaction.envelope.name
             }
 
             // Stwórz dane transakcji
