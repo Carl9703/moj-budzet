@@ -83,12 +83,14 @@ export async function POST(request: NextRequest) {
             })
 
             // Zwiększ saldo koperty docelowej
-            await tx.envelope.update({
+            const updatedToEnvelope = await tx.envelope.update({
                 where: { id: toEnvelope.id },
                 data: {
                     currentAmount: toEnvelope.currentAmount + data.amount
                 }
             })
+            
+            console.log(`Transfer: Updated ${toEnvelope.name} from ${toEnvelope.currentAmount} to ${updatedToEnvelope.currentAmount}`)
 
             // Utwórz transakcję "expense" dla koperty źródłowej (wyjście środków)
             await tx.transaction.create({

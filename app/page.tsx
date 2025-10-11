@@ -465,6 +465,7 @@ export default function HomePage() {
                 )}
                 {showTransferModal && (
                     <TransferModal
+                        key={`transfer-${data?.balance || 0}`}
                         onClose={() => setShowTransferModal(false)}
                         onSave={handleTransferSave}
                         envelopes={[
