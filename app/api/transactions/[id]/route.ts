@@ -177,7 +177,8 @@ export async function DELETE(
                     }
                 })
 
-                // Przywróć salda kopert
+                // Przywróć salda kopert - odwróć operacje transferu
+                // expense: przywróć środki do koperty źródłowej
                 if (transaction.type === 'expense' && transaction.envelopeId) {
                     const envelope = await prisma.envelope.findUnique({
                         where: { id: transaction.envelopeId }
@@ -192,6 +193,7 @@ export async function DELETE(
                     }
                 }
 
+                // income: odejmij środki z koperty docelowej (przywróć do stanu sprzed transferu)
                 if (pairedTransaction.type === 'income' && pairedTransaction.envelopeId) {
                     const envelope = await prisma.envelope.findUnique({
                         where: { id: pairedTransaction.envelopeId }
