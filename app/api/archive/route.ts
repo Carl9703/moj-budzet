@@ -124,7 +124,16 @@ export async function GET(request: NextRequest) {
             }
 
             if (!transaction.category && !isTransfer && transaction.envelope?.name) {
-                categoryName = transaction.envelope.name
+                // Sprawdź czy to transfer do koperty rocznej
+                const isYearlyEnvelopeTransfer = transaction.type === 'income' && 
+                    ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(transaction.envelope.name)
+                
+                if (isYearlyEnvelopeTransfer) {
+                    categoryName = transaction.envelope.name
+                    isTransfer = true
+                } else {
+                    categoryName = transaction.envelope.name
+                }
             }
 
             // Stwórz dane transakcji
@@ -137,8 +146,10 @@ export async function GET(request: NextRequest) {
                 category: categoryName
             }
 
-            // Dodaj do głównej listy transakcji
-            monthData.transactions.push(transactionData)
+            // Dodaj do głównej listy transakcji (tylko jeśli to nie jest przychód bez koperty)
+            if (!(transaction.type === 'income' && !transaction.envelopeId)) {
+                monthData.transactions.push(transactionData)
+            }
 
             if (includeInStats) {
                 if (transaction.type === 'income') {
