@@ -187,8 +187,8 @@ export async function GET(request: NextRequest) {
                     return (t.type === 'expense' || t.type === 'income')
                 }
                 
-                // Dla zwykłych transakcji sprawdź includeInStats
-                return (t.type === 'expense' || t.type === 'income') && 
+                // Dla zwykłych transakcji sprawdź includeInStats - TYLKO WYDATKI
+                return (t.type === 'expense') && 
                        originalTransaction?.includeInStats !== false
             })
 
