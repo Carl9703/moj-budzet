@@ -96,12 +96,17 @@ export async function GET(request: NextRequest) {
             let categoryName = 'Inne'
             let isTransfer = false
 
-            if (transaction.category) {
+            // Sprawdź czy to transfer do koperty rocznej (najpierw)
+            if (transaction.envelope?.name && ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(transaction.envelope.name)) {
+                categoryName = transaction.envelope.name
+                isTransfer = true
+            } else if (transaction.category) {
                 categoryName = getCategoryName(transaction.category)
-                isTransfer = false
+                // Sprawdź czy to transfer do koperty rocznej
+                isTransfer = ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(categoryName)
             } else if (transaction.description) {
                 const desc = transaction.description.toLowerCase()
-                console.log(`Transaction description: "${desc}"`)
+                console.log(`Transaction description: "${desc}", categoryName: "${categoryName}", isTransfer: ${isTransfer}`)
                 if (desc.includes('transfer: konto wspólne')) {
                     categoryName = 'Konto wspólne'
                     isTransfer = true
@@ -170,10 +175,19 @@ export async function GET(request: NextRequest) {
             // Mapa transferów
             const transferMap = new Map<string, ArchiveCategory>()
 
-            const expenseTransactions = monthData.transactions.filter(t =>
-                (t.type === 'expense' || t.type === 'income') &&
-                allTransactions.find(at => at.id === t.id)?.includeInStats !== false
-            )
+            const expenseTransactions = monthData.transactions.filter(t => {
+                const originalTransaction = allTransactions.find(at => at.id === t.id)
+                const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
+                
+                // Uwzględnij transfery niezależnie od includeInStats
+                if (isTransfer) {
+                    return (t.type === 'expense' || t.type === 'income')
+                }
+                
+                // Dla zwykłych transakcji sprawdź includeInStats
+                return (t.type === 'expense' || t.type === 'income') && 
+                       originalTransaction?.includeInStats !== false
+            })
 
             for (const transaction of expenseTransactions) {
                 const isTransfer = ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Transfery', 'Zamknięcie miesiąca'].includes(transaction.category)
@@ -194,7 +208,12 @@ export async function GET(request: NextRequest) {
                     transferCategory.transactions.push(transaction)
                 } else {
                     const originalTransaction = allTransactions.find(at => at.id === transaction.id)
-                    const envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                    let envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                    
+                    // Mapuj nazwy kopert na nazwy transferów
+                    if (envelopeName === 'Podróże') {
+                        envelopeName = 'Wakacje'
+                    }
 
                     if (!envelopeMap.has(envelopeName)) {
                         const envelope = allEnvelopes.find(e => e.name === envelopeName)
