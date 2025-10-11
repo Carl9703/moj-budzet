@@ -190,44 +190,44 @@ export async function DELETE(
                 })
 
                 // Przywróć salda kopert - odwróć operacje transferu
-                // expense: przywróć środki do koperty źródłowej
-                if (transaction.type === 'expense' && transaction.envelopeId) {
+                // income: odejmij środki z koperty docelowej (przywróć do stanu sprzed transferu)
+                if (transaction.type === 'income' && transaction.envelopeId) {
                     const envelope = await prisma.envelope.findUnique({
                         where: { id: transaction.envelopeId }
                     })
                     if (envelope) {
-                        console.log(`📤 Restoring ${transaction.amount} to source envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount + transaction.amount}`)
+                        console.log(`📥 Removing ${transaction.amount} from destination envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount - transaction.amount}`)
                         await prisma.envelope.update({
                             where: { id: transaction.envelopeId },
                             data: {
-                                currentAmount: envelope.currentAmount + transaction.amount
+                                currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
                             }
                         })
                     } else {
-                        console.log(`❌ Source envelope not found: ${transaction.envelopeId}`)
+                        console.log(`❌ Destination envelope not found: ${transaction.envelopeId}`)
                     }
                 } else {
-                    console.log(`❌ Cannot restore source: type=${transaction.type}, envelopeId=${transaction.envelopeId}`)
+                    console.log(`❌ Cannot restore destination: type=${transaction.type}, envelopeId=${transaction.envelopeId}`)
                 }
 
-                // income: odejmij środki z koperty docelowej (przywróć do stanu sprzed transferu)
-                if (pairedTransaction.type === 'income' && pairedTransaction.envelopeId) {
+                // expense: przywróć środki do koperty źródłowej
+                if (pairedTransaction.type === 'expense' && pairedTransaction.envelopeId) {
                     const envelope = await prisma.envelope.findUnique({
                         where: { id: pairedTransaction.envelopeId }
                     })
                     if (envelope) {
-                        console.log(`📥 Removing ${pairedTransaction.amount} from destination envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount - pairedTransaction.amount}`)
+                        console.log(`📤 Restoring ${pairedTransaction.amount} to source envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount + pairedTransaction.amount}`)
                         await prisma.envelope.update({
                             where: { id: pairedTransaction.envelopeId },
                             data: {
-                                currentAmount: Math.max(0, envelope.currentAmount - pairedTransaction.amount)
+                                currentAmount: envelope.currentAmount + pairedTransaction.amount
                             }
                         })
                     } else {
-                        console.log(`❌ Destination envelope not found: ${pairedTransaction.envelopeId}`)
+                        console.log(`❌ Source envelope not found: ${pairedTransaction.envelopeId}`)
                     }
                 } else {
-                    console.log(`❌ Cannot restore destination: type=${pairedTransaction.type}, envelopeId=${pairedTransaction.envelopeId}`)
+                    console.log(`❌ Cannot restore source: type=${pairedTransaction.type}, envelopeId=${pairedTransaction.envelopeId}`)
                 }
 
                 return NextResponse.json({
