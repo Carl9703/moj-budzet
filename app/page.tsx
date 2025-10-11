@@ -472,14 +472,14 @@ export default function HomePage() {
                                 id: e.id,
                                 name: e.name,
                                 icon: e.icon,
-                                type: 'monthly',
+                                type: 'monthly' as const,
                                 currentAmount: e.currentAmount
                             })) || []),
                             ...(data.yearlyEnvelopes?.map(e => ({
                                 id: e.id,
                                 name: e.name,
                                 icon: e.icon,
-                                type: 'yearly',
+                                type: 'yearly' as const,
                                 currentAmount: e.currentAmount
                             })) || [])
                         ]}
