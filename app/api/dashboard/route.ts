@@ -170,15 +170,22 @@ export async function GET(request: NextRequest) {
 
         const yearlyEnvelopes = envelopes
             .filter(e => e.type === 'yearly')
-            .map(e => ({
-                id: e.id,
-                name: e.name,
-                icon: e.icon,
-                spent: e.currentAmount,
-                planned: e.plannedAmount,
-                current: e.currentAmount,
-                group: e.group
-            }))
+            .map(e => {
+                const envelopeTransactions = monthTransactions.filter(t => 
+                    t.type === 'expense' && t.envelopeId === e.id
+                )
+                const spent = Math.round(envelopeTransactions.reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+
+                return {
+                    id: e.id,
+                    name: e.name,
+                    icon: e.icon,
+                    spent: spent,
+                    planned: e.plannedAmount,
+                    current: e.currentAmount,
+                    group: e.group
+                }
+            })
             .sort((a, b) => a.name.localeCompare(b.name))
 
         return NextResponse.json({
