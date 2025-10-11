@@ -97,13 +97,13 @@ export async function GET(request: NextRequest) {
             let isTransfer = false
 
             // Sprawdź czy to transfer do koperty rocznej (najpierw)
-            if (transaction.envelope?.name && ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(transaction.envelope.name)) {
+            if (transaction.envelope?.name && ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(transaction.envelope.name)) {
                 categoryName = transaction.envelope.name
                 isTransfer = true
             } else if (transaction.category) {
                 categoryName = getCategoryName(transaction.category)
                 // Sprawdź czy to transfer do koperty rocznej
-                isTransfer = ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(categoryName)
+                isTransfer = ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(categoryName)
             } else if (transaction.description) {
                 const desc = transaction.description.toLowerCase()
                 console.log(`Transaction description: "${desc}", categoryName: "${categoryName}", isTransfer: ${isTransfer}`)
