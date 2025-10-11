@@ -53,6 +53,8 @@ export async function POST(req: NextRequest) {
         defaultToJoint: 1500,
         defaultToSavings: 1000,
         defaultToVacation: 400,
+        defaultToWedding: 0,
+        defaultToGroceries: 0,
         defaultToInvestment: 500
       }
     })
@@ -70,8 +72,15 @@ export async function POST(req: NextRequest) {
     )
 
   } catch (error) {
+    console.error('❌ SIGNUP ERROR:', error)
+    console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
+    
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas tworzenia konta' },
+      { 
+        error: 'Wystąpił błąd podczas tworzenia konta',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
