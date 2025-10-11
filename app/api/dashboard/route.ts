@@ -185,9 +185,12 @@ export async function GET(request: NextRequest) {
             .filter(e => e.type === 'yearly')
             .map(e => {
                 const envelopeTransactions = monthTransactions.filter(t => 
-                    t.type === 'expense' && t.envelopeId === e.id
+                    t.envelopeId === e.id
                 )
-                const spent = Math.round(envelopeTransactions.reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+                const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
+                    // Dla kopert rocznych: income = transfery do koperty (zwiększa spent)
+                    return t.type === 'income' ? sum + t.amount : sum - t.amount
+                }, 0) * 100) / 100
 
 
                 return {
