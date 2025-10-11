@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Modal } from './Modal'
-import { useToast } from '@/hooks/useToast'
+import { Modal } from '../ui/Modal'
+import { useToast } from '../ui/Toast'
 
 interface Envelope {
     id: string

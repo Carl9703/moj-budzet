@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getUserIdFromToken } from '@/lib/auth'
+import { prisma } from '../../../lib/utils/prisma'
+import { getUserIdFromToken } from '../../../lib/auth/jwt'
 import { z } from 'zod'
 
 const transferSchema = z.object({
