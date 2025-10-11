@@ -150,8 +150,17 @@ export async function GET(request: NextRequest) {
                     t.envelopeId === e.id
                 )
                 const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
-                    // Dla kopert miesięcznych: expense = wydatki, income = transfery do koperty
-                    return t.type === 'expense' ? sum + t.amount : sum - t.amount
+                    // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
+                    // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
+                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny' || e.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
+                        return t.type === 'income' ? sum + t.amount : sum - t.amount
+                    } else {
+                        // Koperty wydatkowe: expense zwiększa spent (więcej wydatków)
+                        return t.type === 'expense' ? sum + t.amount : sum - t.amount
+                    }
                 }, 0) * 100) / 100
 
                 return {
