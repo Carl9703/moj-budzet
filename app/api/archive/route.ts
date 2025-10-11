@@ -101,6 +101,7 @@ export async function GET(request: NextRequest) {
                 isTransfer = false
             } else if (transaction.description) {
                 const desc = transaction.description.toLowerCase()
+                console.log(`Transaction description: "${desc}"`)
                 if (desc.includes('transfer: konto wspólne')) {
                     categoryName = 'Konto wspólne'
                     isTransfer = true
@@ -159,7 +160,7 @@ export async function GET(request: NextRequest) {
             const transferMap = new Map<string, ArchiveCategory>()
 
             const expenseTransactions = monthData.transactions.filter(t =>
-                t.type === 'expense' &&
+                (t.type === 'expense' || t.type === 'income') &&
                 allTransactions.find(at => at.id === t.id)?.includeInStats !== false
             )
 
