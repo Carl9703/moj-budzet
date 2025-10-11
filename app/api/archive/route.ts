@@ -1,9 +1,7 @@
-// app/api/archive/route.ts - POPRAWIONA WERSJA z kategoriami
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
-
 
 interface TransactionData {
     id: string
@@ -51,7 +49,7 @@ export async function GET(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        // Pobierz wszystkie transakcje WŁĄCZAJĄC POLE includeInStats
+        // Pobierz wszystkie transakcje
         const allTransactions = await prisma.transaction.findMany({
             where: {
                 userId,
@@ -92,20 +90,16 @@ export async function GET(request: NextRequest) {
 
             const monthData = monthlyData[monthKey]
 
-            // POPRAWKA: Sprawdź includeInStats dla statystyk
             const includeInStats = transaction.includeInStats !== false
 
-            // KATEGORYZACJA TRANSAKCJI - POPRAWIONA KOLEJNOŚĆ
+            // Kategoryzacja transakcji
             let categoryName = 'Inne'
             let isTransfer = false
 
-            // NAJPIERW sprawdź zapisaną kategorię (transfery z kategoriami mają priorytet)
             if (transaction.category) {
                 categoryName = getCategoryName(transaction.category)
-                // Transfer z kategorią to prawdziwy wydatek, nie transfer
                 isTransfer = false
             } else if (transaction.description) {
-                // DOPIERO POTEM sprawdź opis (transfery bez kategorii)
                 const desc = transaction.description.toLowerCase()
                 if (desc.includes('transfer: konto wspólne')) {
                     categoryName = 'Konto wspólne'
@@ -128,7 +122,6 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // OSTATECZNIE sprawdź kopertę (jeśli nie ma kategorii i nie jest transferem)
             if (!transaction.category && !isTransfer && transaction.envelope?.name) {
                 categoryName = transaction.envelope.name
             }
@@ -146,18 +139,16 @@ export async function GET(request: NextRequest) {
             // Dodaj do głównej listy transakcji
             monthData.transactions.push(transactionData)
 
-            // POPRAWKA: Aktualizuj sumy TYLKO dla transakcji includeInStats
             if (includeInStats) {
                 if (transaction.type === 'income') {
                     monthData.income += transaction.amount
                 } else if (transaction.type === 'expense') {
-                    // WSZYSTKIE wydatki (włącznie z transferami) są wliczane do expenses
                     monthData.expenses += transaction.amount
                 }
             }
         }
 
-        // GRUPOWANIE PO KOPERTACH I KATEGORIACH
+        // Grupowanie po kopertach i kategoriach
         for (const monthKey in monthlyData) {
             const monthData = monthlyData[monthKey]
 
@@ -167,7 +158,6 @@ export async function GET(request: NextRequest) {
             // Mapa transferów
             const transferMap = new Map<string, ArchiveCategory>()
 
-            // Przetwórz transakcje wydatkowe TYLKO te ze statystykami
             const expenseTransactions = monthData.transactions.filter(t =>
                 t.type === 'expense' &&
                 allTransactions.find(at => at.id === t.id)?.includeInStats !== false
@@ -177,7 +167,6 @@ export async function GET(request: NextRequest) {
                 const isTransfer = ['Konto wspólne', 'Inwestycje', 'Wesele', 'Wakacje', 'Transfery', 'Zamknięcie miesiąca'].includes(transaction.category)
 
                 if (isTransfer) {
-                    // OBSŁUGA TRANSFERÓW
                     if (!transferMap.has(transaction.category)) {
                         transferMap.set(transaction.category, {
                             name: transaction.category,
@@ -192,7 +181,6 @@ export async function GET(request: NextRequest) {
                     transferCategory.amount += transaction.amount
                     transferCategory.transactions.push(transaction)
                 } else {
-                    // OBSŁUGA KOPERT - znajdź kopertę dla tej transakcji
                     const originalTransaction = allTransactions.find(at => at.id === transaction.id)
                     const envelopeName = originalTransaction?.envelope?.name || 'Inne'
 
@@ -210,7 +198,6 @@ export async function GET(request: NextRequest) {
                     const envelopeData = envelopeMap.get(envelopeName)!
                     envelopeData.totalSpent += transaction.amount
 
-                    // POPRAWKA: Znajdź kategorię w kopercie według RZECZYWISTEJ kategorii
                     const realCategoryId = originalTransaction?.category
                     const realCategoryName = realCategoryId ? getCategoryName(realCategoryId) : transaction.category
                     const realCategoryIcon = realCategoryId ? getCategoryIcon(realCategoryId) : '📦'
@@ -232,7 +219,7 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // Oblicz procenty dla kopert - względem wydatków z kopert (BEZ transferów)
+            // Oblicz procenty dla kopert
             const envelopeArray = Array.from(envelopeMap.values())
             const totalEnvelopeExpenses = envelopeArray.reduce((sum, env) => sum + env.totalSpent, 0)
 
@@ -245,23 +232,19 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // Oblicz procenty dla transferów - względem WSZYSTKICH wydatków
+            // Oblicz procenty dla transferów
             const transferArray = Array.from(transferMap.values())
             for (const transfer of transferArray) {
                 transfer.percentage = monthData.expenses > 0 ? Math.round((transfer.amount / monthData.expenses) * 100) : 0
             }
 
-            // Konwertuj mapy na tablice i posortuj
-            monthData.envelopes = envelopeArray
-                .sort((a, b) => b.totalSpent - a.totalSpent) // Od największych wydatków
-
-            monthData.transfers = transferArray
-                .sort((a, b) => b.amount - a.amount) // Od największych transferów
+            monthData.envelopes = envelopeArray.sort((a, b) => b.totalSpent - a.totalSpent)
+            monthData.transfers = transferArray.sort((a, b) => b.amount - a.amount)
 
             // Oblicz bilans
             monthData.balance = monthData.income - monthData.expenses
 
-            // Posortuj transakcje w kategoriach (najnowsze pierwsze)
+            // Posortuj transakcje w kategoriach
             monthData.envelopes.forEach(envelope => {
                 envelope.categories.forEach(category => {
                     category.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -273,7 +256,7 @@ export async function GET(request: NextRequest) {
             })
         }
 
-        // Konwertuj do tablicy i posortuj (najnowsze miesiące pierwsze)
+        // Konwertuj do tablicy i posortuj
         const result = Object.values(monthlyData).sort((a, b) => {
             if (a.year !== b.year) return b.year - a.year
             const months = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -281,10 +264,7 @@ export async function GET(request: NextRequest) {
             return months.indexOf(b.month) - months.indexOf(a.month)
         })
 
-        console.log('Hierarchical archive data with categories:', result[0]?.envelopes[0]?.categories) // Debug
-
         return NextResponse.json(result)
-
     } catch (error) {
         console.error('Archive API error:', error)
         return NextResponse.json(
@@ -294,7 +274,6 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// Pomocnicza funkcja dla ikon transferów
 function getTransferIcon(transferName: string): string {
     switch (transferName) {
         case 'Konto wspólne': return '👫'

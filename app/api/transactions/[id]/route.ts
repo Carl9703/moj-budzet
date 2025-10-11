@@ -159,87 +159,59 @@ export async function DELETE(
             )
         }
 
-        console.log(`🗑️ Deleting transaction: ${transaction.id}, type: ${transaction.type}, transferPairId: ${transaction.transferPairId}`)
-        
-        // Sprawdź czy to jest transfer (ma transferPairId)
-        if (transaction.transferPairId) {
-            console.log(`🔗 Found transfer pair: ${transaction.transferPairId}`)
-            
-            // Znajdź drugą transakcję z tej pary transferów
-            const pairedTransaction = await prisma.transaction.findFirst({
-                where: {
-                    transferPairId: transaction.transferPairId,
-                    id: { not: transaction.id }
-                }
-            })
-
-            if (pairedTransaction) {
-                console.log(`🔗 Found paired transaction: ${pairedTransaction.id}, type: ${pairedTransaction.type}`)
-                console.log(`🔗 Transaction envelopeId: ${transaction.envelopeId}`)
-                console.log(`🔗 Paired envelopeId: ${pairedTransaction.envelopeId}`)
-                console.log(`🔗 Transaction type: ${transaction.type}`)
-                console.log(`🔗 Paired type: ${pairedTransaction.type}`)
-                console.log(`🔗 Transaction amount: ${transaction.amount}`)
-                console.log(`🔗 Paired amount: ${pairedTransaction.amount}`)
-                
-                // Usuń obie transakcje z pary transferów
-                await prisma.transaction.deleteMany({
-                    where: {
-                        transferPairId: transaction.transferPairId
-                    }
-                })
-
-                // Przywróć salda kopert - odwróć operacje transferu
-                // income: odejmij środki z koperty docelowej (przywróć do stanu sprzed transferu)
-                if (transaction.type === 'income' && transaction.envelopeId) {
-                    const envelope = await prisma.envelope.findUnique({
-                        where: { id: transaction.envelopeId }
+                // Sprawdź czy to jest transfer (ma transferPairId)
+                if (transaction.transferPairId) {
+                    // Znajdź drugą transakcję z tej pary transferów
+                    const pairedTransaction = await prisma.transaction.findFirst({
+                        where: {
+                            transferPairId: transaction.transferPairId,
+                            id: { not: transaction.id }
+                        }
                     })
-                    if (envelope) {
-                        console.log(`📥 Removing ${transaction.amount} from destination envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount - transaction.amount}`)
-                        await prisma.envelope.update({
-                            where: { id: transaction.envelopeId },
-                            data: {
-                                currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
+
+                    if (pairedTransaction) {
+                        // Usuń obie transakcje z pary transferów
+                        await prisma.transaction.deleteMany({
+                            where: {
+                                transferPairId: transaction.transferPairId
                             }
                         })
-                    } else {
-                        console.log(`❌ Destination envelope not found: ${transaction.envelopeId}`)
-                    }
-                } else {
-                    console.log(`❌ Cannot restore destination: type=${transaction.type}, envelopeId=${transaction.envelopeId}`)
-                }
 
-                // expense: przywróć środki do koperty źródłowej
-                if (pairedTransaction.type === 'expense' && pairedTransaction.envelopeId) {
-                    const envelope = await prisma.envelope.findUnique({
-                        where: { id: pairedTransaction.envelopeId }
-                    })
-                    if (envelope) {
-                        console.log(`📤 Restoring ${pairedTransaction.amount} to source envelope ${envelope.name}: ${envelope.currentAmount} → ${envelope.currentAmount + pairedTransaction.amount}`)
-                        await prisma.envelope.update({
-                            where: { id: pairedTransaction.envelopeId },
-                            data: {
-                                currentAmount: envelope.currentAmount + pairedTransaction.amount
+                        // Przywróć salda kopert - odwróć operacje transferu
+                        if (transaction.type === 'income' && transaction.envelopeId) {
+                            const envelope = await prisma.envelope.findUnique({
+                                where: { id: transaction.envelopeId }
+                            })
+                            if (envelope) {
+                                await prisma.envelope.update({
+                                    where: { id: transaction.envelopeId },
+                                    data: {
+                                        currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
+                                    }
+                                })
                             }
-                        })
-                    } else {
-                        console.log(`❌ Source envelope not found: ${pairedTransaction.envelopeId}`)
-                    }
-                } else {
-                    console.log(`❌ Cannot restore source: type=${pairedTransaction.type}, envelopeId=${pairedTransaction.envelopeId}`)
-                }
+                        }
 
-                return NextResponse.json({
-                    success: true,
-                    message: 'Transfer został usunięty (oba transfery)'
-                })
-            } else {
-                console.log(`❌ No paired transaction found for transferPairId: ${transaction.transferPairId}`)
-            }
-        } else {
-            console.log(`ℹ️ Regular transaction (no transferPairId)`)
-        }
+                        if (pairedTransaction.type === 'expense' && pairedTransaction.envelopeId) {
+                            const envelope = await prisma.envelope.findUnique({
+                                where: { id: pairedTransaction.envelopeId }
+                            })
+                            if (envelope) {
+                                await prisma.envelope.update({
+                                    where: { id: pairedTransaction.envelopeId },
+                                    data: {
+                                        currentAmount: envelope.currentAmount + pairedTransaction.amount
+                                    }
+                                })
+                            }
+                        }
+
+                        return NextResponse.json({
+                            success: true,
+                            message: 'Transfer został usunięty (oba transfery)'
+                        })
+                    }
+                }
 
         // Standardowa logika dla pojedynczych transakcji
         if (transaction.type === 'expense' && transaction.envelopeId) {

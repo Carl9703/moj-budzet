@@ -18,7 +18,6 @@ const transferSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
-        console.log('🚀 Transfer API called')
         let userId: string
         try {
             userId = await getUserIdFromToken(request)
