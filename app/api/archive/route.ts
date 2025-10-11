@@ -263,7 +263,12 @@ export async function GET(request: NextRequest) {
             // Przetwórz transfery
             for (const transaction of transferTransactions) {
                 const originalTransaction = allTransactions.find(at => at.id === transaction.id)
-                const envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                let envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                
+                // Mapuj nazwy kopert na nazwy transferów
+                if (envelopeName === 'Podróże') {
+                    envelopeName = 'Wakacje'
+                }
                 
                 // Sprawdź czy to transfer do koperty rocznej
                 const isYearlyEnvelopeTransfer = ['Wesele', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(envelopeName)
