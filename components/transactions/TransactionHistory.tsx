@@ -19,9 +19,10 @@ interface Transaction {
 
 interface Props {
     transactions: Transaction[]
+    onTransactionDeleted?: () => void
 }
 
-export function TransactionHistory({ transactions }: Props) {
+export function TransactionHistory({ transactions, onTransactionDeleted }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editAmount, setEditAmount] = useState<string>('')
 
@@ -99,7 +100,12 @@ export function TransactionHistory({ transactions }: Props) {
                 })
 
                 if (response.ok) {
-                    window.location.reload()
+                    // Wywołaj callback jeśli dostępny, inaczej przeładuj stronę
+                    if (onTransactionDeleted) {
+                        onTransactionDeleted()
+                    } else {
+                        window.location.reload()
+                    }
                 } else {
                     alert('Błąd podczas usuwania')
                 }

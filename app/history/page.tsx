@@ -24,18 +24,21 @@ export default function HistoryPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   
+  const fetchTransactions = async () => {
+    try {
+      const response = await authorizedFetch('/api/transactions')
+      const data = await response.json()
+      setTransactions(data)
+      setLoading(false)
+    } catch (err) {
+      console.error('Error:', err)
+      setLoading(false)
+    }
+  }
+  
   useEffect(() => {
     if (!isAuthenticated) return
-    authorizedFetch('/api/transactions')
-      .then(res => res.json())
-      .then(data => {
-        setTransactions(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Error:', err)
-        setLoading(false)
-      })
+    fetchTransactions()
   }, [isAuthenticated])
 
   if (isCheckingAuth) {
@@ -71,7 +74,10 @@ export default function HistoryPage() {
           📜 Historia transakcji
         </h1>
         
-        <TransactionHistory transactions={transactions} />
+        <TransactionHistory 
+          transactions={transactions} 
+          onTransactionDeleted={fetchTransactions}
+        />
       </div>
     </div>
   )
