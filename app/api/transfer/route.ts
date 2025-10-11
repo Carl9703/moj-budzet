@@ -73,21 +73,25 @@ export async function POST(request: NextRequest) {
             // Generuj unikalny ID dla pary transferów
             const transferPairId = `transfer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
             
+            console.log(`🔄 Transfer: ${data.amount} zł z ${fromEnvelope.name} (${fromEnvelope.currentAmount}) do ${toEnvelope.name} (${toEnvelope.currentAmount})`)
+            
             // Zmniejsz saldo koperty źródłowej
-            await tx.envelope.update({
+            const updatedFromEnvelope = await tx.envelope.update({
                 where: { id: fromEnvelope.id },
                 data: {
                     currentAmount: fromEnvelope.currentAmount - data.amount
                 }
             })
+            console.log(`📤 Koperta źródłowa ${fromEnvelope.name}: ${fromEnvelope.currentAmount} → ${updatedFromEnvelope.currentAmount}`)
 
             // Zwiększ saldo koperty docelowej
-            await tx.envelope.update({
+            const updatedToEnvelope = await tx.envelope.update({
                 where: { id: toEnvelope.id },
                 data: {
                     currentAmount: toEnvelope.currentAmount + data.amount
                 }
             })
+            console.log(`📥 Koperta docelowa ${toEnvelope.name}: ${toEnvelope.currentAmount} → ${updatedToEnvelope.currentAmount}`)
 
             // Utwórz transakcję "expense" dla koperty źródłowej (wyjście środków)
             await tx.transaction.create({
