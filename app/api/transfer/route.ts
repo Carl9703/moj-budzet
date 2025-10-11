@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
                     description: `Transfer: ${toEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: fromEnvelope.id,
-                    includeInStats: false, // Transfer nie wpływa na statystyki
+                    includeInStats: !!data.toCategory, // Transfer z kategorią wpływa na statystyki
                     transferPairId: transferPairId
                 }
             })
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
                     description: `Transfer: ${fromEnvelope.name}${data.toCategory ? ` (${data.toCategory})` : ''}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: toEnvelope.id,
-                    includeInStats: false, // Transfer nie wpływa na statystyki
+                    includeInStats: !!data.toCategory, // Transfer z kategorią wpływa na statystyki
                     transferPairId: transferPairId,
                     category: data.toCategory || null
                 }

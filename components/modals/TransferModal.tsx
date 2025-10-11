@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Modal } from '../ui/Modal'
 import { useToast } from '../ui/Toast'
+import { getCategoriesForEnvelope } from '../../lib/constants/categories'
 
 interface Envelope {
     id: string
@@ -86,12 +87,8 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
         const envelope = envelopes.find(e => e.id === envelopeId)
         if (!envelope) return []
         
-        // Dla koperty "Budowanie Przyszłości" dodaj kategorie
-        if (envelope.name === 'Budowanie Przyszłości') {
-            return ['IKE', 'IKZE', 'PPK']
-        }
-        
-        return []
+        // Pobierz kategorie dla koperty z systemu
+        return getCategoriesForEnvelope(envelope.name)
     }
     
     const availableCategories = getAvailableCategories(toEnvelopeId)
@@ -205,8 +202,8 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
                         >
                             <option value="">Wybierz kategorię (opcjonalnie)</option>
                             {availableCategories.map(category => (
-                                <option key={category} value={category}>
-                                    {category}
+                                <option key={category.id} value={category.id}>
+                                    {category.icon} {category.name}
                                 </option>
                             ))}
                         </select>
