@@ -96,8 +96,7 @@ async function createDefaultEnvelopes(userId: string) {
 
   // GRUPA 3: CELE FINANSOWE (miesięczne)
   const financialGoalsEnvelopes = [
-    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'financial' },
-    { name: 'Budowanie Przyszłości', plannedAmount: 800, icon: '📈', group: 'financial' }
+    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'financial' }
   ]
 
   // FUNDUSZE CELOWE (roczne)
@@ -106,6 +105,7 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Prezenty i Okazje', plannedAmount: 1500, icon: '🎁', group: 'target' },
     { name: 'Podróże', plannedAmount: 5000, icon: '✈️', group: 'target' },
     { name: 'Wesele', plannedAmount: 15000, icon: '💍', group: 'target' },
+    { name: 'Budowanie Przyszłości', plannedAmount: 9600, icon: '📈', group: 'target' },
     { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '🎉', group: 'target' }
   ]
 

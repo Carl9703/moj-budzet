@@ -46,8 +46,8 @@ export const EXPENSE_CATEGORIES: Category[] = [
     { id: 'accessories', name: 'Dodatki', icon: '💍', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
     
     // GRUPA 3: CELE FINANSOWE - Budowanie Przyszłości
-    { id: 'ike', name: 'IKE', icon: '📈', defaultEnvelope: 'Budowanie Przyszłości', type: 'monthly' },
-    { id: 'crypto', name: 'Kryptowaluty', icon: '₿', defaultEnvelope: 'Budowanie Przyszłości', type: 'monthly' },
+    { id: 'ike', name: 'IKE', icon: '📈', defaultEnvelope: 'Budowanie Przyszłości', type: 'yearly' },
+    { id: 'crypto', name: 'Kryptowaluty', icon: '₿', defaultEnvelope: 'Budowanie Przyszłości', type: 'yearly' },
     
     // FUNDUSZE CELOWE - Auto: Serwis i Ubezpieczenie
     { id: 'car-insurance', name: 'Ubezpieczenie', icon: '📋', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },

@@ -122,7 +122,11 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
                     >
                         <option value="">Wybierz kopertę źródłową</option>
                         {envelopes
-                            .filter(e => e.currentAmount > 0)
+                            .filter(e => e.currentAmount > 0 && (
+                                e.name === 'Wolne środki (roczne)' || 
+                                e.name === 'Fundusz Awaryjny' || 
+                                e.name === 'Budowanie Przyszłości'
+                            ))
                             .map(envelope => (
                                 <option key={envelope.id} value={envelope.id}>
                                     {envelope.icon} {envelope.name} ({envelope.currentAmount.toFixed(2)} zł)
@@ -166,7 +170,11 @@ export function TransferModal({ onClose, onSave, envelopes }: Props) {
                     >
                         <option value="">Wybierz kopertę docelową</option>
                         {envelopes
-                            .filter(e => e.id !== fromEnvelopeId)
+                            .filter(e => e.id !== fromEnvelopeId && (
+                                e.name === 'Wolne środki (roczne)' || 
+                                e.name === 'Fundusz Awaryjny' || 
+                                e.name === 'Budowanie Przyszłości'
+                            ))
                             .map(envelope => (
                                 <option key={envelope.id} value={envelope.id}>
                                     {envelope.icon} {envelope.name} ({envelope.currentAmount.toFixed(2)} zł)
