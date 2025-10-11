@@ -121,8 +121,9 @@ export async function GET(request: NextRequest) {
                     categoryName = 'Wakacje'
                     isTransfer = true
                 } else if (desc.includes('transfer:')) {
-                    categoryName = 'Transfery'
-                    isTransfer = true
+                    // Nie ustawiaj ogólnej kategorii Transfery - zostaw jako Inne
+                    categoryName = 'Inne'
+                    isTransfer = false
                 } else if (desc.includes('zamknięcie miesiąca')) {
                     categoryName = 'Zamknięcie miesiąca'
                     isTransfer = true
