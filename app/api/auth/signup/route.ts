@@ -53,6 +53,8 @@ export async function POST(req: NextRequest) {
         defaultToJoint: 1500,
         defaultToSavings: 1000,
         defaultToVacation: 400,
+        defaultToWedding: 0,
+        defaultToGroceries: 0,
         defaultToInvestment: 500
       }
     })
