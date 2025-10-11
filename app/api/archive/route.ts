@@ -178,18 +178,25 @@ export async function GET(request: NextRequest) {
             // Mapa transferów
             const transferMap = new Map<string, ArchiveCategory>()
 
+            // Tylko rzeczywiste wydatki (bez transferów)
             const expenseTransactions = monthData.transactions.filter(t => {
                 const originalTransaction = allTransactions.find(at => at.id === t.id)
                 const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
                 
-                // Uwzględnij transfery niezależnie od includeInStats
+                // WYKLUCZ transfery z wydatków - tylko rzeczywiste wydatki
                 if (isTransfer) {
-                    return (t.type === 'expense' || t.type === 'income')
+                    return false
                 }
                 
                 // Dla zwykłych transakcji sprawdź includeInStats - TYLKO WYDATKI
                 return (t.type === 'expense') && 
                        originalTransaction?.includeInStats !== false
+            })
+
+            // Osobna lista dla transferów
+            const transferTransactions = monthData.transactions.filter(t => {
+                const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
+                return isTransfer
             })
 
             for (const transaction of expenseTransactions) {
@@ -250,6 +257,31 @@ export async function GET(request: NextRequest) {
 
                     categoryInEnvelope.amount += transaction.amount
                     categoryInEnvelope.transactions.push(transaction)
+                }
+            }
+
+            // Przetwórz transfery
+            for (const transaction of transferTransactions) {
+                const originalTransaction = allTransactions.find(at => at.id === transaction.id)
+                const envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                
+                // Sprawdź czy to transfer do koperty rocznej
+                const isYearlyEnvelopeTransfer = ['Wesele', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(envelopeName)
+                
+                if (isYearlyEnvelopeTransfer) {
+                    if (!transferMap.has(envelopeName)) {
+                        transferMap.set(envelopeName, {
+                            name: envelopeName,
+                            icon: getTransferIcon(envelopeName),
+                            amount: 0,
+                            percentage: 0,
+                            transactions: []
+                        })
+                    }
+
+                    const transferCategory = transferMap.get(envelopeName)!
+                    transferCategory.amount += transaction.amount
+                    transferCategory.transactions.push(transaction)
                 }
             }
 
