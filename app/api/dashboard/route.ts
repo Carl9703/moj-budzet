@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        console.log(`📊 Dashboard API called for user: ${userId}`)
 
         // Sprawdź czy użytkownik istnieje
         const user = await prisma.user.findUnique({
@@ -178,7 +177,6 @@ export async function GET(request: NextRequest) {
                 )
                 const spent = Math.round(envelopeTransactions.reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-                console.log(`📈 Koperta ${e.name}: currentAmount=${e.currentAmount}, spent=${spent}`)
 
                 return {
                     id: e.id,

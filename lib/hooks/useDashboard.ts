@@ -39,15 +39,8 @@ export function useDashboard() {
 
     const fetchData = async () => {
         try {
-            console.log('🔄 Fetching dashboard data...')
-            const response = await authorizedFetch('/api/dashboard', {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
-            })
+            const response = await authorizedFetch('/api/dashboard')
             const json = await response.json()
-            console.log('📊 Dashboard data received:', json)
             setData(json)
         } catch (error) {
             console.error('Error fetching dashboard:', error)
