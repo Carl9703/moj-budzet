@@ -70,6 +70,9 @@ export async function POST(request: NextRequest) {
 
         // Wykonaj transfer w transakcji
         await prisma.$transaction(async (tx) => {
+            // Generuj unikalny ID dla pary transferów
+            const transferPairId = `transfer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            
             // Zmniejsz saldo koperty źródłowej
             await tx.envelope.update({
                 where: { id: fromEnvelope.id },
@@ -95,7 +98,8 @@ export async function POST(request: NextRequest) {
                     description: `Transfer: ${toEnvelope.name}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: fromEnvelope.id,
-                    includeInStats: false // Transfer nie wpływa na statystyki
+                    includeInStats: false, // Transfer nie wpływa na statystyki
+                    transferPairId: transferPairId
                 }
             })
 
@@ -108,7 +112,8 @@ export async function POST(request: NextRequest) {
                     description: `Transfer: ${fromEnvelope.name}`,
                     date: data.date ? new Date(data.date) : new Date(),
                     envelopeId: toEnvelope.id,
-                    includeInStats: false // Transfer nie wpływa na statystyki
+                    includeInStats: false, // Transfer nie wpływa na statystyki
+                    transferPairId: transferPairId
                 }
             })
         })

@@ -159,7 +159,61 @@ export async function DELETE(
             )
         }
 
-        // Jeśli to był wydatek, przywróć całą kwotę do koperty
+        // Sprawdź czy to jest transfer (ma transferPairId)
+        if (transaction.transferPairId) {
+            // Znajdź drugą transakcję z tej pary transferów
+            const pairedTransaction = await prisma.transaction.findFirst({
+                where: {
+                    transferPairId: transaction.transferPairId,
+                    id: { not: transaction.id }
+                }
+            })
+
+            if (pairedTransaction) {
+                // Usuń obie transakcje z pary transferów
+                await prisma.transaction.deleteMany({
+                    where: {
+                        transferPairId: transaction.transferPairId
+                    }
+                })
+
+                // Przywróć salda kopert
+                if (transaction.type === 'expense' && transaction.envelopeId) {
+                    const envelope = await prisma.envelope.findUnique({
+                        where: { id: transaction.envelopeId }
+                    })
+                    if (envelope) {
+                        await prisma.envelope.update({
+                            where: { id: transaction.envelopeId },
+                            data: {
+                                currentAmount: envelope.currentAmount + transaction.amount
+                            }
+                        })
+                    }
+                }
+
+                if (pairedTransaction.type === 'income' && pairedTransaction.envelopeId) {
+                    const envelope = await prisma.envelope.findUnique({
+                        where: { id: pairedTransaction.envelopeId }
+                    })
+                    if (envelope) {
+                        await prisma.envelope.update({
+                            where: { id: pairedTransaction.envelopeId },
+                            data: {
+                                currentAmount: Math.max(0, envelope.currentAmount - pairedTransaction.amount)
+                            }
+                        })
+                    }
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    message: 'Transfer został usunięty (oba transfery)'
+                })
+            }
+        }
+
+        // Standardowa logika dla pojedynczych transakcji
         if (transaction.type === 'expense' && transaction.envelopeId) {
             const envelope = await prisma.envelope.findUnique({
                 where: { id: transaction.envelopeId }
@@ -185,7 +239,6 @@ export async function DELETE(
             }
         }
 
-        // Jeśli to był przychód, usuń kwotę z koperty (jeśli była przypisana)
         if (transaction.type === 'income' && transaction.envelopeId) {
             const envelope = await prisma.envelope.findUnique({
                 where: { id: transaction.envelopeId }

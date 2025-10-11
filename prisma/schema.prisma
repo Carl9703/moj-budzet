@@ -99,6 +99,7 @@ model Transaction {
   envelopeId      String?
   category        String?
   editHistory     String   @default("[]")
+  transferPairId  String?  // Links transfer pairs (expense + income)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -108,6 +109,7 @@ model Transaction {
   @@index([userId, date])
   @@index([userId, type])
   @@index([envelopeId])
+  @@index([transferPairId])
 }
 
 // Konfiguracja użytkownika dla wypłaty i stałych transferów (tylko dla pensji)
