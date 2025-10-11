@@ -195,22 +195,43 @@ export async function GET(request: NextRequest) {
                 } else {
                     const originalTransaction = allTransactions.find(at => at.id === transaction.id)
                     const envelopeName = originalTransaction?.envelope?.name || 'Inne'
+                    const envelope = allEnvelopes.find(e => e.name === envelopeName)
+                    
+                    // Sprawdź czy to transfer do koperty rocznej
+                    const isYearlyEnvelopeTransfer = transaction.type === 'income' && 
+                        envelope?.type === 'yearly' &&
+                        ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(envelopeName)
+                    
+                    if (isYearlyEnvelopeTransfer) {
+                        // Przenieś do transferów
+                        if (!transferMap.has(envelopeName)) {
+                            transferMap.set(envelopeName, {
+                                name: envelopeName,
+                                icon: envelope?.icon || '📦',
+                                amount: 0,
+                                percentage: 0,
+                                transactions: []
+                            })
+                        }
+                        const transferCategory = transferMap.get(envelopeName)!
+                        transferCategory.amount += transaction.amount
+                        transferCategory.transactions.push(transaction)
+                    } else {
+                        // Standardowa logika dla kopert miesięcznych
+                        if (!envelopeMap.has(envelopeName)) {
+                            envelopeMap.set(envelopeName, {
+                                name: envelopeName,
+                                icon: envelope?.icon || '📦',
+                                totalSpent: 0,
+                                percentage: 0,
+                                categories: []
+                            })
+                        }
 
-                    if (!envelopeMap.has(envelopeName)) {
-                        const envelope = allEnvelopes.find(e => e.name === envelopeName)
-                        envelopeMap.set(envelopeName, {
-                            name: envelopeName,
-                            icon: envelope?.icon || '📦',
-                            totalSpent: 0,
-                            percentage: 0,
-                            categories: []
-                        })
-                    }
+                        const envelopeData = envelopeMap.get(envelopeName)!
+                        envelopeData.totalSpent += transaction.amount
 
-                    const envelopeData = envelopeMap.get(envelopeName)!
-                    envelopeData.totalSpent += transaction.amount
-
-                    const realCategoryId = originalTransaction?.category
+                        const realCategoryId = originalTransaction?.category
                     const realCategoryName = realCategoryId ? getCategoryName(realCategoryId) : transaction.category
                     const realCategoryIcon = realCategoryId ? getCategoryIcon(realCategoryId) : '📦'
 
@@ -226,8 +247,9 @@ export async function GET(request: NextRequest) {
                         envelopeData.categories.push(categoryInEnvelope)
                     }
 
-                    categoryInEnvelope.amount += transaction.amount
-                    categoryInEnvelope.transactions.push(transaction)
+                        categoryInEnvelope.amount += transaction.amount
+                        categoryInEnvelope.transactions.push(transaction)
+                    }
                 }
             }
 
