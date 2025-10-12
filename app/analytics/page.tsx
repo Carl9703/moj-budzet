@@ -87,6 +87,7 @@ export default function AnalyticsPage() {
     const [selectedPeriod, setSelectedPeriod] = useState<string>('3months')
 
     const periodOptions = [
+        { value: 'currentMonth', label: 'Bieżący miesiąc' },
         { value: '1month', label: 'Ostatni miesiąc' },
         { value: '3months', label: 'Ostatnie 3 miesiące' },
         { value: '6months', label: 'Ostatnie 6 miesięcy' },
