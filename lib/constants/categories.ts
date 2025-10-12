@@ -14,7 +14,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
     
     // GRUPA 1: POTRZEBY - Żywność
     { id: 'shared-groceries', name: 'Wspólne zakupy', icon: '🛒', defaultEnvelope: 'Żywność', type: 'monthly' },
-    { id: 'personal-groceries', name: 'Moje zakupy', icon: '🥕', defaultEnvelope: 'Żywność', type: 'monthly' },
+    { id: 'personal-groceries', name: 'Moje zakupy', icon: '🛍️', defaultEnvelope: 'Żywność', type: 'monthly' },
     
     // GRUPA 1: POTRZEBY - Transport
     { id: 'fuel', name: 'Paliwo', icon: '⛽', defaultEnvelope: 'Transport', type: 'monthly' },
@@ -43,7 +43,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
     // GRUPA 2: STYL ŻYCIA - Ubrania i Akcesoria
     { id: 'clothes', name: 'Odzież', icon: '👕', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
     { id: 'shoes', name: 'Obuwie', icon: '👟', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
-    { id: 'accessories', name: 'Dodatki', icon: '💍', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
+    { id: 'accessories', name: 'Dodatki', icon: '👜', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
     
     // GRUPA 3: CELE FINANSOWE - Budowanie Przyszłości
     { id: 'ike', name: 'IKE', icon: '📈', defaultEnvelope: 'Budowanie Przyszłości', type: 'yearly' },
