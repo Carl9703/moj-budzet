@@ -96,7 +96,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
                     <span style={{ fontSize: '20px' }}>{icon}</span>
                     <span className="text-theme-primary" style={{ fontWeight: '500', fontSize: '14px', transition: 'color 0.3s ease' }}>{name}</span>
                 </div>
-                <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease' }}>
+                <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease', whiteSpace: 'nowrap' }}>
                     {type === 'monthly' ?
                         `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
                         isFreedomFunds ?
