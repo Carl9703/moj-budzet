@@ -73,15 +73,7 @@ export async function POST(request: NextRequest) {
             .reduce((sum, t) => sum + t.amount, 0)
 
         const totalExpenses = monthTransactions
-            .filter(t => {
-                // Exclude transfers from expenses calculation
-                const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
-                if (isTransfer) {
-                    return false
-                }
-                // Only include expenses that should be counted in stats
-                return t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false
-            })
+            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
             .reduce((sum, t) => sum + t.amount, 0)
 
         // Oblicz składowe
