@@ -95,7 +95,6 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '20px' }}>{icon}</span>
                     <span className="text-theme-primary" style={{ fontWeight: '500', fontSize: '14px', transition: 'color 0.3s ease' }}>{name}</span>
-                    <span style={{ fontSize: '16px', marginLeft: '4px' }}>{getStatusIcon()}</span>
                 </div>
                 <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease' }}>
                     {type === 'monthly' ?
