@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
                 const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
                     // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
                     // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
-                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny' || e.name === 'Budowanie Przyszłości'
+                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
                     
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
