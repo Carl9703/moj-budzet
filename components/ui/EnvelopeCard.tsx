@@ -160,7 +160,9 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
                     {type === 'monthly' ?
                         (isOverBudget ?
                             `⚠️ Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100, false)} zł` :
-                            `Zostało: ${formatMoney(remaining, false)} zł`) :
+                            (name === 'Fundusz Awaryjny' || name === 'Budowanie Przyszłości' ?
+                                `Brakuje: ${formatMoney(Math.abs(remaining), false)} zł` :
+                                `Zostało: ${formatMoney(remaining, false)} zł`)) :
                         isFreedomFunds ?
                             `💰 Dostępne środki` :
                             (percentage >= 100 ?
