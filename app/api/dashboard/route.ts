@@ -129,7 +129,15 @@ export async function GET(request: NextRequest) {
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const totalExpenses = Math.round(monthTransactions
-            .filter(t => t.type === 'expense')
+            .filter(t => {
+                // Exclude transfers from expenses calculation
+                const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
+                if (isTransfer) {
+                    return false
+                }
+                // Only include expenses that should be counted in stats
+                return t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false
+            })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const isMonthClosed = !!monthCloseTransaction
