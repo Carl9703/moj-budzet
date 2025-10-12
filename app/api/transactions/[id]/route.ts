@@ -1,4 +1,3 @@
-// app/api/transactions/[id]/route.ts - NAPRAWIONY dla Next.js 15
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'

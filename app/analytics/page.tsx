@@ -1,5 +1,4 @@
-﻿// app/analytics/page.tsx - Z WŁASNYM PIĘKNYM WYKRESEM
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'

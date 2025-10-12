@@ -1,4 +1,3 @@
-// app/auth/signin/page.tsx - Prosta strona logowania
 'use client'
 
 import { useState } from 'react'

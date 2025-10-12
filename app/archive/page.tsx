@@ -1,5 +1,4 @@
-﻿// app/archive/page.tsx - PRZEPISANY OD NOWA
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'

@@ -1,9 +1,7 @@
-// app/api/analytics/route.ts - Z OBSŁUGĄ OKRESÓW I PORÓWNANIAMI
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
-
 
 interface MonthlyData {
     month: string
@@ -55,6 +53,210 @@ interface TransferAnalysis {
     percentage: number
 }
 
+function getStartDate(period: string): Date {
+    const now = new Date()
+    
+    switch (period) {
+        case '1month':
+            return new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        case 'currentMonth':
+            return new Date(now.getFullYear(), now.getMonth(), 1)
+        case '6months':
+            return new Date(now.getFullYear(), now.getMonth() - 6, 1)
+        case 'currentYear':
+            return new Date(now.getFullYear(), 0, 1)
+        default: // 3months
+            return new Date(now.getFullYear(), now.getMonth() - 3, 1)
+    }
+}
+
+async function getMonthlyData(userId: string): Promise<{ [key: string]: MonthlyData }> {
+    const monthlyData: { [key: string]: MonthlyData } = {}
+    const now = new Date()
+
+    for (let i = 11; i >= 0; i--) {
+        const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)
+        const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59)
+
+        const monthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth()).padStart(2, '0')}`
+        const monthName = targetDate.toLocaleDateString('pl-PL', { month: 'long' })
+        const year = targetDate.getFullYear()
+
+        // Pobierz transakcje z miesiąca - ZAWSZE wszystkie transakcje z miesiąca
+        const monthTransactions = await prisma.transaction.findMany({
+            where: {
+                userId: userId,
+                date: { gte: startOfMonth, lte: endOfMonth },
+                type: { in: ['income', 'expense'] },
+                NOT: [
+                    { description: { contains: 'Zamknięcie miesiąca' } },
+                    { description: { contains: 'przeniesienie bilansu' } }
+                ]
+            }
+        })
+
+        const totalIncome = monthTransactions
+            .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .reduce((sum, t) => sum + t.amount, 0)
+
+        const totalExpenses = monthTransactions
+            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .reduce((sum, t) => sum + t.amount, 0)
+
+        if (totalIncome > 0 || totalExpenses > 0) {
+            monthlyData[monthKey] = {
+                month: monthName,
+                year: year,
+                income: totalIncome,
+                expenses: totalExpenses,
+                savings: totalIncome - totalExpenses
+            }
+        }
+    }
+
+    return monthlyData
+}
+
+async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sortedMonths: MonthlyData[]): Promise<EnvelopeAnalysis[]> {
+    const envelopeAnalysis: EnvelopeAnalysis[] = []
+
+    // Grupuj wydatki po kopertach
+    const expensesByEnvelope: { [key: string]: { amount: number; envelope?: { name?: string | null } | null; category?: string | null }[] } = {}
+    for (const expense of realExpenses) {
+        const envelopeName = expense.envelope?.name || 'Inne'
+        if (!expensesByEnvelope[envelopeName]) {
+            expensesByEnvelope[envelopeName] = []
+        }
+        expensesByEnvelope[envelopeName].push(expense)
+    }
+
+    // Pobierz dane z ostatnich 2 miesięcy dla porównania
+    const lastTwoMonths = sortedMonths.slice(-2)
+    const currentMonthData = lastTwoMonths[1]
+    const previousMonthData = lastTwoMonths[0]
+
+    for (const [envelopeName, transactions] of Object.entries(expensesByEnvelope)) {
+        const envelope = envelopes.find(e => e.name === envelopeName)
+        const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0)
+
+        // Grupuj po kategoriach
+        const categoriesInEnvelope: { [key: string]: { amount: number, icon: string, name: string } } = {}
+
+        transactions.forEach(transaction => {
+            const categoryId = transaction.category || 'other'
+            const categoryName = getCategoryName(categoryId)
+            const categoryIcon = getCategoryIcon(categoryId)
+
+            if (!categoriesInEnvelope[categoryId]) {
+                categoriesInEnvelope[categoryId] = { amount: 0, name: categoryName, icon: categoryIcon }
+            }
+            categoriesInEnvelope[categoryId].amount += transaction.amount
+        })
+
+        const categoryBreakdown: CategoryBreakdown[] = Object.entries(categoriesInEnvelope)
+            .map(([categoryId, data]) => ({
+                categoryId,
+                categoryName: data.name,
+                categoryIcon: data.icon,
+                amount: data.amount,
+                percentage: Math.round((data.amount / totalSpent) * 100)
+            }))
+            .sort((a, b) => b.amount - a.amount)
+
+        // === PORÓWNANIE MIESIĘCZNE ===
+        let monthlyComparison
+        if (currentMonthData && previousMonthData) {
+            // Pobierz transakcje z bieżącego miesiąca dla tej koperty
+            const currentMonthTransactions = await prisma.transaction.findMany({
+                where: {
+                    userId: transactions[0].userId,
+                    type: 'expense',
+                    date: { gte: new Date(currentMonthData.year, getMonthIndex(currentMonthData.month), 1) },
+                    envelope: { name: envelopeName }
+                }
+            })
+
+            const previousMonthTransactions = await prisma.transaction.findMany({
+                where: {
+                    userId: transactions[0].userId,
+                    type: 'expense',
+                    date: { gte: new Date(previousMonthData.year, getMonthIndex(previousMonthData.month), 1) },
+                    envelope: { name: envelopeName }
+                }
+            })
+
+            const currentTotal = currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0)
+            const previousTotal = previousMonthTransactions.reduce((sum, t) => sum + t.amount, 0)
+            const totalChange = currentTotal - previousTotal
+            const totalChangePercent = previousTotal > 0 ? Math.round((totalChange / previousTotal) * 100) : 0
+
+            // Porównanie kategorii
+            const categoryComparisons: CategoryComparison[] = []
+            const currentCategories: { [key: string]: number } = {}
+            const previousCategories: { [key: string]: number } = {}
+
+            currentMonthTransactions.forEach(t => {
+                const categoryId = t.category || 'other'
+                currentCategories[categoryId] = (currentCategories[categoryId] || 0) + t.amount
+            })
+
+            previousMonthTransactions.forEach(t => {
+                const categoryId = t.category || 'other'
+                previousCategories[categoryId] = (previousCategories[categoryId] || 0) + t.amount
+            })
+
+            const allCategories = new Set([...Object.keys(currentCategories), ...Object.keys(previousCategories)])
+            for (const categoryId of allCategories) {
+                const currentAmount = currentCategories[categoryId] || 0
+                const previousAmount = previousCategories[categoryId] || 0
+                const change = currentAmount - previousAmount
+                const changePercent = previousAmount > 0 ? Math.round((change / previousAmount) * 100) : 0
+
+                categoryComparisons.push({
+                    categoryId,
+                    categoryName: getCategoryName(categoryId),
+                    categoryIcon: getCategoryIcon(categoryId),
+                    currentAmount,
+                    previousAmount,
+                    change,
+                    changePercent
+                })
+            }
+
+            categoryComparisons.sort((a, b) => b.currentAmount - a.currentAmount)
+
+            monthlyComparison = {
+                currentMonth: currentMonthData.month,
+                previousMonth: previousMonthData.month,
+                currentTotal,
+                previousTotal,
+                totalChange,
+                totalChangePercent,
+                categoryComparisons
+            }
+        }
+
+        envelopeAnalysis.push({
+            name: envelopeName,
+            icon: envelope?.icon || '📦',
+            plannedAmount: envelope?.plannedAmount || 0,
+            totalSpent: totalSpent,
+            avgMonthlySpent: Math.round(totalSpent / Math.max(1, sortedMonths.length)),
+            categoryBreakdown,
+            monthlyComparison
+        })
+    }
+
+    return envelopeAnalysis
+}
+
+function getMonthIndex(monthName: string): number {
+    const months = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
+    return months.indexOf(monthName)
+}
+
 export async function GET(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -67,26 +269,7 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url)
         const period = searchParams.get('period') || '3months'
-
-        const now = new Date()
-        let startDate: Date
-
-        switch (period) {
-            case '1month':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-                break
-            case 'currentMonth':
-                startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-                break
-            case '6months':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1)
-                break
-            case 'currentYear':
-                startDate = new Date(now.getFullYear(), 0, 1)
-                break
-            default: // 3months
-                startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1)
-        }
+        const startDate = getStartDate(period)
 
         // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({
@@ -94,48 +277,7 @@ export async function GET(request: NextRequest) {
         })
 
         // === TRENDY MIESIĘCZNE - OSTATNIE 12 MIESIĘCY ===
-        const monthlyData: { [key: string]: MonthlyData } = {}
-
-        for (let i = 11; i >= 0; i--) {
-            const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
-            const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)
-            const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59)
-
-            const monthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth()).padStart(2, '0')}`
-            const monthName = targetDate.toLocaleDateString('pl-PL', { month: 'long' })
-            const year = targetDate.getFullYear()
-
-            // Pobierz transakcje z miesiąca - ZAWSZE wszystkie transakcje z miesiąca
-            const monthTransactions = await prisma.transaction.findMany({
-                where: {
-                    userId: userId,
-                    date: { gte: startOfMonth, lte: endOfMonth },
-                    type: { in: ['income', 'expense'] },
-                    NOT: [
-                        { description: { contains: 'Zamknięcie miesiąca' } },
-                        { description: { contains: 'przeniesienie bilansu' } }
-                    ]
-                }
-            })
-
-            const totalIncome = monthTransactions
-                .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
-                .reduce((sum, t) => sum + t.amount, 0)
-
-            const totalExpenses = monthTransactions
-                .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
-                .reduce((sum, t) => sum + t.amount, 0)
-
-            if (totalIncome > 0 || totalExpenses > 0) {
-                monthlyData[monthKey] = {
-                    month: monthName,
-                    year: year,
-                    income: totalIncome,
-                    expenses: totalExpenses,
-                    savings: totalIncome - totalExpenses
-                }
-            }
-        }
+        const monthlyData = await getMonthlyData(userId)
 
         const sortedMonths = Object.values(monthlyData).sort((a, b) => {
             if (a.year !== b.year) return a.year - b.year
@@ -199,22 +341,7 @@ export async function GET(request: NextRequest) {
         transfers.sort((a, b) => b.amount - a.amount)
 
         // === ANALIZA KOPERT Z PORÓWNANIAMI MIESIĘCZNYMI ===
-        const envelopeAnalysis: EnvelopeAnalysis[] = []
-
-        // Grupuj wydatki po kopertach
-        const expensesByEnvelope: { [key: string]: { amount: number; envelope?: { name?: string | null } | null; category?: string | null }[] } = {}
-        for (const expense of realExpenses) {
-            const envelopeName = expense.envelope?.name || 'Inne'
-            if (!expensesByEnvelope[envelopeName]) {
-                expensesByEnvelope[envelopeName] = []
-            }
-            expensesByEnvelope[envelopeName].push(expense)
-        }
-
-        // Pobierz dane z ostatnich 2 miesięcy dla porównania
-        const lastTwoMonths = sortedMonths.slice(-2)
-        const currentMonthData = lastTwoMonths[1]
-        const previousMonthData = lastTwoMonths[0]
+        const envelopeAnalysis = await getEnvelopeAnalysis(realExpenses, envelopes, sortedMonths)
 
         for (const [envelopeName, transactions] of Object.entries(expensesByEnvelope)) {
             const envelope = envelopes.find(e => e.name === envelopeName)

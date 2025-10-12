@@ -1,4 +1,3 @@
-// lib/hooks/useAuth.ts - Hook do sprawdzania autoryzacji
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 

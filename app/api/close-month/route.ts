@@ -81,12 +81,6 @@ export async function POST(request: NextRequest) {
         const returnsBalance = nonStatsIncome             // zwroty i refundacje
         const totalToTransfer = monthBalance + returnsBalance // całkowite saldo do przeniesienia
 
-        console.log('Stats income (w statystykach):', statsIncome)
-        console.log('Non-stats income (zwroty):', nonStatsIncome)
-        console.log('Total expenses:', totalExpenses)
-        console.log('Month balance (oszczędności):', monthBalance)
-        console.log('Returns balance (zwroty):', returnsBalance)
-        console.log('CAŁKOWITE do przeniesienia:', totalToTransfer)
 
         // Pobierz koperty miesięczne (tylko do informacji o stanie)
         const monthlyEnvelopes = await prisma.envelope.findMany({
@@ -117,7 +111,6 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        console.log('Niewykorzystane środki z kopert:', totalUnusedFunds)
 
         // Przenieś CAŁE SALDO do wolnych środków (jeśli dodatnie)
         if (totalToTransfer > 0) {
@@ -130,7 +123,6 @@ export async function POST(request: NextRequest) {
             })
 
             if (freedomEnvelope) {
-                console.log(`Transferring TOTAL ${totalToTransfer} to freedom envelope`)
 
                 await prisma.envelope.update({
                     where: { id: freedomEnvelope.id },

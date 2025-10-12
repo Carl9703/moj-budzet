@@ -72,40 +72,6 @@ export const CATEGORY_TO_ENVELOPE_MAP: Record<string, string> = EXPENSE_CATEGORI
     {} as Record<string, string>
 )
 
-export function getPopularCategories(limit: number = 9): Category[] {
-    if (typeof window !== 'undefined') {
-        const usage = JSON.parse(localStorage.getItem('categoryUsage') || '{}')
-
-        const sorted = [...EXPENSE_CATEGORIES].sort((a, b) => {
-            const usageA = usage[a.id] || 0
-            const usageB = usage[b.id] || 0
-            return usageB - usageA
-        })
-
-        return sorted.slice(0, limit)
-    }
-
-    return EXPENSE_CATEGORIES.slice(0, limit)
-}
-
-// Pobierz popularne kategorie wydatków
-export function getPopularExpenseCategories(limit: number = 9): Category[] {
-    const expenseCategories = getExpenseCategories()
-    
-    if (typeof window !== 'undefined') {
-        const usage = JSON.parse(localStorage.getItem('categoryUsage') || '{}')
-
-        const sorted = [...expenseCategories].sort((a, b) => {
-            const usageA = usage[a.id] || 0
-            const usageB = usage[b.id] || 0
-            return usageB - usageA
-        })
-
-        return sorted.slice(0, limit)
-    }
-
-    return expenseCategories.slice(0, limit)
-}
 
 export function trackCategoryUsage(categoryId: string): void {
     if (typeof window !== 'undefined') {
@@ -171,10 +137,6 @@ export function getExpenseCategories(): Category[] {
     return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope !== '')
 }
 
-// Filtruj kategorie przychodów (bez przypisanych kopert)
-export function getIncomeCategories(): Category[] {
-    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === '')
-}
 
 // Filtruj kategorie dla konkretnej koperty
 export function getCategoriesForEnvelope(envelopeName: string): Category[] {
