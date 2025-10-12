@@ -206,7 +206,7 @@ async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sorted
                 previousCategories[categoryId] = (previousCategories[categoryId] || 0) + t.amount
             })
 
-            const allCategories = new Set([...Object.keys(currentCategories), ...Object.keys(previousCategories)])
+            const allCategories = Array.from(new Set([...Object.keys(currentCategories), ...Object.keys(previousCategories)]))
             for (const categoryId of allCategories) {
                 const currentAmount = currentCategories[categoryId] || 0
                 const previousAmount = previousCategories[categoryId] || 0
