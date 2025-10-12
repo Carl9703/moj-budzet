@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
             include: { envelope: true }
         })
 
-        const expenseTransactions = allTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+        const expenseTransactions = allTransactions.filter(t => t.type === 'expense')
 
         const transfers: TransferAnalysis[] = []
         const realExpenses: { amount: number; envelope?: { name?: string | null } | null; category?: string | null }[] = []
@@ -163,21 +163,18 @@ export async function GET(request: NextRequest) {
         let totalExpenseAmount = 0
 
         for (const transaction of expenseTransactions) {
-            const desc = transaction.description?.toLowerCase() || ''
-            const envelopeName = transaction.envelope?.name || ''
-
-            const isTransfer =
-                desc.includes('transfer:') ||
-                desc.includes('przeniesienie') ||
-                desc.includes('oszczędności') ||
-                desc.includes('IKE') ||
-                desc.includes('Fundusz Awaryjny') ||
-                desc.includes('Transfer: Wakacje') ||
-                desc.includes('Transfer: Wesele') ||
-                ['Wesele', 'Prezenty', 'OC', 'Święta', 'Wolne środki (roczne)', 'Budowanie Przyszłości', 'Fundusz Awaryjny', 'Podróże'].includes(envelopeName) ||
-                (envelopeName === 'Wakacje' && transaction.amount > 200)
-
-            if (isTransfer) {
+            // Use includeInStats flag to determine if transaction should be counted as expense or transfer
+            const shouldIncludeInStats = (transaction as { includeInStats?: boolean }).includeInStats !== false
+            
+            if (shouldIncludeInStats) {
+                // Real expense - include in statistics
+                realExpenses.push(transaction)
+                totalExpenseAmount += transaction.amount
+            } else {
+                // Transfer/savings - exclude from statistics
+                const desc = transaction.description?.toLowerCase() || ''
+                const envelopeName = transaction.envelope?.name || ''
+                
                 let transferName = envelopeName
                 if (desc.includes('transfer:')) {
                     transferName = transaction.description?.replace(/transfer:\s*/i, '').trim() || envelopeName
@@ -190,9 +187,6 @@ export async function GET(request: NextRequest) {
                     transfers.push({ name: transferName, amount: transaction.amount, percentage: 0 })
                 }
                 totalTransferAmount += transaction.amount
-            } else {
-                realExpenses.push(transaction)
-                totalExpenseAmount += transaction.amount
             }
         }
 
