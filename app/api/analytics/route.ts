@@ -118,7 +118,7 @@ async function getMonthlyData(userId: string): Promise<{ [key: string]: MonthlyD
     return monthlyData
 }
 
-async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sortedMonths: MonthlyData[]): Promise<EnvelopeAnalysis[]> {
+async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sortedMonths: MonthlyData[], userId: string): Promise<EnvelopeAnalysis[]> {
     const envelopeAnalysis: EnvelopeAnalysis[] = []
 
     // Grupuj wydatki po kopertach
@@ -170,7 +170,7 @@ async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sorted
             // Pobierz transakcje z bieżącego miesiąca dla tej koperty
             const currentMonthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: transactions[0].userId,
+                    userId: userId,
                     type: 'expense',
                     date: { gte: new Date(currentMonthData.year, getMonthIndex(currentMonthData.month), 1) },
                     envelope: { name: envelopeName }
@@ -179,7 +179,7 @@ async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sorted
 
             const previousMonthTransactions = await prisma.transaction.findMany({
                 where: {
-                    userId: transactions[0].userId,
+                    userId: userId,
                     type: 'expense',
                     date: { gte: new Date(previousMonthData.year, getMonthIndex(previousMonthData.month), 1) },
                     envelope: { name: envelopeName }
@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
         transfers.sort((a, b) => b.amount - a.amount)
 
         // === ANALIZA KOPERT Z PORÓWNANIAMI MIESIĘCZNYMI ===
-        const envelopeAnalysis = await getEnvelopeAnalysis(realExpenses, envelopes, sortedMonths)
+        const envelopeAnalysis = await getEnvelopeAnalysis(realExpenses, envelopes, sortedMonths, userId)
 
         for (const [envelopeName, transactions] of Object.entries(expensesByEnvelope)) {
             const envelope = envelopes.find(e => e.name === envelopeName)
