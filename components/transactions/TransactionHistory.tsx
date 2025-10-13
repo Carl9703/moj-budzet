@@ -26,6 +26,41 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editAmount, setEditAmount] = useState<string>('')
 
+    // Funkcja do obliczania działań matematycznych
+    const calculateMathExpression = (expression: string): number | null => {
+        try {
+            // Usuń spacje i sprawdź czy zawiera operatory matematyczne
+            const cleanExpression = expression.replace(/\s/g, '')
+            
+            // Sprawdź czy zawiera tylko dozwolone znaki (cyfry, +, -, *, /, ., (, ))
+            if (!/^[0-9+\-*/.()]+$/.test(cleanExpression)) {
+                return null
+            }
+            
+            // Sprawdź czy nie zawiera niebezpiecznych konstrukcji
+            if (cleanExpression.includes('..') || 
+                cleanExpression.includes('++') || 
+                cleanExpression.includes('--') ||
+                cleanExpression.includes('**') ||
+                cleanExpression.includes('//')) {
+                return null
+            }
+            
+            // Oblicz wyrażenie
+            const result = Function(`"use strict"; return (${cleanExpression})`)()
+            
+            // Sprawdź czy wynik jest liczbą
+            if (typeof result !== 'number' || !isFinite(result)) {
+                return null
+            }
+            
+            // Zaokrąglij do 2 miejsc po przecinku
+            return Math.round(result * 100) / 100
+        } catch {
+            return null
+        }
+    }
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
         return date.toLocaleDateString('pl-PL', {
@@ -64,8 +99,23 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
     const handleEdit = async (transactionId: string, currentAmount: number) => {
         if (editingId === transactionId) {
             // Zapisz zmiany
-            const newAmount = parseFloat(editAmount)
-            if (newAmount >= 0 && newAmount !== currentAmount) {
+            let newAmount: number
+            
+            // Sprawdź czy to wyrażenie matematyczne
+            const mathResult = calculateMathExpression(editAmount)
+            if (mathResult !== null) {
+                newAmount = mathResult
+            } else {
+                // Spróbuj parsować jako zwykłą liczbę
+                newAmount = parseFloat(editAmount)
+            }
+            
+            if (isNaN(newAmount) || newAmount < 0) {
+                alert('Nieprawidłowa kwota. Możesz używać działań matematycznych (np. 750/2)')
+                return
+            }
+            
+            if (newAmount !== currentAmount) {
                 try {
                     const response = await authorizedFetch(`/api/transactions/${transactionId}`, {
                         method: 'PATCH',
@@ -223,12 +273,12 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
                                             {editingId === transaction.id ? (
                                                 <>
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         value={editAmount}
                                                         onChange={(e) => setEditAmount(e.target.value)}
-                                                        step="0.01"
+                                                        placeholder="np. 750/2"
                                                         style={{
-                                                            width: '100px',
+                                                            width: '120px',
                                                             padding: '4px 8px',
                                                             border: '1px solid var(--border-primary)',
                                                             borderRadius: '4px',
@@ -298,7 +348,7 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
                                                                 cursor: 'pointer',
                                                                 color: 'var(--text-primary)'
                                                             }}
-                                                            title="Edytuj kwotę"
+                                                            title="Edytuj kwotę (możesz używać działań: 750/2, 100+50, itp.)"
                                                         >
                                                             Edytuj
                                                         </button>
