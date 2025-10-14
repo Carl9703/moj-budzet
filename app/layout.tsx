@@ -48,6 +48,31 @@ export default function RootLayout({
                 <script
                     dangerouslySetInnerHTML={{
                         __html: `
+                            // PWA Installation Detection
+                            let deferredPrompt;
+                            
+                            window.addEventListener('beforeinstallprompt', (e) => {
+                                console.log('PWA: Install prompt available');
+                                e.preventDefault();
+                                deferredPrompt = e;
+                                
+                                // Show install button or banner
+                                const installBanner = document.createElement('div');
+                                installBanner.innerHTML = '📱 Zainstaluj aplikację na telefonie';
+                                installBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#3b82f6;color:white;padding:10px;text-align:center;z-index:9999;cursor:pointer;';
+                                installBanner.onclick = () => {
+                                    deferredPrompt.prompt();
+                                    deferredPrompt.userChoice.then((choiceResult) => {
+                                        if (choiceResult.outcome === 'accepted') {
+                                            console.log('PWA: User accepted install');
+                                        }
+                                        deferredPrompt = null;
+                                    });
+                                };
+                                document.body.appendChild(installBanner);
+                            });
+                            
+                            // Service Worker Registration
                             if ('serviceWorker' in navigator) {
                                 window.addEventListener('load', function() {
                                     navigator.serviceWorker.register('/sw.js')
