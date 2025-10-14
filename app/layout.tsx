@@ -67,6 +67,13 @@ export default function RootLayout({
                             // PWA Installation Detection
                             let deferredPrompt;
                             
+                            // Debug PWA requirements
+                            console.log('PWA Debug:');
+                            console.log('- Standalone:', window.matchMedia('(display-mode: standalone)').matches);
+                            console.log('- User Agent:', navigator.userAgent);
+                            console.log('- HTTPS:', location.protocol === 'https:');
+                            console.log('- Manifest:', document.querySelector('link[rel="manifest"]')?.href);
+                            
                             window.addEventListener('beforeinstallprompt', (e) => {
                                 console.log('PWA: Install prompt available');
                                 e.preventDefault();
@@ -87,6 +94,25 @@ export default function RootLayout({
                                 };
                                 document.body.appendChild(installBanner);
                             });
+                            
+                            // Check if already installed
+                            window.addEventListener('appinstalled', () => {
+                                console.log('PWA: App was installed');
+                            });
+                            
+                            // Manual install button if no prompt
+                            setTimeout(() => {
+                                if (!deferredPrompt) {
+                                    console.log('PWA: No install prompt available, showing manual button');
+                                    const manualButton = document.createElement('div');
+                                    manualButton.innerHTML = '📱 Zainstaluj aplikację (ręcznie)';
+                                    manualButton.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#10b981;color:white;padding:10px;text-align:center;z-index:9999;cursor:pointer;';
+                                    manualButton.onclick = () => {
+                                        alert('Aby zainstalować aplikację:\\n1. W menu przeglądarki wybierz "Zainstaluj aplikację"\\n2. Lub dodaj do ekranu głównego');
+                                    };
+                                    document.body.appendChild(manualButton);
+                                }
+                            }, 3000);
                             
                             // Service Worker Registration
                             if ('serviceWorker' in navigator) {
