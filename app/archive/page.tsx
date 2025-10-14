@@ -215,10 +215,7 @@ export default function ArchivePage() {
             <div style={{ 
                 maxWidth: '1400px', 
                 margin: '0 auto', 
-                padding: '12px',
-                '@media (max-width: 768px)': {
-                    padding: '8px'
-                }
+                padding: '12px'
             }} className="archive-container">
                 <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
                     📁 Archiwum miesięcy
@@ -244,11 +241,7 @@ export default function ArchivePage() {
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: 'minmax(300px, 400px) 1fr', 
-                        gap: '24px',
-                        '@media (max-width: 768px)': {
-                            gridTemplateColumns: '1fr',
-                            gap: '16px'
-                        }
+                        gap: '24px'
                     }} className="archive-layout">
                         {/* Lista miesięcy */}
                         <div>
