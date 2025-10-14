@@ -212,7 +212,14 @@ export default function ArchivePage() {
     return (
         <div className="min-h-screen bg-theme-primary">
             <TopNavigation />
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+            <div style={{ 
+                maxWidth: '1400px', 
+                margin: '0 auto', 
+                padding: '12px',
+                '@media (max-width: 768px)': {
+                    padding: '8px'
+                }
+            }} className="archive-container">
                 <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
                     📁 Archiwum miesięcy
                 </h1>
@@ -234,7 +241,15 @@ export default function ArchivePage() {
                         </p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '24px' }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'minmax(300px, 400px) 1fr', 
+                        gap: '24px',
+                        '@media (max-width: 768px)': {
+                            gridTemplateColumns: '1fr',
+                            gap: '16px'
+                        }
+                    }} className="archive-layout">
                         {/* Lista miesięcy */}
                         <div>
                             <h2 className="section-header" style={{
@@ -356,9 +371,9 @@ export default function ArchivePage() {
                                     {/* Główne statystyki */}
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(4, 1fr)',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                                         gap: '16px'
-                                    }}>
+                                    }} className="stats-grid">
                                         <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',

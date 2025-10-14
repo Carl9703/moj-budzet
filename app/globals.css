@@ -681,3 +681,44 @@ body {
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
 }
+
+/* Archive Page Responsive Design */
+@media (max-width: 768px) {
+    .archive-container {
+        padding: 8px !important;
+    }
+    
+    .archive-layout {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    .archive-layout > div:first-child {
+        order: 2; /* Move months list below details on mobile */
+    }
+    
+    .archive-layout > div:last-child {
+        order: 1; /* Move details above months list on mobile */
+    }
+    
+    /* Mobile header adjustments */
+    .section-header {
+        font-size: 24px !important;
+        margin-bottom: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .section-header {
+        font-size: 20px !important;
+    }
+}
