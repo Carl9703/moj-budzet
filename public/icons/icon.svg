@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#3b82f6" stroke="#1e40af" stroke-width="8"/>
+  
+  <!-- Money symbol -->
+  <text x="256" y="320" font-family="Arial, sans-serif" font-size="200" font-weight="bold" text-anchor="middle" fill="white">₿</text>
+  
+  <!-- Small coins around -->
+  <circle cx="150" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+  <circle cx="362" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+  <circle cx="150" cy="362" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+  <circle cx="362" cy="362" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+  
+  <!-- Money lines -->
+  <line x1="100" y1="200" x2="412" y2="200" stroke="white" stroke-width="4" opacity="0.7"/>
+  <line x1="100" y1="312" x2="412" y2="312" stroke="white" stroke-width="4" opacity="0.7"/>
+</svg>
