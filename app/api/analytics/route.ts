@@ -168,20 +168,32 @@ async function getEnvelopeAnalysis(realExpenses: any[], envelopes: any[], sorted
         let monthlyComparison
         if (currentMonthData && previousMonthData) {
             // Pobierz transakcje z bieżącego miesiąca dla tej koperty
+            const currentMonthStart = new Date(currentMonthData.year, getMonthIndex(currentMonthData.month), 1)
+            const currentMonthEnd = new Date(currentMonthData.year, getMonthIndex(currentMonthData.month) + 1, 0, 23, 59, 59)
+            
             const currentMonthTransactions = await prisma.transaction.findMany({
                 where: {
                     userId: userId,
                     type: 'expense',
-                    date: { gte: new Date(currentMonthData.year, getMonthIndex(currentMonthData.month), 1) },
+                    date: { 
+                        gte: currentMonthStart,
+                        lte: currentMonthEnd
+                    },
                     envelope: { name: envelopeName }
                 }
             })
 
+            const previousMonthStart = new Date(previousMonthData.year, getMonthIndex(previousMonthData.month), 1)
+            const previousMonthEnd = new Date(previousMonthData.year, getMonthIndex(previousMonthData.month) + 1, 0, 23, 59, 59)
+            
             const previousMonthTransactions = await prisma.transaction.findMany({
                 where: {
                     userId: userId,
                     type: 'expense',
-                    date: { gte: new Date(previousMonthData.year, getMonthIndex(previousMonthData.month), 1) },
+                    date: { 
+                        gte: previousMonthStart,
+                        lte: previousMonthEnd
+                    },
                     envelope: { name: envelopeName }
                 }
             })
