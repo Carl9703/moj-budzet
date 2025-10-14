@@ -48,6 +48,22 @@ export default function RootLayout({
                 <script
                     dangerouslySetInnerHTML={{
                         __html: `
+                            // Cache busting for user data
+                            const userId = localStorage.getItem('userId');
+                            const lastLogin = localStorage.getItem('lastLogin');
+                            const currentTime = Date.now();
+                            
+                            // Clear cache if user changed or 24h passed
+                            if (userId && lastLogin) {
+                                const timeDiff = currentTime - parseInt(lastLogin);
+                                if (timeDiff > 24 * 60 * 60 * 1000) { // 24 hours
+                                    console.log('Cache expired, clearing...');
+                                    localStorage.clear();
+                                    sessionStorage.clear();
+                                    window.location.reload();
+                                }
+                            }
+                            
                             // PWA Installation Detection
                             let deferredPrompt;
                             
