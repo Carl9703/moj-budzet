@@ -568,10 +568,11 @@ export default function AnalyticsPage() {
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
                                     style={{
                                         padding: '6px 12px',
-                                        border: '1px solid #d1d5db',
+                                        border: '1px solid var(--border-primary)',
                                         borderRadius: '6px',
                                         fontSize: '14px',
                                         backgroundColor: 'var(--bg-secondary)',
+                                        color: 'var(--text-primary)',
                                         cursor: 'pointer'
                                     }}
                                 >
