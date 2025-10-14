@@ -464,11 +464,11 @@ export default function AnalyticsPage() {
                                         transition: 'all 0.2s'
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = '#f1f5f9'
+                                        e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
                                         e.currentTarget.style.transform = 'translateY(-2px)'
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = '#f8fafc'
+                                        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
                                         e.currentTarget.style.transform = 'translateY(0)'
                                     }}
                                 >
