@@ -83,11 +83,10 @@ export async function GET(request: NextRequest) {
                 return false // Wyklucz transfery
             }
 
-            // Dodatkowe sprawdzenie opisu transakcji
+            // Sprawdź opis transakcji - wyklucz tylko wyraźne transfery
             const description = transaction.description?.toLowerCase() || ''
-            const envelopeName = transaction.envelope?.name?.toLowerCase() || ''
             
-            // Wyklucz transfery na podstawie opisu i nazwy koperty
+            // Wyklucz tylko transakcje z wyraźnymi słowami kluczowymi transferów
             const transferKeywords = [
                 'transfer:',
                 'przelew',
@@ -95,33 +94,11 @@ export async function GET(request: NextRequest) {
                 'prezent',
                 'oszczędności',
                 'fundusz',
-                'celowy',
-                'podróż',
-                'wakacje',
-                'inwestycja',
-                'krypto',
-                'ike',
-                'auto:',
-                'serwis',
-                'ubezpieczenie'
-            ]
-            
-            // Koperty typowo używane do transferów/oszczędności
-            const transferEnvelopes = [
-                'budowanie przyszłości',
-                'fundusz awaryjny',
-                'podróże',
-                'auto: serwis i ubezpieczenie',
-                'ike',
-                'kryptowaluty',
-                'wyjazdy weekendowe',
-                'wakacje'
+                'celowy'
             ]
             
             const isTransfer = transferKeywords.some(keyword => 
-                description.includes(keyword) || envelopeName.includes(keyword)
-            ) || transferEnvelopes.some(env => 
-                envelopeName.includes(env.toLowerCase())
+                description.includes(keyword)
             )
             
             return !isTransfer
