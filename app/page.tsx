@@ -269,49 +269,22 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Envelopes Section */}
-                <div className="space-y-8">
+                {/* All Envelopes Grid - Single View */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {/* Fundusze celowe */}
-                    <div className="animate-in fade-in-up duration-500 delay-300">
-                        <EnvelopeGroup
-                            title="Fundusze celowe"
-                            icon="🎯"
-                            color="rgba(245, 158, 11, 0.1)"
-                            envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
-                            type="yearly"
-                        />
-                    </div>
+                    {data.yearlyEnvelopes?.filter(e => e.group === 'target').map((envelope) => (
+                        <div key={envelope.id} className="animate-fade-in-up">
+                            <EnvelopeCard {...envelope} type="yearly" />
+                        </div>
+                    ))}
 
-                    {/* Sprawdź czy użytkownik ma koperty miesięczne */}
+                    {/* Koperty miesięczne */}
                     {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
-                        <>
-                            {/* GRUPA 1: POTRZEBY */}
-                            <EnvelopeGroup
-                                title="Potrzeby"
-                                icon="🏡"
-                                color="rgba(34, 197, 94, 0.1)"
-                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'needs')}
-                                type="monthly"
-                            />
-                            
-                            {/* GRUPA 2: STYL ŻYCIA */}
-                            <EnvelopeGroup
-                                title="Styl życia"
-                                icon="🎉"
-                                color="rgba(168, 85, 247, 0.1)"
-                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
-                                type="monthly"
-                            />
-                            
-                            {/* GRUPA 3: CELE FINANSOWE */}
-                            <EnvelopeGroup
-                                title="Cele finansowe"
-                                icon="🎯"
-                                color="rgba(59, 130, 246, 0.1)"
-                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
-                                type="monthly"
-                            />
-                        </>
+                        data.monthlyEnvelopes.map((envelope) => (
+                            <div key={envelope.id} className="animate-fade-in-up">
+                                <EnvelopeCard {...envelope} type="monthly" />
+                            </div>
+                        ))
                     ) : (
                         <div className="slide-in-left">
                             <div style={{ 
