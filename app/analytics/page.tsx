@@ -1,5 +1,4 @@
-﻿// app/analytics/page.tsx - Z WŁASNYM PIĘKNYM WYKRESEM
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
@@ -87,6 +86,7 @@ export default function AnalyticsPage() {
     const [selectedPeriod, setSelectedPeriod] = useState<string>('3months')
 
     const periodOptions = [
+        { value: 'currentMonth', label: 'Bieżący miesiąc' },
         { value: '1month', label: 'Ostatni miesiąc' },
         { value: '3months', label: 'Ostatnie 3 miesiące' },
         { value: '6months', label: 'Ostatnie 6 miesięcy' },
@@ -464,11 +464,11 @@ export default function AnalyticsPage() {
                                         transition: 'all 0.2s'
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = '#f1f5f9'
+                                        e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
                                         e.currentTarget.style.transform = 'translateY(-2px)'
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = '#f8fafc'
+                                        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
                                         e.currentTarget.style.transform = 'translateY(0)'
                                     }}
                                 >
@@ -568,10 +568,11 @@ export default function AnalyticsPage() {
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
                                     style={{
                                         padding: '6px 12px',
-                                        border: '1px solid #d1d5db',
+                                        border: '1px solid var(--border-primary)',
                                         borderRadius: '6px',
                                         fontSize: '14px',
                                         backgroundColor: 'var(--bg-secondary)',
+                                        color: 'var(--text-primary)',
                                         cursor: 'pointer'
                                     }}
                                 >

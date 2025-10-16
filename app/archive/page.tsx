@@ -1,5 +1,4 @@
-﻿// app/archive/page.tsx - PRZEPISANY OD NOWA
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
@@ -213,7 +212,11 @@ export default function ArchivePage() {
     return (
         <div className="min-h-screen bg-theme-primary">
             <TopNavigation />
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+            <div style={{ 
+                maxWidth: '1400px', 
+                margin: '0 auto', 
+                padding: '12px'
+            }} className="archive-container">
                 <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
                     📁 Archiwum miesięcy
                 </h1>
@@ -235,7 +238,11 @@ export default function ArchivePage() {
                         </p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '24px' }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'minmax(300px, 400px) 1fr', 
+                        gap: '24px'
+                    }} className="archive-layout">
                         {/* Lista miesięcy */}
                         <div>
                             <h2 className="section-header" style={{
@@ -357,9 +364,9 @@ export default function ArchivePage() {
                                     {/* Główne statystyki */}
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(4, 1fr)',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                                         gap: '16px'
-                                    }}>
+                                    }} className="stats-grid">
                                         <div className="bg-theme-secondary card" style={{
                                             padding: '20px',
                                             borderRadius: '8px',
@@ -431,10 +438,22 @@ export default function ArchivePage() {
                                                 marginBottom: '16px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px',
+                                                justifyContent: 'space-between',
                                                 color: 'var(--text-primary)'
                                             }}>
-                                                📦 Wydatki z kopert ({monthData.envelopes.length})
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    📦 Wydatki z kopert ({monthData.envelopes.length})
+                                                </span>
+                                                <span style={{ 
+                                                    fontSize: '16px', 
+                                                    fontWeight: 'bold', 
+                                                    color: 'var(--accent-error)',
+                                                    backgroundColor: 'var(--bg-warning)',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px'
+                                                }}>
+                                                    {formatMoney(monthData.envelopes.reduce((sum, env) => sum + env.totalSpent, 0))}
+                                                </span>
                                             </h3>
 
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -603,10 +622,22 @@ export default function ArchivePage() {
                                                 marginBottom: '16px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px',
+                                                justifyContent: 'space-between',
                                                 color: 'var(--text-primary)'
                                             }}>
-                                                🔄 Transfery i przelewy ({monthData.transfers.length})
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    🔄 Transfery i przelewy ({monthData.transfers.length})
+                                                </span>
+                                                <span style={{ 
+                                                    fontSize: '16px', 
+                                                    fontWeight: 'bold', 
+                                                    color: 'var(--accent-info)',
+                                                    backgroundColor: 'var(--bg-info)',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px'
+                                                }}>
+                                                    {formatMoney(monthData.transfers.reduce((sum, transfer) => sum + transfer.amount, 0))}
+                                                </span>
                                             </h3>
 
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

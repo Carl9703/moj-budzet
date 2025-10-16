@@ -265,7 +265,7 @@ export default function HomePage() {
                 }}>
                     {/* FUNDUSZE CELOWE - NA GÓRZE */}
                     <EnvelopeGroup
-                        title="🎯 Fundusze celowe"
+                        title="Fundusze celowe"
                         icon="🎯"
                         color="rgba(245, 158, 11, 0.1)"
                         envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
@@ -277,7 +277,7 @@ export default function HomePage() {
                         <>
                             {/* GRUPA 1: POTRZEBY */}
                             <EnvelopeGroup
-                                title="🏡 Potrzeby"
+                                title="Potrzeby"
                                 icon="🏡"
                                 color="rgba(34, 197, 94, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'needs')}
@@ -286,7 +286,7 @@ export default function HomePage() {
                             
                             {/* GRUPA 2: STYL ŻYCIA */}
                             <EnvelopeGroup
-                                title="🎉 Styl życia"
+                                title="Styl życia"
                                 icon="🎉"
                                 color="rgba(168, 85, 247, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
@@ -295,7 +295,7 @@ export default function HomePage() {
                             
                             {/* GRUPA 3: CELE FINANSOWE */}
                             <EnvelopeGroup
-                                title="🎯 Cele finansowe"
+                                title="Cele finansowe"
                                 icon="🎯"
                                 color="rgba(59, 130, 246, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}

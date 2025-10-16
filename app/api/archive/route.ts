@@ -107,7 +107,6 @@ export async function GET(request: NextRequest) {
                 isTransfer = ['Wesele', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(categoryName)
             } else if (transaction.description) {
                 const desc = transaction.description.toLowerCase()
-                console.log(`Transaction description: "${desc}", categoryName: "${categoryName}", isTransfer: ${isTransfer}`)
                 if (desc.includes('transfer: konto wspólne')) {
                     categoryName = 'Konto wspólne'
                     isTransfer = true

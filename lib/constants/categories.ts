@@ -14,7 +14,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
     
     // GRUPA 1: POTRZEBY - Żywność
     { id: 'shared-groceries', name: 'Wspólne zakupy', icon: '🛒', defaultEnvelope: 'Żywność', type: 'monthly' },
-    { id: 'personal-groceries', name: 'Moje zakupy', icon: '🥕', defaultEnvelope: 'Żywność', type: 'monthly' },
+    { id: 'personal-groceries', name: 'Moje zakupy', icon: '🛍️', defaultEnvelope: 'Żywność', type: 'monthly' },
     
     // GRUPA 1: POTRZEBY - Transport
     { id: 'fuel', name: 'Paliwo', icon: '⛽', defaultEnvelope: 'Transport', type: 'monthly' },
@@ -43,7 +43,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
     // GRUPA 2: STYL ŻYCIA - Ubrania i Akcesoria
     { id: 'clothes', name: 'Odzież', icon: '👕', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
     { id: 'shoes', name: 'Obuwie', icon: '👟', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
-    { id: 'accessories', name: 'Dodatki', icon: '💍', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
+    { id: 'accessories', name: 'Dodatki', icon: '👜', defaultEnvelope: 'Ubrania i Akcesoria', type: 'monthly' },
     
     // GRUPA 3: CELE FINANSOWE - Budowanie Przyszłości
     { id: 'ike', name: 'IKE', icon: '📈', defaultEnvelope: 'Budowanie Przyszłości', type: 'yearly' },
@@ -72,40 +72,6 @@ export const CATEGORY_TO_ENVELOPE_MAP: Record<string, string> = EXPENSE_CATEGORI
     {} as Record<string, string>
 )
 
-export function getPopularCategories(limit: number = 9): Category[] {
-    if (typeof window !== 'undefined') {
-        const usage = JSON.parse(localStorage.getItem('categoryUsage') || '{}')
-
-        const sorted = [...EXPENSE_CATEGORIES].sort((a, b) => {
-            const usageA = usage[a.id] || 0
-            const usageB = usage[b.id] || 0
-            return usageB - usageA
-        })
-
-        return sorted.slice(0, limit)
-    }
-
-    return EXPENSE_CATEGORIES.slice(0, limit)
-}
-
-// Pobierz popularne kategorie wydatków
-export function getPopularExpenseCategories(limit: number = 9): Category[] {
-    const expenseCategories = getExpenseCategories()
-    
-    if (typeof window !== 'undefined') {
-        const usage = JSON.parse(localStorage.getItem('categoryUsage') || '{}')
-
-        const sorted = [...expenseCategories].sort((a, b) => {
-            const usageA = usage[a.id] || 0
-            const usageB = usage[b.id] || 0
-            return usageB - usageA
-        })
-
-        return sorted.slice(0, limit)
-    }
-
-    return expenseCategories.slice(0, limit)
-}
 
 export function trackCategoryUsage(categoryId: string): void {
     if (typeof window !== 'undefined') {
@@ -171,10 +137,6 @@ export function getExpenseCategories(): Category[] {
     return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope !== '')
 }
 
-// Filtruj kategorie przychodów (bez przypisanych kopert)
-export function getIncomeCategories(): Category[] {
-    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === '')
-}
 
 // Filtruj kategorie dla konkretnej koperty
 export function getCategoriesForEnvelope(envelopeName: string): Category[] {

@@ -1,4 +1,3 @@
-// app/auth/signup/page.tsx - Prosta strona rejestracji
 'use client'
 
 import { useState } from 'react'

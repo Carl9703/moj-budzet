@@ -4,7 +4,6 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function POST(request: NextRequest) {
     try {
-        console.log('🚀 Rozpoczynam tworzenie kopert...')
         
         // Timeout dla całej operacji (30 sekund)
         const timeoutPromise = new Promise((_, reject) => {
@@ -17,21 +16,17 @@ export async function POST(request: NextRequest) {
         let userId: string
         try {
             userId = await getUserIdFromToken(request)
-            console.log('✅ UserId pobrany:', userId)
         } catch (error) {
             console.error('❌ Błąd autoryzacji:', error)
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
         // Sprawdź czy użytkownik ma nowe koperty (z grupami)
-        console.log('🔍 Sprawdzam istniejące koperty...')
         let existingEnvelopes
         try {
             existingEnvelopes = await prisma.envelope.findMany({
                 where: { userId }
             })
-            console.log('📊 Znaleziono kopert:', existingEnvelopes.length)
-            console.log('📋 Koperty:', existingEnvelopes.map(e => ({ name: e.name, group: e.group })))
         } catch (error) {
             console.error('❌ Błąd podczas sprawdzania kopert:', error)
             throw error
@@ -40,21 +35,17 @@ export async function POST(request: NextRequest) {
         // Jeśli ma stare koperty (bez group), usuń je i utwórz nowe
         if (existingEnvelopes.length > 0) {
             const hasNewStructure = existingEnvelopes.some(e => e.group !== null)
-            console.log('🔄 Ma nową strukturę:', hasNewStructure)
             
             if (hasNewStructure) {
-                console.log('❌ Użytkownik już ma nowe koperty - blokuję')
                 return NextResponse.json(
                     { error: 'Użytkownik już ma skonfigurowane koperty' },
                     { status: 400 }
                 )
             } else {
-                console.log('🗑️ Usuwam stare koperty...')
                 // Usuń stare koperty
                 await prisma.envelope.deleteMany({
                     where: { userId }
                 })
-                console.log('✅ Stare koperty usunięte')
             }
         }
 
@@ -85,7 +76,6 @@ export async function POST(request: NextRequest) {
         
         for (const envelope of allMonthlyEnvelopes) {
             try {
-                console.log('Tworzenie koperty:', envelope.name, 'group:', envelope.group)
                 await prisma.envelope.create({
                     data: {
                         userId,
@@ -97,7 +87,6 @@ export async function POST(request: NextRequest) {
                         group: envelope.group
                     }
                 })
-                console.log('Koperta utworzona:', envelope.name)
             } catch (error) {
                 console.error('Błąd podczas tworzenia koperty:', envelope.name, error)
                 throw error
@@ -115,7 +104,6 @@ export async function POST(request: NextRequest) {
 
         for (const envelope of targetFundsEnvelopes) {
             try {
-                console.log('Tworzenie koperty rocznej:', envelope.name, 'group:', envelope.group)
                 await prisma.envelope.create({
                     data: {
                         userId,
@@ -127,7 +115,6 @@ export async function POST(request: NextRequest) {
                         group: envelope.group
                     }
                 })
-                console.log('Koperta roczna utworzona:', envelope.name)
             } catch (error) {
                 console.error('Błąd podczas tworzenia koperty rocznej:', envelope.name, error)
                 throw error

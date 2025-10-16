@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
-        console.log('🔧 Naprawiam grupy kopert dla użytkownika:', userId)
 
         // Mapowanie nazw kopert na grupy
         const envelopeGroupMap: { [key: string]: string } = {
@@ -38,13 +37,11 @@ export async function POST(request: NextRequest) {
             where: { userId }
         })
 
-        console.log('📊 Znaleziono kopert:', envelopes.length)
 
         // Napraw grupy dla każdej koperty
         for (const envelope of envelopes) {
             const group = envelopeGroupMap[envelope.name]
             if (group && envelope.group !== group) {
-                console.log(`🔄 Aktualizuję kopertę: ${envelope.name} -> group: ${group}`)
                 await prisma.envelope.update({
                     where: { id: envelope.id },
                     data: { group }

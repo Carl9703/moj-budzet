@@ -3,17 +3,13 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
-    console.log('🚀 CONFIG API CALLED - Starting request')
     try {
-        console.log('🔍 Config API - Starting request')
         
         // Pobierz userId z JWT tokenu
         let userId: string
         try {
             userId = await getUserIdFromToken(request)
-            console.log('✅ Config API - userId extracted:', userId)
         } catch (error) {
-            console.log('❌ Config API - Auth error:', error)
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
@@ -33,7 +29,6 @@ export async function GET(request: NextRequest) {
             })
         }
 
-        console.log('🔍 Config API - userId:', userId)
         
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
         let monthlyEnvelopes
@@ -44,9 +39,7 @@ export async function GET(request: NextRequest) {
                 select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
             })
             
-            console.log('📊 Monthly envelopes found:', monthlyEnvelopes.length)
         } catch (dbError) {
-            console.log('❌ Database error for monthly envelopes:', dbError)
             throw dbError
         }
 
@@ -59,17 +52,12 @@ export async function GET(request: NextRequest) {
                 select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
             })
             
-            console.log('📊 Yearly envelopes found:', yearlyEnvelopes.length)
         } catch (dbError) {
-            console.log('❌ Database error for yearly envelopes:', dbError)
             throw dbError
         }
 
         return NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
     } catch (error) {
-        console.log('❌ CONFIG API ERROR:', error)
-        console.log('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
-        console.log('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }

@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
                 }
             })
             
-            console.log(`Transfer: Updated ${toEnvelope.name} from ${toEnvelope.currentAmount} to ${updatedToEnvelope.currentAmount}`)
 
             // Utwórz transakcję "expense" dla koperty źródłowej (wyjście środków)
             await tx.transaction.create({

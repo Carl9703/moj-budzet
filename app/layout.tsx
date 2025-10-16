@@ -4,8 +4,8 @@ import { ThemeProvider } from '@/lib/contexts/ThemeContext'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata = {
-    title: 'Budżet Domowy',
-    description: 'Aplikacja do zarządzania budżetem',
+    title: 'Mój Budżet - Aplikacja Finansowa',
+    description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami'
 }
 
 export default function RootLayout({

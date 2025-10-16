@@ -28,11 +28,18 @@ ADD COLUMN IF NOT EXISTS "loginAttempts" INTEGER DEFAULT 0;
 ALTER TABLE "User" 
 ADD COLUMN IF NOT EXISTS "lockedUntil" TIMESTAMP;
 
--- 4. Sprawdź czy wszystkie kolumny zostały dodane
+-- 4. Dodaj brakujące kolumny do UserConfig
+ALTER TABLE "UserConfig" 
+ADD COLUMN IF NOT EXISTS "defaultToWedding" DOUBLE PRECISION DEFAULT 0;
+
+ALTER TABLE "UserConfig" 
+ADD COLUMN IF NOT EXISTS "defaultToGroceries" DOUBLE PRECISION DEFAULT 0;
+
+-- 5. Sprawdź czy wszystkie kolumny zostały dodane
 SELECT 
     table_name,
     column_name,
     data_type
 FROM information_schema.columns 
-WHERE table_name IN ('User', 'Envelope', 'Transaction')
+WHERE table_name IN ('User', 'Envelope', 'Transaction', 'UserConfig')
 ORDER BY table_name, ordinal_position;

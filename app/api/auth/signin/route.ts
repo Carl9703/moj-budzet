@@ -175,6 +175,8 @@ async function createDemoConfig(userId: string) {
       defaultToJoint: 1500,
       defaultToSavings: 1000,
       defaultToVacation: 420,
+      defaultToWedding: 0,
+      defaultToGroceries: 0,
       defaultToInvestment: 600
     }
   })

@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const totalExpenses = Math.round(monthTransactions
-            .filter(t => t.type === 'expense')
+            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const isMonthClosed = !!monthCloseTransaction
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
                 const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
                     // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
                     // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
-                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny' || e.name === 'Budowanie Przyszłości'
+                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
                     
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
@@ -185,16 +185,13 @@ export async function GET(request: NextRequest) {
             .filter(e => e.type === 'yearly')
             .map(e => {
                 const envelopeTransactions = monthTransactions.filter(t => 
-                    t.type === 'expense' && t.envelopeId === e.id
+                    t.envelopeId === e.id
                 )
-                const spent = Math.round(envelopeTransactions.reduce((sum, t) => sum + t.amount, 0) * 100) / 100
-
-
                 return {
                     id: e.id,
                     name: e.name,
                     icon: e.icon,
-                    spent: spent,
+                    spent: e.currentAmount, // Dla kopert rocznych używamy currentAmount
                     planned: e.plannedAmount,
                     current: e.currentAmount,
                     group: e.group
@@ -208,7 +205,7 @@ export async function GET(request: NextRequest) {
             totalExpenses,
             monthlyEnvelopes,
             yearlyEnvelopes,
-            transactions: monthTransactions.slice(0, 10),
+            transactions: allTransactions.slice(0, 20), // Więcej transakcji dla AutoTransfers
             isMonthClosed
         })
 
