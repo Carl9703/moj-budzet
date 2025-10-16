@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { authorizedFetch } from '@/lib/utils/api'
 
+interface TransactionDetail {
+    id: string
+    amount: number
+    description: string
+    date: string
+    envelopeName: string
+    envelopeIcon: string
+}
+
 interface CategoryAnalysis {
     categoryId: string
     categoryName: string
@@ -22,6 +31,7 @@ interface CategoryAnalysis {
         year: number
         amount: number
     }[]
+    transactions: TransactionDetail[]
 }
 
 interface CategoryAnalyticsData {
@@ -44,6 +54,7 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
     const [data, setData] = useState<CategoryAnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+    const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set())
     const [sortBy, setSortBy] = useState<'amount' | 'transactions' | 'name'>('amount')
     const [filterText, setFilterText] = useState('')
 
@@ -71,6 +82,15 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
 
     const formatMoney = (amount: number) => amount.toLocaleString('pl-PL') + ' zł'
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('pl-PL', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        })
+    }
+
     const toggleCategory = (categoryId: string) => {
         const newExpanded = new Set(expandedCategories)
         if (newExpanded.has(categoryId)) {
@@ -79,6 +99,16 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
             newExpanded.add(categoryId)
         }
         setExpandedCategories(newExpanded)
+    }
+
+    const toggleTransactions = (categoryId: string) => {
+        const newExpanded = new Set(expandedTransactions)
+        if (newExpanded.has(categoryId)) {
+            newExpanded.delete(categoryId)
+        } else {
+            newExpanded.add(categoryId)
+        }
+        setExpandedTransactions(newExpanded)
     }
 
     if (loading) {
@@ -350,7 +380,7 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
 
                                     {/* TREND MIESIĘCZNY */}
                                     {category.monthlyTrend.length > 0 && (
-                                        <div>
+                                        <div style={{ marginBottom: '16px' }}>
                                             <h4 style={{
                                                 fontSize: '14px',
                                                 fontWeight: '600',
@@ -382,6 +412,89 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
                                                     </div>
                                                 ))}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* SZCZEGÓŁY TRANSAKCJI */}
+                                    {category.transactions.length > 0 && (
+                                        <div>
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                marginBottom: '8px'
+                                            }}>
+                                                <h4 style={{
+                                                    fontSize: '14px',
+                                                    fontWeight: '600',
+                                                    color: 'var(--text-primary)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    margin: 0
+                                                }}>
+                                                    💳 Szczegóły transakcji:
+                                                </h4>
+                                                <button
+                                                    onClick={() => toggleTransactions(category.categoryId)}
+                                                    style={{
+                                                        padding: '4px 8px',
+                                                        backgroundColor: 'var(--bg-tertiary)',
+                                                        border: '1px solid var(--border-primary)',
+                                                        borderRadius: '4px',
+                                                        fontSize: '12px',
+                                                        color: 'var(--text-primary)',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                                        e.currentTarget.style.color = '#ffffff'
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                                        e.currentTarget.style.color = 'var(--text-primary)'
+                                                    }}
+                                                >
+                                                    {expandedTransactions.has(category.categoryId) ? 'Ukryj' : 'Pokaż'} transakcje
+                                                </button>
+                                            </div>
+                                            
+                                            {expandedTransactions.has(category.categoryId) && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    {category.transactions.map((transaction) => (
+                                                        <div key={transaction.id} style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '8px 12px',
+                                                            backgroundColor: 'var(--bg-tertiary)',
+                                                            borderRadius: '4px',
+                                                            fontSize: '13px',
+                                                            border: '1px solid var(--border-primary)'
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                                                <span style={{ fontSize: '14px' }}>{transaction.envelopeIcon}</span>
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+                                                                        {transaction.description}
+                                                                    </div>
+                                                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                                        {transaction.envelopeName} • {formatDate(transaction.date)}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ 
+                                                                color: 'var(--accent-error)', 
+                                                                fontWeight: '600',
+                                                                fontSize: '14px'
+                                                            }}>
+                                                                {formatMoney(transaction.amount)}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

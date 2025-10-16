@@ -3,6 +3,15 @@ import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon, EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+interface TransactionDetail {
+    id: string
+    amount: number
+    description: string
+    date: string
+    envelopeName: string
+    envelopeIcon: string
+}
+
 interface CategoryAnalysis {
     categoryId: string
     categoryName: string
@@ -22,6 +31,7 @@ interface CategoryAnalysis {
         year: number
         amount: number
     }[]
+    transactions: TransactionDetail[]
 }
 
 function getStartDate(period: string): Date {
@@ -186,6 +196,21 @@ export async function GET(request: NextRequest) {
                     return months.indexOf(a.month) - months.indexOf(b.month)
                 })
 
+            // Przygotuj szczegóły transakcji
+            const transactions: TransactionDetail[] = data.transactions
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Najnowsze na górze
+                .map(transaction => {
+                    const envelope = envelopes.find(e => e.name === transaction.envelope?.name)
+                    return {
+                        id: transaction.id,
+                        amount: transaction.amount,
+                        description: transaction.description || 'Brak opisu',
+                        date: transaction.date.toISOString().split('T')[0], // YYYY-MM-DD format
+                        envelopeName: transaction.envelope?.name || 'Inne',
+                        envelopeIcon: envelope?.icon || '📦'
+                    }
+                })
+
             return {
                 categoryId,
                 categoryName,
@@ -195,7 +220,8 @@ export async function GET(request: NextRequest) {
                 avgTransactionAmount: Math.round(data.totalAmount / data.transactions.length),
                 percentage: totalExpenses > 0 ? Math.round((data.totalAmount / totalExpenses) * 100) : 0,
                 envelopeBreakdown,
-                monthlyTrend
+                monthlyTrend,
+                transactions
             }
         }).sort((a, b) => b.totalAmount - a.totalAmount)
 
