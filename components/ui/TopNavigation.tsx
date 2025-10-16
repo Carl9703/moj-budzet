@@ -27,93 +27,285 @@ export function TopNavigation() {
     ]
 
     return (
-        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
-                    <div className="flex items-center space-x-4">
-                        <button
-                            onClick={() => router.push('/')}
-                            className="flex items-center space-x-3 group"
-                        >
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
-                                <span className="text-white font-bold text-lg">B</span>
-                            </div>
-                            <div className="hidden sm:block">
-                                <h1 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                    Budżet Domowy
-                                </h1>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Zarządzanie finansami</p>
-                            </div>
-                        </button>
+        <header className="bg-theme-secondary border-theme shadow-md" style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+            borderBottom: '1px solid var(--border-primary)',
+            padding: '12px 0',
+            marginBottom: '24px',
+            transition: 'all 0.3s ease'
+        }}>
+            <div style={{
+                maxWidth: '1400px',
+                margin: '0 auto',
+                padding: '0 24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+            }}>
+                {/* Logo/Tytuł + Dark Mode */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div 
+                        onClick={() => router.push('/')}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.transform = 'translateY(-1px)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                        }}
+                    >
+                        <h1 className="text-theme-primary" style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            margin: 0,
+                            transition: 'color 0.3s ease'
+                        }}>
+                            💰 Budżet Domowy
+                        </h1>
                     </div>
+                    
+                    {/* Theme Toggle - obok logo */}
+                    <ThemeToggle size="small" />
+                </div>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex items-center space-x-1">
+                {/* Nawigacja */}
+                <nav style={{
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Nawigacja - ukryj na małych ekranach */}
+                    <div className="hidden-mobile" style={{
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center'
+                    }}>
                         {navItems.map((item) => (
                             <button
                                 key={item.path}
                                 onClick={() => router.push(item.path)}
-                                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                                className="nav-button smooth-all"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '10px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '2px solid var(--border-primary)',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textDecoration: 'none',
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                    e.currentTarget.style.transform = 'translateY(-2px)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                    e.currentTarget.style.transform = 'translateY(0)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                                }}
                             >
-                                <span className="text-lg">{item.icon}</span>
+                                <span style={{ fontSize: '16px' }}>{item.icon}</span>
                                 <span>{item.label}</span>
                             </button>
                         ))}
-                    </nav>
+                    </div>
 
-                    {/* Right side */}
-                    <div className="flex items-center space-x-4">
-                        <ThemeToggle size="small" />
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="mobile-only"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '40px',
+                            height: '40px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            border: '2px solid var(--border-primary)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                            e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.borderColor = 'var(--border-primary)'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>
+                            {isMobileMenuOpen ? '✕' : '☰'}
+                        </span>
+                    </button>
+
+                    {/* Logout Button - tylko na PC */}
+                    <button
+                        onClick={handleLogout}
+                        className="nav-button smooth-all hidden-mobile"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '10px 16px',
+                            backgroundColor: '#fee',
+                            border: '2px solid #fcc',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#c33',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            marginLeft: '8px',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#dc3545'
+                            e.currentTarget.style.borderColor = '#dc3545'
+                            e.currentTarget.style.color = '#ffffff'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fee'
+                            e.currentTarget.style.borderColor = '#fcc'
+                            e.currentTarget.style.color = '#c33'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
+                        title="Wyloguj się"
+                    >
+                        <span style={{ fontSize: '16px' }}>🚪</span>
+                        <span>Wyloguj</span>
+                    </button>
+                </nav>
+                </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border-primary)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    boxShadow: 'var(--shadow-lg)',
+                    zIndex: 1000,
+                    padding: '8px'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                    }}>
+                        {navItems.map((item) => (
+                            <button
+                                key={item.path}
+                                onClick={() => handleNavClick(item.path)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '12px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--border-primary)',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                }}
+                            >
+                                <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
                         
-                        {/* Logout Button */}
+                        {/* Wyloguj w menu mobile */}
                         <button
-                            onClick={handleLogout}
-                            className="hidden md:flex items-center space-x-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                            onClick={() => {
+                                handleLogout()
+                                setIsMobileMenuOpen(false)
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px 16px',
+                                backgroundColor: '#fee',
+                                border: '1px solid #fcc',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#c33',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                textAlign: 'left',
+                                marginTop: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#dc3545'
+                                e.currentTarget.style.borderColor = '#dc3545'
+                                e.currentTarget.style.color = '#ffffff'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#fee'
+                                e.currentTarget.style.borderColor = '#fcc'
+                                e.currentTarget.style.color = '#c33'
+                            }}
                         >
-                            <span>🚪</span>
+                            <span style={{ fontSize: '18px' }}>🚪</span>
                             <span>Wyloguj</span>
-                        </button>
-
-                        {/* Mobile menu button */}
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            <span className="text-xl">
-                                {isMobileMenuOpen ? '✕' : '☰'}
-                            </span>
                         </button>
                     </div>
                 </div>
-
-                {/* Mobile Navigation */}
-                {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4">
-                        <div className="space-y-2">
-                            {navItems.map((item) => (
-                                <button
-                                    key={item.path}
-                                    onClick={() => handleNavClick(item.path)}
-                                    className="flex items-center space-x-3 w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                >
-                                    <span className="text-lg">{item.icon}</span>
-                                    <span className="font-medium">{item.label}</span>
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => {
-                                    handleLogout()
-                                    setIsMobileMenuOpen(false)
-                                }}
-                                className="flex items-center space-x-3 w-full px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            >
-                                <span className="text-lg">🚪</span>
-                                <span className="font-medium">Wyloguj</span>
-                            </button>
-                        </div>
-                    </div>
-                )}
+            )}
             </div>
         </header>
     )
