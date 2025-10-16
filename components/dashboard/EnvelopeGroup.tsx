@@ -46,8 +46,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type }: Props) {
                 {envelopes.map((envelope, index) => (
                     <div 
                         key={`${envelope.id}-${envelope.current}`} 
-                        className="animate-in fade-in-up duration-500"
-                        style={{ animationDelay: `${index * 100}ms` }}
+                        className="animate-fade-in-up"
                     >
                         <EnvelopeCard {...envelope} type={type} />
                     </div>

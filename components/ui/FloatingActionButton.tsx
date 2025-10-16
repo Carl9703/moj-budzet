@@ -20,7 +20,7 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end space-y-3">
             {/* Menu opcji */}
             {isOpen && (
-                <div className="flex flex-col space-y-2 mb-2 animate-in slide-in-from-bottom-2 duration-200">
+                <div className="flex flex-col space-y-2 mb-2">
                     <button
                         onClick={() => {
                             onAddIncome()

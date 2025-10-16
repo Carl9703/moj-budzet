@@ -249,10 +249,10 @@ export default function HomePage() {
 
                 {/* Top Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="animate-in fade-in-up duration-500">
+                    <div className="animate-fade-in-up">
                         <MainBalance balance={data.balance || 0} />
                     </div>
-                    <div className="animate-in fade-in-up duration-500 delay-100">
+                    <div className="animate-fade-in-up">
                         <MonthStatus
                             totalIncome={data.totalIncome || 0}
                             totalExpenses={data.totalExpenses || 0}
@@ -261,7 +261,7 @@ export default function HomePage() {
                             previousMonthStatus={previousMonthStatus}
                         />
                     </div>
-                    <div className="animate-in fade-in-up duration-500 delay-200">
+                    <div className="animate-fade-in-up">
                         <QuickActions
                             onAddIncome={() => setShowIncomeModal(true)}
                             onAddExpense={() => setShowExpenseModal(true)}
