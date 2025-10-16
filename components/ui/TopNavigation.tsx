@@ -210,7 +210,7 @@ export function TopNavigation() {
                         <span>Wyloguj</span>
                     </button>
                 </nav>
-                </div>
+            </div>
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
@@ -306,7 +306,6 @@ export function TopNavigation() {
                     </div>
                 </div>
             )}
-            </div>
         </header>
     )
 }
