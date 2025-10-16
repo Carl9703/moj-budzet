@@ -234,14 +234,25 @@ export default function HomePage() {
 
 
     return (
-        <div className="min-h-screen fade-in-up bg-theme-primary">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <TopNavigation />
-            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                    <div className="smooth-all hover-lift">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Hero Section */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        Dashboard Finansowy
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        Zarządzaj swoim budżetem w prosty i intuicyjny sposób
+                    </p>
+                </div>
+
+                {/* Top Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div className="animate-in fade-in-up duration-500">
                         <MainBalance balance={data.balance || 0} />
                     </div>
-                    <div className="smooth-all hover-lift">
+                    <div className="animate-in fade-in-up duration-500 delay-100">
                         <MonthStatus
                             totalIncome={data.totalIncome || 0}
                             totalExpenses={data.totalExpenses || 0}
@@ -250,7 +261,7 @@ export default function HomePage() {
                             previousMonthStatus={previousMonthStatus}
                         />
                     </div>
-                    <div className="smooth-all hover-lift">
+                    <div className="animate-in fade-in-up duration-500 delay-200">
                         <QuickActions
                             onAddIncome={() => setShowIncomeModal(true)}
                             onAddExpense={() => setShowExpenseModal(true)}
@@ -258,19 +269,18 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <div className="grid-responsive" style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '20px'
-                }}>
-                    {/* FUNDUSZE CELOWE - NA GÓRZE */}
-                    <EnvelopeGroup
-                        title="Fundusze celowe"
-                        icon="🎯"
-                        color="rgba(245, 158, 11, 0.1)"
-                        envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
-                        type="yearly"
-                    />
+                {/* Envelopes Section */}
+                <div className="space-y-8">
+                    {/* Fundusze celowe */}
+                    <div className="animate-in fade-in-up duration-500 delay-300">
+                        <EnvelopeGroup
+                            title="Fundusze celowe"
+                            icon="🎯"
+                            color="rgba(245, 158, 11, 0.1)"
+                            envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
+                            type="yearly"
+                        />
+                    </div>
 
                     {/* Sprawdź czy użytkownik ma koperty miesięczne */}
                     {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (

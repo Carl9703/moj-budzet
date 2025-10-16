@@ -17,57 +17,19 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '12px'
-        }}>
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end space-y-3">
             {/* Menu opcji */}
             {isOpen && (
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    marginBottom: '8px',
-                    animation: 'fadeInUp 0.2s ease-out'
-                }}>
+                <div className="flex flex-col space-y-2 mb-2 animate-in slide-in-from-bottom-2 duration-200">
                     <button
                         onClick={() => {
                             onAddIncome()
                             setIsOpen(false)
                         }}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 16px',
-                            backgroundColor: '#10b981',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '25px',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                            transition: 'all 0.2s ease',
-                            transform: 'translateX(0)',
-                            opacity: 1
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateX(-4px)'
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)'
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateX(0)'
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)'
-                        }}
+                        className="flex items-center space-x-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 text-sm font-medium"
                     >
-                        💵 Dodaj przychód
+                        <span>💵</span>
+                        <span>Dodaj przychód</span>
                     </button>
                     
                     <button
@@ -75,33 +37,10 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             onAddExpense()
                             setIsOpen(false)
                         }}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 16px',
-                            backgroundColor: '#ef4444',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '25px',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
-                            transition: 'all 0.2s ease',
-                            transform: 'translateX(0)',
-                            opacity: 1
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateX(-4px)'
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.4)'
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateX(0)'
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)'
-                        }}
+                        className="flex items-center space-x-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 text-sm font-medium"
                     >
-                        💸 Dodaj wydatek
+                        <span>💸</span>
+                        <span>Dodaj wydatek</span>
                     </button>
 
                     {onAddBonus && (
@@ -182,36 +121,11 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
             {/* Główny przycisk */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    width: '56px',
-                    height: '56px',
-                    backgroundColor: isOpen ? '#ef4444' : '#6366f1',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    boxShadow: isOpen 
-                        ? '0 6px 16px rgba(239, 68, 68, 0.4)' 
-                        : '0 4px 12px rgba(99, 102, 241, 0.3)',
-                    transition: 'all 0.3s ease',
-                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = isOpen ? 'rotate(45deg) scale(1.1)' : 'rotate(0deg) scale(1.1)'
-                    e.currentTarget.style.boxShadow = isOpen 
-                        ? '0 8px 20px rgba(239, 68, 68, 0.5)' 
-                        : '0 6px 16px rgba(99, 102, 241, 0.4)'
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = isOpen ? 'rotate(45deg) scale(1)' : 'rotate(0deg) scale(1)'
-                    e.currentTarget.style.boxShadow = isOpen 
-                        ? '0 6px 16px rgba(239, 68, 68, 0.4)' 
-                        : '0 4px 12px rgba(99, 102, 241, 0.3)'
-                }}
+                className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 ${
+                    isOpen 
+                        ? 'bg-red-500 hover:bg-red-600 rotate-45' 
+                        : 'bg-blue-500 hover:bg-blue-600'
+                }`}
             >
                 {isOpen ? '✕' : '+'}
             </button>
