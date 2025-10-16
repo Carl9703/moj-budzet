@@ -5,7 +5,26 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata = {
     title: 'Mój Budżet - Aplikacja Finansowa',
-    description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami'
+    description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+    manifest: '/manifest.json',
+    icons: {
+        icon: '/icon.svg',
+        apple: '/icon.svg',
+    },
+    themeColor: '#3B82F6',
+    viewport: 'width=device-width, initial-scale=1',
+    robots: 'index, follow',
+    openGraph: {
+        title: 'Mój Budżet - Aplikacja Finansowa',
+        description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+        type: 'website',
+        locale: 'pl_PL',
+    },
+    twitter: {
+        card: 'summary',
+        title: 'Mój Budżet - Aplikacja Finansowa',
+        description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+    }
 }
 
 export default function RootLayout({

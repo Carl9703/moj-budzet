@@ -1,0 +1,16 @@
+{
+  "name": "Mój Budżet",
+  "short_name": "Budżet",
+  "description": "Inteligentna aplikacja do zarządzania budżetem osobistym",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
