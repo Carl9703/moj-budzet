@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { CategoryAnalysis } from '@/components/analytics/CategoryAnalysis'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -84,6 +85,7 @@ export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true)
     const [expandedEnvelopes, setExpandedEnvelopes] = useState<Set<string>>(new Set())
     const [selectedPeriod, setSelectedPeriod] = useState<string>('3months')
+    const [activeTab, setActiveTab] = useState<'envelopes' | 'categories'>('envelopes')
 
     const periodOptions = [
         { value: 'currentMonth', label: 'Bieżący miesiąc' },
@@ -182,9 +184,71 @@ export default function AnalyticsPage() {
                     📊 Analizy Budżetowe
                 </h1>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                {/* ZAKŁADKI */}
+                <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '24px',
+                    padding: '4px',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-primary)'
+                }}>
+                    <button
+                        onClick={() => setActiveTab('envelopes')}
+                        style={{
+                            flex: 1,
+                            padding: '12px 16px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: activeTab === 'envelopes' ? 'var(--accent-primary)' : 'transparent',
+                            color: activeTab === 'envelopes' ? '#ffffff' : 'var(--text-primary)',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <span>📦</span>
+                        <span>Wydatki wg kopert</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('categories')}
+                        style={{
+                            flex: 1,
+                            padding: '12px 16px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: activeTab === 'categories' ? 'var(--accent-primary)' : 'transparent',
+                            color: activeTab === 'categories' ? '#ffffff' : 'var(--text-primary)',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <span>🏷️</span>
+                        <span>Wydatki wg kategorii</span>
+                    </button>
+                </div>
 
-                    {/* PODSUMOWANIE */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                    {activeTab === 'categories' ? (
+                        <CategoryAnalysis 
+                            selectedPeriod={selectedPeriod}
+                            onPeriodChange={setSelectedPeriod}
+                        />
+                    ) : (
+                        <>
+                            {/* PODSUMOWANIE */}
                     <div className="bg-theme-secondary card" style={{
                         padding: '24px',
                         borderRadius: '8px',
@@ -892,6 +956,8 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
                     </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
