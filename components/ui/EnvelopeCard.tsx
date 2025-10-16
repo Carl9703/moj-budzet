@@ -64,92 +64,110 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
     }
 
     return (
-        <div className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
-            isOverBudget ? 'ring-2 ring-red-200 dark:ring-red-800 bg-red-50 dark:bg-red-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-        }`}>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <span className="text-lg">{icon}</span>
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{name}</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {type === 'monthly' ? 'Miesięczne' : 'Roczne'}
-                        </p>
-                    </div>
+        <div className="envelope-card smooth-all bg-theme-secondary" style={{
+            border: isOverBudget ? '2px solid var(--accent-error)' : '1px solid var(--border-primary)',
+            borderRadius: '12px',
+            padding: '16px',
+            transition: 'all 0.3s ease',
+            boxShadow: isOverBudget 
+                ? '0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(239, 68, 68, 0.1)' 
+                : 'var(--shadow-md)',
+            cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = isOverBudget 
+                ? '0 6px 16px rgba(239, 68, 68, 0.2), 0 4px 8px rgba(239, 68, 68, 0.15)'
+                : '0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.15)'
+        }}
+        onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = isOverBudget 
+                ? '0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(239, 68, 68, 0.1)' 
+                : '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '20px' }}>{icon}</span>
+                    <span className="text-theme-primary" style={{ fontWeight: '500', fontSize: '14px', transition: 'color 0.3s ease' }}>{name}</span>
                 </div>
-                <div className="text-right">
-                    <p className={`text-sm font-bold ${
-                        isOverBudget ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'
-                    }`}>
-                        {type === 'monthly' ?
-                            `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
-                            isFreedomFunds ?
-                                formatMoney(current) :
-                                `${formatMoney(current, false)}/${formatMoney(planned, false)} zł`
-                        }
-                    </p>
-                    {!isFreedomFunds && (
-                        <p className={`text-xs ${
-                            isOverBudget ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'
-                        }`}>
-                            {percentage}%
-                        </p>
-                    )}
-                </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-3">
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div 
-                        className="h-full rounded-full transition-all duration-300 ease-out"
-                        style={{
-                            width: `${Math.min(percentage, 100)}%`,
-                            backgroundColor: getProgressColor()
-                        }}
-                    />
-                </div>
-            </div>
-
-            {/* Status */}
-            <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center space-x-1">
-                    <span className={`w-2 h-2 rounded-full ${
-                        status === 'over' ? 'bg-red-500' :
-                        status === 'warning' ? 'bg-yellow-500' :
-                        status === 'good' ? 'bg-green-500' :
-                        status === 'completed' ? 'bg-blue-500' : 'bg-gray-400'
-                    }`}></span>
-                    <span className={`font-medium ${
-                        isOverBudget ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'
-                    }`}>
-                        {getStatusIcon()} {status === 'over' ? 'Przekroczono' : 
-                         status === 'warning' ? 'Uwaga' : 
-                         status === 'good' ? 'W porządku' : 
-                         status === 'completed' ? 'Ukończono' : 'W toku'}
-                    </span>
-                </div>
-                <span className={`font-medium ${
-                    type === 'monthly' ?
-                        (isOverBudget ? 'text-red-600 dark:text-red-400' : (remaining > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400')) :
+                <span className="text-theme-secondary" style={{ fontSize: '13px', color: isOverBudget ? 'var(--accent-error)' : 'var(--text-secondary)', transition: 'color 0.3s ease', whiteSpace: 'nowrap' }}>
+                    {type === 'monthly' ?
+                        `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
                         isFreedomFunds ?
-                            'text-blue-600 dark:text-blue-400' :
-                            (percentage >= 100 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400')
-                }`}>
+                            formatMoney(current) :
+                            `${formatMoney(current, false)}/${formatMoney(planned, false)} zł`
+                    }
+                </span>
+            </div>
+
+            <div className="progress-bar-bg" style={{
+                width: '100%',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderRadius: '6px',
+                height: '6px',
+                marginBottom: '8px',
+                overflow: 'hidden'
+            }}>
+                <div style={{
+                    width: `${Math.min(percentage, 100)}%`,
+                    backgroundColor: getProgressColor(),
+                    height: '100%',
+                    borderRadius: '6px',
+                    transition: 'width 0.3s ease, background-color 0.3s ease',
+                    position: 'relative'
+                }}>
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '50%',
+                        background: 'linear-gradient(to bottom, rgba(255,255,255,0.3), transparent)',
+                        borderRadius: '6px 6px 0 0'
+                    }} />
+                </div>
+            </div>
+
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '12px'
+            }}>
+                {!isFreedomFunds && (
+                    <span style={{
+                        color: isOverBudget ? '#dc2626' : '#6b7280',
+                        fontWeight: isOverBudget ? '600' : '400'
+                    }}>
+                        {percentage}%
+                    </span>
+                )}
+
+                <span style={{
+                    fontWeight: '500',
+                    color: type === 'monthly' ?
+                        (isOverBudget ? '#dc2626' : (remaining > 0 ? '#059669' : '#6b7280')) :
+                        isFreedomFunds ?
+                            '#6366f1' :
+                            (percentage >= 100 ? '#059669' : '#6b7280'),
+                    marginLeft: isFreedomFunds ? 'auto' : '0'
+                }}>
                     {type === 'monthly' ?
                         (isOverBudget ?
-                            `+${formatMoney(Math.round((spent - planned) * 100) / 100, false)} zł` :
+                            `⚠️ Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100, false)} zł` :
                             (name === 'Fundusz Awaryjny' || name === 'Budowanie Przyszłości' ?
-                                `-${formatMoney(Math.abs(remaining), false)} zł` :
-                                `${formatMoney(remaining, false)} zł`)) :
+                                `Brakuje: ${formatMoney(Math.abs(remaining), false)} zł` :
+                                `Zostało: ${formatMoney(remaining, false)} zł`)) :
                         isFreedomFunds ?
-                            `Dostępne` :
+                            `💰 Dostępne środki` :
                             (percentage >= 100 ?
-                                `+${formatMoney(Math.abs(remaining), false)} zł` :
-                                `-${formatMoney(Math.abs(remaining), false)} zł`)
+                                `Zebrano! +${formatMoney(Math.abs(remaining), false)} zł` :
+                                `Brakuje: ${formatMoney(Math.abs(remaining), false)} zł`)
                     }
                 </span>
             </div>

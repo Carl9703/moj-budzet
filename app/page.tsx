@@ -234,25 +234,14 @@ export default function HomePage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen fade-in-up bg-theme-primary">
             <TopNavigation />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Hero Section */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Dashboard Finansowy
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Zarządzaj swoim budżetem w prosty i intuicyjny sposób
-                    </p>
-                </div>
-
-                {/* Top Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="animate-fade-in-up">
+            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+                <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div className="smooth-all hover-lift">
                         <MainBalance balance={data.balance || 0} />
                     </div>
-                    <div className="animate-fade-in-up">
+                    <div className="smooth-all hover-lift">
                         <MonthStatus
                             totalIncome={data.totalIncome || 0}
                             totalExpenses={data.totalExpenses || 0}
@@ -261,7 +250,7 @@ export default function HomePage() {
                             previousMonthStatus={previousMonthStatus}
                         />
                     </div>
-                    <div className="animate-fade-in-up">
+                    <div className="smooth-all hover-lift">
                         <QuickActions
                             onAddIncome={() => setShowIncomeModal(true)}
                             onAddExpense={() => setShowExpenseModal(true)}
@@ -269,22 +258,50 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* All Envelopes Grid - Single View */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {/* Fundusze celowe */}
-                    {data.yearlyEnvelopes?.filter(e => e.group === 'target').map((envelope) => (
-                        <div key={envelope.id} className="animate-fade-in-up">
-                            <EnvelopeCard {...envelope} type="yearly" />
-                        </div>
-                    ))}
+                <div className="grid-responsive" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '20px'
+                }}>
+                    {/* FUNDUSZE CELOWE - NA GÓRZE */}
+                    <EnvelopeGroup
+                        title="Fundusze celowe"
+                        icon="🎯"
+                        color="rgba(245, 158, 11, 0.1)"
+                        envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
+                        type="yearly"
+                    />
 
-                    {/* Koperty miesięczne */}
+                    {/* Sprawdź czy użytkownik ma koperty miesięczne */}
                     {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
-                        data.monthlyEnvelopes.map((envelope) => (
-                            <div key={envelope.id} className="animate-fade-in-up">
-                                <EnvelopeCard {...envelope} type="monthly" />
-                            </div>
-                        ))
+                        <>
+                            {/* GRUPA 1: POTRZEBY */}
+                            <EnvelopeGroup
+                                title="Potrzeby"
+                                icon="🏡"
+                                color="rgba(34, 197, 94, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'needs')}
+                                type="monthly"
+                            />
+                            
+                            {/* GRUPA 2: STYL ŻYCIA */}
+                            <EnvelopeGroup
+                                title="Styl życia"
+                                icon="🎉"
+                                color="rgba(168, 85, 247, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
+                                type="monthly"
+                            />
+                            
+                            {/* GRUPA 3: CELE FINANSOWE */}
+                            <EnvelopeGroup
+                                title="Cele finansowe"
+                                icon="🎯"
+                                color="rgba(59, 130, 246, 0.1)"
+                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
+                                type="monthly"
+                            />
+                        </>
                     ) : (
                         <div className="slide-in-left">
                             <div style={{ 
