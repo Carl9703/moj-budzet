@@ -60,12 +60,11 @@ export async function GET(request: NextRequest) {
         const startDate = getStartDate(period)
 
         // Pobierz wszystkie transakcje wydatków dla wybranego okresu
-        const expenseTransactions = await prisma.transaction.findMany({
+        const allTransactions = await prisma.transaction.findMany({
             where: {
                 userId: userId,
                 type: 'expense',
                 date: { gte: startDate },
-                includeInStats: { not: false }, // Tylko rzeczywiste wydatki, nie transfery
                 NOT: [
                     { description: { contains: 'Zamknięcie miesiąca' } },
                     { description: { contains: 'przeniesienie bilansu' } }
@@ -73,6 +72,59 @@ export async function GET(request: NextRequest) {
             },
             include: { envelope: true },
             orderBy: { date: 'desc' }
+        })
+
+        // Filtruj tylko rzeczywiste wydatki, wyklucz transfery
+        const expenseTransactions = allTransactions.filter(transaction => {
+            // Sprawdź flagę includeInStats
+            const shouldIncludeInStats = (transaction as { includeInStats?: boolean }).includeInStats !== false
+            
+            if (!shouldIncludeInStats) {
+                return false // Wyklucz transfery
+            }
+
+            // Dodatkowe sprawdzenie opisu transakcji
+            const description = transaction.description?.toLowerCase() || ''
+            const envelopeName = transaction.envelope?.name?.toLowerCase() || ''
+            
+            // Wyklucz transfery na podstawie opisu i nazwy koperty
+            const transferKeywords = [
+                'transfer:',
+                'przelew',
+                'wesele',
+                'prezent',
+                'oszczędności',
+                'fundusz',
+                'celowy',
+                'podróż',
+                'wakacje',
+                'inwestycja',
+                'krypto',
+                'ike',
+                'auto:',
+                'serwis',
+                'ubezpieczenie'
+            ]
+            
+            // Koperty typowo używane do transferów/oszczędności
+            const transferEnvelopes = [
+                'budowanie przyszłości',
+                'fundusz awaryjny',
+                'podróże',
+                'auto: serwis i ubezpieczenie',
+                'ike',
+                'kryptowaluty',
+                'wyjazdy weekendowe',
+                'wakacje'
+            ]
+            
+            const isTransfer = transferKeywords.some(keyword => 
+                description.includes(keyword) || envelopeName.includes(keyword)
+            ) || transferEnvelopes.some(env => 
+                envelopeName.includes(env.toLowerCase())
+            )
+            
+            return !isTransfer
         })
 
         // Pobierz koperty użytkownika
