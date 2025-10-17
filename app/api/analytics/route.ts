@@ -269,6 +269,51 @@ function getMonthIndex(monthName: string): number {
     return months.indexOf(monthName)
 }
 
+function getGroupIcon(groupName: string): string {
+    const groupIcons: { [key: string]: string } = {
+        'POTRZEBY': '🏠',
+        'STYL ŻYCIA': '🎯',
+        'CELE FINANSOWE': '💰',
+        'Inne': '📦'
+    }
+    return groupIcons[groupName] || '📦'
+}
+
+async function getTrendsData(userId: string, startDate: Date, endDate: Date) {
+    const trends = []
+    const currentDate = new Date(startDate)
+    
+    while (currentDate <= endDate) {
+        const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
+        
+        const monthTransactions = await prisma.transaction.findMany({
+            where: {
+                userId: userId,
+                type: 'expense',
+                date: { gte: monthStart, lte: monthEnd },
+                NOT: [
+                    { description: { contains: 'Zamknięcie miesiąca' } },
+                    { description: { contains: 'przeniesienie bilansu' } }
+                ]
+            }
+        })
+        
+        const totalExpenses = monthTransactions
+            .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
+            .reduce((sum, t) => sum + t.amount, 0)
+        
+        trends.push({
+            period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
+            totalExpenses
+        })
+        
+        currentDate.setMonth(currentDate.getMonth() + 1)
+    }
+    
+    return trends
+}
+
 export async function GET(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -280,30 +325,33 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url)
-        const period = searchParams.get('period') || '3months'
-        const startDate = getStartDate(period)
+        const startDate = searchParams.get('startDate')
+        const endDate = searchParams.get('endDate')
+        const compare = searchParams.get('compare') === 'true'
+        
+        // Jeśli nie podano dat, użyj domyślnego okresu
+        let start: Date, end: Date
+        if (startDate && endDate) {
+            start = new Date(startDate)
+            end = new Date(endDate)
+        } else {
+            const period = searchParams.get('period') || '3months'
+            start = getStartDate(period)
+            end = new Date()
+        }
 
-        // Pobierz koperty
+        // Pobierz koperty z grupami
         const envelopes = await prisma.envelope.findMany({
-            where: { userId: userId }
+            where: { userId: userId },
+            include: { group: true }
         })
 
-        // === TRENDY MIESIĘCZNE - OSTATNIE 12 MIESIĘCY ===
-        const monthlyData = await getMonthlyData(userId)
-
-        const sortedMonths = Object.values(monthlyData).sort((a, b) => {
-            if (a.year !== b.year) return a.year - b.year
-            const months = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-                'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
-            return months.indexOf(a.month) - months.indexOf(b.month)
-        })
-
-        // === ANALIZA WYDATKÓW DLA WYBRANEGO OKRESU ===
-        const allTransactions = await prisma.transaction.findMany({
+        // === GŁÓWNE METRYKI DLA BIEŻĄCEGO OKRESU ===
+        const currentPeriodTransactions = await prisma.transaction.findMany({
             where: {
                 userId: userId,
                 type: { in: ['income', 'expense'] },
-                date: { gte: startDate },
+                date: { gte: start, lte: end },
                 NOT: [
                     { description: { contains: 'Zamknięcie miesiąca' } },
                     { description: { contains: 'przeniesienie bilansu' } }
@@ -312,92 +360,178 @@ export async function GET(request: NextRequest) {
             include: { envelope: true }
         })
 
-        const expenseTransactions = allTransactions.filter(t => t.type === 'expense')
+        const currentIncome = currentPeriodTransactions
+            .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .reduce((sum, t) => sum + t.amount, 0)
 
-        const transfers: TransferAnalysis[] = []
-        const realExpenses: { amount: number; envelope?: { name?: string | null } | null; category?: string | null }[] = []
-        let totalTransferAmount = 0
-        let totalExpenseAmount = 0
+        const currentExpenses = currentPeriodTransactions
+            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .reduce((sum, t) => sum + t.amount, 0)
 
-        for (const transaction of expenseTransactions) {
-            // Use includeInStats flag to determine if transaction should be counted as expense or transfer
-            const shouldIncludeInStats = (transaction as { includeInStats?: boolean }).includeInStats !== false
-            
-            if (shouldIncludeInStats) {
-                // Real expense - include in statistics
-                realExpenses.push(transaction)
-                totalExpenseAmount += transaction.amount
-            } else {
-                // Transfer/savings - exclude from statistics
-                const desc = transaction.description?.toLowerCase() || ''
-                const envelopeName = transaction.envelope?.name || ''
-                
-                let transferName = envelopeName
-                if (desc.includes('transfer:')) {
-                    transferName = transaction.description?.replace(/transfer:\s*/i, '').trim() || envelopeName
+        const currentBalance = currentIncome - currentExpenses
+        const currentSavingsRate = currentIncome > 0 ? currentBalance / currentIncome : 0
+
+        // === DANE PORÓWNAWCZE (jeśli włączony tryb porównawczy) ===
+        let previousPeriodData = null
+        if (compare) {
+            const periodLength = end.getTime() - start.getTime()
+            const previousStart = new Date(start.getTime() - periodLength)
+            const previousEnd = new Date(start.getTime() - 1)
+
+            const previousPeriodTransactions = await prisma.transaction.findMany({
+                where: {
+                    userId: userId,
+                    type: { in: ['income', 'expense'] },
+                    date: { gte: previousStart, lte: previousEnd },
+                    NOT: [
+                        { description: { contains: 'Zamknięcie miesiąca' } },
+                        { description: { contains: 'przeniesienie bilansu' } }
+                    ]
                 }
+            })
 
-                const existing = transfers.find(t => t.name === transferName)
-                if (existing) {
-                    existing.amount += transaction.amount
-                } else {
-                    transfers.push({ name: transferName, amount: transaction.amount, percentage: 0 })
-                }
-                totalTransferAmount += transaction.amount
+            const previousIncome = previousPeriodTransactions
+                .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
+                .reduce((sum, t) => sum + t.amount, 0)
+
+            const previousExpenses = previousPeriodTransactions
+                .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+                .reduce((sum, t) => sum + t.amount, 0)
+
+            const previousBalance = previousIncome - previousExpenses
+            const previousSavingsRate = previousIncome > 0 ? previousBalance / previousIncome : 0
+
+            previousPeriodData = {
+                income: previousIncome,
+                expense: previousExpenses,
+                balance: previousBalance,
+                savingsRate: previousSavingsRate
             }
         }
 
-        transfers.forEach(transfer => {
-            transfer.percentage = totalTransferAmount > 0 ? Math.round((transfer.amount / totalTransferAmount) * 100) : 0
-        })
-        transfers.sort((a, b) => b.amount - a.amount)
-
-        // === ANALIZA KOPERT Z PORÓWNANIAMI MIESIĘCZNYMI ===
-        const envelopeAnalysis = await getEnvelopeAnalysis(realExpenses, envelopes, sortedMonths, userId)
-
-
-        envelopeAnalysis.sort((a, b) => b.totalSpent - a.totalSpent)
-
-        // === PORÓWNANIA OKRESOWE ===
-        const lastMonth = sortedMonths[sortedMonths.length - 1]
-        const previousMonth = sortedMonths[sortedMonths.length - 2]
-
-        const monthComparison = previousMonth ? {
-            incomeChange: lastMonth.income - previousMonth.income,
-            expenseChange: lastMonth.expenses - previousMonth.expenses,
-            savingsChange: lastMonth.savings - previousMonth.savings,
-            incomeChangePercent: previousMonth.income > 0 ? Math.round(((lastMonth.income - previousMonth.income) / previousMonth.income) * 100) : 0,
-            expenseChangePercent: previousMonth.expenses > 0 ? Math.round(((lastMonth.expenses - previousMonth.expenses) / previousMonth.expenses) * 100) : 0
-        } : null
-
-        // Średnie ruchome (3 miesiące)
-        const movingAverages = sortedMonths.slice(-3).reduce((acc, month) => {
-            acc.avgIncome += month.income
-            acc.avgExpenses += month.expenses
-            acc.avgSavings += month.savings
-            return acc
-        }, { avgIncome: 0, avgExpenses: 0, avgSavings: 0 })
-
-        if (sortedMonths.length >= 3) {
-            movingAverages.avgIncome = Math.round(movingAverages.avgIncome / 3)
-            movingAverages.avgExpenses = Math.round(movingAverages.avgExpenses / 3)
-            movingAverages.avgSavings = Math.round(movingAverages.avgSavings / 3)
+        // === ROZKŁAD WYDATKÓW WEDŁUG GRUP KOPERT ===
+        const expensesByGroup: { [key: string]: { amount: number; envelopes: any[] } } = {}
+        
+        for (const transaction of currentPeriodTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)) {
+            const envelope = transaction.envelope
+            const groupName = envelope?.group?.name || 'Inne'
+            
+            if (!expensesByGroup[groupName]) {
+                expensesByGroup[groupName] = { amount: 0, envelopes: [] }
+            }
+            
+            expensesByGroup[groupName].amount += transaction.amount
+            
+            const existingEnvelope = expensesByGroup[groupName].envelopes.find(e => e.name === envelope?.name)
+            if (existingEnvelope) {
+                existingEnvelope.amount += transaction.amount
+            } else {
+                expensesByGroup[groupName].envelopes.push({
+                    name: envelope?.name || 'Inne',
+                    amount: transaction.amount,
+                    icon: envelope?.icon || '📦',
+                    percentage: 0
+                })
+            }
         }
 
-        const expenseVsTransferRatio = totalExpenseAmount > 0 ?
-            Math.round((totalTransferAmount / (totalExpenseAmount + totalTransferAmount)) * 100) : 0
+        // Oblicz procenty dla kopert w grupach
+        Object.values(expensesByGroup).forEach(group => {
+            group.envelopes.forEach(envelope => {
+                envelope.percentage = group.amount > 0 ? Math.round((envelope.amount / group.amount) * 100) : 0
+            })
+            group.envelopes.sort((a, b) => b.amount - a.amount)
+        })
+
+        const spendingBreakdownByGroup = Object.entries(expensesByGroup).map(([groupName, data]) => ({
+            group: groupName,
+            amount: data.amount,
+            percentage: currentExpenses > 0 ? Math.round((data.amount / currentExpenses) * 100) : 0,
+            icon: getGroupIcon(groupName),
+            envelopes: data.envelopes
+        })).sort((a, b) => b.amount - a.amount)
+
+        // === ROZKŁAD WYDATKÓW WEDŁUG KOPERT ===
+        const expensesByEnvelope: { [key: string]: { amount: number; categories: any[] } } = {}
+        
+        for (const transaction of currentPeriodTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)) {
+            const envelope = transaction.envelope
+            const envelopeName = envelope?.name || 'Inne'
+            const category = transaction.category || 'other'
+            
+            if (!expensesByEnvelope[envelopeName]) {
+                expensesByEnvelope[envelopeName] = { amount: 0, categories: [] }
+            }
+            
+            expensesByEnvelope[envelopeName].amount += transaction.amount
+            
+            const existingCategory = expensesByEnvelope[envelopeName].categories.find(c => c.categoryId === category)
+            if (existingCategory) {
+                existingCategory.amount += transaction.amount
+            } else {
+                expensesByEnvelope[envelopeName].categories.push({
+                    categoryId: category,
+                    categoryName: getCategoryName(category),
+                    amount: transaction.amount,
+                    icon: getCategoryIcon(category),
+                    percentage: 0
+                })
+            }
+        }
+
+        // Oblicz procenty dla kategorii w kopertach
+        Object.values(expensesByEnvelope).forEach(envelope => {
+            envelope.categories.forEach(category => {
+                category.percentage = envelope.amount > 0 ? Math.round((category.amount / envelope.amount) * 100) : 0
+            })
+            envelope.categories.sort((a, b) => b.amount - a.amount)
+        })
+
+        const spendingBreakdownByEnvelope = Object.entries(expensesByEnvelope).map(([envelopeName, data]) => ({
+            envelope: envelopeName,
+            amount: data.amount,
+            percentage: currentExpenses > 0 ? Math.round((data.amount / currentExpenses) * 100) : 0,
+            icon: envelopes.find(e => e.name === envelopeName)?.icon || '📦',
+            categories: data.categories
+        })).sort((a, b) => b.amount - a.amount)
+
+        // === ROZKŁAD WEDŁUG KATEGORII ===
+        const expensesByCategory: { [key: string]: { amount: number } } = {}
+        
+        for (const transaction of currentPeriodTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)) {
+            const category = transaction.category || 'other'
+            if (!expensesByCategory[category]) {
+                expensesByCategory[category] = { amount: 0 }
+            }
+            expensesByCategory[category].amount += transaction.amount
+        }
+
+        const spendingBreakdownByCategory = Object.entries(expensesByCategory).map(([categoryId, data]) => ({
+            category: getCategoryName(categoryId),
+            amount: data.amount,
+            percentage: currentExpenses > 0 ? Math.round((data.amount / currentExpenses) * 100) : 0,
+            icon: getCategoryIcon(categoryId)
+        })).sort((a, b) => b.amount - a.amount)
+
+        // === TRENDY CZASOWE ===
+        const trends = await getTrendsData(userId, start, end)
 
         return NextResponse.json({
-            monthlyTrends: sortedMonths,
-            envelopeAnalysis,
-            transfers,
-            monthComparison,
-            movingAverages,
-            summary: {
-                totalRealExpenses: totalExpenseAmount,
-                totalTransfers: totalTransferAmount,
-                expenseVsTransferRatio
-            }
+            mainMetrics: {
+                currentPeriod: {
+                    income: currentIncome,
+                    expense: currentExpenses,
+                    balance: currentBalance,
+                    savingsRate: currentSavingsRate
+                },
+                previousPeriod: previousPeriodData
+            },
+            spendingBreakdown: {
+                byGroup: spendingBreakdownByGroup,
+                byEnvelope: spendingBreakdownByEnvelope,
+                byCategory: spendingBreakdownByCategory
+            },
+            trends
         })
 
     } catch (error) {
