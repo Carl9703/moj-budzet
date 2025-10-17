@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { 
+    LineChart, 
+    Line, 
+    XAxis as RechartsXAxis, 
+    YAxis as RechartsYAxis, 
+    CartesianGrid, 
+    Tooltip, 
+    ResponsiveContainer, 
+    BarChart, 
+    Bar 
+} from 'recharts'
 
 interface TrendData {
     period: string
@@ -286,12 +296,12 @@ export function TrendsChart({
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-                            <XAxis 
+                            <RechartsXAxis 
                                 dataKey="formattedPeriod" 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                             />
-                            <YAxis 
+                            <RechartsYAxis 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                                 tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
@@ -309,12 +319,12 @@ export function TrendsChart({
                     ) : (
                         <BarChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-                            <XAxis 
+                            <RechartsXAxis 
                                 dataKey="formattedPeriod" 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                             />
-                            <YAxis 
+                            <RechartsYAxis 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                                 tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
