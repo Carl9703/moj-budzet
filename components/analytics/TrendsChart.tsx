@@ -19,13 +19,13 @@ interface TrendsChartProps {
     onPeriodClick?: (period: string) => void
 }
 
-export function TrendsChart({ 
+const TrendsChart = ({ 
     data, 
     selectedEnvelope, 
     chartType = 'line',
     loading = false,
     onPeriodClick 
-}: TrendsChartProps) {
+}: TrendsChartProps) => {
     const [hoveredPeriod, setHoveredPeriod] = useState<string | null>(null)
     const [isClient, setIsClient] = useState(false)
 
@@ -456,3 +456,5 @@ export function TrendsChart({
         </div>
     )
 }
+
+export default TrendsChart

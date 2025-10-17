@@ -45,7 +45,7 @@ const COLORS = [
     '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
 ]
 
-export function SpendingBreakdownChart({ 
+const SpendingBreakdownChart = ({ 
     data, 
     onEnvelopeSelect, 
     selectedEnvelope, 
@@ -437,3 +437,5 @@ export function SpendingBreakdownChart({
         </div>
     )
 }
+
+export default SpendingBreakdownChart
