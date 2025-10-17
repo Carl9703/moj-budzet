@@ -22,7 +22,10 @@ interface KeyMetricsProps {
 }
 
 export function KeyMetrics({ currentPeriod, previousPeriod, compareMode, loading = false }: KeyMetricsProps) {
-    const formatMoney = (amount: number) => amount.toLocaleString('pl-PL') + ' zł'
+    const formatMoney = (amount: number | undefined) => {
+        if (amount === undefined || amount === null || isNaN(amount)) return '0 zł'
+        return amount.toLocaleString('pl-PL') + ' zł'
+    }
     
     const formatPercentage = (value: number) => {
         const sign = value >= 0 ? '+' : ''
@@ -229,8 +232,13 @@ export function KeyMetrics({ currentPeriod, previousPeriod, compareMode, loading
                                 fontSize: '11px'
                             }}>
                                 {metric.isPercentage 
-                                    ? `Poprzednio: ${(previousPeriod[metric.title.toLowerCase().replace(' ', '') as keyof ComparisonData] * 100).toFixed(1)}%`
-                                    : `Poprzednio: ${formatMoney(previousPeriod[metric.title.toLowerCase().replace(' ', '') as keyof ComparisonData])}`
+                                    ? `Poprzednio: ${((previousPeriod?.savingsRate || 0) * 100).toFixed(1)}%`
+                                    : `Poprzednio: ${formatMoney(
+                                        metric.title === 'Całkowity Przychód' ? previousPeriod?.income :
+                                        metric.title === 'Całkowity Wydatek' ? previousPeriod?.expense :
+                                        metric.title === 'Bilans' ? previousPeriod?.balance :
+                                        0
+                                    )}`
                                 }
                             </div>
                         </div>
