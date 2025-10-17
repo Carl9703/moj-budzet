@@ -241,20 +241,83 @@ export default function AnalyticsPage() {
                     loading={loading}
                 />
 
-                {/* Główna Wizualizacja */}
-                <SpendingBreakdownChart
+                {/* Główna Wizualizacja - Tymczasowo wyłączone z powodu błędów Recharts */}
+                {/* <SpendingBreakdownChart
                     data={data.spendingBreakdown}
                     onEnvelopeSelect={setSelectedEnvelope}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                />
+                /> */}
 
-                {/* Analiza Trendów */}
-                <TrendsChart
+                {/* Analiza Trendów - Tymczasowo wyłączone z powodu błędów Recharts */}
+                {/* <TrendsChart
                     data={data.trends}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                />
+                /> */}
+
+                {/* Tymczasowe komponenty zastępcze */}
+                <div style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-primary)',
+                    boxShadow: 'var(--shadow-md)',
+                    marginBottom: '24px'
+                }}>
+                    <h3 style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: 'var(--text-primary)',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        📊 Główna Wizualizacja
+                    </h3>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '200px',
+                        color: 'var(--text-secondary)',
+                        fontSize: '16px'
+                    }}>
+                        🚧 Wykresy tymczasowo wyłączone - naprawiamy problemy z Recharts
+                    </div>
+                </div>
+
+                <div style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-primary)',
+                    boxShadow: 'var(--shadow-md)',
+                    marginBottom: '24px'
+                }}>
+                    <h3 style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: 'var(--text-primary)',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        📈 Analiza Trendów
+                    </h3>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '200px',
+                        color: 'var(--text-secondary)',
+                        fontSize: '16px'
+                    }}>
+                        🚧 Wykresy tymczasowo wyłączone - naprawiamy problemy z Recharts
+                    </div>
+                </div>
 
                 {/* Szczegółowa Tabela */}
                 <DetailedDataTable
