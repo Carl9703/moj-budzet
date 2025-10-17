@@ -50,7 +50,7 @@ const SpendingBreakdownChart = ({
     onEnvelopeSelect, 
     selectedEnvelope, 
     loading = false 
-}: SpendingBreakdownChartProps) {
+}: SpendingBreakdownChartProps) => {
     const [drillDownLevel, setDrillDownLevel] = useState<'group' | 'envelope'>('group')
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
     const [isClient, setIsClient] = useState(false)
