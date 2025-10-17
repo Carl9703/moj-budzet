@@ -1,18 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamiczny import Recharts
-const LineChart = dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false })
-const Line = dynamic(() => import('recharts').then(mod => ({ default: mod.Line })), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
-const BarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false })
-const Bar = dynamic(() => import('recharts').then(mod => ({ default: mod.Bar })), { ssr: false })
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
 interface TrendData {
     period: string
@@ -38,6 +27,11 @@ export function TrendsChart({
     onPeriodClick 
 }: TrendsChartProps) {
     const [hoveredPeriod, setHoveredPeriod] = useState<string | null>(null)
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     const chartData = useMemo(() => {
         return data.map(item => ({
@@ -212,6 +206,31 @@ export function TrendsChart({
                 }}>
                     Wybierz inny okres lub dodaj transakcje
                 </div>
+            </div>
+        )
+    }
+
+    if (!isClient) {
+        return (
+            <div style={{
+                backgroundColor: 'var(--bg-secondary)',
+                padding: '24px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '300px'
+            }}>
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: '50%',
+                    animation: 'pulse 2s infinite'
+                }} />
             </div>
         )
     }

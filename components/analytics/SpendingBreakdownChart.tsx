@@ -1,15 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamiczny import Recharts
-const PieChart = dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
-const Legend = dynamic(() => import('recharts').then(mod => ({ default: mod.Legend })), { ssr: false })
+import { useState, useMemo, useEffect } from 'react'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
 interface GroupData {
     group: string
@@ -61,6 +53,11 @@ export function SpendingBreakdownChart({
 }: SpendingBreakdownChartProps) {
     const [drillDownLevel, setDrillDownLevel] = useState<'group' | 'envelope'>('group')
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     const chartData = useMemo(() => {
         if (drillDownLevel === 'group') {
@@ -237,6 +234,31 @@ export function SpendingBreakdownChart({
                         </div>
                     </div>
                 </div>
+            </div>
+        )
+    }
+
+    if (!isClient) {
+        return (
+            <div style={{
+                backgroundColor: 'var(--bg-secondary)',
+                padding: '24px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '300px'
+            }}>
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: '50%',
+                    animation: 'pulse 2s infinite'
+                }} />
             </div>
         )
     }
