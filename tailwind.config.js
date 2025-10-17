@@ -64,5 +64,7 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tremor/react/tailwind')
+  ],
 }
