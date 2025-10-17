@@ -127,8 +127,8 @@ export function TrendsVisualization({
           margin: '0'
         }}>
           {selectedItem 
-            ? `Trend dla: ${selectedItem}` 
-            : 'Trend całkowitych wydatków w czasie'
+            ? `📈 Trend dla: ${selectedItem}` 
+            : '📈 Trend całkowitych wydatków w czasie'
           }
         </p>
       </div>

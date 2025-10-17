@@ -72,6 +72,8 @@ export default function AnalyticsPage() {
   })
   const [compareMode, setCompareMode] = useState(false)
   const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
+  const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
+  const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
 
   const fetchData = async (newDateRange: DateRange, newCompareMode: boolean) => {
     setLoading(true)
@@ -126,11 +128,33 @@ export default function AnalyticsPage() {
     const item = findItem(data?.spendingTree || [])
     if (item) {
       setSelectedItem(item)
+      setHighlightedGroup(segmentName)
+      setHighlightedEnvelope(null)
+      
+      // Przewiń do eksploratora
+      setTimeout(() => {
+        const explorerElement = document.getElementById('expense-explorer')
+        if (explorerElement) {
+          explorerElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
     }
   }
 
   const handleExplorerItemClick = (item: SpendingTreeNode) => {
     setSelectedItem(item)
+    
+    // Ustaw odpowiednie podświetlenie na podstawie typu
+    if (item.type === 'GROUP') {
+      setHighlightedGroup(item.name)
+      setHighlightedEnvelope(null)
+    } else if (item.type === 'ENVELOPE') {
+      setHighlightedEnvelope(item.name)
+      setHighlightedGroup(null)
+    } else {
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+    }
   }
 
   // Przygotowanie danych dla wykresu kołowego
@@ -281,12 +305,16 @@ export default function AnalyticsPage() {
                                         </div>
 
         {/* Sekcja D: Interaktywny Eksplorator Wydatków */}
-        <InteractiveExpenseExplorer
-          data={data.spendingTree}
-          compareMode={compareMode}
-          onItemClick={handleExplorerItemClick}
-          loading={loading}
-        />
+        <div id="expense-explorer">
+          <InteractiveExpenseExplorer
+            data={data.spendingTree}
+            compareMode={compareMode}
+            onItemClick={handleExplorerItemClick}
+            loading={loading}
+            highlightedGroup={highlightedGroup}
+            highlightedEnvelope={highlightedEnvelope}
+          />
+        </div>
             </div>
         </div>
     )

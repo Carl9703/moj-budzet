@@ -25,13 +25,17 @@ interface InteractiveExpenseExplorerProps {
   compareMode: boolean
   onItemClick?: (item: SpendingTreeNode) => void
   loading?: boolean
+  highlightedGroup?: string | null
+  highlightedEnvelope?: string | null
 }
 
 export function InteractiveExpenseExplorer({ 
   data, 
   compareMode,
   onItemClick, 
-  loading = false 
+  loading = false,
+  highlightedGroup = null,
+  highlightedEnvelope = null
 }: InteractiveExpenseExplorerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
@@ -150,6 +154,11 @@ export function InteractiveExpenseExplorer({
     const isSelected = selectedItem === node.id
     const hasChildren = node.children && node.children.length > 0
     const isTransaction = node.type === 'TRANSACTION'
+    
+    // Sprawdź czy element powinien być podświetlony
+    const isHighlighted = 
+      (node.type === 'GROUP' && highlightedGroup === node.name) ||
+      (node.type === 'ENVELOPE' && highlightedEnvelope === node.name)
 
     return (
       <div key={node.id}>
@@ -160,21 +169,31 @@ export function InteractiveExpenseExplorer({
             alignItems: 'center',
             padding: isTransaction ? '8px 16px' : '12px 16px',
             marginLeft: `${level * 20}px`,
-            backgroundColor: isSelected ? 'var(--accent-primary-alpha)' : 'transparent',
-            border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
+            backgroundColor: isSelected 
+              ? 'var(--accent-primary-alpha)' 
+              : isHighlighted 
+                ? 'var(--accent-primary-alpha)' 
+                : 'transparent',
+            border: isSelected 
+              ? '2px solid var(--accent-primary)' 
+              : isHighlighted 
+                ? '2px solid var(--accent-primary)' 
+                : '1px solid transparent',
             borderRadius: '8px',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
+            transition: 'all 0.3s ease',
             marginBottom: '4px',
-            fontSize: isTransaction ? '14px' : '16px'
+            fontSize: isTransaction ? '14px' : '16px',
+            transform: isHighlighted ? 'scale(1.02)' : 'scale(1)',
+            boxShadow: isHighlighted ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none'
           }}
           onMouseEnter={(e) => {
-            if (!isSelected) {
+            if (!isSelected && !isHighlighted) {
               e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
             }
           }}
           onMouseLeave={(e) => {
-            if (!isSelected) {
+            if (!isSelected && !isHighlighted) {
               e.currentTarget.style.backgroundColor = 'transparent'
             }
           }}
@@ -227,13 +246,27 @@ export function InteractiveExpenseExplorer({
             {compareMode && node.comparison && !isTransaction && (
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '12px',
-                color: getChangeColor(node.comparison.change)
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                gap: '2px',
+                fontSize: '12px'
               }}>
-                {getChangeIcon(node.comparison.change)}
-                {formatPercentage(node.comparison.changePercent)}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: getChangeColor(node.comparison.change),
+                  fontWeight: '600'
+                }}>
+                  {getChangeIcon(node.comparison.change)}
+                  {formatPercentage(node.comparison.changePercent)}
+                </div>
+                <div style={{
+                  color: 'var(--text-tertiary)',
+                  fontSize: '10px'
+                }}>
+                  Poprzednio: {formatMoney(node.comparison.previousTotal)}
+                </div>
               </div>
             )}
 
