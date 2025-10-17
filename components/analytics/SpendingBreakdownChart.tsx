@@ -3,18 +3,36 @@
 import { useState, useMemo } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
-interface EnvelopeData {
-    name: string
+interface GroupData {
+    group: string
     amount: number
     percentage: number
     icon: string
-    color: string
-    envelopes?: EnvelopeData[]
+    envelopes: Array<{
+        name: string
+        amount: number
+        icon: string
+        percentage: number
+    }>
+}
+
+interface EnvelopeData {
+    envelope: string
+    amount: number
+    percentage: number
+    icon: string
+    categories: Array<{
+        categoryId: string
+        categoryName: string
+        amount: number
+        icon: string
+        percentage: number
+    }>
 }
 
 interface SpendingBreakdownChartProps {
     data: {
-        byGroup: EnvelopeData[]
+        byGroup: GroupData[]
         byEnvelope: EnvelopeData[]
     }
     onEnvelopeSelect?: (envelopeName: string) => void
@@ -39,15 +57,23 @@ export function SpendingBreakdownChart({
     const chartData = useMemo(() => {
         if (drillDownLevel === 'group') {
             return data.byGroup.map((group, index) => ({
-                ...group,
-                color: COLORS[index % COLORS.length]
+                name: group.group,
+                amount: group.amount,
+                percentage: group.percentage,
+                icon: group.icon,
+                color: COLORS[index % COLORS.length],
+                envelopes: group.envelopes
             }))
         } else {
             return data.byEnvelope
-                .filter(envelope => !selectedGroup || envelope.name.includes(selectedGroup))
+                .filter(envelope => !selectedGroup || envelope.envelope.includes(selectedGroup))
                 .map((envelope, index) => ({
-                    ...envelope,
-                    color: COLORS[index % COLORS.length]
+                    name: envelope.envelope,
+                    amount: envelope.amount,
+                    percentage: envelope.percentage,
+                    icon: envelope.icon,
+                    color: COLORS[index % COLORS.length],
+                    categories: envelope.categories
                 }))
         }
     }, [data, drillDownLevel, selectedGroup])
