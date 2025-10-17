@@ -45,21 +45,21 @@ interface AnalyticsData {
         }>
         byEnvelope: Array<{
             envelope: string
-            amount: number
-            percentage: number
+    amount: number
+    percentage: number
             icon: string
             categories: Array<{
-                categoryId: string
-                categoryName: string
+    categoryId: string
+    categoryName: string
                 amount: number
-                icon: string
+    icon: string
                 percentage: number
             }>
         }>
         byCategory: Array<{
             category: string
-            amount: number
-            percentage: number
+    amount: number
+    percentage: number
             icon: string
         }>
     }
@@ -155,7 +155,7 @@ export default function AnalyticsPage() {
                             fontSize: '18px',
                             color: 'var(--text-secondary)'
                         }}>
-                            📊 Ładowanie analiz...
+                        📊 Ładowanie analiz...
                         </div>
                     </div>
                 </div>
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
                         <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                            Błąd ładowania danych
+                    Błąd ładowania danych
                         </div>
                         <div style={{ fontSize: '14px' }}>
                             Spróbuj odświeżyć stronę lub skontaktuj się z administratorem
@@ -241,20 +241,20 @@ export default function AnalyticsPage() {
                     loading={loading}
                 />
 
-                {/* Główna Wizualizacja */}
-                <SpendingBreakdownChart
+                {/* Główna Wizualizacja - Tymczasowo wyłączone */}
+                {/* <SpendingBreakdownChart
                     data={data.spendingBreakdown}
                     onEnvelopeSelect={setSelectedEnvelope}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                />
+                /> */}
 
-                {/* Analiza Trendów */}
-                <TrendsChart
+                {/* Analiza Trendów - Tymczasowo wyłączone */}
+                {/* <TrendsChart
                     data={data.trends}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                />
+                /> */}
 
                 {/* Szczegółowa Tabela */}
                 <DetailedDataTable
