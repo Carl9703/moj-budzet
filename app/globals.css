@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tremor CSS */
+@import '@tremor/react/dist/esm/tremor.css';
+
 /* CSS Variables for Theme System */
 :root {
     /* Light Theme */
