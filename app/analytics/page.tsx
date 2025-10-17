@@ -1,6 +1,4 @@
-﻿'use client'
-
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { AnalyticsFilters } from '@/components/analytics/AnalyticsFilters'
 import { KeyMetrics } from '@/components/analytics/KeyMetrics'
