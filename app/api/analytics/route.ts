@@ -22,14 +22,14 @@ interface MainMetrics {
 
 interface ComparisonData {
   previousTotal: number
-  change: number
-  changePercent: number
+    change: number
+    changePercent: number
 }
 
 interface SpendingTreeNode {
   type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
   id: string
-  name: string
+    name: string
   total: number
   comparison?: ComparisonData
   children?: SpendingTreeNode[]
@@ -58,20 +58,20 @@ interface AnalyticsResponse {
 // === FUNKCJE POMOCNICZE ===
 
 function getStartDate(period: string): Date {
-  const now = new Date()
-  
-  switch (period) {
-    case '1month':
-      return new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    case 'currentMonth':
-      return new Date(now.getFullYear(), now.getMonth(), 1)
-    case '6months':
-      return new Date(now.getFullYear(), now.getMonth() - 6, 1)
-    case 'currentYear':
-      return new Date(now.getFullYear(), 0, 1)
-    default: // 3months
-      return new Date(now.getFullYear(), now.getMonth() - 3, 1)
-  }
+    const now = new Date()
+    
+    switch (period) {
+        case '1month':
+            return new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        case 'currentMonth':
+            return new Date(now.getFullYear(), now.getMonth(), 1)
+        case '6months':
+            return new Date(now.getFullYear(), now.getMonth() - 6, 1)
+        case 'currentYear':
+            return new Date(now.getFullYear(), 0, 1)
+        default: // 3months
+            return new Date(now.getFullYear(), now.getMonth() - 3, 1)
+    }
 }
 
 function getGroupIcon(groupName: string): string {
@@ -93,14 +93,14 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
     
     const whereClause: any = {
-      userId: userId,
+                userId: userId,
       type: 'expense',
       date: { gte: monthStart, lte: monthEnd },
-      NOT: [
-        { description: { contains: 'Zamknięcie miesiąca' } },
-        { description: { contains: 'przeniesienie bilansu' } }
-      ]
-    }
+                NOT: [
+                    { description: { contains: 'Zamknięcie miesiąca' } },
+                    { description: { contains: 'przeniesienie bilansu' } }
+                ]
+            }
     
     if (envelopeId) {
       whereClause.envelopeId = envelopeId
@@ -112,8 +112,8 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
     
     const totalExpenses = monthTransactions
       .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
-      .reduce((sum, t) => sum + t.amount, 0)
-    
+            .reduce((sum, t) => sum + t.amount, 0)
+
     trends.push({
       period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
       value: totalExpenses
@@ -128,9 +128,9 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
 async function buildSpendingTree(userId: string, startDate: Date, endDate: Date, compare: boolean): Promise<SpendingTreeNode[]> {
   // Pobierz wszystkie transakcje dla okresu
   const transactions = await prisma.transaction.findMany({
-    where: {
-      userId: userId,
-      type: 'expense',
+                where: {
+                    userId: userId,
+                    type: 'expense',
       date: { gte: startDate, lte: endDate },
       NOT: [
         { description: { contains: 'Zamknięcie miesiąca' } },
@@ -148,9 +148,9 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     const previousEnd = new Date(startDate.getTime() - 1)
 
     previousTransactions = await prisma.transaction.findMany({
-      where: {
-        userId: userId,
-        type: 'expense',
+                where: {
+                    userId: userId,
+                    type: 'expense',
         date: { gte: previousStart, lte: previousEnd },
         NOT: [
           { description: { contains: 'Zamknięcie miesiąca' } },
@@ -227,7 +227,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
   // Konwertuj Map na Array i dodaj dane porównawcze
   const spendingTree: SpendingTreeNode[] = []
   
-  for (const [groupName, group] of groupMap) {
+  for (const [groupName, group] of Array.from(groupMap.entries())) {
     const groupNode: SpendingTreeNode = {
       type: 'GROUP',
       id: group.id,
@@ -253,7 +253,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     }
     
     // Przetwórz koperty
-    for (const [envelopeName, envelope] of group.children) {
+    for (const [envelopeName, envelope] of Array.from((group.children as Map<string, any>).entries())) {
       const envelopeNode: SpendingTreeNode = {
         type: 'ENVELOPE',
         id: envelope.id,
@@ -279,7 +279,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       }
       
       // Przetwórz kategorie
-      for (const [categoryName, category] of envelope.children) {
+      for (const [categoryName, category] of Array.from((envelope.children as Map<string, any>).entries())) {
         const categoryNode: SpendingTreeNode = {
           type: 'CATEGORY',
           id: category.id,
@@ -317,15 +317,15 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    let userId: string
     try {
-      userId = await getUserIdFromToken(request)
-    } catch (error) {
-      return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
-    }
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+        }
 
-    const { searchParams } = new URL(request.url)
+        const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const compare = searchParams.get('compare') === 'true'
@@ -335,7 +335,7 @@ export async function GET(request: NextRequest) {
       start = new Date(startDate)
       end = new Date(endDate)
     } else {
-      const period = searchParams.get('period') || '3months'
+        const period = searchParams.get('period') || '3months'
       start = getStartDate(period)
       end = new Date()
     }
@@ -365,21 +365,21 @@ export async function GET(request: NextRequest) {
     const currentSavingsRate = currentIncome > 0 ? currentBalance / currentIncome : 0
 
     // === DANE PORÓWNAWCZE (jeśli włączony tryb porównawczy) ===
-    let previousPeriodData = null
+    let previousPeriodData: { income: number; expense: number; balance: number; savingsRate: number } | undefined = undefined
     if (compare) {
       const periodLength = end.getTime() - start.getTime()
       const previousStart = new Date(start.getTime() - periodLength)
       const previousEnd = new Date(start.getTime() - 1)
 
       const previousPeriodTransactions = await prisma.transaction.findMany({
-        where: {
-          userId: userId,
-          type: { in: ['income', 'expense'] },
+            where: {
+                userId: userId,
+                type: { in: ['income', 'expense'] },
           date: { gte: previousStart, lte: previousEnd },
-          NOT: [
-            { description: { contains: 'Zamknięcie miesiąca' } },
-            { description: { contains: 'przeniesienie bilansu' } }
-          ]
+                NOT: [
+                    { description: { contains: 'Zamknięcie miesiąca' } },
+                    { description: { contains: 'przeniesienie bilansu' } }
+                ]
         }
       })
 
@@ -440,11 +440,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (error) {
-    console.error('Analytics API error:', error)
-    return NextResponse.json(
-      { error: 'Błąd pobierania analiz' },
-      { status: 500 }
-    )
-  }
+    } catch (error) {
+        console.error('Analytics API error:', error)
+        return NextResponse.json(
+            { error: 'Błąd pobierania analiz' },
+            { status: 500 }
+        )
+    }
 }
