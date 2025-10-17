@@ -1,84 +1,152 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ["class"],
+  // WAŻNA ZMIANA: Dodajemy ścieżkę do Tremora i upraszczamy resztę
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // <-- Kluczowa linia
   ],
-  darkMode: 'class',
+  // NOWA SEKCJA: 'safelist' to nasza polisa ubezpieczeniowa
+  // Gwarantuje, że kolory Tremora ZAWSZE znajdą się w finalnym CSS.
+  safelist: [
+    {
+      pattern:
+        /^(bg-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+    {
+      pattern:
+        /^(text-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+    {
+      pattern:
+        /^(border-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+    {
+      pattern:
+        /^(ring-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+    {
+      pattern:
+        /^(stroke-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+    {
+      pattern:
+        /^(fill-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
+    },
+  ],
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+    transparent: "transparent",
+    current: "currentColor",
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
       },
-      animation: {
-        'fade-in-up': 'fadeInUp 0.5s ease-out',
-        'slide-in-right': 'slideInRight 0.4s ease-out',
-        'slide-in-left': 'slideInLeft 0.4s ease-out',
-        'scale-in': 'scaleIn 0.3s ease-out',
-        'pulse': 'pulse 2s infinite',
+    },
+    extend: {
+      // Tutaj zostawiamy bez zmian Twoje kolory z Shadcn
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        // Dodajemy pełną paletę kolorów Tremora, aby była dostępna
+        tremor: {
+          brand: {
+            faint: "#eff6ff", // blue-50
+            muted: "#bfdbfe", // blue-200
+            subtle: "#60a5fa", // blue-400
+            DEFAULT: "#3b82f6", // blue-500
+            emphasis: "#1d4ed8", // blue-700
+            inverted: "#ffffff", // white
+          },
+          background: {
+            muted: "#f9fafb", // gray-50
+            subtle: "#f3f4f6", // gray-100
+            DEFAULT: "#ffffff", // white
+            emphasis: "#374151", // gray-700
+          },
+          border: {
+            DEFAULT: "#e5e7eb", // gray-200
+          },
+          ring: {
+            DEFAULT: "#e5e7eb", // gray-200
+          },
+          content: {
+            subtle: "#9ca3af", // gray-400
+            DEFAULT: "#6b7280", // gray-500
+            emphasis: "#374151", // gray-700
+            strong: "#111827", // gray-900
+            inverted: "#ffffff", // white
+          },
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+        "tremor-small": "0.375rem",
+        "tremor-default": "0.5rem",
+        "tremor-full": "9999px",
       },
       keyframes: {
-        fadeInUp: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateY(20px)',
-          },
-          '100%': {
-            opacity: '1',
-            transform: 'translateY(0)',
-          },
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        slideInRight: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateX(20px)',
-          },
-          '100%': {
-            opacity: '1',
-            transform: 'translateX(0)',
-          },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
         },
-        slideInLeft: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateX(-20px)',
-          },
-          '100%': {
-            opacity: '1',
-            transform: 'translateX(0)',
-          },
-        },
-        scaleIn: {
-          '0%': {
-            opacity: '0',
-            transform: 'scale(0.95)',
-          },
-          '100%': {
-            opacity: '1',
-            transform: 'scale(1)',
-          },
-        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+       boxShadow: {
+        // Dodajemy cienie Tremora
+        "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "tremor-card": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        "tremor-dropdown": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+      },
+      fontSize: {
+        "tremor-label": ["0.75rem"],
+        "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
+        "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
+        "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
       },
     },
   },
-  plugins: [],
-  safelist: [
-    // Tremor colors safelist - rozszerzona paleta
-    {
-      pattern: /^(bg|border|hover:bg|hover:border|hover:text|fill|ring|stroke|text|ui-selected:bg|ui-selected:border|ui-selected:text)-(blue|red|green|yellow|purple|pink|cyan|lime|orange|indigo|emerald|teal|sky|violet|fuchsia|rose|amber|slate|gray|zinc|neutral|stone)$/,
-    },
-    // Wszystkie kolory z ANALYTICS_COLORS
-    'bg-blue-500', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-indigo-500', 'bg-emerald-500',
-    'bg-purple-500', 'bg-pink-500', 'bg-cyan-500', 'bg-lime-500', 'bg-orange-500', 'bg-violet-500',
-    'text-blue-500', 'text-teal-500', 'text-amber-500', 'text-rose-500', 'text-indigo-500', 'text-emerald-500',
-    'text-purple-500', 'text-pink-500', 'text-cyan-500', 'text-lime-500', 'text-orange-500', 'text-violet-500',
-    // Dodatkowe warianty kolorów dla Tremor
-    'bg-blue-400', 'bg-blue-600', 'bg-teal-400', 'bg-teal-600', 'bg-amber-400', 'bg-amber-600',
-    'bg-rose-400', 'bg-rose-600', 'bg-indigo-400', 'bg-indigo-600', 'bg-emerald-400', 'bg-emerald-600',
-    'bg-purple-400', 'bg-purple-600', 'bg-pink-400', 'bg-pink-600', 'bg-cyan-400', 'bg-cyan-600',
-    'bg-lime-400', 'bg-lime-600', 'bg-orange-400', 'bg-orange-600', 'bg-violet-400', 'bg-violet-600',
-  ],
-}
+  plugins: [require("tailwindcss-animate")],
+};
