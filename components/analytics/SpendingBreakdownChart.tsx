@@ -31,7 +31,7 @@ const SpendingBreakdownChart = ({
 }: SpendingBreakdownChartProps) => {
   // Wyciągamy nazwy kategorii dla legendy
   const categories = data.map((item) => item.name);
-  // Wyciągamy kolory dla legendy
+  // Wyciągamy kolory dla legendy - Tremor oczekuje tablicy kolorów
   const colors = data.map((item) => item.color);
 
   if (loading) {
@@ -133,7 +133,7 @@ const SpendingBreakdownChart = ({
             category="value"
             index="name"
             valueFormatter={valueFormatter}
-            colors={colors}
+            colors={['blue', 'red', 'green', 'yellow', 'purple', 'pink', 'cyan', 'lime', 'orange', 'indigo']}
             className="h-80 w-80"
             showAnimation
             onValueChange={(value) => {
@@ -146,7 +146,7 @@ const SpendingBreakdownChart = ({
         <div style={{ flex: '1', minWidth: '250px' }}>
           <Legend 
             categories={categories} 
-            colors={colors} 
+            colors={['blue', 'red', 'green', 'yellow', 'purple', 'pink', 'cyan', 'lime', 'orange', 'indigo']}
             className="max-w-full"
             style={{
               fontSize: '16px',
