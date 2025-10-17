@@ -1,9 +1,13 @@
-﻿import { useState, useEffect } from 'react'
+﻿'use client'
+
+import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { AnalyticsFilters } from '@/components/analytics/AnalyticsFilters'
 import { KeyMetrics } from '@/components/analytics/KeyMetrics'
-import SpendingBreakdownChart from '@/components/analytics/SpendingBreakdownChart'
-import TrendsChart from '@/components/analytics/TrendsChart'
+import dynamic from 'next/dynamic'
+
+const SpendingBreakdownChart = dynamic(() => import('@/components/analytics/SpendingBreakdownChart'), { ssr: false })
+const TrendsChart = dynamic(() => import('@/components/analytics/TrendsChart'), { ssr: false })
 import { DetailedDataTable } from '@/components/analytics/DetailedDataTable'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
