@@ -1,6 +1,7 @@
 'use client'
 
 import { LineChart } from '@tremor/react'
+import { ANALYTICS_COLORS } from '@/lib/constants/colors'
 
 interface TrendData {
   period: string
@@ -139,7 +140,7 @@ export function TrendsVisualization({
           data={chartData}
           index="period"
           categories={['wydatki']}
-          colors={[selectedItem ? 'blue' : 'red']}
+          colors={[selectedItem ? ANALYTICS_COLORS[0] : ANALYTICS_COLORS[1]]}
           valueFormatter={valueFormatter}
           className="h-full w-full"
           showAnimation
