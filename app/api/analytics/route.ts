@@ -74,11 +74,31 @@ function getStartDate(period: string): Date {
     }
 }
 
+function getGroupDisplayName(groupName: string): string {
+  const groupNames: { [key: string]: string } = {
+    'needs': 'Potrzeby',
+    'lifestyle': 'Styl Życia',
+    'financial': 'Cele Finansowe', 
+    'target': 'Fundusze Celowe',
+    'Potrzeby': 'Potrzeby',
+    'Styl Życia': 'Styl Życia',
+    'Cele Finansowe': 'Cele Finansowe',
+    'Fundusze Celowe': 'Fundusze Celowe',
+    'Inne': 'Inne'
+  }
+  return groupNames[groupName] || 'Inne'
+}
+
 function getGroupIcon(groupName: string): string {
   const groupIcons: { [key: string]: string } = {
-    'POTRZEBY': '🏠',
-    'STYL ŻYCIA': '🎯',
-    'CELE FINANSOWE': '💰',
+    'needs': '🏠',
+    'lifestyle': '🎯', 
+    'financial': '💰',
+    'target': '🎯',
+    'Potrzeby': '🏠',
+    'Styl Życia': '🎯',
+    'Cele Finansowe': '💰',
+    'Fundusze Celowe': '🎯',
     'Inne': '📦'
   }
   return groupIcons[groupName] || '📦'
@@ -231,7 +251,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     const groupNode: SpendingTreeNode = {
       type: 'GROUP',
       id: group.id,
-      name: group.name,
+      name: getGroupDisplayName(group.name),
       total: group.total,
       children: []
     }

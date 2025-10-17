@@ -57,11 +57,44 @@ export function InteractiveExpenseExplorer({
     return <Minus size={14} />
   }
 
-  const getItemIcon = (type: string) => {
+  const getItemIcon = (type: string, name?: string) => {
     switch (type) {
-      case 'GROUP': return '🏠'
-      case 'ENVELOPE': return '📁'
-      case 'CATEGORY': return '🏷️'
+      case 'GROUP': 
+        // Użyj ikon grup z systemu
+        if (name === 'Potrzeby') return '🏠'
+        if (name === 'Styl Życia') return '🎯'
+        if (name === 'Cele Finansowe') return '💰'
+        if (name === 'Fundusze Celowe') return '🎯'
+        return '📦'
+      case 'ENVELOPE': 
+        // Użyj ikon kopert z systemu
+        if (name === 'Mieszkanie') return '🏠'
+        if (name === 'Żywność') return '🍕'
+        if (name === 'Transport') return '🚗'
+        if (name === 'Zdrowie i Higiena') return '💊'
+        if (name === 'Rachunki i Subskrypcje') return '📱'
+        if (name === 'Wydatki Osobiste') return '🎮'
+        if (name === 'Gastronomia') return '🍽️'
+        if (name === 'Ubrania i Akcesoria') return '👕'
+        if (name === 'Fundusz Awaryjny') return '🚨'
+        if (name === 'Budowanie Przyszłości') return '📈'
+        if (name === 'Auto: Serwis i Ubezpieczenie') return '🚗'
+        if (name === 'Prezenty i Okazje') return '🎁'
+        if (name === 'Podróże') return '✈️'
+        if (name === 'Wesele') return '💍'
+        return '📁'
+      case 'CATEGORY': 
+        // Użyj ikon kategorii z systemu
+        if (name === 'Wspólne opłaty') return '🏠'
+        if (name === 'Paliwo') return '⛽'
+        if (name === 'Lekarz i Leki') return '👨‍⚕️'
+        if (name === 'Telefon(y)') return '📱'
+        if (name === 'Hobby') return '🎮'
+        if (name === 'Restauracje') return '🍕'
+        if (name === 'Odzież') return '👕'
+        if (name === 'IKE') return '📈'
+        if (name === 'Wakacje') return '✈️'
+        return '🏷️'
       case 'TRANSACTION': return '💰'
       default: return '📦'
     }
@@ -163,7 +196,7 @@ export function InteractiveExpenseExplorer({
             marginRight: '12px',
             fontSize: isTransaction ? '16px' : '20px'
           }}>
-            {getItemIcon(node.type)}
+            {getItemIcon(node.type, node.name)}
           </div>
 
           {/* Nazwa */}
