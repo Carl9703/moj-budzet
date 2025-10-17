@@ -1,119 +1,161 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
-import { AnalyticsFilters } from '@/components/analytics/AnalyticsFilters'
-import { KeyMetrics } from '@/components/analytics/KeyMetrics'
-import SpendingBreakdownChart from '@/components/analytics/SpendingBreakdownChart'
-import TrendsChart from '@/components/analytics/TrendsChart'
-import { DetailedDataTable } from '@/components/analytics/DetailedDataTable'
+import { GlobalFilters } from '@/components/analytics/GlobalFilters'
+import { KeyMetricsCards } from '@/components/analytics/KeyMetricsCards'
+import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
+import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
+import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 interface DateRange {
-    startDate: string
-    endDate: string
+  from: Date | undefined
+  to: Date | undefined
+}
+
+interface MainMetrics {
+  currentPeriod: {
+    income: number
+    expense: number
+    balance: number
+    savingsRate: number
+  }
+  previousPeriod?: {
+    income: number
+    expense: number
+    balance: number
+    savingsRate: number
+  }
+}
+
+interface SpendingTreeNode {
+  type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
+  id: string
+  name: string
+  total: number
+  comparison?: {
+    previousTotal: number
+    change: number
+    changePercent: number
+  }
+  children?: SpendingTreeNode[]
+  date?: string
+  description?: string
+  amount?: number
+}
+
+interface TrendData {
+  period: string
+  value: number
+}
+
+interface TrendsData {
+  totalExpenses: TrendData[]
+  byEnvelope: { [envelopeId: string]: TrendData[] }
 }
 
 interface AnalyticsData {
-    mainMetrics: {
-        currentPeriod: {
-            income: number
-            expense: number
-            balance: number
-            savingsRate: number
-        }
-        previousPeriod?: {
-            income: number
-            expense: number
-            balance: number
-            savingsRate: number
-        }
-    }
-    spendingBreakdown: {
-        byGroup: Array<{
-            group: string
-            amount: number
-            percentage: number
-            icon: string
-            envelopes: Array<{
-                name: string
-                amount: number
-                icon: string
-                percentage: number
-            }>
-        }>
-        byEnvelope: Array<{
-            envelope: string
-    amount: number
-    percentage: number
-            icon: string
-            categories: Array<{
-    categoryId: string
-    categoryName: string
-                amount: number
-    icon: string
-                percentage: number
-            }>
-        }>
-        byCategory: Array<{
-            category: string
-    amount: number
-    percentage: number
-            icon: string
-        }>
-    }
-    trends: Array<{
-        period: string
-        totalExpenses: number
-    }>
+  mainMetrics: MainMetrics
+  spendingTree: SpendingTreeNode[]
+  trends: TrendsData
 }
 
 export default function AnalyticsPage() {
     const { isAuthenticated, isCheckingAuth } = useAuth()
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
-    const [filters, setFilters] = useState({
-        dateRange: { startDate: '', endDate: '' },
-        compareMode: false,
-        period: 'currentMonth'
-    })
-    const [selectedEnvelope, setSelectedEnvelope] = useState<string | undefined>()
-    const [viewType, setViewType] = useState<'envelopes' | 'categories'>('envelopes')
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    to: new Date()
+  })
+  const [compareMode, setCompareMode] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
 
-    const fetchData = async (newFilters: typeof filters) => {
-        setLoading(true)
-        try {
-            const params = new URLSearchParams()
-            if (newFilters.dateRange.startDate && newFilters.dateRange.endDate) {
-                params.append('startDate', newFilters.dateRange.startDate)
-                params.append('endDate', newFilters.dateRange.endDate)
-            } else {
-                params.append('period', newFilters.period)
-            }
-            if (newFilters.compareMode) {
-                params.append('compare', 'true')
-            }
+  const fetchData = async (newDateRange: DateRange, newCompareMode: boolean) => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (newDateRange.from && newDateRange.to) {
+        params.append('startDate', newDateRange.from.toISOString())
+        params.append('endDate', newDateRange.to.toISOString())
+      }
+      if (newCompareMode) {
+        params.append('compare', 'true')
+      }
 
-            const response = await authorizedFetch(`/api/analytics?${params.toString()}`)
-            const analyticsData = await response.json()
-            setData(analyticsData)
-        } catch (err) {
-            console.error('Analytics error:', err)
-        } finally {
-            setLoading(false)
-        }
+      const response = await authorizedFetch(`/api/analytics?${params.toString()}`)
+      const analyticsData = await response.json()
+      setData(analyticsData)
+    } catch (err) {
+      console.error('Analytics error:', err)
+    } finally {
+      setLoading(false)
     }
+  }
 
     useEffect(() => {
         if (!isAuthenticated) return
-        fetchData(filters)
-    }, [isAuthenticated])
+    fetchData(dateRange, compareMode)
+  }, [isAuthenticated])
 
-    const handleFiltersChange = (newFilters: typeof filters) => {
-        setFilters(newFilters)
-        fetchData(newFilters)
+  const handleDateRangeChange = (newDateRange: DateRange) => {
+    setDateRange(newDateRange)
+    fetchData(newDateRange, compareMode)
+  }
+
+  const handleCompareModeChange = (enabled: boolean) => {
+    setCompareMode(enabled)
+    fetchData(dateRange, enabled)
+  }
+
+  const handleSegmentClick = (segmentName: string) => {
+    // Znajdź pozycję w drzewie wydatków
+    const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
+      for (const node of nodes) {
+        if (node.name === segmentName) return node
+        if (node.children) {
+          const found = findItem(node.children)
+          if (found) return found
+        }
+      }
+      return null
     }
+    
+    const item = findItem(data?.spendingTree || [])
+    if (item) {
+      setSelectedItem(item)
+    }
+  }
+
+  const handleExplorerItemClick = (item: SpendingTreeNode) => {
+    setSelectedItem(item)
+  }
+
+  // Przygotowanie danych dla wykresu kołowego
+  const chartData = useMemo(() => {
+    if (!data?.spendingTree) return []
+    
+    return data.spendingTree.map((group, index) => ({
+      name: group.name,
+      value: group.total,
+      color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'][index % 10]
+    }))
+  }, [data?.spendingTree])
+
+  // Przygotowanie danych dla wykresu trendów
+  const trendsData = useMemo(() => {
+    if (!data?.trends) return []
+    
+    if (selectedItem && selectedItem.type === 'ENVELOPE') {
+      // Znajdź trendy dla wybranej koperty
+      const envelopeId = selectedItem.id.replace('env_', '')
+      return data.trends.byEnvelope[envelopeId] || []
+    }
+    
+    return data.trends.totalExpenses
+  }, [data?.trends, selectedItem])
     
     if (isCheckingAuth) {
         return (
@@ -127,36 +169,36 @@ export default function AnalyticsPage() {
         return null
     }
 
-    if (loading) {
+  if (loading && !data) {
         return (
             <div className="min-h-screen bg-theme-primary">
-                <TopNavigation />
+        <TopNavigation />
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: 'calc(100vh - 80px)'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '16px'
-                    }}>
-                        <div style={{
-                            width: '60px',
-                            height: '60px',
-                            border: '4px solid var(--border-primary)',
-                            borderTop: '4px solid var(--accent-primary)',
-                            borderRadius: '50%',
-                            animation: 'spin 1s linear infinite'
-                        }} />
-                        <div style={{
-                            fontSize: '18px',
-                            color: 'var(--text-secondary)'
-                        }}>
+          height: 'calc(100vh - 80px)'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              border: '4px solid var(--border-primary)',
+              borderTop: '4px solid var(--accent-primary)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <div style={{
+              fontSize: '18px',
+              color: 'var(--text-secondary)'
+            }}>
                         📊 Ładowanie analiz...
-                        </div>
+            </div>
                     </div>
                 </div>
             </div>
@@ -166,109 +208,85 @@ export default function AnalyticsPage() {
     if (!data) {
         return (
             <div className="min-h-screen bg-theme-primary">
-                <TopNavigation />
-                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '40px',
-                        color: 'var(--text-secondary)'
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
-                        <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+        <TopNavigation />
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+          <div style={{
+            textAlign: 'center',
+            padding: '40px',
+            color: 'var(--text-secondary)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
                     Błąd ładowania danych
-                        </div>
-                        <div style={{ fontSize: '14px' }}>
-                            Spróbuj odświeżyć stronę lub skontaktuj się z administratorem
-                        </div>
-                    </div>
+            </div>
+            <div style={{ fontSize: '14px' }}>
+              Spróbuj odświeżyć stronę lub skontaktuj się z administratorem
+            </div>
+          </div>
                 </div>
             </div>
         )
     }
 
-    // Przygotuj dane dla tabeli
-    const tableData = viewType === 'envelopes' 
-        ? data.spendingBreakdown.byEnvelope.map(item => ({
-            name: item.envelope,
-            amount: item.amount,
-            percentage: item.percentage,
-            icon: item.icon,
-            comparison: filters.compareMode && data.mainMetrics.previousPeriod ? {
-                previousAmount: 0, // TODO: Implement previous period data for envelopes
-                change: 0,
-                changePercent: 0
-            } : undefined
-        }))
-        : data.spendingBreakdown.byCategory.map(item => ({
-            name: item.category,
-            amount: item.amount,
-            percentage: item.percentage,
-            icon: item.icon,
-            comparison: filters.compareMode && data.mainMetrics.previousPeriod ? {
-                previousAmount: 0, // TODO: Implement previous period data for categories
-                change: 0,
-                changePercent: 0
-            } : undefined
-        }))
-
     return (
         <div className="min-h-screen bg-theme-primary">
             <TopNavigation />
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-                <h1 style={{
-                    fontSize: '32px',
-                    fontWeight: 'bold',
-                    color: 'var(--text-primary)',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: 'bold',
+          color: 'var(--text-primary)',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
                     📊 Analizy Budżetowe
                 </h1>
 
-                {/* Globalne Filtry */}
-                <AnalyticsFilters 
-                    onFiltersChange={handleFiltersChange}
-                    initialPeriod={filters.period}
-                />
+        {/* Sekcja A: Globalne Kontrolery */}
+        <GlobalFilters
+          dateRange={dateRange}
+          compareMode={compareMode}
+          onDateRangeChange={handleDateRangeChange}
+          onCompareModeChange={handleCompareModeChange}
+          loading={loading}
+        />
 
-                {/* Kluczowe Wskaźniki */}
-                <KeyMetrics
-                    currentPeriod={data.mainMetrics.currentPeriod}
-                    previousPeriod={data.mainMetrics.previousPeriod}
-                    compareMode={filters.compareMode}
-                    loading={loading}
-                />
+        {/* Sekcja B: Kluczowe Wskaźniki */}
+        <KeyMetricsCards
+          currentPeriod={data.mainMetrics.currentPeriod}
+          previousPeriod={data.mainMetrics.previousPeriod}
+          compareMode={compareMode}
+          loading={loading}
+        />
 
-                {/* Główna Wizualizacja */}
-                <SpendingBreakdownChart
-                    data={data.spendingBreakdown.byGroup.map((group, index) => ({
-                        name: group.group,
-                        value: group.amount,
-                        color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'][index % 10]
-                    }))}
-                    onEnvelopeSelect={setSelectedEnvelope}
-                    selectedEnvelope={selectedEnvelope}
-                    loading={loading}
-                />
+        {/* Sekcja C: Wizualizacje */}
+                        <div style={{
+                            display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+          gap: '24px',
+          marginBottom: '24px'
+        }}>
+          <SpendingBreakdownVisualization
+            data={chartData}
+            onSegmentClick={handleSegmentClick}
+            loading={loading}
+          />
+          <TrendsVisualization
+            data={trendsData}
+            selectedItem={selectedItem?.name}
+            loading={loading}
+          />
+                                        </div>
 
-                {/* Analiza Trendów */}
-                <TrendsChart
-                    data={data.trends}
-                    selectedEnvelope={selectedEnvelope}
-                    loading={loading}
-                />
-
-
-                {/* Szczegółowa Tabela */}
-                <DetailedDataTable
-                    data={tableData}
-                    viewType={viewType}
-                    compareMode={filters.compareMode}
-                    loading={loading}
-                    onViewTypeChange={setViewType}
-                />
+        {/* Sekcja D: Interaktywny Eksplorator Wydatków */}
+        <InteractiveExpenseExplorer
+          data={data.spendingTree}
+          compareMode={compareMode}
+          onItemClick={handleExplorerItemClick}
+          loading={loading}
+        />
             </div>
         </div>
     )
