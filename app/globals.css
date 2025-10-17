@@ -3,11 +3,28 @@
 @tailwind utilities;
 
 /* Tremor Charts - Ensure SVG elements can use their own colors */
-.tremor-chart svg {
+/* Target all SVG elements in Tremor components */
+[data-tremor] svg,
+.tremor-DonutChart svg,
+.tremor-LineChart svg,
+.tremor-BarChart svg {
   color: inherit !important;
 }
 
-.tremor-chart svg * {
+[data-tremor] svg *,
+.tremor-DonutChart svg *,
+.tremor-LineChart svg *,
+.tremor-BarChart svg * {
+  color: inherit !important;
+}
+
+/* Alternative: Target all SVG elements globally but allow Tremor to override */
+svg {
+  color: inherit;
+}
+
+/* Ensure Tremor charts can use their own colors */
+svg[data-tremor] {
   color: inherit !important;
 }
 
