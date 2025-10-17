@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { AnalyticsFilters } from '@/components/analytics/AnalyticsFilters'
 import { KeyMetrics } from '@/components/analytics/KeyMetrics'
-import dynamic from 'next/dynamic'
-
-const SpendingBreakdownChart = dynamic(() => import('@/components/analytics/SpendingBreakdownChart'), { ssr: false })
-const TrendsChart = dynamic(() => import('@/components/analytics/TrendsChart'), { ssr: false })
+import SpendingBreakdownChart from '@/components/analytics/SpendingBreakdownChart'
+import TrendsChart from '@/components/analytics/TrendsChart'
 import { DetailedDataTable } from '@/components/analytics/DetailedDataTable'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -245,7 +243,11 @@ export default function AnalyticsPage() {
 
                 {/* Główna Wizualizacja */}
                 <SpendingBreakdownChart
-                    data={data.spendingBreakdown}
+                    data={data.spendingBreakdown.byGroup.map((group, index) => ({
+                        name: group.group,
+                        value: group.amount,
+                        color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'][index % 5]
+                    }))}
                     onEnvelopeSelect={setSelectedEnvelope}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
