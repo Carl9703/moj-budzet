@@ -31,6 +31,8 @@ const SpendingBreakdownChart = ({
 }: SpendingBreakdownChartProps) => {
   // Wyciągamy kolory z danych, aby przekazać je do wykresu
   const chartColors = data.map((item) => item.color);
+  // Wyciągamy nazwy kategorii dla legendy
+  const categories = data.map((item) => item.name);
 
   if (loading) {
     return (
@@ -143,6 +145,7 @@ const SpendingBreakdownChart = ({
         </div>
         <div style={{ flex: '1', minWidth: '250px' }}>
           <Legend 
+            categories={categories}
             className="max-w-full"
             style={{
               fontSize: '16px',
