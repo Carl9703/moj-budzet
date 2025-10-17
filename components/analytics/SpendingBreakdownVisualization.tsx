@@ -128,7 +128,7 @@ export function SpendingBreakdownVisualization({
             category="value"
             index="name"
             valueFormatter={valueFormatter}
-            colors={['blue', 'red', 'green', 'yellow', 'purple', 'pink', 'cyan', 'lime', 'orange', 'indigo']}
+            colors={data.map(item => item.color)}
             className="h-80 w-80"
             showAnimation
             onValueChange={(value) => {
