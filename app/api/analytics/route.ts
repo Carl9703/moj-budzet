@@ -335,15 +335,14 @@ export async function GET(request: NextRequest) {
             start = new Date(startDate)
             end = new Date(endDate)
         } else {
-            const period = searchParams.get('period') || '3months'
+        const period = searchParams.get('period') || '3months'
             start = getStartDate(period)
             end = new Date()
         }
 
-        // Pobierz koperty z grupami
+        // Pobierz koperty
         const envelopes = await prisma.envelope.findMany({
-            where: { userId: userId },
-            include: { group: true }
+            where: { userId: userId }
         })
 
         // === GŁÓWNE METRYKI DLA BIEŻĄCEGO OKRESU ===
@@ -414,7 +413,7 @@ export async function GET(request: NextRequest) {
         
         for (const transaction of currentPeriodTransactions.filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)) {
             const envelope = transaction.envelope
-            const groupName = envelope?.group?.name || 'Inne'
+            const groupName = envelope?.group || 'Inne'
             
             if (!expensesByGroup[groupName]) {
                 expensesByGroup[groupName] = { amount: 0, envelopes: [] }
@@ -425,7 +424,7 @@ export async function GET(request: NextRequest) {
             const existingEnvelope = expensesByGroup[groupName].envelopes.find(e => e.name === envelope?.name)
             if (existingEnvelope) {
                 existingEnvelope.amount += transaction.amount
-            } else {
+                } else {
                 expensesByGroup[groupName].envelopes.push({
                     name: envelope?.name || 'Inne',
                     amount: transaction.amount,
