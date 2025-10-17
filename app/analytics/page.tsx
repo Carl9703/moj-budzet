@@ -241,20 +241,20 @@ export default function AnalyticsPage() {
                     loading={loading}
                 />
 
-                {/* Główna Wizualizacja - Tymczasowo wyłączone */}
-                {/* <SpendingBreakdownChart
+                {/* Główna Wizualizacja */}
+                <SpendingBreakdownChart
                     data={data.spendingBreakdown}
                     onEnvelopeSelect={setSelectedEnvelope}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                /> */}
+                />
 
-                {/* Analiza Trendów - Tymczasowo wyłączone */}
-                {/* <TrendsChart
+                {/* Analiza Trendów */}
+                <TrendsChart
                     data={data.trends}
                     selectedEnvelope={selectedEnvelope}
                     loading={loading}
-                /> */}
+                />
 
                 {/* Szczegółowa Tabela */}
                 <DetailedDataTable

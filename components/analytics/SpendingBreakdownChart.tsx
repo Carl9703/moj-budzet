@@ -1,7 +1,15 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import dynamic from 'next/dynamic'
+
+// Dynamiczny import Recharts
+const PieChart = dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false })
+const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })), { ssr: false })
+const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false })
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
+const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
+const Legend = dynamic(() => import('recharts').then(mod => ({ default: mod.Legend })), { ssr: false })
 
 interface GroupData {
     group: string

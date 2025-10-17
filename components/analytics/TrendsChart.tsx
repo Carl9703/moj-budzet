@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { 
-    LineChart, 
-    Line, 
-    XAxis as RechartsXAxis, 
-    YAxis as RechartsYAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    ResponsiveContainer, 
-    BarChart, 
-    Bar 
-} from 'recharts'
+import { useState, useMemo, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+
+// Dynamiczny import Recharts
+const LineChart = dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false })
+const Line = dynamic(() => import('recharts').then(mod => ({ default: mod.Line })), { ssr: false })
+const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })), { ssr: false })
+const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })), { ssr: false })
+const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
+const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
+const BarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false })
+const Bar = dynamic(() => import('recharts').then(mod => ({ default: mod.Bar })), { ssr: false })
 
 interface TrendData {
     period: string
@@ -296,12 +297,12 @@ export function TrendsChart({
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-                            <RechartsXAxis 
+                            <XAxis 
                                 dataKey="formattedPeriod" 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                             />
-                            <RechartsYAxis 
+                            <YAxis 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                                 tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
@@ -319,12 +320,12 @@ export function TrendsChart({
                     ) : (
                         <BarChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-                            <RechartsXAxis 
+                            <XAxis 
                                 dataKey="formattedPeriod" 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                             />
-                            <RechartsYAxis 
+                            <YAxis 
                                 stroke="var(--text-secondary)"
                                 fontSize={12}
                                 tickFormatter={(value: number) => `${(value / 1000).toFixed(0)}k`}
