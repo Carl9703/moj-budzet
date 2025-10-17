@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from './RechartsClient'
 
 interface GroupData {
     group: string
