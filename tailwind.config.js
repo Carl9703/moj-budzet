@@ -13,6 +13,39 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      colors: {
+        // Tremor colors
+        tremor: {
+          brand: {
+            faint: '#eff6ff',
+            muted: '#bfdbfe',
+            subtle: '#60a5fa',
+            DEFAULT: '#3b82f6',
+            emphasis: '#1d4ed8',
+            inverted: '#ffffff',
+          },
+          ring: {
+            DEFAULT: '#3b82f6',
+          },
+          background: {
+            muted: '#f9fafb',
+            subtle: '#f3f4f6',
+            DEFAULT: '#ffffff',
+            emphasis: '#374151',
+          },
+          border: {
+            DEFAULT: '#e5e7eb',
+            emphasis: '#374151',
+          },
+          content: {
+            subtle: '#6b7280',
+            DEFAULT: '#111827',
+            emphasis: '#111827',
+            strong: '#111827',
+            inverted: '#ffffff',
+          },
+        },
+      },
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out',
         'slide-in-right': 'slideInRight 0.4s ease-out',
@@ -64,7 +97,5 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require('@tremor/react/tailwind')
-  ],
+  plugins: [],
 }
