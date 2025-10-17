@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tremor Charts - Ensure SVG elements can use their own colors */
+.tremor-chart svg {
+  color: inherit !important;
+}
+
+.tremor-chart svg * {
+  color: inherit !important;
+}
+
 /* CSS Variables for Theme System */
 :root {
     /* Light Theme */
