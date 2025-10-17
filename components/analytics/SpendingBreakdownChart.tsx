@@ -134,7 +134,6 @@ const SpendingBreakdownChart = ({
             colors={chartColors}
             className="h-80 w-80"
             showAnimation
-            showLegend={false}
             onValueChange={(value) => {
               if (onEnvelopeSelect && value) {
                 onEnvelopeSelect(value.name);
