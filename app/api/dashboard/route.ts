@@ -69,7 +69,11 @@ export async function GET(request: NextRequest) {
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        const balance = Math.round((totalAllIncome - totalAllExpenses) * 100) / 100
+        // Znajdź kopertę Fundusz Awaryjny i odejmij jej wartość od salda głównego
+        const emergencyFundEnvelope = envelopes.find(e => e.name === 'Fundusz Awaryjny')
+        const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
+
+        const balance = Math.round((totalAllIncome - totalAllExpenses - emergencyFundAmount) * 100) / 100
 
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
