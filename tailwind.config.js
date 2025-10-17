@@ -13,39 +13,6 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
-      colors: {
-        // Tremor colors
-        tremor: {
-          brand: {
-            faint: '#eff6ff',
-            muted: '#bfdbfe',
-            subtle: '#60a5fa',
-            DEFAULT: '#3b82f6',
-            emphasis: '#1d4ed8',
-            inverted: '#ffffff',
-          },
-          ring: {
-            DEFAULT: '#3b82f6',
-          },
-          background: {
-            muted: '#f9fafb',
-            subtle: '#f3f4f6',
-            DEFAULT: '#ffffff',
-            emphasis: '#374151',
-          },
-          border: {
-            DEFAULT: '#e5e7eb',
-            emphasis: '#374151',
-          },
-          content: {
-            subtle: '#6b7280',
-            DEFAULT: '#111827',
-            emphasis: '#111827',
-            strong: '#111827',
-            inverted: '#ffffff',
-          },
-        },
-      },
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out',
         'slide-in-right': 'slideInRight 0.4s ease-out',
@@ -98,4 +65,31 @@ module.exports = {
     },
   },
   plugins: [],
+  safelist: [
+    // Tremor colors safelist
+    {
+      pattern: /^(bg|border|hover:bg|hover:border|hover:text|fill|ring|stroke|text|ui-selected:bg|ui-selected:border|ui-selected:text)-(blue|red|green|yellow|purple|pink|cyan|lime|orange|indigo|emerald|teal|sky|violet|fuchsia|rose|amber|slate|gray|zinc|neutral|stone)$/,
+    },
+    // Custom colors for charts
+    'bg-blue-500',
+    'bg-red-500', 
+    'bg-green-500',
+    'bg-yellow-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-cyan-500',
+    'bg-lime-500',
+    'bg-orange-500',
+    'bg-indigo-500',
+    'text-blue-500',
+    'text-red-500',
+    'text-green-500',
+    'text-yellow-500',
+    'text-purple-500',
+    'text-pink-500',
+    'text-cyan-500',
+    'text-lime-500',
+    'text-orange-500',
+    'text-indigo-500',
+  ],
 }
