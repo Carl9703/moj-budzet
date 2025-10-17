@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
                     data={data.spendingBreakdown.byGroup.map((group, index) => ({
                         name: group.group,
                         value: group.amount,
-                        color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'][index % 5]
+                        color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'][index % 10]
                     }))}
                     onEnvelopeSelect={setSelectedEnvelope}
                     selectedEnvelope={selectedEnvelope}

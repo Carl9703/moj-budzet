@@ -133,24 +133,26 @@ const TrendsChart = ({
       </div>
 
       {/* Wykres Tremor */}
-      <LineChart
-        data={chartData}
-        index="period"
-        categories={['wydatki']}
-        colors={[selectedEnvelope ? 'blue' : 'red']}
-        valueFormatter={valueFormatter}
-        className="h-80"
-        showAnimation
-        onValueChange={(value) => {
-          if (onPeriodClick && value) {
-            // Znajdź oryginalny okres na podstawie sformatowanego
-            const originalPeriod = data.find(item => formatPeriod(item.period) === value.period)?.period;
-            if (originalPeriod) {
-              onPeriodClick(originalPeriod);
+      <div style={{ width: '100%', height: '400px' }}>
+        <LineChart
+          data={chartData}
+          index="period"
+          categories={['wydatki']}
+          colors={[selectedEnvelope ? 'blue' : 'red']}
+          valueFormatter={valueFormatter}
+          className="h-full w-full"
+          showAnimation
+          onValueChange={(value) => {
+            if (onPeriodClick && value) {
+              // Znajdź oryginalny okres na podstawie sformatowanego
+              const originalPeriod = data.find(item => formatPeriod(item.period) === value.period)?.period;
+              if (originalPeriod) {
+                onPeriodClick(originalPeriod);
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
+      </div>
 
       {selectedEnvelope && (
         <div style={{

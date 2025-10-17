@@ -122,33 +122,39 @@ const SpendingBreakdownChart = ({
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: '24px',
-        flexWrap: 'wrap'
+        justifyContent: 'space-between',
+        gap: '32px',
+        flexWrap: 'wrap',
+        minHeight: '400px'
       }}>
-        <DonutChart
-          data={data}
-          category="value"
-          index="name"
-          valueFormatter={valueFormatter}
-          colors={colors}
-          className="h-48 w-48"
-          showAnimation
-          onValueChange={(value) => {
-            if (onEnvelopeSelect && value) {
-              onEnvelopeSelect(value.name);
-            }
-          }}
-        />
-        <Legend 
-          categories={categories} 
-          colors={colors} 
-          className="max-w-xs"
-          style={{
-            fontSize: '14px',
-            color: 'var(--text-secondary)'
-          }}
-        />
+        <div style={{ flex: '1', minWidth: '300px' }}>
+          <DonutChart
+            data={data}
+            category="value"
+            index="name"
+            valueFormatter={valueFormatter}
+            colors={colors}
+            className="h-80 w-80"
+            showAnimation
+            onValueChange={(value) => {
+              if (onEnvelopeSelect && value) {
+                onEnvelopeSelect(value.name);
+              }
+            }}
+          />
+        </div>
+        <div style={{ flex: '1', minWidth: '250px' }}>
+          <Legend 
+            categories={categories} 
+            colors={colors} 
+            className="max-w-full"
+            style={{
+              fontSize: '16px',
+              color: 'var(--text-primary)',
+              fontWeight: '500'
+            }}
+          />
+        </div>
       </div>
 
       <div style={{
