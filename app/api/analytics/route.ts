@@ -195,12 +195,12 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       })
     }
     
-    const envelope = group.children.get(envelopeName)
-    envelope.total += transaction.amount
+    const envelopeNode = group.children.get(envelopeName)
+    envelopeNode.total += transaction.amount
     
     // Kategoria
-    if (!envelope.children.has(category)) {
-      envelope.children.set(category, {
+    if (!envelopeNode.children.has(category)) {
+      envelopeNode.children.set(category, {
         type: 'CATEGORY',
         id: `cat_${category}`,
         name: getCategoryName(category),
@@ -209,11 +209,11 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       })
     }
     
-    const category = envelope.children.get(category)
-    category.total += transaction.amount
+    const categoryNode = envelopeNode.children.get(category)
+    categoryNode.total += transaction.amount
     
     // Transakcja
-    category.children.push({
+    categoryNode.children.push({
       type: 'TRANSACTION',
       id: `trx_${transaction.id}`,
       name: transaction.description || 'Brak opisu',
