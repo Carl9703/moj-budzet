@@ -133,13 +133,17 @@ export function InteractiveExpenseExplorer({
   }
 
   const toggleExpanded = (itemId: string) => {
-    const newExpanded = new Set(expandedItems)
-    if (newExpanded.has(itemId)) {
-      newExpanded.delete(itemId)
-    } else {
-      newExpanded.add(itemId)
-    }
-    setExpandedItems(newExpanded)
+    setExpandedItems(prev => {
+      const newExpanded = new Set(prev)
+      if (newExpanded.has(itemId)) {
+        newExpanded.delete(itemId)
+        console.log('🔄 Zwijam:', itemId)
+      } else {
+        newExpanded.add(itemId)
+        console.log('🔄 Rozwijam:', itemId)
+      }
+      return newExpanded
+    })
   }
 
   const handleItemClick = (item: SpendingTreeNode) => {
@@ -466,7 +470,8 @@ export function InteractiveExpenseExplorer({
 
       {/* Lista hierarchiczna */}
       <div style={{
-        maxHeight: '600px',
+        maxHeight: '80vh',
+        minHeight: '500px',
         overflowY: 'auto',
         border: '1px solid var(--border-primary)',
         borderRadius: '8px',
