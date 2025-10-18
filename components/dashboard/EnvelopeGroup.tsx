@@ -29,13 +29,14 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
     const totalAvailable = envelopes.reduce((sum, envelope) => sum + envelope.current, 0)
     const totalPlanned = envelopes.reduce((sum, envelope) => sum + envelope.planned, 0)
     const totalSpent = envelopes.reduce((sum, envelope) => sum + envelope.spent, 0)
+    const totalRemaining = totalPlanned - totalSpent
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('pl-PL', {
             style: 'currency',
             currency: 'PLN',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         }).format(amount)
     }
 
@@ -84,7 +85,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                         fontWeight: '500'
                     }}>
                         {type === 'monthly' ? 
-                            `Wydano: ${formatMoney(totalSpent)}` :
+                            `Zostało: ${formatMoney(totalRemaining)}` :
                             `Zebrano: ${formatMoney(totalAvailable)}`
                         }
                     </div>
