@@ -44,7 +44,7 @@ export function EnvelopeTransactionsModal({
     
     try {
       console.log('Fetching transactions for envelopeId:', envelopeId)
-      const response = await authorizedFetch(`/api/transactions?envelopeId=${envelopeId}&limit=20`)
+      const response = await authorizedFetch(`/api/transactions?envelopeId=${envelopeId}&limit=20&currentMonth=true`)
       const data = await response.json()
       
       console.log('API Response:', { response: response.ok, data })

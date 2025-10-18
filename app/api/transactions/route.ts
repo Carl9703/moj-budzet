@@ -17,10 +17,22 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const envelopeId = searchParams.get('envelopeId')
         const limit = parseInt(searchParams.get('limit') || '100')
+        const currentMonth = searchParams.get('currentMonth') === 'true'
 
         const whereClause: any = { userId }
         if (envelopeId) {
             whereClause.envelopeId = envelopeId
+        }
+        
+        // Jeśli currentMonth=true, filtruj tylko bieżący miesiąc
+        if (currentMonth) {
+            const now = new Date()
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+            whereClause.date = {
+                gte: startOfMonth,
+                lte: endOfMonth
+            }
         }
 
         const transactions = await prisma.transaction.findMany({

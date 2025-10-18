@@ -77,7 +77,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                         fontWeight: '600',
                         color: 'var(--text-primary)'
                     }}>
-                        {type === 'monthly' ? formatMoney(totalRemaining) : formatMoney(totalAvailable)}
+                        {type === 'monthly' ? formatMoney(totalSpent) : formatMoney(totalAvailable)}
                     </div>
                     <div style={{
                         fontSize: '11px',
