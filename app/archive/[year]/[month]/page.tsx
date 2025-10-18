@@ -79,11 +79,27 @@ export default function ArchiveMonthPage() {
       const response = await authorizedFetch('/api/archive')
       const allMonths = await response.json()
       
+      console.log('All months from API:', allMonths)
+      console.log('Looking for year:', year, 'month:', month)
+      
+      // Convert month number to Polish month name
+      const monthNames = [
+        'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+      ]
+      
+      const monthIndex = parseInt(month) - 1
+      const monthName = monthNames[monthIndex]
+      
+      console.log('Looking for month name:', monthName)
+      
       // Find the specific month
       const targetMonth = allMonths.find((m: MonthData) => 
         m.year.toString() === year && 
-        m.month.toLowerCase() === month.toLowerCase()
+        m.month.toLowerCase() === monthName.toLowerCase()
       )
+      
+      console.log('Found month:', targetMonth)
       
       if (targetMonth) {
         setMonthData(targetMonth)
