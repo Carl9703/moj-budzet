@@ -81,6 +81,7 @@ export default function ArchiveMonthPage() {
       
       console.log('All months from API:', allMonths)
       console.log('Looking for year:', year, 'month:', month)
+      console.log('API response type:', typeof allMonths, 'is array:', Array.isArray(allMonths))
       
       // Debug each month structure
       allMonths.forEach((m: MonthData, index: number) => {
@@ -92,21 +93,34 @@ export default function ArchiveMonthPage() {
         })
       })
       
-      // Convert month number to Polish month name
-      const monthNames = [
-        'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
-      ]
+      // Decode URL-encoded month name
+      const decodedMonth = decodeURIComponent(month)
+      console.log('Decoded month:', decodedMonth)
       
-      const monthIndex = parseInt(month) - 1
-      const monthName = monthNames[monthIndex]
+      // Check if month is already a Polish name or if it's a number
+      let monthName: string
+      if (isNaN(parseInt(month))) {
+        // Month is already a Polish name (URL-encoded)
+        monthName = decodedMonth
+      } else {
+        // Month is a number, convert to Polish name
+        const monthNames = [
+          'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+          'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+        ]
+        const monthIndex = parseInt(month) - 1
+        monthName = monthNames[monthIndex]
+      }
       
       console.log('Looking for month name:', monthName)
       
-      // Find the specific month
-      const targetMonth = allMonths.find((m: MonthData) => 
+      // Find the specific month - filter out invalid months first
+      const validMonths = allMonths.filter((m: MonthData) => m.month && typeof m.month === 'string')
+      console.log('Valid months:', validMonths.length, 'out of', allMonths.length)
+      
+      const targetMonth = validMonths.find((m: MonthData) => 
         m.year.toString() === year && 
-        m.month && m.month.toLowerCase() === monthName.toLowerCase()
+        m.month.toLowerCase() === monthName.toLowerCase()
       )
       
       console.log('Found month:', targetMonth)
