@@ -58,10 +58,47 @@ interface TrendsData {
   byEnvelopeName: { [envelopeName: string]: TrendData[] } // Dodaj mapowanie po nazwie
 }
 
+interface CategoryAnalysis {
+  categoryId: string
+  categoryName: string
+  categoryIcon: string
+  totalAmount: number
+  transactionCount: number
+  avgTransactionAmount: number
+  percentage: number
+  envelopeBreakdown: {
+    envelopeName: string
+    envelopeIcon: string
+    amount: number
+    percentage: number
+  }[]
+  monthlyTrend: {
+    month: string
+    year: number
+    amount: number
+  }[]
+  transactions: {
+    id: string
+    amount: number
+    description: string
+    date: string
+    envelopeName: string
+    envelopeIcon: string
+  }[]
+}
+
 interface AnalyticsData {
   mainMetrics: MainMetrics
   spendingTree: SpendingTreeNode[]
   trends: TrendsData
+  categoryAnalysis: CategoryAnalysis[]
+  totalExpenses: number
+  period: string
+  summary: {
+    totalCategories: number
+    totalTransactions: number
+    avgTransactionAmount: number
+  }
 }
 
 export default function AnalyticsPage() {
