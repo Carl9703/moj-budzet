@@ -10,9 +10,11 @@ interface Props {
         monthName: string
         monthStr: string
     }
+    currentDay: number
+    totalDays: number
 }
 
-export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus }: Props) {
+export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus, currentDay, totalDays }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
 
@@ -78,6 +80,37 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                 border: '1px solid var(--accent-warning)'
             }}>
                 📅 Do końca miesiąca: <strong>{daysLeft} dni</strong> • Dzienny budżet: <strong>{Math.round(balance / daysLeft)} zł</strong>
+            </div>
+
+            {/* Pasek postępu miesiąca */}
+            <div style={{ marginTop: '12px' }}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                    fontSize: '12px'
+                }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Postęp miesiąca</span>
+                    <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                        {currentDay}/{totalDays} dni ({Math.round((currentDay / totalDays) * 100)}%)
+                    </span>
+                </div>
+                <div style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${Math.round((currentDay / totalDays) * 100)}%`,
+                        height: '100%',
+                        backgroundColor: '#3b82f6',
+                        borderRadius: '4px',
+                        transition: 'width 0.3s ease'
+                    }} />
+                </div>
             </div>
         </div>
     )

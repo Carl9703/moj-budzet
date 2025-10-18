@@ -3,7 +3,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
-import { MonthProgress } from '../components/dashboard/MonthProgress'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { EnvelopeGroup } from '../components/dashboard/EnvelopeGroup'
@@ -268,6 +267,8 @@ export default function HomePage() {
                             daysLeft={calculateDaysLeft()}
                             onCloseMonth={() => setShowCloseMonthModal(true)}
                             previousMonthStatus={previousMonthStatus}
+                            currentDay={getCurrentDayAndTotalDays().currentDay}
+                            totalDays={getCurrentDayAndTotalDays().totalDays}
                         />
                     </div>
                     <div className="smooth-all hover-lift">
@@ -278,16 +279,6 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* MonthProgress - nowy komponent */}
-                <div className="smooth-all hover-lift" style={{ marginBottom: '16px' }}>
-                    <MonthProgress
-                        totalIncome={data.totalIncome || 0}
-                        totalExpenses={data.totalExpenses || 0}
-                        daysLeft={calculateDaysLeft()}
-                        currentDay={getCurrentDayAndTotalDays().currentDay}
-                        totalDays={getCurrentDayAndTotalDays().totalDays}
-                    />
-                </div>
 
                 <div className="grid-responsive" style={{
                     display: 'grid',

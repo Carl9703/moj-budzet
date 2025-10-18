@@ -14,13 +14,22 @@ export async function GET(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
+        const { searchParams } = new URL(request.url)
+        const envelopeId = searchParams.get('envelopeId')
+        const limit = parseInt(searchParams.get('limit') || '100')
+
+        const whereClause: any = { userId }
+        if (envelopeId) {
+            whereClause.envelopeId = envelopeId
+        }
+
         const transactions = await prisma.transaction.findMany({
-            where: { userId },
+            where: whereClause,
             include: {
                 envelope: true
             },
             orderBy: { date: 'desc' },
-            take: 100 // Ostatnie 100 transakcji
+            take: limit
         })
 
         // Formatuj dane
