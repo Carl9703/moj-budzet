@@ -412,7 +412,8 @@ export async function GET(request: NextRequest) {
           { description: { contains: 'Zamknięcie miesiąca' } },
           { description: { contains: 'przeniesienie bilansu' } }
         ]
-      }
+      },
+      include: { envelope: true }
     })
 
     const currentIncome = currentPeriodTransactions
