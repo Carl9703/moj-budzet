@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryName, getCategoryIcon } from '@/lib/constants/categories'
+import { getCategoryName, getCategoryIcon, EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 // === INTERFEJSY DLA NOWEJ STRUKTURY ===
@@ -50,10 +50,51 @@ interface TrendsData {
   byEnvelopeName: { [envelopeName: string]: TrendData[] } // Dodaj mapowanie po nazwie
 }
 
+// === INTERFEJSY Z CATEGORIES ===
+
+interface TransactionDetail {
+  id: string
+  amount: number
+  description: string
+  date: string
+  envelopeName: string
+  envelopeIcon: string
+}
+
+interface CategoryAnalysis {
+  categoryId: string
+  categoryName: string
+  categoryIcon: string
+  totalAmount: number
+  transactionCount: number
+  avgTransactionAmount: number
+  percentage: number
+  envelopeBreakdown: {
+    envelopeName: string
+    envelopeIcon: string
+    amount: number
+    percentage: number
+  }[]
+  monthlyTrend: {
+    month: string
+    year: number
+    amount: number
+  }[]
+  transactions: TransactionDetail[]
+}
+
 interface AnalyticsResponse {
   mainMetrics: MainMetrics
   spendingTree: SpendingTreeNode[]
   trends: TrendsData
+  categoryAnalysis: CategoryAnalysis[]
+  totalExpenses: number
+  period: string
+  summary: {
+    totalCategories: number
+    totalTransactions: number
+    avgTransactionAmount: number
+  }
 }
 
 // === FUNKCJE POMOCNICZE ===
@@ -448,6 +489,155 @@ export async function GET(request: NextRequest) {
       byEnvelopeName: byEnvelopeName // Dodaj mapowanie po nazwie
     }
 
+    // === ANALIZA KATEGORII ===
+    // Filtruj tylko wydatki (używamy tych samych transakcji co wcześniej)
+    const expenseTransactions = currentPeriodTransactions
+      .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+      .filter(transaction => {
+        // Sprawdź opis transakcji - wyklucz tylko wyraźne transfery
+        const description = transaction.description?.toLowerCase() || ''
+        
+        // Wyklucz tylko transakcje z wyraźnymi słowami kluczowymi transferów
+        const transferKeywords = [
+          'transfer:',
+          'przelew',
+          'wesele',
+          'prezent',
+          'oszczędności',
+          'fundusz',
+          'celowy'
+        ]
+        
+        const isTransfer = transferKeywords.some(keyword => 
+          description.includes(keyword)
+        )
+        
+        return !isTransfer
+      })
+
+    // Grupuj transakcje według kategorii
+    const categoryData: { [key: string]: {
+      transactions: any[]
+      totalAmount: number
+      envelopeBreakdown: { [key: string]: number }
+      monthlyData: { [key: string]: number }
+    } } = {}
+
+    expenseTransactions.forEach(transaction => {
+      const categoryId = transaction.category || 'other'
+      const categoryName = getCategoryName(categoryId)
+      const envelopeName = transaction.envelope?.name || 'Inne'
+      
+      if (!categoryData[categoryId]) {
+        categoryData[categoryId] = {
+          transactions: [],
+          totalAmount: 0,
+          envelopeBreakdown: {},
+          monthlyData: {}
+        }
+      }
+
+      categoryData[categoryId].transactions.push(transaction)
+      categoryData[categoryId].totalAmount += transaction.amount
+
+      // Grupuj według kopert
+      if (!categoryData[categoryId].envelopeBreakdown[envelopeName]) {
+        categoryData[categoryId].envelopeBreakdown[envelopeName] = 0
+      }
+      categoryData[categoryId].envelopeBreakdown[envelopeName] += transaction.amount
+
+      // Grupuj według miesięcy
+      const monthKey = `${transaction.date.getFullYear()}-${String(transaction.date.getMonth() + 1).padStart(2, '0')}`
+      if (!categoryData[categoryId].monthlyData[monthKey]) {
+        categoryData[categoryId].monthlyData[monthKey] = 0
+      }
+      categoryData[categoryId].monthlyData[monthKey] += transaction.amount
+    })
+
+    // Oblicz całkowitą kwotę wydatków
+    const totalExpensesForCategories = Object.values(categoryData).reduce((sum, data) => sum + data.totalAmount, 0)
+
+    // Stwórz analizę kategorii
+    const categoryAnalysis: CategoryAnalysis[] = Object.entries(categoryData).map(([categoryId, data]) => {
+      const categoryName = getCategoryName(categoryId)
+      const categoryIcon = getCategoryIcon(categoryId)
+      
+      // Przygotuj dane o kopertach
+      const envelopeBreakdown = Object.entries(data.envelopeBreakdown).map(([envelopeName, amount]) => {
+        const envelope = envelopes.find(e => e.name === envelopeName)
+        return {
+          envelopeName,
+          envelopeIcon: envelope?.icon || '📦',
+          amount,
+          percentage: Math.round((amount / data.totalAmount) * 100)
+        }
+      }).sort((a, b) => b.amount - a.amount)
+
+      // Przygotuj trendy miesięczne
+      const monthlyTrend = Object.entries(data.monthlyData)
+        .map(([monthKey, amount]) => {
+          const [year, month] = monthKey.split('-')
+          const monthNames = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+              'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
+          return {
+            month: monthNames[parseInt(month) - 1],
+            year: parseInt(year),
+            amount
+          }
+        })
+        .sort((a, b) => {
+          if (a.year !== b.year) return a.year - b.year
+          const months = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+              'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
+          return months.indexOf(a.month) - months.indexOf(b.month)
+        })
+
+      // Przygotuj szczegóły transakcji
+      const transactions: TransactionDetail[] = data.transactions
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Najnowsze na górze
+        .map(transaction => {
+          const envelope = envelopes.find(e => e.name === transaction.envelope?.name)
+          return {
+            id: transaction.id,
+            amount: transaction.amount,
+            description: transaction.description || 'Brak opisu',
+            date: transaction.date.toISOString().split('T')[0], // YYYY-MM-DD format
+            envelopeName: transaction.envelope?.name || 'Inne',
+            envelopeIcon: envelope?.icon || '📦'
+          }
+        })
+
+      return {
+        categoryId,
+        categoryName,
+        categoryIcon,
+        totalAmount: data.totalAmount,
+        transactionCount: data.transactions.length,
+        avgTransactionAmount: Math.round(data.totalAmount / data.transactions.length),
+        percentage: totalExpensesForCategories > 0 ? Math.round((data.totalAmount / totalExpensesForCategories) * 100) : 0,
+        envelopeBreakdown,
+        monthlyTrend,
+        transactions
+      }
+    }).sort((a, b) => b.totalAmount - a.totalAmount)
+
+    // Dodaj kategorie bez wydatków (dla kompletności)
+    const usedCategories = new Set(categoryAnalysis.map(c => c.categoryId))
+    const unusedCategories = EXPENSE_CATEGORIES
+      .filter(c => !usedCategories.has(c.id) && c.defaultEnvelope !== '')
+      .map(category => ({
+        categoryId: category.id,
+        categoryName: category.name,
+        categoryIcon: category.icon,
+        totalAmount: 0,
+        transactionCount: 0,
+        avgTransactionAmount: 0,
+        percentage: 0,
+        envelopeBreakdown: [],
+        monthlyTrend: [],
+        transactions: []
+      }))
+
     const response: AnalyticsResponse = {
       mainMetrics: {
         currentPeriod: {
@@ -459,7 +649,17 @@ export async function GET(request: NextRequest) {
         previousPeriod: previousPeriodData
       },
       spendingTree,
-      trends
+      trends,
+      categoryAnalysis: [...categoryAnalysis, ...unusedCategories],
+      totalExpenses: totalExpensesForCategories,
+      period: searchParams.get('period') || '3months',
+      summary: {
+        totalCategories: categoryAnalysis.length,
+        totalTransactions: expenseTransactions.length,
+        avgTransactionAmount: expenseTransactions.length > 0 
+          ? Math.round(totalExpensesForCategories / expenseTransactions.length) 
+          : 0
+      }
     }
 
     return NextResponse.json(response)

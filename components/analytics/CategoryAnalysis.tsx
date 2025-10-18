@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { authorizedFetch } from '@/lib/utils/api'
+import { useState } from 'react'
 
 interface TransactionDetail {
     id: string
@@ -46,17 +45,34 @@ interface CategoryAnalyticsData {
 }
 
 interface Props {
+    isLoading: boolean
+    categories: CategoryAnalysis[] | undefined
     selectedPeriod: string
     onPeriodChange: (period: string) => void
+    sortBy: 'amount' | 'transactions' | 'name'
+    setSortBy: (value: 'amount' | 'transactions' | 'name') => void
+    filterText: string
+    setFilterText: (text: string) => void
+    expandedCategories: Set<string>
+    setExpandedCategories: (value: Set<string>) => void
+    expandedTransactions: Set<string>
+    setExpandedTransactions: (value: Set<string>) => void
 }
 
-export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
-    const [data, setData] = useState<CategoryAnalyticsData | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-    const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set())
-    const [sortBy, setSortBy] = useState<'amount' | 'transactions' | 'name'>('amount')
-    const [filterText, setFilterText] = useState('')
+export function CategoryAnalysis({ 
+    isLoading, 
+    categories, 
+    selectedPeriod, 
+    onPeriodChange, 
+    sortBy, 
+    setSortBy, 
+    filterText, 
+    setFilterText,
+    expandedCategories,
+    setExpandedCategories,
+    expandedTransactions,
+    setExpandedTransactions
+}: Props) {
 
     const periodOptions = [
         { value: 'currentMonth', label: 'Bieżący miesiąc' },
@@ -65,20 +81,6 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
         { value: '6months', label: 'Ostatnie 6 miesięcy' },
         { value: 'currentYear', label: 'Bieżący rok' }
     ]
-
-    useEffect(() => {
-        setLoading(true)
-        authorizedFetch(`/api/analytics/categories?period=${selectedPeriod}`)
-            .then(res => res.json())
-            .then(data => {
-                setData(data)
-                setLoading(false)
-            })
-            .catch(err => {
-                console.error('Category analytics error:', err)
-                setLoading(false)
-            })
-    }, [selectedPeriod])
 
     const formatMoney = (amount: number) => amount.toLocaleString('pl-PL') + ' zł'
 
@@ -111,7 +113,7 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
         setExpandedTransactions(newExpanded)
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div style={{
                 display: 'flex',
@@ -126,7 +128,7 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
         )
     }
 
-    if (!data) {
+    if (!categories) {
         return (
             <div className="text-theme-primary" style={{ padding: '20px', textAlign: 'center' }}>
                 Błąd ładowania danych kategorii
@@ -134,24 +136,8 @@ export function CategoryAnalysis({ selectedPeriod, onPeriodChange }: Props) {
         )
     }
 
-    // Filtruj i sortuj kategorie
-    const filteredCategories = data.categoryAnalysis
-        .filter(category => 
-            category.categoryName.toLowerCase().includes(filterText.toLowerCase()) ||
-            category.categoryIcon.includes(filterText)
-        )
-        .sort((a, b) => {
-            switch (sortBy) {
-                case 'amount':
-                    return b.totalAmount - a.totalAmount
-                case 'transactions':
-                    return b.transactionCount - a.transactionCount
-                case 'name':
-                    return a.categoryName.localeCompare(b.categoryName)
-                default:
-                    return b.totalAmount - a.totalAmount
-            }
-        })
+    // Użyj przefiltrowanych i posortowanych kategorii z propsów
+    const filteredCategories = categories
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

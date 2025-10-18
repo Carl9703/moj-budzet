@@ -7,6 +7,7 @@ import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingB
 import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
 import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts' // <-- NOWY KOMPONENT
+import { CategoryAnalysis } from '@/components/analytics/CategoryAnalysis' // <-- DODAJ KATEGORIE
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -75,6 +76,12 @@ export default function AnalyticsPage() {
   const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
   const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
   const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
+  
+  // === STANY FILTRÓW DLA KATEGORII ===
+  const [sortBy, setSortBy] = useState<'amount' | 'transactions' | 'name'>('amount')
+  const [filterText, setFilterText] = useState('')
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set())
 
   const fetchData = async (newDateRange: DateRange, newCompareMode: boolean) => {
     setLoading(true)
@@ -273,6 +280,31 @@ export default function AnalyticsPage() {
     console.log('Wszystkie trendy:', totalExpenses)
     return totalExpenses
   }, [data?.trends, selectedItem])
+
+  // === LOGIKA FILTROWANIA I SORTOWANIA KATEGORII ===
+  const filteredAndSortedCategories = useMemo(() => {
+    if (!data?.categoryAnalysis) return []
+    
+    let filtered = data.categoryAnalysis.filter(category => 
+      category.categoryName.toLowerCase().includes(filterText.toLowerCase())
+    )
+    
+    // Sortowanie
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'amount':
+          return b.totalAmount - a.totalAmount
+        case 'transactions':
+          return b.transactionCount - a.transactionCount
+        case 'name':
+          return a.categoryName.localeCompare(b.categoryName)
+        default:
+          return b.totalAmount - a.totalAmount
+      }
+    })
+    
+    return filtered
+  }, [data?.categoryAnalysis, filterText, sortBy])
     
     if (isCheckingAuth) {
         return (
@@ -408,7 +440,27 @@ export default function AnalyticsPage() {
             highlightedGroup={highlightedGroup}
             highlightedEnvelope={highlightedEnvelope}
           />
-                </div>
+        </div>
+
+        {/* Sekcja E: Analiza Kategorii */}
+        <div id="category-analysis">
+          <CategoryAnalysis
+            isLoading={loading}
+            categories={filteredAndSortedCategories}
+            selectedPeriod={dateRange.from ? 'custom' : '3months'}
+            onPeriodChange={(period) => {
+              // TODO: Implement period change logic
+            }}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            filterText={filterText}
+            setFilterText={setFilterText}
+            expandedCategories={expandedCategories}
+            setExpandedCategories={setExpandedCategories}
+            expandedTransactions={expandedTransactions}
+            setExpandedTransactions={setExpandedTransactions}
+          />
+        </div>
             </div>
         </div>
     )
