@@ -15,16 +15,46 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url)
+        
+        // Podstawowe parametry
         const envelopeId = searchParams.get('envelopeId')
         const limit = parseInt(searchParams.get('limit') || '100')
         const currentMonth = searchParams.get('currentMonth') === 'true'
+        
+        // Zaawansowane filtry
+        const startDate = searchParams.get('startDate')
+        const endDate = searchParams.get('endDate')
+        const searchText = searchParams.get('search')
+        const transactionType = searchParams.get('type')
+        const category = searchParams.get('category')
+        const group = searchParams.get('group')
+        const sortBy = searchParams.get('sortBy') || 'date'
+        const sortOrder = searchParams.get('sortOrder') || 'desc'
 
         const whereClause: any = { userId }
+        
+        // Filtry podstawowe
         if (envelopeId) {
             whereClause.envelopeId = envelopeId
         }
         
-        // Jeśli currentMonth=true, filtruj tylko bieżący miesiąc
+        if (transactionType) {
+            whereClause.type = transactionType
+        }
+        
+        if (category) {
+            whereClause.category = category
+        }
+        
+        // Wyszukiwanie tekstowe
+        if (searchText) {
+            whereClause.description = {
+                contains: searchText,
+                mode: 'insensitive'
+            }
+        }
+        
+        // Filtry dat
         if (currentMonth) {
             const now = new Date()
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -33,6 +63,33 @@ export async function GET(request: NextRequest) {
                 gte: startOfMonth,
                 lte: endOfMonth
             }
+        } else if (startDate || endDate) {
+            whereClause.date = {}
+            if (startDate) {
+                whereClause.date.gte = new Date(startDate)
+            }
+            if (endDate) {
+                whereClause.date.lte = new Date(endDate)
+            }
+        }
+        
+        // Filtrowanie po grupie kopert
+        if (group) {
+            whereClause.envelope = {
+                group: group
+            }
+        }
+
+        // Przygotuj sortowanie
+        const orderBy: any = {}
+        if (sortBy === 'date') {
+            orderBy.date = sortOrder
+        } else if (sortBy === 'amount') {
+            orderBy.amount = sortOrder
+        } else if (sortBy === 'description') {
+            orderBy.description = sortOrder
+        } else if (sortBy === 'type') {
+            orderBy.type = sortOrder
         }
 
         const transactions = await prisma.transaction.findMany({
@@ -40,7 +97,7 @@ export async function GET(request: NextRequest) {
             include: {
                 envelope: true
             },
-            orderBy: { date: 'desc' },
+            orderBy: Object.keys(orderBy).length > 0 ? orderBy : { date: 'desc' },
             take: limit
         })
 
@@ -76,7 +133,15 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        return NextResponse.json(formatted)
+        return NextResponse.json({
+            transactions: formatted,
+            total: formatted.length,
+            filters: {
+                categories: await getAvailableCategories(userId),
+                groups: await getAvailableGroups(userId),
+                envelopes: await getAvailableEnvelopes(userId)
+            }
+        })
 
     } catch (error) {
         return NextResponse.json(
@@ -84,6 +149,41 @@ export async function GET(request: NextRequest) {
             { status: 500 }
         )
     }
+}
+
+// Funkcje pomocnicze do pobierania opcji filtrów
+async function getAvailableCategories(userId: string) {
+    const categories = await prisma.transaction.findMany({
+        where: { 
+            userId,
+            category: { not: null }
+        },
+        select: { category: true },
+        distinct: ['category']
+    })
+    return categories.map(c => c.category).filter(Boolean)
+}
+
+async function getAvailableGroups(userId: string) {
+    const groups = await prisma.envelope.findMany({
+        where: { userId },
+        select: { group: true },
+        distinct: ['group']
+    })
+    return groups.map(g => g.group).filter(Boolean)
+}
+
+async function getAvailableEnvelopes(userId: string) {
+    const envelopes = await prisma.envelope.findMany({
+        where: { userId },
+        select: { 
+            id: true,
+            name: true,
+            icon: true,
+            group: true
+        }
+    })
+    return envelopes
 }
 
 export async function POST(request: NextRequest) {

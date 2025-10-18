@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TransactionHistory } from '@/components/transactions/TransactionHistory'
+import { TransactionFilters, FilterState } from '@/components/transactions/TransactionFilters'
+import { TransactionTable } from '@/components/transactions/TransactionTable'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -13,27 +14,81 @@ interface Transaction {
   amount: number
   description: string
   date: string
+  category?: string
   envelope?: {
     name: string
     icon: string
   }
 }
 
+interface FilterOptions {
+  categories: string[]
+  groups: string[]
+  envelopes: Array<{
+    id: string
+    name: string
+    icon: string
+    group: string
+  }>
+}
+
 export default function HistoryPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    categories: [],
+    groups: [],
+    envelopes: []
+  })
   const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
+    startDate: '',
+    endDate: '',
+    type: '',
+    category: '',
+    group: '',
+    envelope: '',
+    sortBy: 'date',
+    sortOrder: 'desc'
+  })
   
-  const fetchTransactions = async () => {
+  const fetchTransactions = async (currentFilters?: FilterState) => {
     try {
-      const response = await authorizedFetch('/api/transactions')
+      setLoading(true)
+      const activeFilters = currentFilters || filters
+      
+      // Buduj URL z parametrami
+      const params = new URLSearchParams()
+      Object.entries(activeFilters).forEach(([key, value]) => {
+        if (value && value !== 'date' && value !== 'desc') {
+          params.append(key, value)
+        }
+      })
+      
+      const response = await authorizedFetch(`/api/transactions?${params.toString()}`)
       const data = await response.json()
-      setTransactions(data)
-      setLoading(false)
+      
+      if (data.transactions) {
+        setTransactions(data.transactions)
+        if (data.filters) {
+          setFilterOptions(data.filters)
+        }
+      } else {
+        // Fallback dla starego formatu API
+        setTransactions(Array.isArray(data) ? data : [])
+      }
     } catch (err) {
       console.error('Error:', err)
+      setTransactions([])
+    } finally {
       setLoading(false)
     }
+  }
+  
+  const handleFiltersChange = (newFilters: FilterState) => {
+    setFilters(newFilters)
+    fetchTransactions(newFilters)
   }
   
   useEffect(() => {
@@ -69,14 +124,23 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-theme-primary">
       <TopNavigation />
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
           📜 Historia transakcji
         </h1>
         
-        <TransactionHistory 
-          transactions={transactions} 
-          onTransactionDeleted={fetchTransactions}
+        {/* Panel filtrów */}
+        <TransactionFilters
+          onFiltersChange={handleFiltersChange}
+          filterOptions={filterOptions}
+          loading={loading}
+        />
+        
+        {/* Tabela transakcji */}
+        <TransactionTable
+          transactions={transactions}
+          onTransactionDeleted={() => fetchTransactions()}
+          loading={loading}
         />
       </div>
     </div>
