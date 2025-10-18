@@ -225,9 +225,31 @@ export default function AnalyticsPage() {
           const groupTrends: { [key: string]: number } = {}
           
           groupEnvelopes.forEach(envelope => {
+            const envelopeName = envelope.name
             const envelopeId = envelope.id.replace('env_', '')
-            const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
-            console.log(`📊 Trendy koperty "${envelope.name}" (ID: ${envelopeId}):`, envelopeTrends)
+            
+            console.log(`🔍 Szukam trendów dla koperty "${envelopeName}" (env_id: ${envelopeId})`)
+            console.log(`🔍 Pełne dane koperty:`, envelope)
+            
+            // Spróbuj znaleźć trendy używając różnych metod
+            let envelopeTrends = []
+            
+            // Metoda 1: Spróbuj użyć envelopeId bezpośrednio
+            if (data.trends.byEnvelope[envelopeId]) {
+              envelopeTrends = data.trends.byEnvelope[envelopeId]
+              console.log(`✅ Metoda 1: Znaleziono trendy dla ${envelopeId}:`, envelopeTrends)
+            } else {
+              console.log(`❌ Metoda 1: Brak trendów dla ${envelopeId}`)
+            }
+            
+            // Metoda 2: Jeśli nie ma, spróbuj znaleźć po nazwie w API
+            if (envelopeTrends.length === 0) {
+              console.log(`🔍 Metoda 2: Szukam po nazwie "${envelopeName}"`)
+              // Tutaj musimy sprawdzić czy API ma mapowanie nazw na ID
+              console.log(`🔍 Dostępne ID w byEnvelope:`, Object.keys(data.trends.byEnvelope))
+            }
+            
+            console.log(`📊 Trendy koperty "${envelope.name}" (finalne):`, envelopeTrends)
             
             if (envelopeTrends.length > 0) {
               envelopeTrends.forEach(trend => {
