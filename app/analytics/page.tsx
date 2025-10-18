@@ -232,7 +232,7 @@ export default function AnalyticsPage() {
             console.log(`🔍 Pełne dane koperty:`, envelope)
             
             // Spróbuj znaleźć trendy używając różnych metod
-            let envelopeTrends = []
+            let envelopeTrends: { period: string; value: number }[] = []
             
             // Metoda 1: Spróbuj użyć envelopeId bezpośrednio
             if (data.trends.byEnvelope[envelopeId]) {
