@@ -1,4 +1,4 @@
-﻿// USUŃ 'use client' - ta strona ma być komponentem serwera
+﻿'use client' // Potrzebne dla useState, useEffect, useMemo
 import { useState, useEffect, useMemo } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { GlobalFilters } from '@/components/analytics/GlobalFilters'
