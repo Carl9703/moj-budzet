@@ -83,7 +83,7 @@ export default function ArchiveMonthPage() {
       console.log('Looking for year:', year, 'month:', month)
       
       // Debug each month structure
-      allMonths.forEach((m: MonthData, index) => {
+      allMonths.forEach((m: MonthData, index: number) => {
         console.log(`Month ${index}:`, {
           year: m.year,
           month: m.month,
