@@ -1,5 +1,4 @@
-﻿'use client'
-
+﻿// USUŃ 'use client' - ta strona ma być komponentem serwera
 import { useState, useEffect, useMemo } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { GlobalFilters } from '@/components/analytics/GlobalFilters'
@@ -7,6 +6,7 @@ import { KeyMetricsCards } from '@/components/analytics/KeyMetricsCards'
 import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
 import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
+import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts' // <-- NOWY KOMPONENT
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -292,10 +292,10 @@ export default function AnalyticsPage() {
           gap: '24px',
           marginBottom: '24px'
         }}>
-          <SpendingBreakdownVisualization
-            data={chartData}
-            onSegmentClick={handleSegmentClick}
-            loading={loading}
+          {/* NOWY KOMPONENT Z WYKRESAMI - Client Component */}
+          <AnalyticsCharts 
+            data={chartData} 
+            total={data.mainMetrics.currentPeriod.expense} 
           />
           <TrendsVisualization
             data={trendsData}
