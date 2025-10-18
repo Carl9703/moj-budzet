@@ -82,6 +82,16 @@ export default function ArchiveMonthPage() {
       console.log('All months from API:', allMonths)
       console.log('Looking for year:', year, 'month:', month)
       
+      // Debug each month structure
+      allMonths.forEach((m, index) => {
+        console.log(`Month ${index}:`, {
+          year: m.year,
+          month: m.month,
+          hasMonth: !!m.month,
+          monthType: typeof m.month
+        })
+      })
+      
       // Convert month number to Polish month name
       const monthNames = [
         'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -96,7 +106,7 @@ export default function ArchiveMonthPage() {
       // Find the specific month
       const targetMonth = allMonths.find((m: MonthData) => 
         m.year.toString() === year && 
-        m.month.toLowerCase() === monthName.toLowerCase()
+        m.month && m.month.toLowerCase() === monthName.toLowerCase()
       )
       
       console.log('Found month:', targetMonth)
