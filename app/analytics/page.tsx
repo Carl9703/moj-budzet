@@ -54,6 +54,7 @@ interface TrendData {
 interface TrendsData {
   totalExpenses: TrendData[]
   byEnvelope: { [envelopeId: string]: TrendData[] }
+  byEnvelopeName: { [envelopeName: string]: TrendData[] } // Dodaj mapowanie po nazwie
 }
 
 interface AnalyticsData {
