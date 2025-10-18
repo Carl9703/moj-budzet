@@ -151,7 +151,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
   const nodeStyle: React.CSSProperties = {
             display: 'flex',
             alignItems: 'center',
-            padding: isTransaction ? '8px 16px' : '12px 16px',
+    padding: isTransaction ? '10px 20px' : '16px 20px',
     marginLeft: `${indentLevel}px`,
             backgroundColor: isSelected 
               ? 'var(--accent-primary-alpha)' 
@@ -166,8 +166,8 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
             borderRadius: '8px',
             cursor: 'pointer',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    marginBottom: '2px',
-            fontSize: isTransaction ? '14px' : '16px',
+            marginBottom: '4px',
+    fontSize: isTransaction ? '16px' : '18px',
     transform: isHighlighted ? 'scale(1.01)' : 'scale(1)',
     boxShadow: isHighlighted ? '0 4px 12px rgba(59, 130, 246, 0.15)' : 'none',
     position: 'relative'
@@ -191,20 +191,20 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
       {/* Expand/Collapse Icon */}
           {hasChildren && !isTransaction && (
             <div style={{
-              marginRight: '8px',
+          marginRight: '12px',
               color: 'var(--text-secondary)',
               display: 'flex',
           alignItems: 'center',
           transition: 'transform 0.2s ease'
             }}>
-              {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
             </div>
           )}
           
       {/* Item Icon */}
           <div style={{
-            marginRight: '12px',
-        fontSize: isTransaction ? '16px' : '20px',
+        marginRight: '16px',
+        fontSize: isTransaction ? '20px' : '24px',
         display: 'flex',
         alignItems: 'center'
           }}>
@@ -232,7 +232,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
           }}>
         {/* Amount */}
             <div style={{
-              fontSize: isTransaction ? '14px' : '16px',
+          fontSize: isTransaction ? '16px' : '18px',
               fontWeight: '600',
               color: isTransaction ? 'var(--text-secondary)' : 'var(--text-primary)'
             }}>
@@ -245,13 +245,13 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-end',
-                gap: '2px',
-                fontSize: '12px'
+            gap: '4px',
+            fontSize: '14px'
               }}>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
+              gap: '6px',
                   color: getChangeColor(node.comparison.change),
                   fontWeight: '600'
                 }}>
@@ -260,7 +260,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
                 </div>
                 <div style={{
                   color: 'var(--text-tertiary)',
-                  fontSize: '10px'
+              fontSize: '12px'
                 }}>
                   Poprzednio: {formatMoney(node.comparison.previousTotal)}
                 </div>
@@ -270,7 +270,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
         {/* Date for transactions */}
             {isTransaction && node.date && (
               <div style={{
-                fontSize: '12px',
+            fontSize: '14px',
                 color: 'var(--text-tertiary)'
               }}>
             {formatDate(node.date)}
@@ -302,10 +302,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder }) =
     <div style={{ position: 'relative', marginBottom: '20px' }}>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         <Search 
-          size={20} 
+          size={24} 
           style={{
             position: 'absolute',
-            left: '12px',
+            left: '16px',
             color: 'var(--text-tertiary)',
             zIndex: 1,
             pointerEvents: 'none'
@@ -319,12 +319,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder }) =
           onChange={(e) => onChange(e.target.value)}
           style={{
             width: '100%',
-            padding: '12px 12px 12px 44px',
+            padding: '16px 16px 16px 48px',
             borderRadius: '8px',
             border: '1px solid var(--border-primary)',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
-            fontSize: '14px',
+            fontSize: '16px',
             outline: 'none',
             transition: 'all 0.2s ease',
             boxSizing: 'border-box'
@@ -594,21 +594,21 @@ export function InteractiveExpenseExplorer({
       {/* Professional Header */}
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{
-          fontSize: '20px',
+          fontSize: '24px',
           fontWeight: '600',
           color: 'var(--text-primary)',
-          marginBottom: '8px',
+          marginBottom: '12px',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '12px'
         }}>
           🔍 Interaktywny Eksplorator Wydatków
         </h3>
         <p style={{
-          fontSize: '14px',
+          fontSize: '16px',
           color: 'var(--text-secondary)',
           margin: '0',
-          lineHeight: '1.5'
+          lineHeight: '1.6'
         }}>
           Kliknij na pozycję, aby ją rozwinąć lub zobaczyć szczegóły. Użyj wyszukiwania, aby szybko znaleźć konkretne wydatki.
         </p>

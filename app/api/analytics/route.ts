@@ -150,6 +150,9 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
   const trends = []
   const currentDate = new Date(startDate)
   
+  // Upewnij się, że zaczynamy od pierwszego dnia miesiąca
+  currentDate.setDate(1)
+  
   while (currentDate <= endDate) {
     const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
@@ -181,6 +184,7 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
       value: totalExpenses
     })
     
+    // Przejdź do następnego miesiąca
     currentDate.setMonth(currentDate.getMonth() + 1)
   }
   
