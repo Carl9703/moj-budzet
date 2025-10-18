@@ -21,11 +21,16 @@ export function TrendsVisualization({
   onPeriodClick, 
   loading = false 
 }: TrendsVisualizationProps) {
-  const valueFormatter = (number: number) =>
-    `${new Intl.NumberFormat('pl-PL', {
+  const valueFormatter = (number: number) => {
+    const formatted = new Intl.NumberFormat('pl-PL', {
       style: 'currency',
       currency: 'PLN',
-    }).format(number)}`
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(number)
+    console.log('ValueFormatter:', number, '->', formatted)
+    return formatted
+  }
 
   // Formatowanie okresu na czytelny format
   const formatPeriod = (period: string) => {

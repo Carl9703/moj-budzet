@@ -237,16 +237,16 @@ export default function AnalyticsPage() {
           }))
           console.log('Zsumowane trendy grupy:', result)
           
-          // Jeśli nie ma trendów dla grupy, zwróć wszystkie trendy
+          // Jeśli nie ma trendów dla grupy, zwróć puste dane (nie wszystkie trendy)
           if (result.length === 0) {
-            console.log('Brak trendów dla grupy, zwracam wszystkie trendy')
-            return totalExpenses
+            console.log('Brak trendów dla grupy, zwracam puste dane')
+            return []
           }
           
           return result
         } else {
-          console.log('Brak kopert w grupie, zwracam wszystkie trendy')
-          return totalExpenses
+          console.log('Brak kopert w grupie, zwracam puste dane')
+          return []
         }
       }
     }
