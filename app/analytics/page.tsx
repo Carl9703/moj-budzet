@@ -200,6 +200,11 @@ export default function AnalyticsPage() {
     console.log('ByEnvelope keys:', Object.keys(data.trends.byEnvelope || {}))
     console.log('ByEnvelope data:', data.trends.byEnvelope)
     
+    // Sprawdź czy mamy dane w ogóle
+    if (totalExpenses.length === 0) {
+      console.log('⚠️ BRAK DANYCH TRENDÓW W API - totalExpenses jest pusty!')
+    }
+    
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
         // Znajdź trendy dla wybranej koperty
@@ -214,20 +219,27 @@ export default function AnalyticsPage() {
         console.log('Dostępne klucze byEnvelope:', Object.keys(data.trends.byEnvelope || {}))
         
         if (groupEnvelopes.length > 0) {
+          console.log(`🔍 Przetwarzam ${groupEnvelopes.length} kopert w grupie "${selectedItem.name}"`)
+          
           // Znajdź trendy dla wszystkich kopert w grupie i zsumuj je
           const groupTrends: { [key: string]: number } = {}
           
           groupEnvelopes.forEach(envelope => {
             const envelopeId = envelope.id.replace('env_', '')
             const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
-            console.log(`Trendy koperty ${envelope.name} (ID: ${envelopeId}):`, envelopeTrends)
+            console.log(`📊 Trendy koperty "${envelope.name}" (ID: ${envelopeId}):`, envelopeTrends)
             
-            envelopeTrends.forEach(trend => {
-              if (!groupTrends[trend.period]) {
-                groupTrends[trend.period] = 0
-              }
-              groupTrends[trend.period] += trend.value
-            })
+            if (envelopeTrends.length > 0) {
+              envelopeTrends.forEach(trend => {
+                if (!groupTrends[trend.period]) {
+                  groupTrends[trend.period] = 0
+                }
+                groupTrends[trend.period] += trend.value
+                console.log(`➕ Dodaję ${trend.value} dla okresu ${trend.period}`)
+              })
+            } else {
+              console.log(`⚠️ Koperta "${envelope.name}" nie ma trendów`)
+            }
           })
           
           // Konwertuj na format oczekiwany przez wykres
@@ -235,11 +247,12 @@ export default function AnalyticsPage() {
             period,
             value
           }))
-          console.log('Zsumowane trendy grupy:', result)
+          console.log('📈 Zsumowane trendy grupy:', result)
+          console.log('📈 Liczba okresów w wynikach:', result.length)
           
           // Jeśli nie ma trendów dla grupy, zwróć puste dane (nie wszystkie trendy)
           if (result.length === 0) {
-            console.log('Brak trendów dla grupy, zwracam puste dane')
+            console.log('❌ Brak trendów dla grupy, zwracam puste dane')
             return []
           }
           
