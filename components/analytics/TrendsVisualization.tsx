@@ -1,6 +1,6 @@
 'use client'
 
-import { LineChart } from '@tremor/react'
+import { LineChart, Card, Title } from '@tremor/react'
 import { ANALYTICS_COLORS } from '@/lib/constants/colors'
 
 interface TrendData {
@@ -45,88 +45,36 @@ export function TrendsVisualization({
 
   if (loading) {
     return (
-      <div style={{
-        backgroundColor: 'var(--bg-secondary)',
-        padding: '24px',
-        borderRadius: '12px',
-        border: '1px solid var(--border-primary)',
-        boxShadow: 'var(--shadow-md)',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '400px'
-      }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          backgroundColor: 'var(--bg-tertiary)',
-          borderRadius: '50%',
-          animation: 'pulse 2s infinite'
-        }} />
-      </div>
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+        </div>
+      </Card>
     )
   }
 
   if (!data || data.length === 0) {
     return (
-      <div style={{
-        backgroundColor: 'var(--bg-secondary)',
-        padding: '24px',
-        borderRadius: '12px',
-        border: '1px solid var(--border-primary)',
-        boxShadow: 'var(--shadow-md)',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '400px'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          color: 'var(--text-secondary)'
-        }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📈</div>
-          <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
-            Brak danych trendów
-          </div>
-          <div style={{ fontSize: '14px' }}>
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12">
+          <div className="text-5xl mb-4">📈</div>
+          <Title className="text-gray-900 dark:text-white mb-2">Brak danych trendów</Title>
+          <p className="text-gray-500 dark:text-gray-400">
             Dodaj transakcje z różnych okresów, aby zobaczyć trendy
-          </div>
+          </p>
         </div>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div style={{
-      backgroundColor: 'var(--bg-secondary)',
-      padding: '24px',
-      borderRadius: '12px',
-      border: '1px solid var(--border-primary)',
-      boxShadow: 'var(--shadow-md)',
-      marginBottom: '24px'
-    }}>
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       {/* Nagłówek */}
-      <div style={{
-        marginBottom: '20px'
-      }}>
-        <h3 style={{
-          fontSize: '18px',
-          fontWeight: '600',
-          color: 'var(--text-primary)',
-          marginBottom: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
+      <div className="mb-5">
+        <Title className="text-gray-900 dark:text-white flex items-center gap-2 mb-1">
           📈 Trend Wydatków
-        </h3>
-        <p style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          margin: '0'
-        }}>
+        </Title>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {selectedItem 
             ? `📈 Trend dla: ${selectedItem}` 
             : '📈 Trend całkowitych wydatków w czasie'
@@ -135,7 +83,7 @@ export function TrendsVisualization({
       </div>
 
       {/* Wykres */}
-      <div style={{ width: '100%', height: '400px' }}>
+      <div className="h-80 w-full">
         <LineChart
           data={chartData}
           index="period"
@@ -143,7 +91,9 @@ export function TrendsVisualization({
           colors={[selectedItem ? ANALYTICS_COLORS[0] : ANALYTICS_COLORS[1]]}
           valueFormatter={valueFormatter}
           className="h-full w-full"
-          showAnimation
+          showAnimation={true}
+          showTooltip={true}
+          showGridLines={true}
           onValueChange={(value) => {
             if (onPeriodClick && value) {
               // Znajdź oryginalny okres na podstawie sformatowanego
@@ -157,20 +107,13 @@ export function TrendsVisualization({
       </div>
 
       {selectedItem && (
-        <div style={{
-          fontSize: '12px',
-          color: 'var(--text-secondary)',
-          textAlign: 'center',
-          marginTop: '16px',
-          padding: '8px',
-          backgroundColor: 'var(--bg-tertiary)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-primary)'
-        }}>
-          💡 <strong>Wskazówka:</strong> Ten wykres pokazuje trendy wydatków dla wybranej pozycji "{selectedItem}". 
-          Kliknij na wykres kołowy powyżej, aby zmienić pozycję lub wróć do widoku wszystkich wydatków.
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <p className="text-xs text-gray-600 dark:text-gray-300 text-center">
+            💡 <strong>Wskazówka:</strong> Ten wykres pokazuje trendy wydatków dla wybranej pozycji "{selectedItem}". 
+            Kliknij na wykres kołowy powyżej, aby zmienić pozycję lub wróć do widoku wszystkich wydatków.
+          </p>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

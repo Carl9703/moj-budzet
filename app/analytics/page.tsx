@@ -295,7 +295,8 @@ export default function AnalyticsPage() {
           {/* NOWY KOMPONENT Z WYKRESAMI - Client Component */}
           <AnalyticsCharts 
             data={chartData} 
-            total={data.mainMetrics.currentPeriod.expense} 
+            total={data.mainMetrics.currentPeriod.expense}
+            onSegmentClick={handleSegmentClick}
           />
           <TrendsVisualization
             data={trendsData}
