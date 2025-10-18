@@ -208,8 +208,8 @@ export default function AnalyticsPage() {
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
         // Znajdź trendy dla wybranej koperty
-        const envelopeId = selectedItem.id.replace('env_', '')
-        const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
+        const envelopeName = selectedItem.name
+        const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
         console.log('Trendy koperty:', envelopeTrends)
         return envelopeTrends
       } else if (selectedItem.type === 'GROUP') {
@@ -226,30 +226,13 @@ export default function AnalyticsPage() {
           
           groupEnvelopes.forEach(envelope => {
             const envelopeName = envelope.name
-            const envelopeId = envelope.id.replace('env_', '')
             
-            console.log(`🔍 Szukam trendów dla koperty "${envelopeName}" (env_id: ${envelopeId})`)
+            console.log(`🔍 Szukam trendów dla koperty "${envelopeName}"`)
             console.log(`🔍 Pełne dane koperty:`, envelope)
             
-            // Spróbuj znaleźć trendy używając różnych metod
-            let envelopeTrends: { period: string; value: number }[] = []
-            
-            // Metoda 1: Spróbuj użyć envelopeId bezpośrednio
-            if (data.trends.byEnvelope[envelopeId]) {
-              envelopeTrends = data.trends.byEnvelope[envelopeId]
-              console.log(`✅ Metoda 1: Znaleziono trendy dla ${envelopeId}:`, envelopeTrends)
-            } else {
-              console.log(`❌ Metoda 1: Brak trendów dla ${envelopeId}`)
-            }
-            
-            // Metoda 2: Jeśli nie ma, spróbuj znaleźć po nazwie w API
-            if (envelopeTrends.length === 0) {
-              console.log(`🔍 Metoda 2: Szukam po nazwie "${envelopeName}"`)
-              // Tutaj musimy sprawdzić czy API ma mapowanie nazw na ID
-              console.log(`🔍 Dostępne ID w byEnvelope:`, Object.keys(data.trends.byEnvelope))
-            }
-            
-            console.log(`📊 Trendy koperty "${envelope.name}" (finalne):`, envelopeTrends)
+            // Użyj byEnvelopeName do znalezienia trendów
+            const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
+            console.log(`📊 Trendy koperty "${envelopeName}":`, envelopeTrends)
             
             if (envelopeTrends.length > 0) {
               envelopeTrends.forEach(trend => {
@@ -260,7 +243,7 @@ export default function AnalyticsPage() {
                 console.log(`➕ Dodaję ${trend.value} dla okresu ${trend.period}`)
               })
             } else {
-              console.log(`⚠️ Koperta "${envelope.name}" nie ma trendów`)
+              console.log(`⚠️ Koperta "${envelopeName}" nie ma trendów`)
             }
           })
           

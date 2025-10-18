@@ -47,6 +47,7 @@ interface TrendData {
 interface TrendsData {
   totalExpenses: TrendData[]
   byEnvelope: { [envelopeId: string]: TrendData[] }
+  byEnvelopeName: { [envelopeName: string]: TrendData[] } // Dodaj mapowanie po nazwie
 }
 
 interface AnalyticsResponse {
@@ -430,6 +431,7 @@ export async function GET(request: NextRequest) {
     
     // Pobierz trendy dla każdej koperty
     const byEnvelope: { [envelopeId: string]: any[] } = {}
+    const byEnvelopeName: { [envelopeName: string]: any[] } = {} // Dodaj mapowanie po nazwie
     const envelopes = await prisma.envelope.findMany({
       where: { userId: userId }
     })
@@ -437,11 +439,13 @@ export async function GET(request: NextRequest) {
     for (const envelope of envelopes) {
       const envelopeTrend = await getTrendsData(userId, start, end, envelope.id)
       byEnvelope[envelope.id] = envelopeTrend
+      byEnvelopeName[envelope.name] = envelopeTrend // Dodaj mapowanie po nazwie
     }
 
     const trends: TrendsData = {
       totalExpenses: totalExpensesTrend,
-      byEnvelope: byEnvelope
+      byEnvelope: byEnvelope,
+      byEnvelopeName: byEnvelopeName // Dodaj mapowanie po nazwie
     }
 
     const response: AnalyticsResponse = {
