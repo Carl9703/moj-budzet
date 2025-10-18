@@ -41,7 +41,7 @@ export function InteractiveExpenseExplorer({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
 
-  // Automatycznie rozwiń grupę gdy jest podświetlona (tylko jedną na raz)
+  // Automatycznie rozwiń grupę gdy jest podświetlona
   React.useEffect(() => {
     if (highlightedGroup) {
       const findGroupId = (nodes: SpendingTreeNode[]): string | null => {
@@ -59,12 +59,13 @@ export function InteractiveExpenseExplorer({
       
       const groupId = findGroupId(data)
       if (groupId) {
-        // Zwiń wszystkie grupy i rozwiń tylko wybraną
-        setExpandedItems(new Set([groupId]))
+        // Rozwiń grupę, ale nie zwijaj innych rozwiniętych elementów
+        setExpandedItems(prev => {
+          const newSet = new Set(prev)
+          newSet.add(groupId)
+          return newSet
+        })
       }
-    } else {
-      // Jeśli nie ma podświetlonej grupy, zwiń wszystko
-      setExpandedItems(new Set())
     }
   }, [highlightedGroup, data])
 
@@ -142,6 +143,8 @@ export function InteractiveExpenseExplorer({
   }
 
   const handleItemClick = (item: SpendingTreeNode) => {
+    console.log('🖱️ Kliknięto na:', item.type, item.name, 'Children:', item.children?.length)
+    
     // Jeśli kliknięto na już wybrany element, odkliknij
     if (selectedItem === item.id) {
       setSelectedItem(null)
@@ -152,9 +155,12 @@ export function InteractiveExpenseExplorer({
     setSelectedItem(item.id)
     onItemClick?.(item)
     
-    // Jeśli to nie transakcja, rozwiń/zwij
+    // Rozwiń/zwij tylko jeśli element ma dzieci i nie jest transakcją
     if (item.type !== 'TRANSACTION' && item.children && item.children.length > 0) {
+      console.log('✅ Rozwijam/zwijam:', item.id)
       toggleExpanded(item.id)
+    } else {
+      console.log('❌ Nie rozwijam - typ:', item.type, 'children:', item.children?.length)
     }
   }
 
