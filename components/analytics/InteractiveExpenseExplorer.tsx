@@ -59,7 +59,11 @@ export function InteractiveExpenseExplorer({
       
       const groupId = findGroupId(data)
       if (groupId) {
-        setExpandedItems(prev => new Set([...prev, groupId]))
+        setExpandedItems(prev => {
+          const newSet = new Set(prev)
+          newSet.add(groupId)
+          return newSet
+        })
       }
     }
   }, [highlightedGroup, data])
