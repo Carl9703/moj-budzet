@@ -43,15 +43,22 @@ export function EnvelopeTransactionsModal({
     setError(null)
     
     try {
+      console.log('Fetching transactions for envelopeId:', envelopeId)
       const response = await authorizedFetch(`/api/transactions?envelopeId=${envelopeId}&limit=20`)
       const data = await response.json()
       
+      console.log('API Response:', { response: response.ok, data })
+      
       if (response.ok) {
-        setTransactions(data.transactions || [])
+        // API zwraca dane bezpośrednio jako array, nie jako { transactions: [] }
+        const transactionsArray = Array.isArray(data) ? data : (data.transactions || [])
+        setTransactions(transactionsArray)
+        console.log('Transactions set:', transactionsArray)
       } else {
         setError(data.error || 'Błąd pobierania transakcji')
       }
     } catch (err) {
+      console.error('Fetch error:', err)
       setError('Błąd połączenia z serwerem')
     } finally {
       setLoading(false)
