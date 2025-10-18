@@ -113,6 +113,14 @@ export default function AnalyticsPage() {
   }
 
   const handleSegmentClick = (segmentName: string, segmentValue?: number) => {
+    // Jeśli kliknięto na już wybrany segment, odkliknij
+    if (selectedItem?.name === segmentName) {
+      setSelectedItem(null)
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+      return
+    }
+
     // Znajdź pozycję w drzewie wydatków
     const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
       for (const node of nodes) {
@@ -141,7 +149,15 @@ export default function AnalyticsPage() {
     }
   }
 
-  const handleExplorerItemClick = (item: SpendingTreeNode) => {
+  const handleExplorerItemClick = (item: SpendingTreeNode | null) => {
+    if (!item) {
+      // Odkliknięcie - wyczyść wszystko
+      setSelectedItem(null)
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+      return
+    }
+
     setSelectedItem(item)
     
     // Ustaw odpowiednie podświetlenie na podstawie typu
@@ -172,10 +188,37 @@ export default function AnalyticsPage() {
   const trendsData = useMemo(() => {
     if (!data?.trends) return []
     
-    if (selectedItem && selectedItem.type === 'ENVELOPE') {
-      // Znajdź trendy dla wybranej koperty
-      const envelopeId = selectedItem.id.replace('env_', '')
-      return data.trends.byEnvelope[envelopeId] || []
+    if (selectedItem) {
+      if (selectedItem.type === 'ENVELOPE') {
+        // Znajdź trendy dla wybranej koperty
+        const envelopeId = selectedItem.id.replace('env_', '')
+        return data.trends.byEnvelope[envelopeId] || []
+      } else if (selectedItem.type === 'GROUP') {
+        // Dla grupy, zsumuj trendy wszystkich kopert w tej grupie
+        const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
+        if (groupEnvelopes.length > 0) {
+          // Znajdź trendy dla wszystkich kopert w grupie i zsumuj je
+          const groupTrends: { [key: string]: number } = {}
+          
+          groupEnvelopes.forEach(envelope => {
+            const envelopeId = envelope.id.replace('env_', '')
+            const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
+            
+            envelopeTrends.forEach(trend => {
+              if (!groupTrends[trend.period]) {
+                groupTrends[trend.period] = 0
+              }
+              groupTrends[trend.period] += trend.value
+            })
+          })
+          
+          // Konwertuj na format oczekiwany przez wykres
+          return Object.entries(groupTrends).map(([period, value]) => ({
+            period,
+            value
+          }))
+        }
+      }
     }
     
     return data.trends.totalExpenses

@@ -142,6 +142,13 @@ export function InteractiveExpenseExplorer({
   }
 
   const handleItemClick = (item: SpendingTreeNode) => {
+    // Jeśli kliknięto na już wybrany element, odkliknij
+    if (selectedItem === item.id) {
+      setSelectedItem(null)
+      onItemClick?.(null as any) // Przekaż null aby odkliknąć
+      return
+    }
+
     setSelectedItem(item.id)
     onItemClick?.(item)
     
