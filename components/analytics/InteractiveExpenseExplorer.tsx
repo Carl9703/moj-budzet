@@ -41,7 +41,7 @@ export function InteractiveExpenseExplorer({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
 
-  // Automatycznie rozwiń grupę gdy jest podświetlona
+  // Automatycznie rozwiń grupę gdy jest podświetlona (tylko jedną na raz)
   React.useEffect(() => {
     if (highlightedGroup) {
       const findGroupId = (nodes: SpendingTreeNode[]): string | null => {
@@ -59,12 +59,12 @@ export function InteractiveExpenseExplorer({
       
       const groupId = findGroupId(data)
       if (groupId) {
-        setExpandedItems(prev => {
-          const newSet = new Set(prev)
-          newSet.add(groupId)
-          return newSet
-        })
+        // Zwiń wszystkie grupy i rozwiń tylko wybraną
+        setExpandedItems(new Set([groupId]))
       }
+    } else {
+      // Jeśli nie ma podświetlonej grupy, zwiń wszystko
+      setExpandedItems(new Set())
     }
   }, [highlightedGroup, data])
 

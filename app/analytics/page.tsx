@@ -186,16 +186,26 @@ export default function AnalyticsPage() {
 
   // Przygotowanie danych dla wykresu trendów
   const trendsData = useMemo(() => {
-    if (!data?.trends) return []
+    if (!data?.trends) {
+      console.log('Brak danych trendów:', data)
+      return []
+    }
+    
+    console.log('Dane trendów:', data.trends)
+    console.log('Wybrany element:', selectedItem)
     
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
         // Znajdź trendy dla wybranej koperty
         const envelopeId = selectedItem.id.replace('env_', '')
-        return data.trends.byEnvelope[envelopeId] || []
+        const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
+        console.log('Trendy koperty:', envelopeTrends)
+        return envelopeTrends
       } else if (selectedItem.type === 'GROUP') {
         // Dla grupy, zsumuj trendy wszystkich kopert w tej grupie
         const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
+        console.log('Koperty w grupie:', groupEnvelopes)
+        
         if (groupEnvelopes.length > 0) {
           // Znajdź trendy dla wszystkich kopert w grupie i zsumuj je
           const groupTrends: { [key: string]: number } = {}
@@ -203,6 +213,7 @@ export default function AnalyticsPage() {
           groupEnvelopes.forEach(envelope => {
             const envelopeId = envelope.id.replace('env_', '')
             const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
+            console.log(`Trendy koperty ${envelope.name}:`, envelopeTrends)
             
             envelopeTrends.forEach(trend => {
               if (!groupTrends[trend.period]) {
@@ -213,14 +224,17 @@ export default function AnalyticsPage() {
           })
           
           // Konwertuj na format oczekiwany przez wykres
-          return Object.entries(groupTrends).map(([period, value]) => ({
+          const result = Object.entries(groupTrends).map(([period, value]) => ({
             period,
             value
           }))
+          console.log('Zsumowane trendy grupy:', result)
+          return result
         }
       }
     }
     
+    console.log('Wszystkie trendy:', data.trends.totalExpenses)
     return data.trends.totalExpenses
   }, [data?.trends, selectedItem])
     
