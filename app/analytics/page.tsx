@@ -112,7 +112,7 @@ export default function AnalyticsPage() {
     fetchData(dateRange, enabled)
   }
 
-  const handleSegmentClick = (segmentName: string) => {
+  const handleSegmentClick = (segmentName: string, segmentValue?: number) => {
     // Znajdź pozycję w drzewie wydatków
     const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
       for (const node of nodes) {

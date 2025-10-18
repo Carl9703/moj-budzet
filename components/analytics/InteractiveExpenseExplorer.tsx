@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { ChevronRight, ChevronDown, Search, DollarSign, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 interface SpendingTreeNode {
@@ -40,6 +40,29 @@ export function InteractiveExpenseExplorer({
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
+
+  // Automatycznie rozwiń grupę gdy jest podświetlona
+  React.useEffect(() => {
+    if (highlightedGroup) {
+      const findGroupId = (nodes: SpendingTreeNode[]): string | null => {
+        for (const node of nodes) {
+          if (node.type === 'GROUP' && node.name === highlightedGroup) {
+            return node.id
+          }
+          if (node.children) {
+            const found = findGroupId(node.children)
+            if (found) return found
+          }
+        }
+        return null
+      }
+      
+      const groupId = findGroupId(data)
+      if (groupId) {
+        setExpandedItems(prev => new Set([...prev, groupId]))
+      }
+    }
+  }, [highlightedGroup, data])
 
   const formatMoney = (amount: number) => {
     return amount.toLocaleString('pl-PL') + ' zł'
