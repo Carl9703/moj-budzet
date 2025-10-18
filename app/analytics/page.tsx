@@ -44,6 +44,7 @@ interface SpendingTreeNode {
   date?: string
   description?: string
   amount?: number
+  categoryId?: string // Dodajemy categoryId dla kategorii
 }
 
 interface TrendData {

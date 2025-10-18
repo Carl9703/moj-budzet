@@ -37,6 +37,7 @@ interface SpendingTreeNode {
   date?: string
   description?: string
   amount?: number
+  categoryId?: string // Dodajemy categoryId dla kategorii
 }
 
 interface TrendData {
@@ -351,7 +352,8 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
           id: category.id,
           name: category.name,
           total: category.total,
-          children: category.children
+          children: category.children,
+          categoryId: categoryName // Przekazujemy categoryId dla kategorii
         }
         
         // Dodaj dane porównawcze dla kategorii

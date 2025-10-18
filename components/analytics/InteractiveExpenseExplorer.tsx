@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { ChevronRight, ChevronDown, Search, DollarSign, TrendingUp, TrendingDown, Minus, Filter, X } from 'lucide-react'
+import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface SpendingTreeNode {
   type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
@@ -17,6 +18,7 @@ interface SpendingTreeNode {
   date?: string
   description?: string
   amount?: number
+  categoryId?: string // Dodajemy categoryId dla kategorii
 }
 
 interface InteractiveExpenseExplorerProps {
@@ -29,7 +31,12 @@ interface InteractiveExpenseExplorerProps {
 }
 
 // Professional icon mapping with fallbacks
-const getItemIcon = (type: string, name?: string): string => {
+const getItemIcon = (type: string, name?: string, categoryId?: string): string => {
+  // Dla kategorii używamy funkcji z constants
+  if (type === 'CATEGORY' && categoryId) {
+    return getCategoryIcon(categoryId)
+  }
+  
   const iconMap: Record<string, Record<string, string>> = {
     GROUP: {
       'Potrzeby': '🏠',
@@ -56,15 +63,6 @@ const getItemIcon = (type: string, name?: string): string => {
       'default': '📁'
     },
     CATEGORY: {
-      'Wspólne opłaty': '🏠',
-      'Paliwo': '⛽',
-      'Lekarz i Leki': '👨‍⚕️',
-      'Telefon(y)': '📱',
-      'Hobby': '🎮',
-      'Restauracje': '🍕',
-      'Odzież': '👕',
-      'IKE': '📈',
-      'Wakacje': '✈️',
       'default': '🏷️'
     },
     TRANSACTION: {
@@ -208,7 +206,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
         display: 'flex',
         alignItems: 'center'
           }}>
-            {getItemIcon(node.type, node.name)}
+            {getItemIcon(node.type, node.name, node.categoryId)}
           </div>
 
       {/* Name */}
