@@ -3,6 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { MonthStatus } from '../components/dashboard/MonthStatus'
+import { MonthProgress } from '../components/dashboard/MonthProgress'
 import { MainBalance } from '../components/dashboard/MainBalance'
 import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { EnvelopeGroup } from '../components/dashboard/EnvelopeGroup'
@@ -25,6 +26,7 @@ const IncomeModal = lazy(() => import('../components/modals/IncomeModal').then(m
 const ExpenseModal = lazy(() => import('../components/modals/ExpenseModal').then(m => ({ default: m.ExpenseModal })))
 const TransferModal = lazy(() => import('../components/modals/TransferModal').then(m => ({ default: m.TransferModal })))
 const CloseMonthModal = lazy(() => import('../components/modals/CloseMonthModal').then(m => ({ default: m.CloseMonthModal })))
+const EnvelopeTransactionsModal = lazy(() => import('../components/modals/EnvelopeTransactionsModal').then(m => ({ default: m.EnvelopeTransactionsModal })))
 
 export default function HomePage() {
     const router = useRouter()
@@ -39,6 +41,12 @@ export default function HomePage() {
     const [showExpenseModal, setShowExpenseModal] = useState(false)
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false)
     const [showTransferModal, setShowTransferModal] = useState(false)
+    const [showEnvelopeTransactionsModal, setShowEnvelopeTransactionsModal] = useState(false)
+    const [selectedEnvelope, setSelectedEnvelope] = useState<{
+        id: string
+        name: string
+        icon: string
+    } | null>(null)
 
     const calculateDaysLeft = () => {
         const now = new Date()
@@ -47,8 +55,20 @@ export default function HomePage() {
         return daysLeft
     }
 
+    const getCurrentDayAndTotalDays = () => {
+        const now = new Date()
+        const currentDay = now.getDate()
+        const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+        return { currentDay, totalDays }
+    }
+
     const handleIncomeSave = createIncomeHandler(refetch, showToast)
     const handleExpenseSave = createExpenseHandler(refetch, showToast)
+    
+    const handleEnvelopeClick = (envelopeId: string, envelopeName: string, envelopeIcon: string) => {
+        setSelectedEnvelope({ id: envelopeId, name: envelopeName, icon: envelopeIcon })
+        setShowEnvelopeTransactionsModal(true)
+    }
     
     const handleTransferSave = async (transferData: any) => {
         try {
@@ -258,6 +278,17 @@ export default function HomePage() {
                     </div>
                 </div>
 
+                {/* MonthProgress - nowy komponent */}
+                <div className="smooth-all hover-lift" style={{ marginBottom: '16px' }}>
+                    <MonthProgress
+                        totalIncome={data.totalIncome || 0}
+                        totalExpenses={data.totalExpenses || 0}
+                        daysLeft={calculateDaysLeft()}
+                        currentDay={getCurrentDayAndTotalDays().currentDay}
+                        totalDays={getCurrentDayAndTotalDays().totalDays}
+                    />
+                </div>
+
                 <div className="grid-responsive" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -270,6 +301,7 @@ export default function HomePage() {
                         color="rgba(245, 158, 11, 0.1)"
                         envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target') || []}
                         type="yearly"
+                        onEnvelopeClick={handleEnvelopeClick}
                     />
 
                     {/* Sprawdź czy użytkownik ma koperty miesięczne */}
@@ -282,6 +314,7 @@ export default function HomePage() {
                                 color="rgba(34, 197, 94, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'needs')}
                                 type="monthly"
+                                onEnvelopeClick={handleEnvelopeClick}
                             />
                             
                             {/* GRUPA 2: STYL ŻYCIA */}
@@ -291,6 +324,7 @@ export default function HomePage() {
                                 color="rgba(168, 85, 247, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'lifestyle')}
                                 type="monthly"
+                                onEnvelopeClick={handleEnvelopeClick}
                             />
                             
                             {/* GRUPA 3: CELE FINANSOWE */}
@@ -300,6 +334,7 @@ export default function HomePage() {
                                 color="rgba(59, 130, 246, 0.1)"
                                 envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
                                 type="monthly"
+                                onEnvelopeClick={handleEnvelopeClick}
                             />
                         </>
                     ) : (
@@ -496,6 +531,18 @@ export default function HomePage() {
                             expenses: data.totalExpenses || 0,
                             savings: (data.totalIncome || 0) - (data.totalExpenses || 0)
                         }}
+                    />
+                )}
+                {showEnvelopeTransactionsModal && selectedEnvelope && (
+                    <EnvelopeTransactionsModal
+                        isOpen={showEnvelopeTransactionsModal}
+                        onClose={() => {
+                            setShowEnvelopeTransactionsModal(false)
+                            setSelectedEnvelope(null)
+                        }}
+                        envelopeId={selectedEnvelope.id}
+                        envelopeName={selectedEnvelope.name}
+                        envelopeIcon={selectedEnvelope.icon}
                     />
                 )}
             </Suspense>

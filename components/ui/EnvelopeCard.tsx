@@ -8,9 +8,11 @@ interface EnvelopeProps {
     planned: number
     current: number
     type: 'monthly' | 'yearly'
+    id?: string
+    onTransactionClick?: (envelopeId: string, envelopeName: string, envelopeIcon: string) => void
 }
 
-export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, planned, current, type }: EnvelopeProps) {
+export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, planned, current, type, id, onTransactionClick }: EnvelopeProps) {
     const isFreedomFunds = name.toLowerCase().includes('wolne środki')
 
     const percentage = type === 'monthly'
@@ -63,17 +65,26 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
         }
     }
 
+    const handleClick = () => {
+        if (id && onTransactionClick) {
+            onTransactionClick(id, name, icon)
+        }
+    }
+
     return (
-        <div className="envelope-card smooth-all bg-theme-secondary" style={{
-            border: isOverBudget ? '2px solid var(--accent-error)' : '1px solid var(--border-primary)',
-            borderRadius: '12px',
-            padding: '16px',
-            transition: 'all 0.3s ease',
-            boxShadow: isOverBudget 
-                ? '0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(239, 68, 68, 0.1)' 
-                : 'var(--shadow-md)',
-            cursor: 'pointer'
-        }}
+        <div 
+            className="envelope-card smooth-all bg-theme-secondary" 
+            onClick={handleClick}
+            style={{
+                border: isOverBudget ? '2px solid var(--accent-error)' : '1px solid var(--border-primary)',
+                borderRadius: '12px',
+                padding: '16px',
+                transition: 'all 0.3s ease',
+                boxShadow: isOverBudget 
+                    ? '0 4px 12px rgba(239, 68, 68, 0.15), 0 2px 4px rgba(239, 68, 68, 0.1)' 
+                    : 'var(--shadow-md)',
+                cursor: id && onTransactionClick ? 'pointer' : 'default'
+            }}
         onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
             e.currentTarget.style.boxShadow = isOverBudget 
