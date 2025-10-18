@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, Calendar, Filter, X, ChevronDown } from 'lucide-react'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
@@ -48,6 +48,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
 
   const [isExpanded, setIsExpanded] = useState(true)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
   // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {
@@ -57,11 +58,41 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     setActiveFiltersCount(count)
   }, [filters])
 
+  // Debounced search function
+  const debouncedSearch = useCallback((searchValue: string) => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+    
+    const timeout = setTimeout(() => {
+      onFiltersChange({ ...filters, search: searchValue })
+    }, 500) // 500ms delay
+    
+    setSearchTimeout(timeout)
+  }, [filters, onFiltersChange, searchTimeout])
+
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    const newFilters = { ...filters, [key]: value }
-    setFilters(newFilters)
-    onFiltersChange(newFilters)
+    if (key === 'search') {
+      // Update local state immediately for UI responsiveness
+      setFilters(prev => ({ ...prev, [key]: value }))
+      // Use debounced version for API calls
+      debouncedSearch(value)
+    } else {
+      // For other filters, update immediately
+      const newFilters = { ...filters, [key]: value }
+      setFilters(newFilters)
+      onFiltersChange(newFilters)
+    }
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout)
+      }
+    }
+  }, [searchTimeout])
 
   const clearFilters = () => {
     const clearedFilters: FilterState = {
@@ -86,11 +117,10 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
 
   const getGroupTranslation = (group: string) => {
     const translations: Record<string, string> = {
-      'monthly': 'Miesięczne',
-      'yearly': 'Roczne',
-      'target': 'Fundusze celowe',
-      'emergency': 'Awaryjne',
-      'savings': 'Oszczędności'
+      'needs': 'Potrzeby',
+      'lifestyle': 'Styl życia',
+      'financial': 'Cele finansowe',
+      'target': 'Fundusze celowe'
     }
     return translations[group] || group
   }
