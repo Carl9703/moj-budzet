@@ -12,7 +12,7 @@ import { formatMoney } from '@/lib/utils/money'
 // Lazy load analytics components
 const DonutChart = lazy(() => import('@tremor/react').then(m => ({ default: m.DonutChart })))
 const BarChart = lazy(() => import('@tremor/react').then(m => ({ default: m.BarChart })))
-const InteractiveExpenseExplorer = lazy(() => import('@/components/analytics/InteractiveExpenseExplorer'))
+const InteractiveExpenseExplorer = lazy(() => import('@/components/analytics/InteractiveExpenseExplorer').then(m => ({ default: m.InteractiveExpenseExplorer })))
 
 interface MonthData {
   month: string
