@@ -49,7 +49,7 @@ const PREDEFINED_PERIODS = [
     icon: TrendingUp,
     getDates: () => {
       const now = new Date()
-      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1)
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1)
       return {
         from: threeMonthsAgo,
         to: now
@@ -62,7 +62,7 @@ const PREDEFINED_PERIODS = [
     icon: TrendingUp,
     getDates: () => {
       const now = new Date()
-      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1)
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
       return {
         from: sixMonthsAgo,
         to: now

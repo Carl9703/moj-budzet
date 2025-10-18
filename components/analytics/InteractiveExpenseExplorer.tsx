@@ -623,8 +623,8 @@ export function InteractiveExpenseExplorer({
 
       {/* Professional Tree Container */}
       <div style={{
-        maxHeight: '80vh',
-        minHeight: '500px',
+        maxHeight: '90vh',
+        minHeight: '70vh',
         overflowY: 'auto',
         border: '1px solid var(--border-primary)',
         borderRadius: '8px',
