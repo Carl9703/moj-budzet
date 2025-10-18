@@ -496,6 +496,8 @@ export default function AnalyticsPage() {
             setExpandedCategories={setExpandedCategories}
             expandedTransactions={expandedTransactions}
             setExpandedTransactions={setExpandedTransactions}
+            totalExpenses={data?.totalExpenses || 0}
+            summary={data?.summary || { totalCategories: 0, totalTransactions: 0, avgTransactionAmount: 0 }}
           />
         </div>
             </div>

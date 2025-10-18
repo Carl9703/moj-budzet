@@ -57,6 +57,12 @@ interface Props {
     setExpandedCategories: (value: Set<string>) => void
     expandedTransactions: Set<string>
     setExpandedTransactions: (value: Set<string>) => void
+    totalExpenses: number
+    summary: {
+        totalCategories: number
+        totalTransactions: number
+        avgTransactionAmount: number
+    }
 }
 
 export function CategoryAnalysis({ 
@@ -71,7 +77,9 @@ export function CategoryAnalysis({
     expandedCategories,
     setExpandedCategories,
     expandedTransactions,
-    setExpandedTransactions
+    setExpandedTransactions,
+    totalExpenses,
+    summary
 }: Props) {
 
     const periodOptions = [
@@ -236,19 +244,19 @@ export function CategoryAnalysis({
                     <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '6px' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Kategorie z wydatkami</div>
                         <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-primary)' }}>
-                            {data.summary.totalCategories}
+                            {summary.totalCategories}
                         </div>
                     </div>
                     <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '6px' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Łączne wydatki</div>
                         <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-error)' }}>
-                            {formatMoney(data.totalExpenses)}
+                            {formatMoney(totalExpenses)}
                         </div>
                     </div>
                     <div style={{ textAlign: 'center', padding: '12px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '6px' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Średnia transakcja</div>
                         <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--accent-success)' }}>
-                            {formatMoney(data.summary.avgTransactionAmount)}
+                            {formatMoney(summary.avgTransactionAmount)}
                         </div>
                     </div>
                 </div>
