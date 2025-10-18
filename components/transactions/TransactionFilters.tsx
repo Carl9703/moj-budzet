@@ -48,8 +48,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
 
   const [isExpanded, setIsExpanded] = useState(true)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
-
   // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {
     const count = Object.values(filters).filter(value => 
@@ -58,41 +56,17 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     setActiveFiltersCount(count)
   }, [filters])
 
-  // Debounced search function
-  const debouncedSearch = useCallback((searchValue: string) => {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout)
-    }
-    
-    const timeout = setTimeout(() => {
-      onFiltersChange({ ...filters, search: searchValue })
-    }, 500) // 500ms delay
-    
-    setSearchTimeout(timeout)
-  }, [filters, onFiltersChange, searchTimeout])
-
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    if (key === 'search') {
-      // Update local state immediately for UI responsiveness
-      setFilters(prev => ({ ...prev, [key]: value }))
-      // Use debounced version for API calls
-      debouncedSearch(value)
-    } else {
-      // For other filters, update immediately
-      const newFilters = { ...filters, [key]: value }
-      setFilters(newFilters)
-      onFiltersChange(newFilters)
-    }
+    const newFilters = { ...filters, [key]: value }
+    setFilters(newFilters)
+    onFiltersChange(newFilters)
   }
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout)
-      }
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onFiltersChange(filters)
     }
-  }, [searchTimeout])
+  }
 
   const clearFilters = () => {
     const clearedFilters: FilterState = {
@@ -167,26 +141,24 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {activeFiltersCount > 0 && (
-            <button
-              onClick={clearFilters}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-primary)',
-                borderRadius: '6px',
-                fontSize: '12px',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <X size={14} />
-              Wyczyść
-            </button>
-          )}
+          <button
+            onClick={clearFilters}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '6px',
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <X size={14} />
+            Wyczyść filtry
+          </button>
         </div>
       </div>
 
@@ -223,8 +195,9 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
                 <input
                   type="text"
                   value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="np. zakupy, rachunek..."
+                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  onKeyPress={handleSearchKeyPress}
+                  placeholder="np. zakupy, rachunek... (naciśnij Enter)"
                   style={{
                     width: '100%',
                     padding: '10px 12px 10px 36px',
