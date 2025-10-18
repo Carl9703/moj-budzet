@@ -46,6 +46,12 @@ export async function GET(request: NextRequest) {
             whereClause.category = category
         }
         
+        // Filtr pojedynczej koperty (envelope)
+        const envelope = searchParams.get('envelope')
+        if (envelope) {
+            whereClause.envelopeId = envelope
+        }
+        
         // Wyszukiwanie tekstowe
         if (searchText) {
             whereClause.description = {

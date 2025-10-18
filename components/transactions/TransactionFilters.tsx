@@ -46,7 +46,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     sortOrder: 'desc'
   })
 
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
 
   // Aktualizuj licznik aktywnych filtrów
@@ -84,6 +84,17 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     handleFilterChange('sortOrder', newOrder)
   }
 
+  const getGroupTranslation = (group: string) => {
+    const translations: Record<string, string> = {
+      'monthly': 'Miesięczne',
+      'yearly': 'Roczne',
+      'target': 'Fundusze celowe',
+      'emergency': 'Awaryjne',
+      'savings': 'Oszczędności'
+    }
+    return translations[group] || group
+  }
+
   return (
     <div style={{
       backgroundColor: 'var(--bg-secondary)',
@@ -99,7 +110,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '16px 20px',
-        borderBottom: isExpanded ? '1px solid var(--border-primary)' : 'none'
+        borderBottom: '1px solid var(--border-primary)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Filter size={20} color="var(--accent-primary)" />
@@ -146,33 +157,10 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               Wyczyść
             </button>
           )}
-          
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            style={{
-              padding: '8px',
-              backgroundColor: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-primary)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <ChevronDown 
-              size={16} 
-              style={{ 
-                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease'
-              }} 
-            />
-          </button>
         </div>
       </div>
 
       {/* Panel filtrów */}
-      {isExpanded && (
         <div style={{ padding: '20px' }}>
           <div style={{
             display: 'grid',
@@ -311,7 +299,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
                 <option value="">Wszystkie grupy</option>
                 {filterOptions.groups.map(group => (
                   <option key={group} value={group}>
-                    {group}
+                    {getGroupTranslation(group)}
                   </option>
                 ))}
               </select>
@@ -490,7 +478,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             </button>
           </div>
         </div>
-      )}
     </div>
   )
 }
