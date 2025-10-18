@@ -54,6 +54,7 @@ export function TrendsVisualization({
   }
 
   if (!data || data.length === 0) {
+    console.log('TrendsVisualization: Brak danych trendów', { data, selectedItem })
     return (
       <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div className="text-center py-12">
@@ -62,6 +63,9 @@ export function TrendsVisualization({
           <p className="text-gray-500 dark:text-gray-400">
             Dodaj transakcje z różnych okresów, aby zobaczyć trendy
           </p>
+          <div className="mt-4 text-xs text-gray-400">
+            Debug: data={JSON.stringify(data)}, selectedItem={selectedItem}
+          </div>
         </div>
       </Card>
     )

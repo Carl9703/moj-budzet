@@ -194,6 +194,10 @@ export default function AnalyticsPage() {
     console.log('Dane trendów:', data.trends)
     console.log('Wybrany element:', selectedItem)
     
+    // Sprawdź czy mamy dane trendów
+    const totalExpenses = data.trends.totalExpenses || []
+    console.log('Total expenses trend:', totalExpenses)
+    
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
         // Znajdź trendy dla wybranej koperty
@@ -234,8 +238,8 @@ export default function AnalyticsPage() {
       }
     }
     
-    console.log('Wszystkie trendy:', data.trends.totalExpenses)
-    return data.trends.totalExpenses
+    console.log('Wszystkie trendy:', totalExpenses)
+    return totalExpenses
   }, [data?.trends, selectedItem])
     
     if (isCheckingAuth) {
