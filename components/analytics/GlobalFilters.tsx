@@ -19,7 +19,7 @@ interface GlobalFiltersProps {
 const PREDEFINED_PERIODS = [
   { 
     key: 'currentMonth', 
-    label: 'Bieżący miesiąc', 
+    label: 'Obecny miesiąc', 
     icon: Calendar,
     getDates: () => {
       const now = new Date()
@@ -44,14 +44,27 @@ const PREDEFINED_PERIODS = [
     }
   },
   { 
-    key: 'currentQuarter', 
-    label: 'Ten kwartał', 
+    key: 'last3Months', 
+    label: 'Ostatnie 3 miesiące', 
     icon: TrendingUp,
     getDates: () => {
       const now = new Date()
-      const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1)
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1)
       return {
-        from: quarterStart,
+        from: threeMonthsAgo,
+        to: now
+      }
+    }
+  },
+  { 
+    key: 'last6Months', 
+    label: 'Ostatnie 6 miesięcy', 
+    icon: TrendingUp,
+    getDates: () => {
+      const now = new Date()
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1)
+      return {
+        from: sixMonthsAgo,
         to: now
       }
     }
@@ -65,6 +78,19 @@ const PREDEFINED_PERIODS = [
       return {
         from: new Date(now.getFullYear(), 0, 1),
         to: now
+      }
+    }
+  },
+  { 
+    key: 'previousYear', 
+    label: 'Ubiegły rok', 
+    icon: CalendarRange,
+    getDates: () => {
+      const now = new Date()
+      const lastYear = now.getFullYear() - 1
+      return {
+        from: new Date(lastYear, 0, 1),
+        to: new Date(lastYear, 11, 31)
       }
     }
   }
