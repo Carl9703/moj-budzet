@@ -43,7 +43,6 @@ export function AnalyticsCharts({ data, total, onSegmentClick }: Props) {
         showAnimation={true}
         showTooltip={true}
         showLabel={true}
-        showLegend={true}
         onValueChange={(value) => {
           if (value && onSegmentClick) {
             onSegmentClick(value.name, value.value)
