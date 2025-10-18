@@ -197,6 +197,8 @@ export default function AnalyticsPage() {
     // Sprawdź czy mamy dane trendów
     const totalExpenses = data.trends.totalExpenses || []
     console.log('Total expenses trend:', totalExpenses)
+    console.log('ByEnvelope keys:', Object.keys(data.trends.byEnvelope || {}))
+    console.log('ByEnvelope data:', data.trends.byEnvelope)
     
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
@@ -209,6 +211,7 @@ export default function AnalyticsPage() {
         // Dla grupy, zsumuj trendy wszystkich kopert w tej grupie
         const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
         console.log('Koperty w grupie:', groupEnvelopes)
+        console.log('Dostępne klucze byEnvelope:', Object.keys(data.trends.byEnvelope || {}))
         
         if (groupEnvelopes.length > 0) {
           // Znajdź trendy dla wszystkich kopert w grupie i zsumuj je
@@ -217,7 +220,7 @@ export default function AnalyticsPage() {
           groupEnvelopes.forEach(envelope => {
             const envelopeId = envelope.id.replace('env_', '')
             const envelopeTrends = data.trends.byEnvelope[envelopeId] || []
-            console.log(`Trendy koperty ${envelope.name}:`, envelopeTrends)
+            console.log(`Trendy koperty ${envelope.name} (ID: ${envelopeId}):`, envelopeTrends)
             
             envelopeTrends.forEach(trend => {
               if (!groupTrends[trend.period]) {
@@ -233,7 +236,17 @@ export default function AnalyticsPage() {
             value
           }))
           console.log('Zsumowane trendy grupy:', result)
+          
+          // Jeśli nie ma trendów dla grupy, zwróć wszystkie trendy
+          if (result.length === 0) {
+            console.log('Brak trendów dla grupy, zwracam wszystkie trendy')
+            return totalExpenses
+          }
+          
           return result
+        } else {
+          console.log('Brak kopert w grupie, zwracam wszystkie trendy')
+          return totalExpenses
         }
       }
     }

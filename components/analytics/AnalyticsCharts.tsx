@@ -62,6 +62,35 @@ export function AnalyticsCharts({ data, total, onSegmentClick }: Props) {
           }}
         />
       </div>
+
+      {/* Legenda z pełnymi kwotami */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {data.map((item, index) => (
+          <div 
+            key={item.name}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+            onClick={() => onSegmentClick?.(item.name, item.value)}
+          >
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-4 h-4 rounded-full flex-shrink-0"
+                style={{ backgroundColor: ANALYTICS_COLORS[index % ANALYTICS_COLORS.length] }}
+              />
+              <span className="font-medium text-gray-900 dark:text-white text-sm">
+                {item.name}
+              </span>
+            </div>
+            <div className="text-right">
+              <div className="font-bold text-gray-900 dark:text-white text-sm">
+                {formatMoneyWithSeparators(item.value)}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {((item.value / total) * 100).toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </Card>
   )
 }
