@@ -12,7 +12,6 @@ import { formatMoney } from '@/lib/utils/money'
 // Lazy load analytics components
 const DonutChart = lazy(() => import('@tremor/react').then(m => ({ default: m.DonutChart })))
 const BarChart = lazy(() => import('@tremor/react').then(m => ({ default: m.BarChart })))
-const InteractiveExpenseExplorer = lazy(() => import('@/components/analytics/InteractiveExpenseExplorer').then(m => ({ default: m.InteractiveExpenseExplorer })))
 
 interface MonthData {
   month: string
@@ -401,14 +400,71 @@ export default function ArchiveMonthPage() {
           }}>
             🔍 Interaktywny eksplorator wydatków
           </h3>
-          <Suspense fallback={<div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Ładowanie eksploratora...</div>}>
-            <InteractiveExpenseExplorer
-              data={{
-                envelopes: monthData.envelopes,
-                transfers: monthData.transfers
-              }}
-            />
-          </Suspense>
+          <div className="space-y-6">
+            {/* Koperty */}
+            {monthData.envelopes.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  📦 Koperty ({monthData.envelopes.length})
+                </h3>
+                <div className="space-y-3">
+                  {monthData.envelopes.map((envelope, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{envelope.icon}</span>
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">{envelope.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {envelope.categories.length} kategorii
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-red-600 dark:text-red-400">
+                          {formatMoney(envelope.totalSpent)}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {envelope.percentage}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Transfery */}
+            {monthData.transfers.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  🔄 Transfery ({monthData.transfers.length})
+                </h3>
+                <div className="space-y-3">
+                  {monthData.transfers.map((transfer, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{transfer.icon}</span>
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">{transfer.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {transfer.transactions.length} transakcji
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-blue-600 dark:text-blue-400">
+                          {formatMoney(transfer.amount)}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {transfer.percentage}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
