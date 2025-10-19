@@ -1,60 +1,40 @@
 'use client'
 
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { GlobalFilters } from '@/components/analytics/GlobalFilters'
 import { KeyMetricsCards } from '@/components/analytics/KeyMetricsCards'
-import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts'
+import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
+import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
+import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ArrowLeft, Calendar } from 'lucide-react'
-import { formatMoney } from '@/lib/utils/money'
 
-interface MonthData {
-  month: string
-  year: number
-  income: number
-  expenses: number
-  balance: number
-  envelopes: Array<{
-    name: string
-    icon: string
-    totalSpent: number
-    percentage: number
-    categories: Array<{
-      name: string
-      icon: string
-      amount: number
-      percentage: number
-      transactions: Array<{
-        id: string
-        type: string
-        amount: number
-        description: string
-        date: string
-        category: string
-      }>
-    }>
-  }>
-  transfers: Array<{
-    name: string
-    icon: string
-    amount: number
-    percentage: number
-    transactions: Array<{
-      id: string
-      type: string
-      amount: number
-      description: string
-      date: string
-      category: string
-    }>
-  }>
+// Interfaces from Analytics
+interface DateRange {
+  from: Date | undefined
+  to: Date | undefined
 }
 
-// Interfaces for Analytics components
+interface MainMetrics {
+  currentPeriod: {
+    income: number
+    expense: number
+    balance: number
+    savingsRate: number
+  }
+  previousPeriod?: {
+    income: number
+    expense: number
+    balance: number
+    savingsRate: number
+  }
+}
+
 interface SpendingTreeNode {
   type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
   id: string
@@ -72,15 +52,69 @@ interface SpendingTreeNode {
   categoryId?: string
 }
 
+interface TrendData {
+  period: string
+  value: number
+}
+
+interface TrendsData {
+  totalExpenses: TrendData[]
+  byEnvelope: { [envelopeId: string]: TrendData[] }
+  byEnvelopeName: { [envelopeName: string]: TrendData[] }
+}
+
+interface CategoryAnalysis {
+  categoryId: string
+  categoryName: string
+  categoryIcon: string
+  totalAmount: number
+  transactionCount: number
+  avgTransactionAmount: number
+  percentage: number
+  envelopeBreakdown: {
+    envelopeName: string
+    envelopeIcon: string
+    amount: number
+    percentage: number
+  }[]
+  monthlyTrend: {
+    month: string
+    year: number
+    amount: number
+  }[]
+  transactions: {
+    id: string
+    amount: number
+    description: string
+    date: string
+    envelopeName: string
+    envelopeIcon: string
+  }[]
+}
+
+interface AnalyticsData {
+  mainMetrics: MainMetrics
+  spendingTree: SpendingTreeNode[]
+  trends: TrendsData
+  categoryAnalysis: CategoryAnalysis[]
+  totalExpenses: number
+  period: string
+  summary: {
+    totalCategories: number
+    totalTransactions: number
+    avgTransactionAmount: number
+  }
+}
+
 export default function ArchiveMonthPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
   const params = useParams()
   const router = useRouter()
-  const [monthData, setMonthData] = useState<MonthData | null>(null)
+  
+  // State exactly like Analytics
+  const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
-  
-  // State for Analytics components
   const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
   const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
   const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
@@ -88,73 +122,60 @@ export default function ArchiveMonthPage() {
   const year = params.year as string
   const month = params.month as string
 
+  // Calculate date range for the specific month
+  const getMonthDateRange = (year: string, month: string): DateRange => {
+    const yearNum = parseInt(year)
+    let monthNum: number
+    
+    // Check if month is already a number or needs conversion
+    if (isNaN(parseInt(month))) {
+      // Month is Polish name, convert to number
+      const monthNames = [
+        'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+      ]
+      const decodedMonth = decodeURIComponent(month)
+      monthNum = monthNames.findIndex(m => m.toLowerCase() === decodedMonth.toLowerCase())
+    } else {
+      monthNum = parseInt(month) - 1
+    }
+    
+    const startDate = new Date(yearNum, monthNum, 1)
+    const endDate = new Date(yearNum, monthNum + 1, 0, 23, 59, 59)
+    
+    return { from: startDate, to: endDate }
+  }
+
   useEffect(() => {
     if (!isAuthenticated) return
-    fetchMonthData()
+    fetchAnalyticsData()
   }, [isAuthenticated, year, month])
 
-  const fetchMonthData = async () => {
+  const fetchAnalyticsData = async () => {
     try {
       setLoading(true)
       setError('')
       
-      const response = await authorizedFetch('/api/archive')
-      const allMonths = await response.json()
+      const dateRange = getMonthDateRange(year, month)
+      console.log('Fetching analytics for date range:', dateRange)
       
-      console.log('All months from API:', allMonths)
-      console.log('Looking for year:', year, 'month:', month)
-      console.log('API response type:', typeof allMonths, 'is array:', Array.isArray(allMonths))
-      
-      // Debug each month structure
-      allMonths.forEach((m: MonthData, index: number) => {
-        console.log(`Month ${index}:`, {
-          year: m.year,
-          month: m.month,
-          hasMonth: !!m.month,
-          monthType: typeof m.month
-        })
-      })
-      
-      // Decode URL-encoded month name
-      const decodedMonth = decodeURIComponent(month)
-      console.log('Decoded month:', decodedMonth)
-      
-      // Check if month is already a Polish name or if it's a number
-      let monthName: string
-      if (isNaN(parseInt(month))) {
-        // Month is already a Polish name (URL-encoded)
-        monthName = decodedMonth
-      } else {
-        // Month is a number, convert to Polish name
-        const monthNames = [
-          'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-          'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
-        ]
-        const monthIndex = parseInt(month) - 1
-        monthName = monthNames[monthIndex]
+      const params = new URLSearchParams()
+      if (dateRange.from && dateRange.to) {
+        params.append('startDate', dateRange.from.toISOString())
+        params.append('endDate', dateRange.to.toISOString())
       }
+
+      const response = await authorizedFetch(`/api/analytics?${params.toString()}`)
+      const analyticsData = await response.json()
       
-      console.log('Looking for month name:', monthName)
-      
-      // Find the specific month - filter out invalid months first
-      const validMonths = allMonths.filter((m: MonthData) => m.month && typeof m.month === 'string')
-      console.log('Valid months:', validMonths.length, 'out of', allMonths.length)
-      
-      const targetMonth = validMonths.find((m: MonthData) => 
-        m.year.toString() === year && 
-        m.month.toLowerCase() === monthName.toLowerCase()
-      )
-      
-      console.log('Found month:', targetMonth)
-      
-      if (targetMonth) {
-        setMonthData(targetMonth)
+      if (response.ok) {
+        setData(analyticsData)
       } else {
-        setError('Nie znaleziono danych dla tego miesiąca')
+        setError(analyticsData.error || 'Błąd pobierania danych analitycznych')
       }
     } catch (err) {
-      console.error('Error fetching month data:', err)
-      setError('Błąd pobierania danych miesiąca')
+      console.error('Error fetching analytics data:', err)
+      setError('Błąd połączenia z serwerem')
     } finally {
       setLoading(false)
     }
@@ -164,71 +185,7 @@ export default function ArchiveMonthPage() {
     router.push('/archive')
   }
 
-  // Convert archive data to Analytics format
-  const convertToSpendingTree = (data: MonthData): SpendingTreeNode[] => {
-    const spendingTree: SpendingTreeNode[] = []
-    
-    // Group envelopes by their group (assuming they have a group property)
-    const groupedEnvelopes: { [key: string]: any[] } = {}
-    
-    data.envelopes.forEach(envelope => {
-      // For now, we'll create a simple structure
-      // In a real app, envelopes would have a group property
-      const groupName = 'Wydatki' // Default group
-      if (!groupedEnvelopes[groupName]) {
-        groupedEnvelopes[groupName] = []
-      }
-      groupedEnvelopes[groupName].push(envelope)
-    })
-    
-    // Create spending tree structure
-    Object.entries(groupedEnvelopes).forEach(([groupName, envelopes]) => {
-      const groupTotal = envelopes.reduce((sum, env) => sum + env.totalSpent, 0)
-      
-      const groupNode: SpendingTreeNode = {
-        type: 'GROUP',
-        id: groupName.toLowerCase().replace(/\s+/g, '-'),
-        name: groupName,
-        total: groupTotal,
-        children: envelopes.map(envelope => {
-          const envelopeNode: SpendingTreeNode = {
-            type: 'ENVELOPE',
-            id: envelope.name.toLowerCase().replace(/\s+/g, '-'),
-            name: envelope.name,
-            total: envelope.totalSpent,
-            children: envelope.categories.map((category: any) => ({
-              type: 'CATEGORY' as const,
-              id: category.name.toLowerCase().replace(/\s+/g, '-'),
-              name: category.name,
-              total: category.amount,
-              children: category.transactions.map((transaction: any) => ({
-                type: 'TRANSACTION' as const,
-                id: transaction.id,
-                name: transaction.description,
-                total: transaction.amount,
-                date: transaction.date,
-                description: transaction.description,
-                amount: transaction.amount
-              }))
-            }))
-          }
-          return envelopeNode
-        })
-      }
-      
-      spendingTree.push(groupNode)
-    })
-    
-    return spendingTree
-  }
-
-  // Prepare chart data
-  const chartData = monthData ? monthData.envelopes.map(env => ({
-    name: env.name,
-    value: env.totalSpent
-  })) : []
-
-  // Handle segment click from chart
+  // Exact same functions as Analytics
   const handleSegmentClick = (segmentName: string, segmentValue?: number) => {
     if (selectedItem?.name === segmentName) {
       setSelectedItem(null)
@@ -237,7 +194,6 @@ export default function ArchiveMonthPage() {
       return
     }
 
-    // Find item in spending tree
     const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
       for (const node of nodes) {
         if (node.name === segmentName) return node
@@ -249,16 +205,21 @@ export default function ArchiveMonthPage() {
       return null
     }
     
-    const spendingTree = monthData ? convertToSpendingTree(monthData) : []
-    const item = findItem(spendingTree)
+    const item = findItem(data?.spendingTree || [])
     if (item) {
       setSelectedItem(item)
       setHighlightedGroup(segmentName)
       setHighlightedEnvelope(null)
+      
+      setTimeout(() => {
+        const explorerElement = document.getElementById('expense-explorer')
+        if (explorerElement) {
+          explorerElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
     }
   }
 
-  // Handle explorer item click
   const handleExplorerItemClick = (item: SpendingTreeNode | null) => {
     if (!item) {
       setSelectedItem(null)
@@ -281,6 +242,56 @@ export default function ArchiveMonthPage() {
     }
   }
 
+  // Prepare data for charts (exact same as Analytics)
+  const chartData = useMemo(() => {
+    if (!data?.spendingTree) return []
+    
+    return data.spendingTree.map((group, index) => ({
+      name: group.name,
+      value: group.total,
+      color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'][index % 10]
+    }))
+  }, [data?.spendingTree])
+
+  const trendsData = useMemo(() => {
+    if (!data?.trends) return []
+    
+    if (selectedItem) {
+      if (selectedItem.type === 'ENVELOPE') {
+        const envelopeName = selectedItem.name
+        const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
+        return envelopeTrends
+      } else if (selectedItem.type === 'GROUP') {
+        const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
+        
+        if (groupEnvelopes.length > 0) {
+          const groupTrends: { [key: string]: number } = {}
+          
+          groupEnvelopes.forEach(envelope => {
+            const envelopeName = envelope.name
+            const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
+            
+            if (envelopeTrends.length > 0) {
+              envelopeTrends.forEach(trend => {
+                if (!groupTrends[trend.period]) {
+                  groupTrends[trend.period] = 0
+                }
+                groupTrends[trend.period] += trend.value
+              })
+            }
+          })
+          
+          return Object.entries(groupTrends).map(([period, value]) => ({
+            period,
+            value
+          }))
+        }
+      }
+    }
+    
+    return data.trends.totalExpenses || []
+  }, [data?.trends, selectedItem])
+
   if (isCheckingAuth) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -293,7 +304,7 @@ export default function ArchiveMonthPage() {
     return null
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="min-h-screen bg-theme-primary">
         <TopNavigation />
@@ -301,38 +312,53 @@ export default function ArchiveMonthPage() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '50vh'
+          height: 'calc(100vh - 80px)'
         }}>
-          <LoadingSpinner size="large" text="Ładowanie danych miesiąca..." />
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              border: '4px solid var(--border-primary)',
+              borderTop: '4px solid var(--accent-primary)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <div style={{
+              fontSize: '18px',
+              color: 'var(--text-secondary)'
+            }}>
+              📊 Ładowanie analiz...
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (error || !monthData) {
+  if (!data) {
     return (
       <div className="min-h-screen bg-theme-primary">
         <TopNavigation />
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '50vh'
-        }}>
-          <div className="bg-theme-secondary card" style={{
-            padding: '32px',
-            borderRadius: '12px',
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+          <div style={{
             textAlign: 'center',
-            color: 'var(--accent-error)',
-            border: '1px solid var(--accent-error)',
-            maxWidth: '400px'
+            padding: '40px',
+            color: 'var(--text-secondary)'
           }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-            <p style={{ fontSize: '18px', marginBottom: '8px', fontWeight: '600' }}>Błąd ładowania</p>
-            <p style={{ fontSize: '14px', marginBottom: '16px' }}>{error}</p>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+              Błąd ładowania danych
+            </div>
+            <div style={{ fontSize: '14px', marginBottom: '16px' }}>
+              {error || 'Nie znaleziono danych dla tego miesiąca'}
+            </div>
             <button
               onClick={goBack}
-              className="nav-button"
               style={{
                 padding: '8px 16px',
                 backgroundColor: 'var(--accent-primary)',
@@ -350,8 +376,20 @@ export default function ArchiveMonthPage() {
     )
   }
 
-  const savingsRate = monthData.income > 0 ? (monthData.balance / monthData.income) : 0
-  const spendingTree = monthData ? convertToSpendingTree(monthData) : []
+  // Get month name for display
+  const getMonthDisplayName = () => {
+    const monthNames = [
+      'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+    ]
+    
+    if (isNaN(parseInt(month))) {
+      return decodeURIComponent(month)
+    } else {
+      const monthIndex = parseInt(month) - 1
+      return monthNames[monthIndex] || month
+    }
+  }
 
   return (
     <div className="min-h-screen bg-theme-primary">
@@ -396,7 +434,7 @@ export default function ArchiveMonthPage() {
               gap: '12px'
             }}>
               <Calendar size={32} />
-              {monthData.month} {monthData.year}
+              {getMonthDisplayName()} {year}
             </h1>
             <p style={{
               fontSize: '16px',
@@ -410,17 +448,13 @@ export default function ArchiveMonthPage() {
 
         {/* Key Metrics Cards */}
         <KeyMetricsCards
-          currentPeriod={{
-            income: monthData.income,
-            expense: monthData.expenses,
-            balance: monthData.balance,
-            savingsRate: savingsRate
-          }}
+          currentPeriod={data.mainMetrics.currentPeriod}
+          previousPeriod={data.mainMetrics.previousPeriod}
           compareMode={false}
           loading={loading}
         />
 
-        {/* Analytics Charts */}
+        {/* Visualizations - EXACT SAME AS ANALYTICS */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
@@ -429,15 +463,20 @@ export default function ArchiveMonthPage() {
         }}>
           <AnalyticsCharts 
             data={chartData} 
-            total={monthData.expenses}
+            total={data.mainMetrics.currentPeriod.expense}
             onSegmentClick={handleSegmentClick}
+          />
+          <TrendsVisualization
+            data={trendsData}
+            selectedItem={selectedItem?.name}
+            loading={loading}
           />
         </div>
 
         {/* Interactive Expense Explorer */}
         <div id="expense-explorer">
           <InteractiveExpenseExplorer
-            data={spendingTree}
+            data={data.spendingTree}
             compareMode={false}
             onItemClick={handleExplorerItemClick}
             loading={loading}
