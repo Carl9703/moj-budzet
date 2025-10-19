@@ -3,15 +3,14 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { TopNavigation } from '@/components/ui/TopNavigation'
+import { KeyMetricsCards } from '@/components/analytics/KeyMetricsCards'
+import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts'
+import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { ArrowLeft, Calendar, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { ArrowLeft, Calendar } from 'lucide-react'
 import { formatMoney } from '@/lib/utils/money'
-
-// Lazy load analytics components
-const DonutChart = lazy(() => import('@tremor/react').then(m => ({ default: m.DonutChart })))
-const BarChart = lazy(() => import('@tremor/react').then(m => ({ default: m.BarChart })))
 
 interface MonthData {
   month: string
@@ -55,6 +54,24 @@ interface MonthData {
   }>
 }
 
+// Interfaces for Analytics components
+interface SpendingTreeNode {
+  type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
+  id: string
+  name: string
+  total: number
+  comparison?: {
+    previousTotal: number
+    change: number
+    changePercent: number
+  }
+  children?: SpendingTreeNode[]
+  date?: string
+  description?: string
+  amount?: number
+  categoryId?: string
+}
+
 export default function ArchiveMonthPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
   const params = useParams()
@@ -62,6 +79,11 @@ export default function ArchiveMonthPage() {
   const [monthData, setMonthData] = useState<MonthData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
+  
+  // State for Analytics components
+  const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
+  const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
+  const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
 
   const year = params.year as string
   const month = params.month as string
@@ -142,6 +164,123 @@ export default function ArchiveMonthPage() {
     router.push('/archive')
   }
 
+  // Convert archive data to Analytics format
+  const convertToSpendingTree = (data: MonthData): SpendingTreeNode[] => {
+    const spendingTree: SpendingTreeNode[] = []
+    
+    // Group envelopes by their group (assuming they have a group property)
+    const groupedEnvelopes: { [key: string]: any[] } = {}
+    
+    data.envelopes.forEach(envelope => {
+      // For now, we'll create a simple structure
+      // In a real app, envelopes would have a group property
+      const groupName = 'Wydatki' // Default group
+      if (!groupedEnvelopes[groupName]) {
+        groupedEnvelopes[groupName] = []
+      }
+      groupedEnvelopes[groupName].push(envelope)
+    })
+    
+    // Create spending tree structure
+    Object.entries(groupedEnvelopes).forEach(([groupName, envelopes]) => {
+      const groupTotal = envelopes.reduce((sum, env) => sum + env.totalSpent, 0)
+      
+      const groupNode: SpendingTreeNode = {
+        type: 'GROUP',
+        id: groupName.toLowerCase().replace(/\s+/g, '-'),
+        name: groupName,
+        total: groupTotal,
+        children: envelopes.map(envelope => {
+          const envelopeNode: SpendingTreeNode = {
+            type: 'ENVELOPE',
+            id: envelope.name.toLowerCase().replace(/\s+/g, '-'),
+            name: envelope.name,
+            total: envelope.totalSpent,
+            children: envelope.categories.map(category => ({
+              type: 'CATEGORY' as const,
+              id: category.name.toLowerCase().replace(/\s+/g, '-'),
+              name: category.name,
+              total: category.amount,
+              children: category.transactions.map(transaction => ({
+                type: 'TRANSACTION' as const,
+                id: transaction.id,
+                name: transaction.description,
+                total: transaction.amount,
+                date: transaction.date,
+                description: transaction.description,
+                amount: transaction.amount
+              }))
+            }))
+          }
+          return envelopeNode
+        })
+      }
+      
+      spendingTree.push(groupNode)
+    })
+    
+    return spendingTree
+  }
+
+  // Prepare chart data
+  const chartData = monthData ? monthData.envelopes.map(env => ({
+    name: env.name,
+    value: env.totalSpent
+  })) : []
+
+  // Handle segment click from chart
+  const handleSegmentClick = (segmentName: string, segmentValue?: number) => {
+    if (selectedItem?.name === segmentName) {
+      setSelectedItem(null)
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+      return
+    }
+
+    // Find item in spending tree
+    const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
+      for (const node of nodes) {
+        if (node.name === segmentName) return node
+        if (node.children) {
+          const found = findItem(node.children)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    
+    const spendingTree = monthData ? convertToSpendingTree(monthData) : []
+    const item = findItem(spendingTree)
+    if (item) {
+      setSelectedItem(item)
+      setHighlightedGroup(segmentName)
+      setHighlightedEnvelope(null)
+    }
+  }
+
+  // Handle explorer item click
+  const handleExplorerItemClick = (item: SpendingTreeNode | null) => {
+    if (!item) {
+      setSelectedItem(null)
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+      return
+    }
+
+    setSelectedItem(item)
+    
+    if (item.type === 'GROUP') {
+      setHighlightedGroup(item.name)
+      setHighlightedEnvelope(null)
+    } else if (item.type === 'ENVELOPE') {
+      setHighlightedEnvelope(item.name)
+      setHighlightedGroup(null)
+    } else {
+      setHighlightedGroup(null)
+      setHighlightedEnvelope(null)
+    }
+  }
+
   if (isCheckingAuth) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -211,21 +350,8 @@ export default function ArchiveMonthPage() {
     )
   }
 
-  const savingsRate = monthData.income > 0 ? Math.round((monthData.balance / monthData.income) * 100) : 0
-  const isPositiveBalance = monthData.balance >= 0
-
-  // Prepare data for charts
-  const envelopeChartData = monthData.envelopes.map(env => ({
-    name: env.name,
-    value: env.totalSpent,
-    icon: env.icon
-  }))
-
-  const transferChartData = monthData.transfers.map(transfer => ({
-    name: transfer.name,
-    value: transfer.amount,
-    icon: transfer.icon
-  }))
+  const savingsRate = monthData.income > 0 ? (monthData.balance / monthData.income) : 0
+  const spendingTree = monthData ? convertToSpendingTree(monthData) : []
 
   return (
     <div className="min-h-screen bg-theme-primary">
@@ -282,229 +408,42 @@ export default function ArchiveMonthPage() {
           </div>
         </div>
 
-        {/* KPIs */}
+        {/* Key Metrics Cards */}
+        <KeyMetricsCards
+          currentPeriod={{
+            income: monthData.income,
+            expense: monthData.expenses,
+            balance: monthData.balance,
+            savingsRate: savingsRate
+          }}
+          compareMode={false}
+          loading={loading}
+        />
+
+        {/* Analytics Charts */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px',
-          marginBottom: '32px'
-        }}>
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', color: 'var(--accent-success)' }}>
-              <TrendingUp size={24} />
-              <span style={{ fontSize: '14px', fontWeight: '600' }}>Przychody</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--accent-success)' }}>
-              +{formatMoney(monthData.income)}
-            </div>
-          </div>
-
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', color: 'var(--accent-error)' }}>
-              <TrendingDown size={24} />
-              <span style={{ fontSize: '14px', fontWeight: '600' }}>Wydatki</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--accent-error)' }}>
-              -{formatMoney(monthData.expenses)}
-            </div>
-          </div>
-
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', color: 'var(--accent-info)' }}>
-              <DollarSign size={24} />
-              <span style={{ fontSize: '14px', fontWeight: '600' }}>Bilans</span>
-            </div>
-            <div style={{ 
-              fontSize: '24px', 
-              fontWeight: '700', 
-              color: isPositiveBalance ? 'var(--accent-success)' : 'var(--accent-error)' 
-            }}>
-              {isPositiveBalance ? '+' : ''}{formatMoney(monthData.balance)}
-            </div>
-          </div>
-
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)',
-            textAlign: 'center'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', color: 'var(--accent-warning)' }}>
-              <span style={{ fontSize: '20px' }}>📊</span>
-              <span style={{ fontSize: '14px', fontWeight: '600' }}>Oszczędności</span>
-            </div>
-            <div style={{ 
-              fontSize: '24px', 
-              fontWeight: '700', 
-              color: savingsRate >= 20 ? 'var(--accent-success)' : savingsRate >= 10 ? 'var(--accent-warning)' : 'var(--accent-error)' 
-            }}>
-              {savingsRate}%
-            </div>
-          </div>
-        </div>
-
-        {/* Charts */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
           gap: '24px',
-          marginBottom: '32px'
-        }}>
-          {/* Envelope spending chart */}
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: 'var(--text-primary)',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              📦 Wydatki z kopert
-            </h3>
-            <Suspense fallback={<div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Ładowanie wykresu...</div>}>
-              <DonutChart
-                data={envelopeChartData}
-                category="value"
-                index="name"
-                colors={['blue', 'green', 'yellow', 'red', 'purple', 'orange', 'pink', 'indigo']}
-                className="h-48"
-              />
-            </Suspense>
-          </div>
-
-          {/* Transfer chart */}
-          <div className="bg-theme-secondary card" style={{
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-primary)'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: 'var(--text-primary)',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              🔄 Transfery i przelewy
-            </h3>
-            <Suspense fallback={<div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Ładowanie wykresu...</div>}>
-              <DonutChart
-                data={transferChartData}
-                category="value"
-                index="name"
-                colors={['cyan', 'teal', 'emerald', 'lime', 'amber', 'rose']}
-                className="h-48"
-              />
-            </Suspense>
-          </div>
-        </div>
-
-        {/* Interactive Explorer */}
-        <div className="bg-theme-secondary card" style={{
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid var(--border-primary)',
           marginBottom: '24px'
         }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            🔍 Interaktywny eksplorator wydatków
-          </h3>
-          <div className="space-y-6">
-            {/* Koperty */}
-            {monthData.envelopes.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  📦 Koperty ({monthData.envelopes.length})
-                </h3>
-                <div className="space-y-3">
-                  {monthData.envelopes.map((envelope, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{envelope.icon}</span>
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{envelope.name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {envelope.categories.length} kategorii
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-red-600 dark:text-red-400">
-                          {formatMoney(envelope.totalSpent)}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {envelope.percentage}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <AnalyticsCharts 
+            data={chartData} 
+            total={monthData.expenses}
+            onSegmentClick={handleSegmentClick}
+          />
+        </div>
 
-            {/* Transfery */}
-            {monthData.transfers.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  🔄 Transfery ({monthData.transfers.length})
-                </h3>
-                <div className="space-y-3">
-                  {monthData.transfers.map((transfer, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{transfer.icon}</span>
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{transfer.name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {transfer.transactions.length} transakcji
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-blue-600 dark:text-blue-400">
-                          {formatMoney(transfer.amount)}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {transfer.percentage}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Interactive Expense Explorer */}
+        <div id="expense-explorer">
+          <InteractiveExpenseExplorer
+            data={spendingTree}
+            compareMode={false}
+            onItemClick={handleExplorerItemClick}
+            loading={loading}
+            highlightedGroup={highlightedGroup}
+            highlightedEnvelope={highlightedEnvelope}
+          />
         </div>
       </div>
     </div>
