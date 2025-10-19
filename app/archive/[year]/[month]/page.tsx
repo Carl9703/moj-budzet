@@ -196,12 +196,12 @@ export default function ArchiveMonthPage() {
             id: envelope.name.toLowerCase().replace(/\s+/g, '-'),
             name: envelope.name,
             total: envelope.totalSpent,
-            children: envelope.categories.map(category => ({
+            children: envelope.categories.map((category: any) => ({
               type: 'CATEGORY' as const,
               id: category.name.toLowerCase().replace(/\s+/g, '-'),
               name: category.name,
               total: category.amount,
-              children: category.transactions.map(transaction => ({
+              children: category.transactions.map((transaction: any) => ({
                 type: 'TRANSACTION' as const,
                 id: transaction.id,
                 name: transaction.description,
