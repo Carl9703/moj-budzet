@@ -73,13 +73,13 @@ const getItemIcon = (type: string, name?: string, categoryId?: string): string =
   return iconMap[type]?.[name || ''] || iconMap[type]?.default || '📦'
 }
 
-// Professional money formatter
+// Professional money formatter (always 2 decimals)
 const formatMoney = (amount: number): string => {
   return new Intl.NumberFormat('pl-PL', {
     style: 'currency',
     currency: 'PLN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(amount)
 }
 

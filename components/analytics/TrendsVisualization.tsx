@@ -42,8 +42,11 @@ export function TrendsVisualization({
     return `${monthNames[parseInt(month) - 1]} ${year.slice(-2)}`
   }
 
-  // Przygotowanie danych dla wykresu
-  const chartData = data.map(item => ({
+  // Przygotowanie danych dla wykresu (tylko bieżący rok)
+  const currentYear = new Date().getFullYear().toString()
+  const chartData = data
+    .filter(item => item.period.split('-')[0] === currentYear)
+    .map(item => ({
     period: formatPeriod(item.period),
     wydatki: item.value
   }))
