@@ -48,13 +48,13 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
   })
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
-  const [isActivePanelOpen, setIsActivePanelOpen] = useState(false)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
   // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {
     const count = Object.values(filters).filter(value => 
       value !== '' && value !== 'date' && value !== 'desc'
     ).length
+    console.log('Active filters count:', count, 'Filters:', filters)
     setActiveFiltersCount(count)
   }, [filters])
 
@@ -242,116 +242,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
               <button onClick={clearFilters} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-primary)', textDecoration: 'underline' }}>
                 Wyczyść
               </button>
-            </div>
-          )}
-          {activeFiltersCount > 0 && (
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => setIsActivePanelOpen(prev => !prev)}
-                style={{
-                  padding: '10px 12px',
-                  backgroundColor: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-primary)',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer'
-                }}
-              >
-                Aktywne filtry ({activeFiltersCount})
-              </button>
-              {/* Dropdown aktywnych filtrów */}
-              <div
-                style={{
-                  display: isActivePanelOpen ? 'block' : 'none',
-                  position: 'absolute',
-                  right: 0,
-                  marginTop: '8px',
-                  width: '320px',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-primary)',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '10px',
-                  zIndex: 1000
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Aktywne filtry</span>
-                  <button
-                    onClick={clearFilters}
-                    style={{
-                      padding: '6px 8px',
-                      backgroundColor: 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-primary)',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Wyczyść wszystkie
-                  </button>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {filters.search && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Szukaj: {filters.search}
-                      <button onClick={() => clearFilter('search')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.type && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Typ: {getTypeLabel(filters.type)}
-                      <button onClick={() => clearFilter('type')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.envelope && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Koperta: {getEnvelopeLabel(filters.envelope)}
-                      <button onClick={() => clearFilter('envelope')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.category && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Kategoria: {getCategoryName(filters.category)}
-                      <button onClick={() => clearFilter('category')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.group && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Grupa: {getGroupTranslation(filters.group)}
-                      <button onClick={() => clearFilter('group')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.startDate && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Od: {filters.startDate}
-                      <button onClick={() => clearFilter('startDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                  {filters.endDate && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Do: {filters.endDate}
-                      <button onClick={() => clearFilter('endDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           )}
           <button
