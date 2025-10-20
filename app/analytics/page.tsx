@@ -1,12 +1,6 @@
 ﻿'use client' // Potrzebne dla useState, useEffect, useMemo
 import { useState, useEffect, useMemo } from 'react'
-import { TopNavigation } from '@/components/ui/TopNavigation'
-import { GlobalFilters } from '@/components/analytics/GlobalFilters'
-import { KeyMetricsCards } from '@/components/analytics/KeyMetricsCards'
-import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
-import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
-import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
-import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts' // <-- NOWY KOMPONENT
+import { TopNavigation, GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts } from '@/components'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
