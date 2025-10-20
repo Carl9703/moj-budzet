@@ -1,9 +1,2 @@
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-}
-
-export default nextConfig
+// Deprecated: migrated to next.config.mjs to avoid TS requirement during build
+export default {}
