@@ -99,6 +99,24 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     return translations[group] || group
   }
 
+  const getTypeLabel = (type: string) => {
+    if (type === 'income') return 'Przychody'
+    if (type === 'expense') return 'Wydatki'
+    if (type === 'transfer') return 'Transfery'
+    return ''
+  }
+
+  const getEnvelopeLabel = (id: string) => {
+    const env = filterOptions.envelopes.find(e => e.id === id)
+    return env ? `${env.icon} ${env.name}` : ''
+  }
+
+  const clearFilter = (key: keyof FilterState) => {
+    const newFilters = { ...filters, [key]: '' }
+    setFilters(newFilters)
+    onFiltersChange(newFilters)
+  }
+
   return (
     <div style={{
       backgroundColor: 'var(--bg-secondary)',
@@ -108,108 +126,199 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
       marginBottom: '20px',
       overflow: 'hidden'
     }}>
-      {/* Nagłówek z przyciskami */}
+      {/* Pasek głównych filtrów zawsze widoczny */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
+        display: 'grid',
+        gridTemplateColumns: '1fr 200px 200px auto',
+        gap: '12px',
         alignItems: 'center',
-        padding: '16px 20px',
-        borderBottom: '1px solid var(--border-primary)'
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--border-primary)',
+        backgroundColor: 'var(--bg-secondary)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Filter size={20} color="var(--accent-primary)" />
-          <h3 style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-            margin: 0
-          }}>
-            Filtry i wyszukiwanie
-          </h3>
-          {activeFiltersCount > 0 && (
-            <span style={{
-              backgroundColor: 'var(--accent-primary)',
-              color: 'white',
-              fontSize: '12px',
-              fontWeight: '600',
-              padding: '2px 8px',
-              borderRadius: '12px'
-            }}>
-              {activeFiltersCount}
-            </span>
-          )}
+        {/* Wyszukiwarka */}
+        <div style={{ position: 'relative' }}>
+          <Search 
+            size={16} 
+            style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--text-tertiary)'
+            }}
+          />
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            onKeyPress={handleSearchKeyPress}
+            placeholder="Szukaj... (Enter)"
+            style={{
+              width: '100%',
+              padding: '10px 12px 10px 36px',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)',
+              fontSize: '14px'
+            }}
+          />
         </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+        {/* Typ */}
+        <select
+          value={filters.type}
+          onChange={(e) => handleFilterChange('type', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '8px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
+            fontSize: '14px'
+          }}
+        >
+          <option value="">Wszystkie typy</option>
+          <option value="income">💰 Przychody</option>
+          <option value="expense">💸 Wydatki</option>
+          <option value="transfer">🔄 Transfery</option>
+        </select>
+
+        {/* Koperta */}
+        <select
+          value={filters.envelope}
+          onChange={(e) => handleFilterChange('envelope', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '8px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
+            fontSize: '14px'
+          }}
+        >
+          <option value="">Wszystkie koperty</option>
+          {filterOptions.envelopes.map(envelope => (
+            <option key={envelope.id} value={envelope.id}>
+              {envelope.icon} {envelope.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Akcje */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
           <button
             onClick={clearFilters}
             style={{
-              padding: '6px 12px',
+              padding: '10px 12px',
               backgroundColor: 'var(--bg-tertiary)',
               border: '1px solid var(--border-primary)',
-              borderRadius: '6px',
-              fontSize: '12px',
+              borderRadius: '8px',
+              fontSize: '13px',
               color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '6px'
             }}
           >
-            <X size={14} />
-            Wyczyść filtry
+            <X size={14} /> Wyczyść
           </button>
         </div>
       </div>
 
-      {/* Panel filtrów */}
-        <div style={{ padding: '20px' }}>
+      {/* Pigułki aktywnych filtrów */}
+      {activeFiltersCount > 0 && (
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          padding: '10px 16px',
+          borderBottom: '1px solid var(--border-primary)'
+        }}>
+          {filters.type && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '9999px',
+              padding: '6px 10px',
+              fontSize: '12px',
+              color: 'var(--text-secondary)'
+            }}>
+              Typ: {getTypeLabel(filters.type)}
+              <button onClick={() => clearFilter('type')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+          {filters.envelope && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '9999px',
+              padding: '6px 10px',
+              fontSize: '12px',
+              color: 'var(--text-secondary)'
+            }}>
+              Koperta: {getEnvelopeLabel(filters.envelope)}
+              <button onClick={() => clearFilter('envelope')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+          {filters.category && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              Kategoria: {getCategoryName(filters.category)}
+              <button onClick={() => clearFilter('category')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+          {filters.group && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              Grupa: {getGroupTranslation(filters.group)}
+              <button onClick={() => clearFilter('group')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+          {filters.startDate && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              Od: {filters.startDate}
+              <button onClick={() => clearFilter('startDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+          {filters.endDate && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', borderRadius: '9999px', padding: '6px 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              Do: {filters.endDate}
+              <button onClick={() => clearFilter('endDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Reszta filtrów w panelu (zaawansowane) */}
+      <div style={{ padding: '16px' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '16px',
             marginBottom: '20px'
           }}>
-            {/* Wyszukiwanie tekstowe */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '500',
-                color: 'var(--text-secondary)',
-                marginBottom: '6px'
-              }}>
-                Wyszukaj w opisie
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Search 
-                  size={16} 
-                  style={{
-                    position: 'absolute',
-                    left: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-tertiary)'
-                  }}
-                />
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  onKeyPress={handleSearchKeyPress}
-                  placeholder="np. zakupy, rachunek... (naciśnij Enter)"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px 10px 36px',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-            </div>
+            {/* Kategoria i Grupa przeniesione jako zaawansowane */}
 
             {/* Typ transakcji */}
             <div>
@@ -342,7 +451,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             </div>
           </div>
 
-          {/* Filtry dat */}
+      {/* Filtry dat */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
