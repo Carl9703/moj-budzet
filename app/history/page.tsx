@@ -79,7 +79,7 @@ export default function HistoryPage() {
         setTransactions(Array.isArray(data) ? data : [])
       }
     } catch (err) {
-      console.error('Error:', err)
+      console.error('Error fetching transactions:', err)
       setTransactions([])
     } finally {
       setLoading(false)
@@ -89,6 +89,22 @@ export default function HistoryPage() {
   const handleFiltersChange = (newFilters: FilterState) => {
     setFilters(newFilters)
     fetchTransactions(newFilters)
+  }
+  
+  const resetFilters = () => {
+    const defaultFilters: FilterState = {
+      search: '',
+      startDate: '',
+      endDate: '',
+      type: '',
+      category: '',
+      group: '',
+      envelope: '',
+      sortBy: 'date',
+      sortOrder: 'desc'
+    }
+    setFilters(defaultFilters)
+    fetchTransactions(defaultFilters)
   }
   
   useEffect(() => {
@@ -125,9 +141,28 @@ export default function HistoryPage() {
     <div className="min-h-screen bg-theme-primary">
       <TopNavigation />
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-        <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
-          📜 Historia transakcji
-        </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>
+            📜 Historia transakcji
+          </h1>
+          <button
+            onClick={resetFilters}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: 'var(--accent-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            🔄 Wyczyść filtry
+          </button>
+        </div>
         
         {/* Panel filtrów */}
         <TransactionFilters

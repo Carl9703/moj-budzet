@@ -34,22 +34,12 @@ export async function GET(request: NextRequest) {
         const whereClause: any = { userId }
         
         // Filtry podstawowe
-        if (envelopeId) {
-            whereClause.envelopeId = envelopeId
-        }
-        
         if (transactionType) {
             whereClause.type = transactionType
         }
         
         if (category) {
             whereClause.category = category
-        }
-        
-        // Filtr pojedynczej koperty (envelope)
-        const envelope = searchParams.get('envelope')
-        if (envelope) {
-            whereClause.envelopeId = envelope
         }
         
         // Wyszukiwanie tekstowe
@@ -79,11 +69,19 @@ export async function GET(request: NextRequest) {
             }
         }
         
-        // Filtrowanie po grupie kopert
-        if (group) {
+        // Filtrowanie po kopertach - priorytet: konkretna koperta > grupa > envelopeId
+        const envelope = searchParams.get('envelope')
+        if (envelope) {
+            // Konkretna koperta ma najwyższy priorytet
+            whereClause.envelopeId = envelope
+        } else if (group) {
+            // Filtrowanie po grupie kopert
             whereClause.envelope = {
                 group: group
             }
+        } else if (envelopeId) {
+            // Fallback na envelopeId
+            whereClause.envelopeId = envelopeId
         }
 
         // Przygotuj sortowanie
@@ -150,8 +148,9 @@ export async function GET(request: NextRequest) {
         })
 
     } catch (error) {
+        console.error('Error fetching transactions:', error)
         return NextResponse.json(
-            { error: 'Błąd pobierania transakcji' },
+            { error: 'Błąd pobierania transakcji', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )
     }
