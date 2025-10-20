@@ -20,6 +20,7 @@ interface TransactionFiltersProps {
   onFiltersChange: (filters: FilterState) => void
   filterOptions: FilterOptions
   loading?: boolean
+  initialFilters?: FilterState
 }
 
 export interface FilterState {
@@ -34,7 +35,7 @@ export interface FilterState {
   sortOrder: 'asc' | 'desc'
 }
 
-export function TransactionFilters({ onFiltersChange, filterOptions, loading: _loading = false }: TransactionFiltersProps) {
+export function TransactionFilters({ onFiltersChange, filterOptions, loading: _loading = false, initialFilters }: TransactionFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     startDate: '',
@@ -49,6 +50,14 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
+
+  // Synchronizuj stan z initialFilters
+  useEffect(() => {
+    if (initialFilters) {
+      console.log('TransactionFilters: syncing with initialFilters:', initialFilters)
+      setFilters(initialFilters)
+    }
+  }, [initialFilters])
 
   // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {

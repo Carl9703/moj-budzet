@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { TransactionFilters, FilterState } from '@/components/transactions/TransactionFilters'
 import { TransactionTable } from '@/components/transactions/TransactionTable'
 import { TopNavigation } from '@/components/ui/TopNavigation'
@@ -40,6 +40,9 @@ export default function HistoryPage() {
     groups: [],
     envelopes: []
   })
+
+  // Memoize filterOptions to prevent unnecessary re-renders
+  const memoizedFilterOptions = useMemo(() => filterOptions, [filterOptions])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -88,11 +91,11 @@ export default function HistoryPage() {
     }
   }
   
-  const handleFiltersChange = (newFilters: FilterState) => {
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
     console.log('History: handleFiltersChange called with:', newFilters)
     setFilters(newFilters)
     fetchTransactions(newFilters)
-  }
+  }, [])
   
   const resetFilters = () => {
     const defaultFilters: FilterState = {
@@ -169,9 +172,11 @@ export default function HistoryPage() {
         
         {/* Panel filtrów */}
         <TransactionFilters
+          key="transaction-filters"
           onFiltersChange={handleFiltersChange}
-          filterOptions={filterOptions}
+          filterOptions={memoizedFilterOptions}
           loading={loading}
+          initialFilters={filters}
         />
         
         {/* Tabela transakcji */}
