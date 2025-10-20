@@ -113,6 +113,18 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
     return env ? `${env.icon} ${env.name}` : ''
   }
 
+  const getActiveFilterLabels = (): string[] => {
+    const labels: string[] = []
+    if (filters.search) labels.push(`Szukaj: ${filters.search}`)
+    if (filters.type) labels.push(`Typ: ${getTypeLabel(filters.type)}`)
+    if (filters.envelope) labels.push(`Koperta: ${getEnvelopeLabel(filters.envelope)}`)
+    if (filters.category) labels.push(`Kategoria: ${getCategoryName(filters.category)}`)
+    if (filters.group) labels.push(`Grupa: ${getGroupTranslation(filters.group)}`)
+    if (filters.startDate) labels.push(`Od: ${filters.startDate}`)
+    if (filters.endDate) labels.push(`Do: ${filters.endDate}`)
+    return labels
+  }
+
   const clearFilter = (key: keyof FilterState) => {
     const newFilters = { ...filters, [key]: '' }
     setFilters(newFilters)
@@ -191,7 +203,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
         
 
         {/* Akcje */}
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center', position: 'relative', flexWrap: 'wrap' }}>
           {activeFiltersCount > 0 && (
             <div style={{
               display: 'inline-flex',
@@ -202,10 +214,14 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
               borderRadius: '9999px',
               padding: '6px 10px',
               fontSize: '12px',
-              color: 'var(--text-secondary)'
+              color: 'var(--text-primary)',
+              maxWidth: '50%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}>
-              <span>Aktywne: {activeFiltersCount}</span>
-              <button onClick={clearFilters} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              <span>Aktywne: {getActiveFilterLabels().join(', ')}</span>
+              <button onClick={clearFilters} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-primary)', textDecoration: 'underline' }}>
                 Wyczyść
               </button>
             </div>
@@ -360,7 +376,8 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
         flexWrap: 'wrap',
         gap: '8px',
         padding: '10px 16px',
-        borderBottom: '1px solid var(--border-primary)'
+        borderBottom: '1px solid var(--border-primary)',
+        backgroundColor: 'var(--bg-tertiary)'
       }}>
           {filters.search && (
             <span style={{
