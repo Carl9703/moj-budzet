@@ -301,8 +301,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               </button>
             </span>
           )}
-        </div>
-      )}
+      </div>
 
       {/* Reszta filtrów w panelu (zaawansowane) */}
       <div style={{ padding: '16px', display: isAdvancedOpen ? 'block' : 'none' }}>
