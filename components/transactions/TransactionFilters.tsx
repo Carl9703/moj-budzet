@@ -218,9 +218,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
               <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                 Aktywne: {activeFiltersCount}
               </span>
-              <button onClick={clearFilters} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-primary)', textDecoration: 'underline' }}>
-                Wyczyść
-              </button>
             </div>
           )}
           <button
@@ -236,23 +233,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
             }}
           >
             {isAdvancedOpen ? 'Ukryj zaawansowane' : 'Zaawansowane filtry'}{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
-          </button>
-          <button
-            onClick={clearFilters}
-            style={{
-              padding: '10px 12px',
-              backgroundColor: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-primary)',
-              borderRadius: '8px',
-              fontSize: '13px',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <X size={14} /> Wyczyść
           </button>
         </div>
       </div>
