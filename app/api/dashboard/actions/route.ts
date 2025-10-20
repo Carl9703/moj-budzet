@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/jwt'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions)
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
-
-        const userId = session.user.id
         const today = new Date()
         const dayOfMonth = today.getDate()
 

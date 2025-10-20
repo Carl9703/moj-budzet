@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/jwt'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { z } from 'zod'
 
 const recurringPaymentSchema = z.object({
@@ -15,12 +14,13 @@ const recurringPaymentSchema = z.object({
 
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions)
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
-
-        const userId = session.user.id
 
         const recurringPayments = await prisma.recurringPayment.findMany({
             where: { userId },
@@ -45,12 +45,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions)
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        // Pobierz userId z JWT tokenu
+        let userId: string
+        try {
+            userId = await getUserIdFromToken(request)
+        } catch (error) {
+            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
-
-        const userId = session.user.id
         const body = await request.json()
 
         const validation = recurringPaymentSchema.safeParse(body)
