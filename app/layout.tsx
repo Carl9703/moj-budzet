@@ -11,8 +11,6 @@ export const metadata = {
         icon: '/icon.svg',
         apple: '/icon.svg',
     },
-    themeColor: '#3B82F6',
-    viewport: 'width=device-width, initial-scale=1',
     robots: 'index, follow',
     openGraph: {
         title: 'Mój Budżet - Aplikacja Finansowa',
@@ -25,6 +23,12 @@ export const metadata = {
         title: 'Mój Budżet - Aplikacja Finansowa',
         description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
     }
+}
+
+export const viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    themeColor: '#3B82F6',
 }
 
 export default function RootLayout({
