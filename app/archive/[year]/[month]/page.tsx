@@ -14,6 +14,12 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ArrowLeft, Calendar } from 'lucide-react'
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#3B82F6',
+}
+
 // Interfaces from Analytics
 interface DateRange {
   from: Date | undefined
