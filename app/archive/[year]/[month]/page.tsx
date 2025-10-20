@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TopNavigation } from '@/components/ui/TopNavigation'
-import { GlobalFilters } from '@/components/analytics/GlobalFilters'
-import { KeyMetricsCards } from '@/components'
+import { TopNavigation, GlobalFilters, KeyMetricsCards } from '@/components'
 import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
 import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'

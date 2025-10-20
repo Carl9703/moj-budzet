@@ -1,2 +1,2 @@
-export { SpendingBreakdownChart } from './SpendingBreakdownChart'
-export { TrendsChart } from './TrendsChart'
+export { default as SpendingBreakdownChart } from './SpendingBreakdownChart'
+export { default as TrendsChart } from './TrendsChart'
