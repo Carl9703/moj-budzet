@@ -573,6 +573,8 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             </button>
           </div>
         </div>
+      </div>
+      )}
     </div>
   )
 }
