@@ -305,8 +305,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
       )}
 
       {/* Reszta filtrów w panelu (zaawansowane) */}
-      {isAdvancedOpen && (
-      <div style={{ padding: '16px' }}>
+      <div style={{ padding: '16px', display: isAdvancedOpen ? 'block' : 'none' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -574,7 +573,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
           </div>
         </div>
       </div>
-      )}
     </div>
   )
 }
