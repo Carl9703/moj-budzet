@@ -46,7 +46,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
     sortOrder: 'desc'
   })
 
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
   // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {
@@ -129,7 +129,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
       {/* Pasek głównych filtrów zawsze widoczny */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 200px 200px auto',
+        gridTemplateColumns: '1fr 220px auto',
         gap: '12px',
         alignItems: 'center',
         padding: '12px 16px',
@@ -186,30 +186,24 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
           <option value="transfer">🔄 Transfery</option>
         </select>
 
-        {/* Koperta */}
-        <select
-          value={filters.envelope}
-          onChange={(e) => handleFilterChange('envelope', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            border: '1px solid var(--border-primary)',
-            borderRadius: '8px',
-            backgroundColor: 'var(--bg-primary)',
-            color: 'var(--text-primary)',
-            fontSize: '14px'
-          }}
-        >
-          <option value="">Wszystkie koperty</option>
-          {filterOptions.envelopes.map(envelope => (
-            <option key={envelope.id} value={envelope.id}>
-              {envelope.icon} {envelope.name}
-            </option>
-          ))}
-        </select>
+        
 
         {/* Akcje */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          <button
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            style={{
+              padding: '10px 12px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              fontSize: '13px',
+              color: 'var(--text-primary)',
+              cursor: 'pointer'
+            }}
+          >
+            {isAdvancedOpen ? 'Ukryj zaawansowane' : 'Zaawansowane filtry'}
+          </button>
           <button
             onClick={clearFilters}
             style={{
@@ -311,6 +305,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
       )}
 
       {/* Reszta filtrów w panelu (zaawansowane) */}
+      {isAdvancedOpen && (
       <div style={{ padding: '16px' }}>
           <div style={{
             display: 'grid',
@@ -318,38 +313,26 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             gap: '16px',
             marginBottom: '20px'
           }}>
-            {/* Kategoria i Grupa przeniesione jako zaawansowane */}
-
-            {/* Typ transakcji */}
+            {/* Koperta */}
             <div>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '500',
-                color: 'var(--text-secondary)',
-                marginBottom: '6px'
-              }}>
-                Typ transakcji
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                Koperta
               </label>
               <select
-                value={filters.type}
-                onChange={(e) => handleFilterChange('type', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid var(--border-primary)',
-                  borderRadius: '8px',
-                  backgroundColor: 'var(--bg-primary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px'
-                }}
+                value={filters.envelope}
+                onChange={(e) => handleFilterChange('envelope', e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border-primary)', borderRadius: '8px', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', fontSize: '14px' }}
               >
-                <option value="">Wszystkie typy</option>
-                <option value="income">💰 Przychody</option>
-                <option value="expense">💸 Wydatki</option>
-                <option value="transfer">🔄 Transfery</option>
+                <option value="">Wszystkie koperty</option>
+                {filterOptions.envelopes.map(envelope => (
+                  <option key={envelope.id} value={envelope.id}>
+                    {envelope.icon} {envelope.name}
+                  </option>
+                ))}
               </select>
             </div>
+
+            {/* Kategoria */}
 
             {/* Kategoria */}
             <div>
