@@ -673,16 +673,189 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
               </div>
             </div>
           </div>
-          {/* Sortowanie */}
+        {/* Aktywne filtry */}
+        {activeFiltersCount > 0 && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
+            marginBottom: '20px',
             padding: '12px',
             backgroundColor: 'var(--bg-tertiary)',
             borderRadius: '8px',
             border: '1px solid var(--border-primary)'
           }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '10px'
+            }}>
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                margin: 0
+              }}>
+                Aktywne filtry ({activeFiltersCount})
+              </h3>
+              <button
+                onClick={clearFilters}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: 'var(--accent-primary)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+              >
+                Wyczyść wszystkie
+              </button>
+            </div>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}>
+              {filters.search && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Szukaj: {filters.search}
+                  <button onClick={() => clearFilter('search')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.type && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Typ: {getTypeLabel(filters.type)}
+                  <button onClick={() => clearFilter('type')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.envelope && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Koperta: {getEnvelopeLabel(filters.envelope)}
+                  <button onClick={() => clearFilter('envelope')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.category && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Kategoria: {getCategoryName(filters.category)}
+                  <button onClick={() => clearFilter('category')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.group && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Grupa: {getGroupTranslation(filters.group)}
+                  <button onClick={() => clearFilter('group')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.startDate && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Od: {filters.startDate}
+                  <button onClick={() => clearFilter('startDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.endDate && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '9999px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Do: {filters.endDate}
+                  <button onClick={() => clearFilter('endDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Sortowanie */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px',
+          backgroundColor: 'var(--bg-tertiary)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-primary)'
+        }}>
             <span style={{
               fontSize: '13px',
               fontWeight: '500',
