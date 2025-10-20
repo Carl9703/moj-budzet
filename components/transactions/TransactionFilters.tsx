@@ -303,7 +303,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
           )}
       </div>
 
-      {/* Reszta filtrów w panelu (zaawansowane) */}
       <div style={{ padding: '16px', display: isAdvancedOpen ? 'block' : 'none' }}>
           <div style={{
             display: 'grid',
@@ -311,7 +310,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             gap: '16px',
             marginBottom: '20px'
           }}>
-            {/* Koperta */}
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Koperta
@@ -330,9 +328,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               </select>
             </div>
 
-            {/* Kategoria */}
-
-            {/* Kategoria */}
+            
             <div>
               <label style={{
                 display: 'block',
@@ -365,7 +361,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               </select>
             </div>
 
-            {/* Grupa kopert */}
             <div>
               <label style={{
                 display: 'block',
@@ -398,7 +393,6 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               </select>
             </div>
 
-            {/* Koperta */}
             <div>
               <label style={{
                 display: 'block',
@@ -432,7 +426,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
             </div>
           </div>
 
-      {/* Filtry dat */}
+      
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
