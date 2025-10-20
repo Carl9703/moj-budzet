@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Calendar, Filter, X, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import type React from 'react'
+import { Search, Calendar, X } from 'lucide-react'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface FilterOptions {
@@ -33,7 +34,7 @@ export interface FilterState {
   sortOrder: 'asc' | 'desc'
 }
 
-export function TransactionFilters({ onFiltersChange, filterOptions, loading = false }: TransactionFiltersProps) {
+export function TransactionFilters({ onFiltersChange, filterOptions, loading: _loading = false }: TransactionFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     startDate: '',
@@ -225,14 +226,13 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
       </div>
 
       {/* Pigułki aktywnych filtrów */}
-      {activeFiltersCount > 0 && (
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          padding: '10px 16px',
-          borderBottom: '1px solid var(--border-primary)'
-        }}>
+      <div style={{
+        display: activeFiltersCount > 0 ? 'flex' : 'none',
+        flexWrap: 'wrap',
+        gap: '8px',
+        padding: '10px 16px',
+        borderBottom: '1px solid var(--border-primary)'
+      }}>
           {filters.type && (
             <span style={{
               display: 'inline-flex',
@@ -303,8 +303,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
           )}
       </div>
 
-      {isAdvancedOpen && (
-      <div style={{ padding: '16px' }}>
+      <div style={{ padding: '16px', display: isAdvancedOpen ? 'block' : 'none' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -507,10 +506,9 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
                     fontSize: '14px'
                   }}
                 />
-              </div>
+            </div>
             </div>
           </div>
-
           {/* Sortowanie */}
           <div style={{
             display: 'flex',
@@ -565,9 +563,8 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading = f
               {filters.sortOrder === 'asc' ? '↑ Rosnąco' : '↓ Malejąco'}
             </button>
           </div>
-        </div>
+        
       </div>
-      )}
     </div>
   )
 }
