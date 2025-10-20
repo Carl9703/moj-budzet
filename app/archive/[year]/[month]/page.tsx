@@ -128,23 +128,33 @@ export default function ArchiveMonthPage() {
   const year = params.year as string
   const month = params.month as string
 
+  // Helpers for robust month parsing
+  const safeDecode = (value: string): string => {
+    try {
+      return decodeURIComponent(value)
+    } catch {
+      return value
+    }
+  }
+
+  const monthIndexFromParam = (param: string): number => {
+    const monthNames = [
+      'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+    ]
+    const numeric = parseInt(param)
+    if (!Number.isNaN(numeric)) {
+      return Math.max(0, Math.min(11, numeric - 1))
+    }
+    const decoded = safeDecode(param).toLowerCase()
+    const idx = monthNames.findIndex(m => m.toLowerCase() === decoded)
+    return idx >= 0 ? idx : new Date().getMonth()
+  }
+
   // Calculate date range for the specific month
   const getMonthDateRange = (year: string, month: string): DateRange => {
     const yearNum = parseInt(year)
-    let monthNum: number
-    
-    // Check if month is already a number or needs conversion
-    if (isNaN(parseInt(month))) {
-      // Month is Polish name, convert to number
-      const monthNames = [
-        'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
-      ]
-      const decodedMonth = decodeURIComponent(month)
-      monthNum = monthNames.findIndex(m => m.toLowerCase() === decodedMonth.toLowerCase())
-    } else {
-      monthNum = parseInt(month) - 1
-    }
+    const monthNum = monthIndexFromParam(month)
     
     const startDate = new Date(yearNum, monthNum, 1)
     const endDate = new Date(yearNum, monthNum + 1, 0, 23, 59, 59)
@@ -388,13 +398,9 @@ export default function ArchiveMonthPage() {
       'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
       'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
     ]
-    
-    if (isNaN(parseInt(month))) {
-      return decodeURIComponent(month)
-    } else {
-      const monthIndex = parseInt(month) - 1
-      return monthNames[monthIndex] || month
-    }
+    const idx = monthIndexFromParam(month)
+    const decoded = safeDecode(month)
+    return monthNames[idx] || decoded
   }
 
   return (
