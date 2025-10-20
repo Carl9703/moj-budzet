@@ -126,7 +126,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
       border: '1px solid var(--border-primary)',
       boxShadow: 'var(--shadow-md)',
       marginBottom: '20px',
-      overflow: 'hidden'
+      overflow: 'visible'
     }}>
       {/* Pasek głównych filtrów zawsze widoczny */}
       <div style={{
@@ -220,7 +220,8 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
                   border: '1px solid var(--border-primary)',
                   borderRadius: '8px',
                   boxShadow: 'var(--shadow-lg)',
-                  padding: '10px'
+                  padding: '10px',
+                  zIndex: 1000
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
