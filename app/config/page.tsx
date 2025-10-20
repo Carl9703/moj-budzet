@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import { TopNavigation } from '@/components/ui/TopNavigation'
 import { EnvelopeGroupConfig } from '@/components/config/EnvelopeGroupConfig'
+import { RecurringPayments } from '@/components/config/RecurringPayments'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
+import { Settings, Zap } from 'lucide-react'
 
 interface MonthlyEnvelopeRow {
   id: string
@@ -16,11 +18,16 @@ interface MonthlyEnvelopeRow {
   group?: string
 }
 
+type TabType = 'settings' | 'automations'
+
 export default function ConfigPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<TabType>('settings')
+  
+  // Settings tab state
   const [defaultSalary, setDefaultSalary] = useState<string>('0')
   const [defaultToJoint, setDefaultToJoint] = useState<string>('0')
   const [defaultToSavings, setDefaultToSavings] = useState<string>('0')
@@ -159,88 +166,156 @@ export default function ConfigPage() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '22px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>⚙️ Konfigurator budżetu</h1>
 
-      <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
-        <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Wypłata (pensja) i stałe przelewy</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">💼 Domyślna wypłata</span>
-            <input type="number" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">📈 IKE (Budowanie Przyszłości)</span>
-            <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">🏠 Wspólne opłaty (Mieszkanie)</span>
-            <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">✈️ Wakacje (Podróże)</span>
-            <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">💍 Wesele</span>
-            <input type="number" value={defaultToWedding} onChange={e=>setDefaultToWedding(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
-            <input type="number" value={defaultToGroceries} onChange={e=>setDefaultToGroceries(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <span className="text-theme-primary">🚨 Fundusz Awaryjny</span>
-            <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-          </label>
+        {/* Zakładki */}
+        <div style={{
+          display: 'flex',
+          gap: '4px',
+          marginBottom: '24px',
+          backgroundColor: 'var(--bg-secondary)',
+          borderRadius: '8px',
+          padding: '4px',
+          border: '1px solid var(--border-primary)'
+        }}>
+          <button
+            onClick={() => setActiveTab('settings')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: activeTab === 'settings' ? 'var(--accent-primary)' : 'transparent',
+              color: activeTab === 'settings' ? 'white' : 'var(--text-secondary)',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Settings size={16} />
+            Ustawienia
+          </button>
+          <button
+            onClick={() => setActiveTab('automations')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: activeTab === 'automations' ? 'var(--accent-primary)' : 'transparent',
+              color: activeTab === 'automations' ? 'white' : 'var(--text-secondary)',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Zap size={16} />
+            Automatyzacje
+          </button>
         </div>
-        {warnings.length > 0 && (
-          <div style={{ marginTop: 12, padding: 8, backgroundColor: 'var(--bg-warning)', border: '1px solid var(--accent-warning)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}>
-            {warnings.map((w, i) => <div key={i}>⚠️ {w}</div>)}
-          </div>
+
+        {/* Zawartość zakładek */}
+        {activeTab === 'settings' && (
+          <>
+            <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
+              <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Wypłata (pensja) i stałe przelewy</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">💼 Domyślna wypłata</span>
+                  <input type="number" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">📈 IKE (Budowanie Przyszłości)</span>
+                  <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">🏠 Wspólne opłaty (Mieszkanie)</span>
+                  <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">✈️ Wakacje (Podróże)</span>
+                  <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">💍 Wesele</span>
+                  <input type="number" value={defaultToWedding} onChange={e=>setDefaultToWedding(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
+                  <input type="number" value={defaultToGroceries} onChange={e=>setDefaultToGroceries(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span className="text-theme-primary">🚨 Fundusz Awaryjny</span>
+                  <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                </label>
+              </div>
+              {warnings.length > 0 && (
+                <div style={{ marginTop: 12, padding: 8, backgroundColor: 'var(--bg-warning)', border: '1px solid var(--accent-warning)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}>
+                  {warnings.map((w, i) => <div key={i}>⚠️ {w}</div>)}
+                </div>
+              )}
+            </div>
+
+            {/* GRUPA 1: POTRZEBY */}
+            <EnvelopeGroupConfig
+              title="🏡 Potrzeby"
+              icon="🏡"
+              color="rgba(34, 197, 94, 0.1)"
+              envelopes={envelopes.filter(e => e.group === 'needs')}
+              onEnvelopeChange={handleEnvelopeChange}
+            />
+            
+            {/* GRUPA 2: STYL ŻYCIA */}
+            <EnvelopeGroupConfig
+              title="🎉 Styl życia"
+              icon="🎉"
+              color="rgba(168, 85, 247, 0.1)"
+              envelopes={envelopes.filter(e => e.group === 'lifestyle')}
+              onEnvelopeChange={handleEnvelopeChange}
+            />
+            
+            {/* GRUPA 3: CELE FINANSOWE */}
+            <EnvelopeGroupConfig
+              title="🎯 Cele finansowe"
+              icon="🎯"
+              color="rgba(59, 130, 246, 0.1)"
+              envelopes={envelopes.filter(e => e.group === 'financial')}
+              onEnvelopeChange={handleEnvelopeChange}
+            />
+
+            {/* FUNDUSZE CELOWE */}
+            <EnvelopeGroupConfig
+              title="🎯 Fundusze celowe"
+              icon="🎯"
+              color="rgba(245, 158, 11, 0.1)"
+              envelopes={yearlyEnvelopes.filter(e => e.group === 'target')}
+              onEnvelopeChange={handleEnvelopeChange}
+            />
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={()=>{ window.location.href='/' }} className="nav-button" style={{ padding: '8px 16px', border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}>Anuluj</button>
+              <button onClick={handleSave} disabled={saving} className="nav-button" style={{ padding: '8px 16px', border: 'none', borderRadius: 6, backgroundColor: 'var(--accent-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{saving ? 'Zapisywanie...' : 'Zapisz konfigurację'}</button>
+            </div>
+          </>
         )}
-      </div>
 
-      {/* GRUPA 1: POTRZEBY */}
-      <EnvelopeGroupConfig
-        title="🏡 Potrzeby"
-        icon="🏡"
-        color="rgba(34, 197, 94, 0.1)"
-        envelopes={envelopes.filter(e => e.group === 'needs')}
-        onEnvelopeChange={handleEnvelopeChange}
-      />
-      
-      {/* GRUPA 2: STYL ŻYCIA */}
-      <EnvelopeGroupConfig
-        title="🎉 Styl życia"
-        icon="🎉"
-        color="rgba(168, 85, 247, 0.1)"
-        envelopes={envelopes.filter(e => e.group === 'lifestyle')}
-        onEnvelopeChange={handleEnvelopeChange}
-      />
-      
-      {/* GRUPA 3: CELE FINANSOWE */}
-      <EnvelopeGroupConfig
-        title="🎯 Cele finansowe"
-        icon="🎯"
-        color="rgba(59, 130, 246, 0.1)"
-        envelopes={envelopes.filter(e => e.group === 'financial')}
-        onEnvelopeChange={handleEnvelopeChange}
-      />
-
-      {/* FUNDUSZE CELOWE */}
-      <EnvelopeGroupConfig
-        title="🎯 Fundusze celowe"
-        icon="🎯"
-        color="rgba(245, 158, 11, 0.1)"
-        envelopes={yearlyEnvelopes.filter(e => e.group === 'target')}
-        onEnvelopeChange={handleEnvelopeChange}
-      />
-
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={()=>{ window.location.href='/' }} className="nav-button" style={{ padding: '8px 16px', border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer' }}>Anuluj</button>
-          <button onClick={handleSave} disabled={saving} className="nav-button" style={{ padding: '8px 16px', border: 'none', borderRadius: 6, backgroundColor: 'var(--accent-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{saving ? 'Zapisywanie...' : 'Zapisz konfigurację'}</button>
-        </div>
+        {activeTab === 'automations' && (
+          <RecurringPayments 
+            envelopes={[
+              ...envelopes.map(e => ({ id: e.id, name: e.name, icon: e.icon || '📦', type: 'monthly' })),
+              ...yearlyEnvelopes.map(e => ({ id: e.id, name: e.name, icon: e.icon || '📦', type: 'yearly' }))
+            ]}
+          />
+        )}
       </div>
     </div>
   )
 }
-
-

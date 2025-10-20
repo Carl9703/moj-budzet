@@ -8,6 +8,7 @@ import { EnvelopeCard } from '../components/ui/EnvelopeCard'
 import { EnvelopeGroup } from '../components/dashboard/EnvelopeGroup'
 import { QuickActions } from '../components/dashboard/QuickActions'
 import { AutoTransfers } from '../components/dashboard/AutoTransfers'
+import { ActionsCenter } from '../components/dashboard/ActionsCenter'
 import { FloatingActionButton } from '../components/ui/FloatingActionButton'
 import { EmptyState } from '../components/ui/EmptyState'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
@@ -256,6 +257,8 @@ export default function HomePage() {
         <div className="min-h-screen fade-in-up bg-theme-primary">
             <TopNavigation />
             <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
+                {/* Centrum Akcji - na samej górze */}
+                <ActionsCenter onActionCompleted={refetch} />
                 <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div className="smooth-all hover-lift">
                         <MainBalance balance={data.balance || 0} />

@@ -1,3 +1,4 @@
+export { ActionsCenter } from './ActionsCenter'
 export { AutoTransfers } from './AutoTransfers'
 export { EnvelopeGroup } from './EnvelopeGroup'
 export { MainBalance } from './MainBalance'
