@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, Calendar, CreditCard, AlertCircle } from 'lucide-react'
 import { authorizedFetch } from '@/lib/utils/api'
-import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
+import { getCategoryIcon, getCategoryName, getCategoriesForEnvelope, getExpenseCategories } from '@/lib/constants/categories'
 
 interface RecurringPayment {
     id: string
@@ -46,6 +46,18 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
         category: '',
         isActive: true
     })
+
+    // Pobierz kategorie dla wybranej koperty
+    const selectedEnvelopeData = envelopes.find(e => e.id === formData.envelopeId)
+    const envelopeCategories = selectedEnvelopeData 
+        ? getCategoriesForEnvelope(selectedEnvelopeData.name)
+        : []
+    
+    // Wszystkie kategorie wydatków (dla opcji "Pokaż wszystkie")
+    const allExpenseCategories = getExpenseCategories()
+    
+    // Kategorie do wyświetlenia (domyślnie dla koperty, lub wszystkie)
+    const displayCategories = envelopeCategories.length > 0 ? envelopeCategories : allExpenseCategories
 
     const fetchPayments = async () => {
         try {
@@ -101,6 +113,14 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
             console.error('Error saving payment:', error)
             setMessage({ type: 'error', text: 'Błąd zapisywania płatności' })
         }
+    }
+
+    const handleEnvelopeChange = (envelopeId: string) => {
+        setFormData(prev => ({
+            ...prev,
+            envelopeId,
+            category: '' // Reset kategorii przy zmianie koperty
+        }))
     }
 
     const handleEdit = (payment: RecurringPayment) => {
@@ -165,11 +185,10 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
         }
     }, [message])
 
-    const categories = [
-        'housing-bills', 'utilities', 'phone', 'internet', 'insurance', 'groceries',
-        'transport', 'healthcare', 'entertainment', 'education', 'savings', 'investment',
-        'other'
-    ]
+    // Dodaj informację o tym, które kategorie są dostępne
+    const categoryInfo = selectedEnvelopeData 
+        ? `Kategorie dla koperty "${selectedEnvelopeData.name}"`
+        : 'Wszystkie kategorie'
 
     if (loading) {
         return (
@@ -364,7 +383,7 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                                 </label>
                                 <select
                                     value={formData.envelopeId}
-                                    onChange={(e) => setFormData({ ...formData, envelopeId: e.target.value })}
+                                    onChange={(e) => handleEnvelopeChange(e.target.value)}
                                     required
                                     style={{
                                         width: '100%',
@@ -395,28 +414,52 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                                 marginBottom: '6px'
                             }}>
                                 Kategoria *
+                                {selectedEnvelopeData && (
+                                    <span style={{
+                                        fontSize: '12px',
+                                        color: 'var(--text-secondary)',
+                                        marginLeft: '8px',
+                                        fontStyle: 'italic'
+                                    }}>
+                                        ({categoryInfo})
+                                    </span>
+                                )}
                             </label>
-                            <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                required
-                                style={{
-                                    width: '100%',
+                            {displayCategories.length > 0 ? (
+                                <select
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 12px',
+                                        border: '1px solid var(--border-primary)',
+                                        borderRadius: '6px',
+                                        backgroundColor: 'var(--bg-primary)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <option value="">Wybierz kategorię</option>
+                                    {displayCategories.map(category => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.icon} {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div style={{
                                     padding: '10px 12px',
                                     border: '1px solid var(--border-primary)',
                                     borderRadius: '6px',
-                                    backgroundColor: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                <option value="">Wybierz kategorię</option>
-                                {categories.map(category => (
-                                    <option key={category} value={category}>
-                                        {getCategoryIcon(category)} {getCategoryName(category)}
-                                    </option>
-                                ))}
-                            </select>
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    color: 'var(--text-secondary)',
+                                    fontSize: '14px',
+                                    textAlign: 'center'
+                                }}>
+                                    Wybierz kopertę, aby zobaczyć dostępne kategorie
+                                </div>
+                            )}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
