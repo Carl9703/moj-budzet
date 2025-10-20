@@ -191,7 +191,25 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
         
 
         {/* Akcje */}
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' }}>
+          {activeFiltersCount > 0 && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '9999px',
+              padding: '6px 10px',
+              fontSize: '12px',
+              color: 'var(--text-secondary)'
+            }}>
+              <span>Aktywne: {activeFiltersCount}</span>
+              <button onClick={clearFilters} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                Wyczyść
+              </button>
+            </div>
+          )}
           {activeFiltersCount > 0 && (
             <div style={{ position: 'relative' }}>
               <button
@@ -635,7 +653,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
                     fontSize: '14px'
                   }}
                 />
-            </div>
+              </div>
             </div>
           </div>
           {/* Sortowanie */}
