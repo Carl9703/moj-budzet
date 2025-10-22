@@ -46,7 +46,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
     }
 
     return (
-        <Modal isOpen={true} onClose={onClose} title="Dodaj Przychód">
+        <Modal onClose={onClose} title="Dodaj Przychód">
             <div style={{ padding: '20px' }}>
                 {/* Typ przychodu */}
                 <div style={{ marginBottom: '20px' }}>
