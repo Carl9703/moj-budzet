@@ -601,8 +601,8 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                                     >
                                         <option value="">Wybierz kategorię</option>
                                         {allExpenseCategories.map(category => (
-                                            <option key={category.value} value={category.value}>
-                                                {category.icon} {category.label}
+                                            <option key={category.id} value={category.id}>
+                                                {category.icon} {category.name}
                                             </option>
                                         ))}
                                     </select>
