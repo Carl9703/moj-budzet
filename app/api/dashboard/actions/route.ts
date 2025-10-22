@@ -26,7 +26,9 @@ export async function GET(request: NextRequest) {
                 ]
             },
             include: {
-                envelope: true
+                envelope: true,
+                fromEnvelope: true,
+                toEnvelope: true
             },
             orderBy: {
                 createdAt: 'asc'
@@ -38,11 +40,26 @@ export async function GET(request: NextRequest) {
             id: payment.id,
             name: payment.name,
             amount: payment.amount,
+            type: payment.type,
             envelope: {
                 id: payment.envelope.id,
                 name: payment.envelope.name,
                 icon: payment.envelope.icon
             },
+            fromEnvelope: payment.type === 'transfer' ? {
+                id: 'main-balance',
+                name: 'Główne saldo',
+                icon: '💰'
+            } : (payment.fromEnvelope ? {
+                id: payment.fromEnvelope.id,
+                name: payment.fromEnvelope.name,
+                icon: payment.fromEnvelope.icon
+            } : null),
+            toEnvelope: payment.toEnvelope ? {
+                id: payment.toEnvelope.id,
+                name: payment.toEnvelope.name,
+                icon: payment.toEnvelope.icon
+            } : null,
             category: payment.category,
             dayOfMonth: payment.dayOfMonth
         }))

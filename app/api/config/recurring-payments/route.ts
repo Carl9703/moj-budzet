@@ -81,21 +81,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
         }
 
-        // Dla transferów, sprawdź dodatkowe koperty
+        // Dla transferów, sprawdź tylko kopertę docelową
         if (data.type === 'transfer') {
-            if (!data.fromEnvelopeId || !data.toEnvelopeId) {
-                return NextResponse.json({ error: 'Dla transferów wymagane są koperty źródłowa i docelowa' }, { status: 400 })
+            if (!data.toEnvelopeId) {
+                return NextResponse.json({ error: 'Dla transferów wymagana jest koperta docelowa' }, { status: 400 })
             }
 
-            const fromEnvelope = await prisma.envelope.findFirst({
-                where: { id: data.fromEnvelopeId, userId }
-            })
             const toEnvelope = await prisma.envelope.findFirst({
                 where: { id: data.toEnvelopeId, userId }
             })
 
-            if (!fromEnvelope || !toEnvelope) {
-                return NextResponse.json({ error: 'Koperty źródłowa lub docelowa nie znalezione' }, { status: 404 })
+            if (!toEnvelope) {
+                return NextResponse.json({ error: 'Koperta docelowa nie znaleziona' }, { status: 404 })
             }
         }
 
