@@ -533,46 +533,81 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
 
                         {/* Pola dla transferów */}
                         {formData.type === 'transfer' && (
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    color: 'var(--text-primary)',
-                                    marginBottom: '6px'
-                                }}>
-                                    Koperta docelowa *
-                                </label>
-                                <select
-                                    value={formData.toEnvelopeId}
-                                    onChange={(e) => setFormData({ ...formData, toEnvelopeId: e.target.value })}
-                                    required={formData.type === 'transfer'}
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid var(--border-primary)',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'var(--bg-primary)',
+                            <>
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
                                         color: 'var(--text-primary)',
-                                        fontSize: '14px'
-                                    }}
-                                >
-                                    <option value="">Wybierz kopertę docelową</option>
-                                    {envelopes.map(envelope => (
-                                        <option key={envelope.id} value={envelope.id}>
-                                            {envelope.icon} {envelope.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div style={{
-                                    fontSize: '12px',
-                                    color: 'var(--text-secondary)',
-                                    marginTop: '4px',
-                                    fontStyle: 'italic'
-                                }}>
-                                    💡 Transfer będzie pobierał środki z głównego salda konta
+                                        marginBottom: '6px'
+                                    }}>
+                                        Koperta docelowa *
+                                    </label>
+                                    <select
+                                        value={formData.toEnvelopeId}
+                                        onChange={(e) => setFormData({ ...formData, toEnvelopeId: e.target.value })}
+                                        required={formData.type === 'transfer'}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px',
+                                            border: '1px solid var(--border-primary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">Wybierz kopertę docelową</option>
+                                        {envelopes.map(envelope => (
+                                            <option key={envelope.id} value={envelope.id}>
+                                                {envelope.icon} {envelope.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div style={{
+                                        fontSize: '12px',
+                                        color: 'var(--text-secondary)',
+                                        marginTop: '4px',
+                                        fontStyle: 'italic'
+                                    }}>
+                                        💡 Transfer będzie pobierał środki z głównego salda konta
+                                    </div>
                                 </div>
-                            </div>
+
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        color: 'var(--text-primary)',
+                                        marginBottom: '6px'
+                                    }}>
+                                        Kategoria *
+                                    </label>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        required={formData.type === 'transfer'}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px',
+                                            border: '1px solid var(--border-primary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">Wybierz kategorię</option>
+                                        {allExpenseCategories.map(category => (
+                                            <option key={category.value} value={category.value}>
+                                                {category.icon} {category.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </>
                         )}
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
