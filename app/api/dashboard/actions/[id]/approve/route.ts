@@ -43,22 +43,43 @@ export async function POST(
                     throw new Error('Koperta docelowa nie znaleziona')
                 }
 
-                // Sprawdź czy użytkownik ma wystarczające środki w głównym saldzie
-                const user = await tx.user.findUnique({
-                    where: { id: userId }
+                // Sprawdź czy użytkownik ma wystarczające środki (oblicz z transakcji)
+                const allTransactions = await tx.transaction.findMany({
+                    where: {
+                        userId,
+                        type: { in: ['income', 'expense'] },
+                        NOT: [
+                            { description: { contains: 'Zamknięcie miesiąca' } },
+                            { description: { contains: 'przeniesienie bilansu' } }
+                        ]
+                    }
                 })
 
-                if (!user || user.balance < recurringPayment.amount) {
+                const totalIncome = allTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0)
+
+                const totalExpenses = allTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0)
+
+                const currentBalance = totalIncome - totalExpenses
+
+                if (currentBalance < recurringPayment.amount) {
                     throw new Error('Niewystarczające środki w głównym saldzie')
                 }
 
-                // Zmniejsz główne saldo użytkownika
-                await tx.user.update({
-                    where: { id: userId },
+                // Utwórz transakcję wydatku (zmniejsza główne saldo)
+                await tx.transaction.create({
                     data: {
-                        balance: {
-                            decrement: recurringPayment.amount
-                        }
+                        userId: userId,
+                        type: 'expense',
+                        amount: recurringPayment.amount,
+                        description: recurringPayment.name,
+                        date: new Date(),
+                        envelopeId: recurringPayment.toEnvelopeId!,
+                        category: 'transfer',
+                        includeInStats: false
                     }
                 })
 
@@ -69,20 +90,6 @@ export async function POST(
                         currentAmount: {
                             increment: recurringPayment.amount
                         }
-                    }
-                })
-
-                // Utwórz transakcję transferu
-                await tx.transaction.create({
-                    data: {
-                        userId: userId,
-                        type: 'transfer',
-                        amount: recurringPayment.amount,
-                        description: recurringPayment.name,
-                        date: new Date(),
-                        envelopeId: recurringPayment.toEnvelopeId!,
-                        category: 'transfer',
-                        includeInStats: false
                     }
                 })
 
