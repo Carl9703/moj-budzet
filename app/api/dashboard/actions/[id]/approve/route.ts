@@ -69,6 +69,18 @@ export async function POST(
                     throw new Error('Niewystarczające środki w głównym saldzie')
                 }
 
+                // Określ kategorię na podstawie nazwy koperty docelowej
+                const getCategoryForEnvelope = (envelopeName: string): string => {
+                    const name = envelopeName.toLowerCase()
+                    if (name.includes('podróże') || name.includes('wakacje') || name.includes('travel')) return 'vacation'
+                    if (name.includes('wesele') || name.includes('wedding')) return 'wedding'
+                    if (name.includes('ike') || name.includes('inwestycje') || name.includes('budowanie')) return 'ike'
+                    if (name.includes('awaryjny') || name.includes('emergency') || name.includes('fundusz')) return 'emergency'
+                    if (name.includes('mieszkanie') || name.includes('housing')) return 'housing-bills'
+                    if (name.includes('żywność') || name.includes('groceries') || name.includes('zakupy')) return 'shared-groceries'
+                    return 'transfer' // domyślna kategoria
+                }
+
                 // Utwórz transakcję wydatku (zmniejsza główne saldo)
                 await tx.transaction.create({
                     data: {
@@ -78,7 +90,7 @@ export async function POST(
                         description: recurringPayment.name,
                         date: new Date(),
                         envelopeId: recurringPayment.toEnvelopeId!,
-                        category: 'transfer',
+                        category: getCategoryForEnvelope(recurringPayment.toEnvelope.name),
                         includeInStats: false
                     }
                 })
