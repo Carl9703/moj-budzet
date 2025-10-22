@@ -2,10 +2,20 @@ import { authorizedFetch } from '../utils/api'
 
 interface IncomeData {
     amount: number
+    toSavings: number
+    toVacation: number
+    toWedding: number
+    toGroceries: number
+    toInvestment: number
+    toJoint: number
+    forExpenses: number
     description?: string
     includeInStats?: boolean
     type?: string
     date?: string
+    toGifts?: number
+    toInsurance?: number
+    toFreedom?: number
 }
 
 interface BonusData {
@@ -31,11 +41,9 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
             const response = await authorizedFetch('/api/income', {
                 method: 'POST',
                 body: JSON.stringify({
-                    amount: incomeData.amount,
-                    description: incomeData.description,
-                    includeInStats: incomeData.includeInStats,
                     type: incomeData.type || 'salary',
-                    date: incomeData.date || new Date().toISOString().split('T')[0]
+                    date: incomeData.date || new Date().toISOString().split('T')[0],
+                    ...incomeData
                 })
             })
 
