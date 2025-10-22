@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { TopNavigation, GlobalFilters, KeyMetricsCards } from '@/components'
+import { GlobalFilters, KeyMetricsCards } from '@/components'
 import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
 import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
@@ -315,7 +315,6 @@ export default function ArchiveMonthPage() {
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-theme-primary">
-        <TopNavigation />
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -351,7 +350,6 @@ export default function ArchiveMonthPage() {
   if (!data) {
     return (
       <div className="min-h-screen bg-theme-primary">
-        <TopNavigation />
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
           <div style={{
             textAlign: 'center',
@@ -397,7 +395,6 @@ export default function ArchiveMonthPage() {
 
   return (
     <div className="min-h-screen bg-theme-primary">
-      <TopNavigation />
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         {/* Header */}
         <div style={{

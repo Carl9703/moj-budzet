@@ -1,6 +1,6 @@
 ﻿'use client' // Potrzebne dla useState, useEffect, useMemo
 import { useState, useEffect, useMemo } from 'react'
-import { TopNavigation, GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts } from '@/components'
+import { GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts } from '@/components'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -323,7 +323,6 @@ export default function AnalyticsPage() {
   if (loading && !data) {
         return (
             <div className="min-h-screen bg-theme-primary">
-        <TopNavigation />
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -359,7 +358,6 @@ export default function AnalyticsPage() {
     if (!data) {
         return (
             <div className="min-h-screen bg-theme-primary">
-        <TopNavigation />
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
           <div style={{
             textAlign: 'center',
@@ -381,7 +379,6 @@ export default function AnalyticsPage() {
 
     return (
         <div className="min-h-screen bg-theme-primary">
-            <TopNavigation />
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         <h1 style={{
           fontSize: '32px',

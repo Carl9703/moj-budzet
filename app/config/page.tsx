@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { TopNavigation } from '@/components/ui/TopNavigation'
 import { EnvelopeGroupConfig } from '@/components/config/EnvelopeGroupConfig'
 import { RecurringPayments } from '@/components/config/RecurringPayments'
 import { authorizedFetch } from '@/lib/utils/api'
@@ -162,7 +161,6 @@ export default function ConfigPage() {
 
   return (
     <div className="min-h-screen bg-theme-primary">
-      <TopNavigation />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '22px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>⚙️ Konfigurator budżetu</h1>
 

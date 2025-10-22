@@ -12,7 +12,6 @@ import { ActionsCenter } from '../components/dashboard/ActionsCenter'
 import { FloatingActionButton } from '../components/ui/FloatingActionButton'
 import { EmptyState } from '../components/ui/EmptyState'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
-import { TopNavigation } from '../components/ui/TopNavigation'
 import { EnvelopeCardSkeleton, MainBalanceSkeleton, MonthStatusSkeleton, QuickActionsSkeleton } from '../components/ui/SkeletonLoader'
 import { useToast } from '../components/ui/Toast'
 import { useDashboard } from '../lib/hooks/useDashboard'
@@ -170,7 +169,6 @@ export default function HomePage() {
     if (loading) {
         return (
             <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-                <TopNavigation />
                 <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                         <MainBalanceSkeleton />
@@ -255,7 +253,6 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen fade-in-up bg-theme-primary">
-            <TopNavigation />
             <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
                 {/* Centrum Akcji - na samej górze */}
                 <ActionsCenter onActionCompleted={refetch} />

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { TopNavigation } from '@/components/ui/TopNavigation'
 import { ArchivedMonthCard } from '@/components/archive/ArchivedMonthCard'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -160,7 +159,6 @@ export default function ArchivePage() {
 
     return (
         <div className="min-h-screen bg-theme-primary">
-            <TopNavigation />
             <div style={{ 
                 maxWidth: '1400px', 
                 margin: '0 auto', 

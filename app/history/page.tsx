@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { TransactionFilters, FilterState } from '@/components/transactions/TransactionFilters'
 import { TransactionTable } from '@/components/transactions/TransactionTable'
-import { TopNavigation } from '@/components/ui/TopNavigation'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -130,7 +129,6 @@ export default function HistoryPage() {
   
   return (
     <div className="min-h-screen bg-theme-primary">
-      <TopNavigation />
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
           📜 Historia transakcji
