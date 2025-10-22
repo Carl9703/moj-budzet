@@ -57,6 +57,12 @@ export const EXPENSE_CATEGORIES: Category[] = [
     { id: 'vacation', name: 'Wakacje', icon: '✈️', defaultEnvelope: 'Podróże', type: 'yearly' },
     { id: 'weekend-trips', name: 'Wyjazdy Weekendowe', icon: '🏖️', defaultEnvelope: 'Podróże', type: 'yearly' },
     
+    // FUNDUSZE CELOWE - Wesele
+    { id: 'wedding', name: 'Wesele', icon: '💍', defaultEnvelope: 'Wesele', type: 'yearly' },
+    
+    // FUNDUSZE CELOWE - Fundusz Awaryjny
+    { id: 'emergency', name: 'Fundusz Awaryjny', icon: '🚨', defaultEnvelope: 'Fundusz Awaryjny', type: 'monthly' },
+    
     // PRZYCHODY (bez zmian)
     { id: 'salary', name: 'Wypłata', icon: '💼', defaultEnvelope: '', type: 'monthly' },
     { id: 'bonus', name: 'Premia', icon: '🎁', defaultEnvelope: '', type: 'yearly' },
