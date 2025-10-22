@@ -52,6 +52,7 @@ model User {
   image           String?
   hashedPassword  String?   // Dla credentials login
   role            String    @default("USER") // USER, ADMIN
+  balance         Float     @default(0) // Główne saldo użytkownika
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
