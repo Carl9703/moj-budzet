@@ -2,11 +2,6 @@ import { authorizedFetch } from '../utils/api'
 
 interface IncomeData {
     amount: number
-    toSavings: number
-    toVacation: number
-    toInvestment: number
-    toJoint: number
-    forExpenses: number
     description?: string
     includeInStats?: boolean
     type?: string
@@ -36,9 +31,11 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
             const response = await authorizedFetch('/api/income', {
                 method: 'POST',
                 body: JSON.stringify({
+                    amount: incomeData.amount,
+                    description: incomeData.description,
+                    includeInStats: incomeData.includeInStats,
                     type: incomeData.type || 'salary',
-                    date: incomeData.date || new Date().toISOString().split('T')[0],
-                    ...incomeData
+                    date: incomeData.date || new Date().toISOString().split('T')[0]
                 })
             })
 
