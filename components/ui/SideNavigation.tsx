@@ -302,5 +302,6 @@ export function SideNavigation() {
                 </button>
             </div>
         </aside>
+        </>
     )
 }
