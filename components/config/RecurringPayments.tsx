@@ -12,8 +12,21 @@ interface RecurringPayment {
     dayOfMonth: number
     envelopeId: string
     category: string
+    type: 'expense' | 'transfer'
+    fromEnvelopeId?: string
+    toEnvelopeId?: string
     isActive: boolean
     envelope: {
+        id: string
+        name: string
+        icon: string
+    }
+    fromEnvelope?: {
+        id: string
+        name: string
+        icon: string
+    }
+    toEnvelope?: {
         id: string
         name: string
         icon: string
@@ -44,6 +57,9 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
         dayOfMonth: 1,
         envelopeId: '',
         category: '',
+        type: 'expense' as 'expense' | 'transfer',
+        fromEnvelopeId: '',
+        toEnvelopeId: '',
         isActive: true
     })
 
@@ -131,6 +147,9 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
             dayOfMonth: payment.dayOfMonth,
             envelopeId: payment.envelopeId,
             category: payment.category,
+            type: payment.type,
+            fromEnvelopeId: payment.fromEnvelopeId || '',
+            toEnvelopeId: payment.toEnvelopeId || '',
             isActive: payment.isActive
         })
         setShowForm(true)
@@ -167,6 +186,9 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
             dayOfMonth: 1,
             envelopeId: '',
             category: '',
+            type: 'expense',
+            fromEnvelopeId: '',
+            toEnvelopeId: '',
             isActive: true
         })
     }
@@ -280,6 +302,53 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                     </h3>
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
+                        {/* Typ płatności */}
+                        <div>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: 'var(--text-primary)',
+                                marginBottom: '8px'
+                            }}>
+                                Typ automatyzacji *
+                            </label>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, type: 'expense' })}
+                                    style={{
+                                        padding: '12px 20px',
+                                        backgroundColor: formData.type === 'expense' ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                                        color: formData.type === 'expense' ? '#ffffff' : 'var(--text-primary)',
+                                        border: '2px solid var(--border-primary)',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    💳 Płatność
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, type: 'transfer' })}
+                                    style={{
+                                        padding: '12px 20px',
+                                        backgroundColor: formData.type === 'transfer' ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                                        color: formData.type === 'transfer' ? '#ffffff' : 'var(--text-primary)',
+                                        border: '2px solid var(--border-primary)',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    🔄 Transfer
+                                </button>
+                            </div>
+                        </div>
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div>
                                 <label style={{
@@ -462,6 +531,77 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                             )}
                         </div>
 
+                        {/* Pola dla transferów */}
+                        {formData.type === 'transfer' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        color: 'var(--text-primary)',
+                                        marginBottom: '6px'
+                                    }}>
+                                        Koperta źródłowa *
+                                    </label>
+                                    <select
+                                        value={formData.fromEnvelopeId}
+                                        onChange={(e) => setFormData({ ...formData, fromEnvelopeId: e.target.value })}
+                                        required={formData.type === 'transfer'}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px',
+                                            border: '1px solid var(--border-primary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">Wybierz kopertę źródłową</option>
+                                        {envelopes.map(envelope => (
+                                            <option key={envelope.id} value={envelope.id}>
+                                                {envelope.icon} {envelope.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        color: 'var(--text-primary)',
+                                        marginBottom: '6px'
+                                    }}>
+                                        Koperta docelowa *
+                                    </label>
+                                    <select
+                                        value={formData.toEnvelopeId}
+                                        onChange={(e) => setFormData({ ...formData, toEnvelopeId: e.target.value })}
+                                        required={formData.type === 'transfer'}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px',
+                                            border: '1px solid var(--border-primary)',
+                                            borderRadius: '6px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">Wybierz kopertę docelową</option>
+                                        {envelopes.map(envelope => (
+                                            <option key={envelope.id} value={envelope.id}>
+                                                {envelope.icon} {envelope.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <input
                                 type="checkbox"
@@ -584,9 +724,17 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                                     <span>•</span>
                                     <span>Dzień: {payment.dayOfMonth}</span>
                                     <span>•</span>
-                                    <span>{payment.envelope.icon} {payment.envelope.name}</span>
-                                    <span>•</span>
-                                    <span>{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
+                                    {payment.type === 'transfer' ? (
+                                        <>
+                                            <span>🔄 Transfer: {payment.fromEnvelope?.icon} {payment.fromEnvelope?.name} → {payment.toEnvelope?.icon} {payment.toEnvelope?.name}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>{payment.envelope.icon} {payment.envelope.name}</span>
+                                            <span>•</span>
+                                            <span>{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 

@@ -9,6 +9,9 @@ const recurringPaymentSchema = z.object({
     dayOfMonth: z.number().min(1).max(31, 'Dzień miesiąca musi być między 1 a 31'),
     envelopeId: z.string().min(1, 'Koperta jest wymagana'),
     category: z.string().min(1, 'Kategoria jest wymagana'),
+    type: z.enum(['expense', 'transfer']).default('expense'),
+    fromEnvelopeId: z.string().optional(),
+    toEnvelopeId: z.string().optional(),
     isActive: z.boolean().optional().default(true)
 })
 
@@ -25,7 +28,9 @@ export async function GET(request: NextRequest) {
         const recurringPayments = await prisma.recurringPayment.findMany({
             where: { userId },
             include: {
-                envelope: true
+                envelope: true,
+                fromEnvelope: true,
+                toEnvelope: true
             },
             orderBy: {
                 dayOfMonth: 'asc'
@@ -76,6 +81,24 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
         }
 
+        // Dla transferów, sprawdź dodatkowe koperty
+        if (data.type === 'transfer') {
+            if (!data.fromEnvelopeId || !data.toEnvelopeId) {
+                return NextResponse.json({ error: 'Dla transferów wymagane są koperty źródłowa i docelowa' }, { status: 400 })
+            }
+
+            const fromEnvelope = await prisma.envelope.findFirst({
+                where: { id: data.fromEnvelopeId, userId }
+            })
+            const toEnvelope = await prisma.envelope.findFirst({
+                where: { id: data.toEnvelopeId, userId }
+            })
+
+            if (!fromEnvelope || !toEnvelope) {
+                return NextResponse.json({ error: 'Koperty źródłowa lub docelowa nie znalezione' }, { status: 404 })
+            }
+        }
+
         const recurringPayment = await prisma.recurringPayment.create({
             data: {
                 userId,
@@ -84,10 +107,15 @@ export async function POST(request: NextRequest) {
                 dayOfMonth: data.dayOfMonth,
                 envelopeId: data.envelopeId,
                 category: data.category,
+                type: data.type,
+                fromEnvelopeId: data.fromEnvelopeId,
+                toEnvelopeId: data.toEnvelopeId,
                 isActive: data.isActive
             },
             include: {
-                envelope: true
+                envelope: true,
+                fromEnvelope: true,
+                toEnvelope: true
             }
         })
 
