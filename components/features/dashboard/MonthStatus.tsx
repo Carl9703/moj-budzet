@@ -17,6 +17,22 @@ interface Props {
 export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus, currentDay, totalDays }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
+    
+    // Inteligentna logika dla przycisku zamknij miesiąc
+    const canCloseMonth = () => {
+        // Jeśli poprzedni miesiąc już zamknięty, nie można zamykać
+        if (previousMonthStatus.isClosed) {
+            return false
+        }
+        
+        // Można zamykać w ostatnich 3 dniach miesiąca lub pierwszych 3 dniach nowego miesiąca
+        const isLastDaysOfMonth = daysLeft <= 3
+        const isFirstDaysOfNewMonth = currentDay <= 3
+        
+        return isLastDaysOfMonth || isFirstDaysOfNewMonth
+    }
+    
+    const shouldShowCloseButton = canCloseMonth()
 
     return (
         <div className="bg-theme-secondary card rounded-lg p-6" style={{
@@ -27,26 +43,41 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                 <h2 className="section-header" style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     📊 Status miesiąca
                 </h2>
-                <button
-                    onClick={onCloseMonth}
-                    disabled={previousMonthStatus.isClosed}
-                    style={{
+                {shouldShowCloseButton ? (
+                    <button
+                        onClick={onCloseMonth}
+                        style={{
+                            padding: '6px 12px',
+                            backgroundColor: 'var(--accent-info)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        🔒 Zamknij {previousMonthStatus.monthName}
+                    </button>
+                ) : (
+                    <div style={{
                         padding: '6px 12px',
-                        backgroundColor: previousMonthStatus.isClosed ? 'var(--text-tertiary)' : 'var(--accent-info)',
+                        backgroundColor: 'var(--text-tertiary)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         fontSize: '12px',
                         fontWeight: '500',
-                        cursor: previousMonthStatus.isClosed ? 'not-allowed' : 'pointer',
-                        opacity: previousMonthStatus.isClosed ? 0.6 : 1
-                    }}
-                >
-                    {previousMonthStatus.isClosed 
-                        ? `✅ ${previousMonthStatus.monthName} zamknięty`
-                        : `🔒 Zamknij ${previousMonthStatus.monthName}`
-                    }
-                </button>
+                        opacity: 0.6
+                    }}>
+                        {previousMonthStatus.isClosed 
+                            ? `✅ ${previousMonthStatus.monthName} zamknięty`
+                            : daysLeft > 3 
+                                ? `⏰ Dostępne za ${daysLeft - 3} dni`
+                                : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
+                        }
+                    </div>
+                )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
