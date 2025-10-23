@@ -40,7 +40,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                 const status = data.monthlyEnvelopes?.map((e: EnvelopeStatus) => ({
                     name: e.name,
                     icon: e.icon,
-                    current: e.current,
+                    current: e.current - e.spent, // Pozostałe środki (początkowe - wydane)
                     planned: e.planned,
                     spent: e.spent
                 }))
