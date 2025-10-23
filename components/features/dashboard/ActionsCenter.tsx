@@ -85,7 +85,7 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
     const handleDismiss = async (actionId: string) => {
         setProcessing(actionId)
         try {
-            const response = await authorizedFetch(`/api/dashboard/actions/${actionId}/dismiss`, {
+            const response = await authorizedFetch(`/api/dashboard/actions/${actionId}/reject`, {
                 method: 'POST'
             })
             const data = await response.json()
