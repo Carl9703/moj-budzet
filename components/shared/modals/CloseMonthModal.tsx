@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/ui/layout/Modal'
 import { useState, useEffect } from 'react'
-import { formatMoney } from '@/lib/utils/money'
+import { formatMoney, roundToCents } from '@/lib/utils/money'
 import { authorizedFetch } from '@/lib/utils/api'
 
 interface EnvelopeStatus {
@@ -31,7 +31,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
 
     const displayMonth = monthName || new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
     // Użyj surplus jeśli podany, inaczej oblicz z monthSummary
-    const balance = surplus !== undefined ? surplus : (monthSummary.income - monthSummary.expenses)
+    const balance = surplus !== undefined ? roundToCents(surplus) : roundToCents(monthSummary.income - monthSummary.expenses)
 
     useEffect(() => {
         authorizedFetch('/api/dashboard')
@@ -67,9 +67,9 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                     <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: 'var(--success-primary)' }}>✓</span>
                         {balance > 0
-                            ? `Przeniesienie ${balance} zł (bilans miesiąca) do "Wolnych środków (roczne)"`
+                            ? `Przeniesienie ${formatMoney(balance, false)} zł (bilans miesiąca) do "Wolnych środków (roczne)"`
                             : balance < 0
-                                ? `Zapisanie deficytu ${Math.abs(balance)} zł`
+                                ? `Zapisanie deficytu ${formatMoney(Math.abs(balance), false)} zł`
                                 : 'Bilans miesiąca wynosi 0 zł'}
                     </li>
                     <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -115,11 +115,11 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--text-primary)' }}>Przychody:</span>
-                        <span style={{ fontWeight: '600', color: 'var(--success-primary)' }}>+{monthSummary.income} zł</span>
+                        <span style={{ fontWeight: '600', color: 'var(--success-primary)' }}>+{formatMoney(monthSummary.income, false)} zł</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'var(--text-primary)' }}>Wydatki:</span>
-                        <span style={{ fontWeight: '600', color: 'var(--error-primary)' }}>-{monthSummary.expenses} zł</span>
+                        <span style={{ fontWeight: '600', color: 'var(--error-primary)' }}>-{formatMoney(monthSummary.expenses, false)} zł</span>
                     </div>
                     <div style={{
                         display: 'flex',
@@ -131,7 +131,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                     }}>
                         <span style={{ color: 'var(--text-primary)' }}>BILANS (do przeniesienia):</span>
                         <span style={{ color: balance >= 0 ? 'var(--success-primary)' : 'var(--error-primary)', fontSize: '16px' }}>
-                            {balance >= 0 ? '+' : ''}{balance} zł
+                            {balance >= 0 ? '+' : ''}{formatMoney(balance, false)} zł
                         </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>

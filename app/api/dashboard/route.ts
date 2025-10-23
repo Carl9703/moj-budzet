@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { roundToCents } from '@/lib/utils/money'
 
 interface Transaction {
     id: string
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
                 const envelopeTransactions = monthTransactions.filter(t => 
                     t.envelopeId === e.id
                 )
-                const spent = Math.round(envelopeTransactions.reduce((sum, t) => {
+                const spent = roundToCents(envelopeTransactions.reduce((sum, t) => {
                     // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
                     // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
                     const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
@@ -165,7 +166,7 @@ export async function GET(request: NextRequest) {
                         // Koperty wydatkowe: expense zwiększa spent (więcej wydatków)
                         return t.type === 'expense' ? sum + t.amount : sum - t.amount
                     }
-                }, 0) * 100) / 100
+                }, 0))
 
                 return {
                     id: e.id,
