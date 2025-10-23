@@ -36,14 +36,17 @@ interface DashboardData {
 export function useDashboard() {
     const [data, setData] = useState<DashboardData | null>(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<Error | null>(null)
 
     const fetchData = async () => {
         try {
+            setError(null)
             const response = await authorizedFetch('/api/dashboard')
             const json = await response.json()
             setData(json)
         } catch (error) {
             console.error('Error fetching dashboard:', error)
+            setError(error as Error)
             setData(null)
         } finally {
             setLoading(false)
@@ -54,5 +57,5 @@ export function useDashboard() {
         fetchData()
     }, [])
 
-    return { data, loading, refetch: fetchData }
+    return { data, loading, error, refetch: fetchData }
 }
