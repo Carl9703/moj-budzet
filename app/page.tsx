@@ -47,13 +47,11 @@ export default function HomePage() {
     }
 
     const handleIncomeSave = createIncomeHandler(
-        setShowIncomeModal,
         refetch,
         showToast
     )
 
     const handleExpenseSave = createExpenseHandler(
-        setShowExpenseModal,
         refetch,
         showToast
     )
