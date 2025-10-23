@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArchivedMonthCard } from '@/components/archive/ArchivedMonthCard'
+import { ArchivedMonthCard } from '@/components/shared/archive/ArchivedMonthCard'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 

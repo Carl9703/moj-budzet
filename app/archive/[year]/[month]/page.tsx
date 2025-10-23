@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { GlobalFilters, KeyMetricsCards } from '@/components'
-import { SpendingBreakdownVisualization } from '@/components/analytics/SpendingBreakdownVisualization'
-import { TrendsVisualization } from '@/components/analytics/TrendsVisualization'
-import { InteractiveExpenseExplorer } from '@/components/analytics/InteractiveExpenseExplorer'
-import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts'
+import { SpendingBreakdownVisualization } from '@/components/features/analytics/SpendingBreakdownVisualization'
+import { TrendsVisualization } from '@/components/features/analytics/TrendsVisualization'
+import { InteractiveExpenseExplorer } from '@/components/features/analytics/InteractiveExpenseExplorer'
+import { AnalyticsCharts } from '@/components/features/analytics/AnalyticsCharts'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
 import { ArrowLeft, Calendar } from 'lucide-react'
 
 // Interfaces from Analytics

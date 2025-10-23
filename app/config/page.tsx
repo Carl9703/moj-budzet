@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { EnvelopeGroupConfig } from '@/components/config/EnvelopeGroupConfig'
-import { RecurringPayments } from '@/components/config/RecurringPayments'
+import { EnvelopeGroupConfig } from '@/components/features/config/EnvelopeGroupConfig'
+import { RecurringPayments } from '@/components/features/config/RecurringPayments'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useToast } from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/feedback/Toast'
 import { Settings, Zap } from 'lucide-react'
 
 interface MonthlyEnvelopeRow {
@@ -28,12 +28,6 @@ export default function ConfigPage() {
   
   // Settings tab state
   const [defaultSalary, setDefaultSalary] = useState<string>('0')
-  const [defaultToJoint, setDefaultToJoint] = useState<string>('0')
-  const [defaultToSavings, setDefaultToSavings] = useState<string>('0')
-  const [defaultToVacation, setDefaultToVacation] = useState<string>('0')
-  const [defaultToWedding, setDefaultToWedding] = useState<string>('0')
-  const [defaultToGroceries, setDefaultToGroceries] = useState<string>('0')
-  const [defaultToInvestment, setDefaultToInvestment] = useState<string>('0')
   const [envelopes, setEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
   const [yearlyEnvelopes, setYearlyEnvelopes] = useState<MonthlyEnvelopeRow[]>([])
 
@@ -42,24 +36,14 @@ export default function ConfigPage() {
     let mounted = true
     const load = async () => {
       try {
-        console.log('🔍 Calling /api/config...')
         const res = await authorizedFetch('/api/config', { cache: 'no-store' })
-        console.log('📡 API response status:', res.status)
         const data = await res.json()
-        console.log('📊 Full API response:', data)
         if (!mounted) return
 
         const cfg = data?.config
         if (cfg) {
           setDefaultSalary(String(cfg.defaultSalary ?? 0))
-          setDefaultToJoint(String(cfg.defaultToJoint ?? 0))
-          setDefaultToSavings(String(cfg.defaultToSavings ?? 0))
-          setDefaultToVacation(String(cfg.defaultToVacation ?? 0))
-          setDefaultToWedding(String(cfg.defaultToWedding ?? 0))
-          setDefaultToGroceries(String(cfg.defaultToGroceries ?? 0))
-          setDefaultToInvestment(String(cfg.defaultToInvestment ?? 0))
         }
-        console.log('📊 Monthly envelopes from API:', data?.monthlyEnvelopes)
         setEnvelopes((data?.monthlyEnvelopes || []).map((e: any) => ({
           id: e.id,
           name: e.name,
@@ -68,7 +52,6 @@ export default function ConfigPage() {
           currentAmount: e.currentAmount,
           group: e.group
         })))
-        console.log('📊 Yearly envelopes from API:', data?.yearlyEnvelopes)
         setYearlyEnvelopes((data?.yearlyEnvelopes || []).map((e: any) => ({
           id: e.id,
           name: e.name,
@@ -99,13 +82,8 @@ export default function ConfigPage() {
     return null
   }
 
-  console.log('🔍 Current envelopes state:', envelopes)
-  console.log('🔍 Current yearlyEnvelopes state:', yearlyEnvelopes)
   
-  const totalTransfers = Number(defaultToJoint||0) + Number(defaultToSavings||0) + Number(defaultToVacation||0) + Number(defaultToWedding||0) + Number(defaultToGroceries||0) + Number(defaultToInvestment||0)
-  const warnings: string[] = []
-  const salaryNum = Number(defaultSalary||0)
-  if (salaryNum > 0 && totalTransfers > salaryNum) warnings.push('Suma przelewów przekracza domyślną wypłatę')
+  // Usunięto logikę totalTransfers - nie ma już stałych przelewów
 
   const handleEnvelopeChange = (envelopeId: string, plannedAmount: number) => {
     // Sprawdź czy to koperta miesięczna czy roczna
@@ -127,12 +105,6 @@ export default function ConfigPage() {
     try {
       const payload = {
         defaultSalary: Number(defaultSalary||0),
-        defaultToJoint: Number(defaultToJoint||0),
-        defaultToSavings: Number(defaultToSavings||0),
-        defaultToVacation: Number(defaultToVacation||0),
-        defaultToWedding: Number(defaultToWedding||0),
-        defaultToGroceries: Number(defaultToGroceries||0),
-        defaultToInvestment: Number(defaultToInvestment||0),
         monthlyEnvelopes: envelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
         yearlyEnvelopes: yearlyEnvelopes.map(e => ({ id: e.id, plannedAmount: Number(e.plannedAmount||0) })),
       }
@@ -224,42 +196,11 @@ export default function ConfigPage() {
         {activeTab === 'settings' && (
           <>
             <div className="bg-theme-secondary card rounded-lg p-4" style={{ marginBottom: '16px', border: '1px solid var(--border-primary)' }}>
-              <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Wypłata (pensja) i stałe przelewy</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">💼 Domyślna wypłata</span>
-                  <input type="number" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">📈 IKE (Budowanie Przyszłości)</span>
-                  <input type="number" value={defaultToInvestment} onChange={e=>setDefaultToInvestment(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">🏠 Wspólne opłaty (Mieszkanie)</span>
-                  <input type="number" value={defaultToJoint} onChange={e=>setDefaultToJoint(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">✈️ Wakacje (Podróże)</span>
-                  <input type="number" value={defaultToVacation} onChange={e=>setDefaultToVacation(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">💍 Wesele</span>
-                  <input type="number" value={defaultToWedding} onChange={e=>setDefaultToWedding(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">🛒 Wspólne zakupy (Żywność)</span>
-                  <input type="number" value={defaultToGroceries} onChange={e=>setDefaultToGroceries(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span className="text-theme-primary">🚨 Fundusz Awaryjny</span>
-                  <input type="number" value={defaultToSavings} onChange={e=>setDefaultToSavings(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
-                </label>
-              </div>
-              {warnings.length > 0 && (
-                <div style={{ marginTop: 12, padding: 8, backgroundColor: 'var(--bg-warning)', border: '1px solid var(--accent-warning)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}>
-                  {warnings.map((w, i) => <div key={i}>⚠️ {w}</div>)}
-                </div>
-              )}
+              <h2 className="section-header" style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>Wypłata (pensja)</h2>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span className="text-theme-primary">💼 Domyślna wypłata</span>
+                <input type="number" inputMode="numeric" value={defaultSalary} onChange={e=>setDefaultSalary(e.target.value)} style={{ width: 120, textAlign: 'right', padding: 8, border: '1px solid var(--border-primary)', borderRadius: 6, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+              </label>
             </div>
 
             {/* GRUPA 1: POTRZEBY */}

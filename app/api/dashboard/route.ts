@@ -203,13 +203,41 @@ export async function GET(request: NextRequest) {
             })
             .sort((a, b) => a.name.localeCompare(b.name))
 
+        // Oblicz dostępne środki (saldo główne)
+        const availableFunds = balance
+
+        // Oblicz stopę oszczędności
+        const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0
+
+        // Oblicz dni pozostałe do końca miesiąca
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        const daysRemaining = Math.max(0, lastDay.getDate() - now.getDate())
+
+        // Oblicz dzienny budżet
+        const dailyBudget = daysRemaining > 0 ? (totalIncome - totalExpenses) / daysRemaining : 0
+
+        // Oblicz postęp miesiąca
+        const currentDay = now.getDate()
+        const totalDays = lastDay.getDate()
+        const monthProgress = currentDay
+
         return NextResponse.json({
+            success: true,
+            mainBalance: balance,
+            availableFunds,
+            monthlyIncome: totalIncome,
+            monthlyExpenses: totalExpenses,
+            savingsRate,
+            daysRemaining,
+            dailyBudget,
+            monthProgress,
+            totalDays,
             balance,
             totalIncome,
             totalExpenses,
             monthlyEnvelopes,
             yearlyEnvelopes,
-            transactions: allTransactions.slice(0, 20), // Więcej transakcji dla AutoTransfers
+            transactions: allTransactions.slice(0, 20),
             isMonthClosed
         })
 

@@ -38,6 +38,9 @@ interface SpendingTreeNode {
   description?: string
   amount?: number
   categoryId?: string // Dodajemy categoryId dla kategorii
+  // Dodatkowe pola dla progress bars
+  budget?: number // Budżet dla kopert
+  budgetPercentage?: number // Procent wykorzystania budżetu
 }
 
 interface TrendData {
@@ -207,12 +210,30 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     include: { envelope: true }
   })
 
+  // Pobierz informacje o budżetach kopert
+  const envelopes = await prisma.envelope.findMany({
+    where: { userId: userId },
+    select: { id: true, name: true, plannedAmount: true }
+  })
+  
+  const envelopeBudgets = new Map<string, number>()
+  for (const envelope of envelopes) {
+    envelopeBudgets.set(envelope.name, envelope.plannedAmount)
+  }
+
   // Pobierz dane porównawcze jeśli włączony tryb porównawczy
   let previousTransactions: any[] = []
   if (compare) {
-    const periodLength = endDate.getTime() - startDate.getTime()
-    const previousStart = new Date(startDate.getTime() - periodLength)
-    const previousEnd = new Date(startDate.getTime() - 1)
+    // Dla porównań miesięcznych - porównuj całe miesiące
+    const currentMonth = startDate.getMonth()
+    const currentYear = startDate.getFullYear()
+    
+    // Poprzedni miesiąc
+    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
+    const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
+    
+    const previousStart = new Date(previousYear, previousMonth, 1)
+    const previousEnd = new Date(previousYear, previousMonth + 1, 0) // Ostatni dzień poprzedniego miesiąca
 
     previousTransactions = await prisma.transaction.findMany({
                 where: {
@@ -295,12 +316,22 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
   const spendingTree: SpendingTreeNode[] = []
   
   for (const [groupName, group] of Array.from(groupMap.entries())) {
+    // Oblicz budżet grupy (suma budżetów wszystkich kopert w grupie)
+    let groupBudget = 0
+    for (const [envelopeName, envelope] of Array.from((group.children as Map<string, any>).entries())) {
+      const envelopeBudget = envelopeBudgets.get(envelopeName) || 0
+      groupBudget += envelopeBudget
+    }
+    const groupBudgetPercentage = groupBudget > 0 ? (group.total / groupBudget) * 100 : 0
+    
     const groupNode: SpendingTreeNode = {
       type: 'GROUP',
       id: group.id,
       name: getGroupDisplayName(group.name),
       total: group.total,
-      children: []
+      children: [],
+      budget: groupBudget,
+      budgetPercentage: groupBudgetPercentage
     }
     
     // Dodaj dane porównawcze dla grupy
@@ -321,12 +352,18 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     
     // Przetwórz koperty
     for (const [envelopeName, envelope] of Array.from((group.children as Map<string, any>).entries())) {
+      // Pobierz budżet dla koperty
+      const budget = envelopeBudgets.get(envelopeName) || 0
+      const budgetPercentage = budget > 0 ? (envelope.total / budget) * 100 : 0
+      
       const envelopeNode: SpendingTreeNode = {
         type: 'ENVELOPE',
         id: envelope.id,
         name: envelope.name,
         total: envelope.total,
-        children: []
+        children: [],
+        budget: budget,
+        budgetPercentage: budgetPercentage
       }
       
       // Dodaj dane porównawcze dla koperty
@@ -475,7 +512,10 @@ export async function GET(request: NextRequest) {
     const spendingTree = await buildSpendingTree(userId, start, end, compare)
 
     // === TRENDY CZASOWE ===
-    const totalExpensesTrend = await getTrendsData(userId, start, end)
+    // Zawsze używaj danych z całego roku dla trendów, niezależnie od filtra
+    const yearStart = new Date(new Date().getFullYear(), 0, 1)
+    const yearEnd = new Date()
+    const totalExpensesTrend = await getTrendsData(userId, yearStart, yearEnd)
     
     // Pobierz trendy dla każdej koperty
     const byEnvelope: { [envelopeId: string]: any[] } = {}
@@ -485,7 +525,7 @@ export async function GET(request: NextRequest) {
     })
     
     for (const envelope of envelopes) {
-      const envelopeTrend = await getTrendsData(userId, start, end, envelope.id)
+      const envelopeTrend = await getTrendsData(userId, yearStart, yearEnd, envelope.id)
       byEnvelope[envelope.id] = envelopeTrend
       byEnvelopeName[envelope.name] = envelopeTrend // Dodaj mapowanie po nazwie
     }

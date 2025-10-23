@@ -1,30 +1,31 @@
 import './globals.css'
-import { ToastProvider } from '@/components/ui/Toast'
+import { ToastProvider } from '@/components/ui/feedback/Toast'
 import { ThemeProvider } from '@/lib/contexts/ThemeContext'
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import { SideNavigation } from '@/components/ui/SideNavigation'
-import { MainContent } from '@/components/ui/MainContent'
+import { ErrorBoundary } from '@/components/ui/feedback/ErrorBoundary'
+import { SideNavigation } from '@/components/ui/layout/SideNavigation'
+import { MainContent } from '@/components/ui/layout/MainContent'
 import { SidebarProvider } from '@/lib/contexts/SidebarContext'
+import { ConditionalLayout } from '@/components/ui/layout/ConditionalLayout'
 
 export const metadata = {
-    title: 'Mój Budżet - Aplikacja Finansowa',
-    description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+    title: 'Quantum Budget - Inteligentna Aplikacja Finansowa',
+    description: 'Quantum Budget - zaawansowana aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
     manifest: '/manifest.json',
     icons: {
-        icon: '/icon.svg',
-        apple: '/icon.svg',
+        icon: '/favicon.svg',
+        apple: '/favicon.svg',
     },
     robots: 'index, follow',
     openGraph: {
-        title: 'Mój Budżet - Aplikacja Finansowa',
-        description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+        title: 'Quantum Budget - Inteligentna Aplikacja Finansowa',
+        description: 'Quantum Budget - zaawansowana aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
         type: 'website',
         locale: 'pl_PL',
     },
     twitter: {
         card: 'summary',
-        title: 'Mój Budżet - Aplikacja Finansowa',
-        description: 'Inteligentna aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
+        title: 'Quantum Budget - Inteligentna Aplikacja Finansowa',
+        description: 'Quantum Budget - zaawansowana aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
     }
 }
 
@@ -41,22 +42,14 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pl" suppressHydrationWarning>
-            <body className="bg-gray-50" suppressHydrationWarning>
+                <body style={{ backgroundColor: 'var(--bg-primary)' }} suppressHydrationWarning>
                 <ErrorBoundary>
                     <ThemeProvider>
                         <ToastProvider>
                             <SidebarProvider>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '240px 1fr',
-                                    minHeight: '100vh',
-                                    backgroundColor: 'var(--bg-primary)'
-                                }} className="sidebar-layout">
-                                    <SideNavigation />
-                                    <MainContent>
-                                        {children}
-                                    </MainContent>
-                                </div>
+                                <ConditionalLayout>
+                                    {children}
+                                </ConditionalLayout>
                             </SidebarProvider>
                         </ToastProvider>
                     </ThemeProvider>

@@ -2,11 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Animations for InteractiveExpenseExplorer */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* ========================================
+   QUANTUM BUDGET - DESIGN SYSTEM TOKENS
+   ======================================== */
+
+:root {
+  /* ========== BACKGROUNDS ========== */
+  --bg-primary: #1A1A1A;
+  --bg-secondary: #2C2C2C;
+  --bg-tertiary: #3C3C3C;
+  
+  /* ========== BRAND COLORS ========== */
+  --brand-primary: #4A90E2;
+  --brand-secondary: #357ABD;
+  
+  /* ========== SEMANTIC COLORS ========== */
+  --color-success: #2ECC71;
+  --color-error: #E74C3C;
+  --color-warning: #F39C12;
+  --color-info: #3498DB;
+  
+  /* ========== TEXT COLORS ========== */
+  --text-primary: #F5F5F5;
+  --text-secondary: #A0A0A0;
+  --text-disabled: #606060;
+  
+  /* ========== SPACING SYSTEM (8px base) ========== */
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 16px;
+  --space-l: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  
+  /* ========== BORDER RADIUS ========== */
+  --border-radius-main: 12px;
+  --border-radius-small: 8px;
+  --border-radius-large: 16px;
+  
+  /* ========== TYPOGRAPHY SCALE ========== */
+  --font-size-xl: 32px;
+  --font-size-l: 20px;
+  --font-size-m: 16px;
+  --font-size-s: 14px;
+  --font-size-xs: 12px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* ========== TRANSITIONS ========== */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
 @keyframes slideDown {
   from {
@@ -830,4 +917,20 @@ body {
     .sidebar-overlay.show {
         display: block;
     }
+}
+
+/* ========================================
+   USUWANIE SPINNERS Z PÓL NUMERYCZNYCH
+   ======================================== */
+
+/* Ukryj spinners (strzałki) z pól number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
 }

@@ -1,4 +1,4 @@
-﻿'use client' // Potrzebne dla useState, useEffect, useMemo
+﻿'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts } from '@/components'
 import { authorizedFetch } from '@/lib/utils/api'
@@ -100,13 +100,14 @@ export default function AnalyticsPage() {
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // Bieżący miesiąc
     to: new Date()
   })
   const [compareMode, setCompareMode] = useState(false)
   const [selectedItem, setSelectedItem] = useState<SpendingTreeNode | null>(null)
   const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
   const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
+  const [forceCollapseAll, setForceCollapseAll] = useState(false)
   
 
   const fetchData = async (newDateRange: DateRange, newCompareMode: boolean) => {
@@ -155,6 +156,9 @@ export default function AnalyticsPage() {
       return
     }
 
+    // Zwiń wszystkie listy przed rozwinięciem nowej
+    setForceCollapseAll(true)
+    
     // Znajdź pozycję w drzewie wydatków
     const findItem = (nodes: SpendingTreeNode[]): SpendingTreeNode | null => {
       for (const node of nodes) {
@@ -170,8 +174,13 @@ export default function AnalyticsPage() {
     const item = findItem(data?.spendingTree || [])
     if (item) {
       setSelectedItem(item)
-      setHighlightedGroup(segmentName)
       setHighlightedEnvelope(null)
+      
+      // Najpierw zwiń, potem rozwiń wybraną grupę
+      setTimeout(() => {
+        setForceCollapseAll(false)
+        setHighlightedGroup(segmentName)
+      }, 150)
       
       // Przewiń do eksploratora
       setTimeout(() => {
@@ -179,7 +188,7 @@ export default function AnalyticsPage() {
         if (explorerElement) {
           explorerElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
-      }, 100)
+      }, 300)
     }
   }
 
@@ -221,52 +230,31 @@ export default function AnalyticsPage() {
   // Przygotowanie danych dla wykresu trendów
   const trendsData = useMemo(() => {
     if (!data?.trends) {
-      console.log('Brak danych trendów:', data)
       return []
     }
     
-    console.log('Dane trendów:', data.trends)
-    console.log('Wybrany element:', selectedItem)
-    
     // Sprawdź czy mamy dane trendów
     const totalExpenses = data.trends.totalExpenses || []
-    console.log('Total expenses trend:', totalExpenses)
-    console.log('ByEnvelope keys:', Object.keys(data.trends.byEnvelope || {}))
-    console.log('ByEnvelope data:', data.trends.byEnvelope)
-    
-    // Sprawdź czy mamy dane w ogóle
-    if (totalExpenses.length === 0) {
-      console.log('⚠️ BRAK DANYCH TRENDÓW W API - totalExpenses jest pusty!')
-    }
     
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
         // Znajdź trendy dla wybranej koperty
         const envelopeName = selectedItem.name
         const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
-        console.log('Trendy koperty:', envelopeTrends)
         return envelopeTrends
       } else if (selectedItem.type === 'GROUP') {
         // Dla grupy, zsumuj trendy wszystkich kopert w tej grupie
         const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
-        console.log('Koperty w grupie:', groupEnvelopes)
-        console.log('Dostępne klucze byEnvelope:', Object.keys(data.trends.byEnvelope || {}))
         
         if (groupEnvelopes.length > 0) {
-          console.log(`🔍 Przetwarzam ${groupEnvelopes.length} kopert w grupie "${selectedItem.name}"`)
-          
           // Znajdź trendy dla wszystkich kopert w grupie i zsumuj je
           const groupTrends: { [key: string]: number } = {}
           
           groupEnvelopes.forEach(envelope => {
             const envelopeName = envelope.name
             
-            console.log(`🔍 Szukam trendów dla koperty "${envelopeName}"`)
-            console.log(`🔍 Pełne dane koperty:`, envelope)
-            
             // Użyj byEnvelopeName do znalezienia trendów
             const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
-            console.log(`📊 Trendy koperty "${envelopeName}":`, envelopeTrends)
             
             if (envelopeTrends.length > 0) {
               envelopeTrends.forEach(trend => {
@@ -274,10 +262,7 @@ export default function AnalyticsPage() {
                   groupTrends[trend.period] = 0
                 }
                 groupTrends[trend.period] += trend.value
-                console.log(`➕ Dodaję ${trend.value} dla okresu ${trend.period}`)
               })
-            } else {
-              console.log(`⚠️ Koperta "${envelopeName}" nie ma trendów`)
             }
           })
           
@@ -286,24 +271,19 @@ export default function AnalyticsPage() {
             period,
             value
           }))
-          console.log('📈 Zsumowane trendy grupy:', result)
-          console.log('📈 Liczba okresów w wynikach:', result.length)
           
           // Jeśli nie ma trendów dla grupy, zwróć puste dane (nie wszystkie trendy)
           if (result.length === 0) {
-            console.log('❌ Brak trendów dla grupy, zwracam puste dane')
             return []
           }
           
           return result
         } else {
-          console.log('Brak kopert w grupie, zwracam puste dane')
           return []
         }
       }
     }
     
-    console.log('Wszystkie trendy:', totalExpenses)
     return totalExpenses
   }, [data?.trends, selectedItem])
 
@@ -438,6 +418,7 @@ export default function AnalyticsPage() {
             loading={loading}
             highlightedGroup={highlightedGroup}
             highlightedEnvelope={highlightedEnvelope}
+            forceCollapseAll={forceCollapseAll}
           />
         </div>
 

@@ -7,9 +7,24 @@ const recurringPaymentSchema = z.object({
     name: z.string().min(1, 'Nazwa jest wymagana'),
     amount: z.number().positive('Kwota musi być większa od 0'),
     dayOfMonth: z.number().min(1).max(31, 'Dzień miesiąca musi być między 1 a 31'),
-    envelopeId: z.string().min(1, 'Koperta jest wymagana'),
-    category: z.string().min(1, 'Kategoria jest wymagana'),
-    isActive: z.boolean().optional()
+    type: z.enum(['expense', 'transfer']).default('expense'),
+    envelopeId: z.string().optional(),
+    category: z.string().optional(),
+    fromEnvelopeId: z.string().optional(),
+    toEnvelopeId: z.string().optional(),
+    isActive: z.boolean().optional().default(true)
+}).refine((data) => {
+    // Dla wydatków wymagamy envelopeId i category
+    if (data.type === 'expense') {
+        return data.envelopeId && data.category
+    }
+    // Dla transferów wymagamy toEnvelopeId
+    if (data.type === 'transfer') {
+        return data.toEnvelopeId
+    }
+    return true
+}, {
+    message: "Nieprawidłowe dane dla wybranego typu automatyzacji"
 })
 
 export async function PUT(
@@ -50,31 +65,63 @@ export async function PUT(
             return NextResponse.json({ error: 'Płatność nie znaleziona' }, { status: 404 })
         }
 
-        // Sprawdź czy koperta należy do użytkownika
-        const envelope = await prisma.envelope.findFirst({
-            where: {
-                id: data.envelopeId,
-                userId: userId
-            }
-        })
+        // Dla wydatków sprawdź kopertę źródłową
+        if (data.type === 'expense') {
+            const envelope = await prisma.envelope.findFirst({
+                where: {
+                    id: data.envelopeId,
+                    userId: userId
+                }
+            })
 
-        if (!envelope) {
-            return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+            if (!envelope) {
+                return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+            }
+        }
+
+        // Dla transferów, sprawdź kopertę docelową
+        if (data.type === 'transfer') {
+            if (!data.toEnvelopeId) {
+                return NextResponse.json({ error: 'Dla transferów wymagana jest koperta docelowa' }, { status: 400 })
+            }
+
+            const toEnvelope = await prisma.envelope.findFirst({
+                where: { id: data.toEnvelopeId, userId }
+            })
+
+            if (!toEnvelope) {
+                return NextResponse.json({ error: 'Koperta docelowa nie znaleziona' }, { status: 404 })
+            }
+        }
+
+        // Przygotuj dane do aktualizacji
+        const updateData: any = {
+            name: data.name,
+            amount: data.amount,
+            dayOfMonth: data.dayOfMonth,
+            type: data.type,
+            isActive: data.isActive,
+            dismissedUntil: null // Reset dismissed status when editing
+        }
+
+        // Dla wydatków dodaj envelopeId i category
+        if (data.type === 'expense' && data.envelopeId && data.category) {
+            updateData.envelopeId = data.envelopeId
+            updateData.category = data.category
+        }
+
+        // Dla transferów dodaj toEnvelopeId
+        if (data.type === 'transfer' && data.toEnvelopeId) {
+            updateData.toEnvelopeId = data.toEnvelopeId
         }
 
         const updatedPayment = await prisma.recurringPayment.update({
             where: { id: paymentId },
-            data: {
-                name: data.name,
-                amount: data.amount,
-                dayOfMonth: data.dayOfMonth,
-                envelopeId: data.envelopeId,
-                category: data.category,
-                isActive: data.isActive,
-                dismissedUntil: null // Reset dismissed status when editing
-            },
+            data: updateData,
             include: {
-                envelope: true
+                envelope: true,
+                fromEnvelope: true,
+                toEnvelope: true
             }
         })
 

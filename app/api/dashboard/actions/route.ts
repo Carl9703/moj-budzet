@@ -13,16 +13,19 @@ export async function GET(request: NextRequest) {
         }
         const today = new Date()
         const dayOfMonth = today.getDate()
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
-        // Znajdź wszystkie aktywne płatności cykliczne na dzisiejszy dzień
+        // Znajdź wszystkie aktywne płatności cykliczne:
+        // 1. Na dzisiejszy dzień (niezrealizowane)
+        // 2. Z poprzednich dni tego miesiąca (niezrealizowane)
         const recurringPayments = await prisma.recurringPayment.findMany({
             where: {
                 userId: userId,
                 isActive: true,
-                dayOfMonth: dayOfMonth,
+                dayOfMonth: { lte: dayOfMonth }, // Wszystkie dni od początku miesiąca do dziś
                 OR: [
                     { dismissedUntil: null },
-                    { dismissedUntil: { lt: today } }
+                    { dismissedUntil: { lt: startOfMonth } } // Tylko te, które nie zostały zatwierdzone w tym miesiącu
                 ]
             },
             include: {
@@ -41,11 +44,11 @@ export async function GET(request: NextRequest) {
             name: payment.name,
             amount: payment.amount,
             type: payment.type,
-            envelope: {
+            envelope: payment.envelope ? {
                 id: payment.envelope.id,
                 name: payment.envelope.name,
                 icon: payment.envelope.icon
-            },
+            } : null,
             fromEnvelope: payment.type === 'transfer' ? {
                 id: 'main-balance',
                 name: 'Główne saldo',

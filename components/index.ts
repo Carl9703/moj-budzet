@@ -1,20 +1,8 @@
-// Analytics
-export * from './analytics'
+// Features
+export * from './features'
 
-// Archive
-export * from './archive'
-
-// Config
-export * from './config'
-
-// Dashboard
-export * from './dashboard'
-
-// Modals
-export * from './modals'
-
-// Transactions
-export * from './transactions'
+// Shared
+export * from './shared'
 
 // UI
 export * from './ui'

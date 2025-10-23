@@ -124,7 +124,9 @@ export default function SignInPage() {
                 borderRadius: '8px',
                 fontSize: '16px',
                 outline: 'none',
-                transition: 'border-color 0.2s'
+                transition: 'border-color 0.2s',
+                color: '#111827',
+                backgroundColor: '#ffffff'
               }}
               placeholder="twoj@email.com"
             />
@@ -152,7 +154,9 @@ export default function SignInPage() {
                 borderRadius: '8px',
                 fontSize: '16px',
                 outline: 'none',
-                transition: 'border-color 0.2s'
+                transition: 'border-color 0.2s',
+                color: '#111827',
+                backgroundColor: '#ffffff'
               }}
               placeholder="••••••••"
             />

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { TransactionFilters, FilterState } from '@/components/transactions/TransactionFilters'
-import { TransactionTable } from '@/components/transactions/TransactionTable'
+import { TransactionFilters, FilterState } from '@/components/features/transactions/TransactionFilters'
+import { TransactionTable } from '@/components/features/transactions/TransactionTable'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
 
 interface Transaction {
   id: string

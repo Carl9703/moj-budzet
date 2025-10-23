@@ -80,7 +80,7 @@ export async function POST(
                         date: new Date(),
                         envelopeId: recurringPayment.toEnvelopeId!,
                         category: recurringPayment.category, // Użyj kategorii z recurring payment
-                        includeInStats: false
+                        includeInStats: true  // ✅ Wliczaj do statystyk miesięcznych
                     }
                 })
 
@@ -143,9 +143,9 @@ export async function POST(
             message,
             amount: recurringPayment.amount,
             type: recurringPayment.type,
-            envelope: recurringPayment.envelope.name,
-            fromEnvelope: recurringPayment.fromEnvelope?.name,
-            toEnvelope: recurringPayment.toEnvelope?.name
+            envelope: recurringPayment.envelope?.name || null,
+            fromEnvelope: recurringPayment.fromEnvelope?.name || null,
+            toEnvelope: recurringPayment.toEnvelope?.name || null
         })
 
     } catch (error) {
