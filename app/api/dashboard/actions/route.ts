@@ -67,11 +67,18 @@ export async function GET(request: NextRequest) {
             dayOfMonth: payment.dayOfMonth
         }))
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             actions,
             count: actions.length,
             date: today.toISOString().split('T')[0]
         })
+
+        // Wyłącz cache dla świeżych danych
+        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+        response.headers.set('Pragma', 'no-cache')
+        response.headers.set('Expires', '0')
+
+        return response
 
     } catch (error) {
         console.error('Error fetching dashboard actions:', error)

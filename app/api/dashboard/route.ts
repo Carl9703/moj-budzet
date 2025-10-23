@@ -222,7 +222,7 @@ export async function GET(request: NextRequest) {
         const totalDays = lastDay.getDate()
         const monthProgress = currentDay
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             mainBalance: balance,
             availableFunds,
@@ -241,6 +241,13 @@ export async function GET(request: NextRequest) {
             transactions: allTransactions.slice(0, 20),
             isMonthClosed
         })
+
+        // Wyłącz cache dla świeżych danych
+        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+        response.headers.set('Pragma', 'no-cache')
+        response.headers.set('Expires', '0')
+
+        return response
 
     } catch (error) {
         return NextResponse.json(

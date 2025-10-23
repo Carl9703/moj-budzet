@@ -38,7 +38,14 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json({ success: true })
+        const response = NextResponse.json({ success: true })
+        
+        // Wyłącz cache dla świeżych danych
+        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+        response.headers.set('Pragma', 'no-cache')
+        response.headers.set('Expires', '0')
+        
+        return response
 
     } catch (error) {
         console.error('Error creating income:', error)

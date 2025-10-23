@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
         // Oblicz stopę oszczędności (tylko z realnych przychodów)
         const savingsRate = statsIncome > 0 ? Math.round((monthBalance / statsIncome) * 100) : 0
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             monthName,
             summary: {
@@ -196,6 +196,13 @@ export async function POST(request: NextRequest) {
                     ? `Miesiąc ${monthName} zamknięty z deficytem ${Math.abs(totalToTransfer)} zł.`
                     : `Miesiąc ${monthName} zamknięty. Saldo wynosi 0 zł.`
         })
+
+        // Wyłącz cache dla świeżych danych
+        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+        response.headers.set('Pragma', 'no-cache')
+        response.headers.set('Expires', '0')
+
+        return response
 
     } catch (error) {
         console.error('Close month API error:', error)

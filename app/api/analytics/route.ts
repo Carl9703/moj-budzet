@@ -709,7 +709,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(response)
+    const nextResponse = NextResponse.json(response)
+    
+    // Wyłącz cache dla świeżych danych
+    nextResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    nextResponse.headers.set('Pragma', 'no-cache')
+    nextResponse.headers.set('Expires', '0')
+    
+    return nextResponse
 
     } catch (error) {
         console.error('Analytics API error:', error)
