@@ -38,7 +38,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
             .then(res => res.json())
             .then(data => {
                 const status = data.monthlyEnvelopes
-                    ?.filter(e => e.name !== 'Budowanie Przyszłości' && e.name !== 'Fundusz Awaryjny') // Wyklucz fundusze oszczędnościowe
+                    ?.filter((e: any) => e.name !== 'Budowanie Przyszłości' && e.name !== 'Fundusz Awaryjny') // Wyklucz fundusze oszczędnościowe
                     ?.map((e: EnvelopeStatus) => {
                         const remaining = e.planned - e.spent // Pozostałe środki (planowane - wydane)
                         return {
