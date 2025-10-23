@@ -304,15 +304,36 @@ export default function HomePage() {
                             refetch()
                             showToast('Transfer został wykonany!', 'success')
                         }}
+                        envelopes={[
+                            ...(data?.monthlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                currentAmount: e.current,
+                                type: 'monthly' as const
+                            })) || []),
+                            ...(data?.yearlyEnvelopes?.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                icon: e.icon,
+                                currentAmount: e.current,
+                                type: 'yearly' as const
+                            })) || [])
+                        ]}
                     />
                 )}
                 {showCloseMonthModal && (
                     <CloseMonthModal
                         onClose={() => setShowCloseMonthModal(false)}
-                        onCloseMonth={() => {
+                        onConfirm={() => {
                             setShowCloseMonthModal(false)
                             refetch()
                             showToast('Miesiąc został zamknięty!', 'success')
+                        }}
+                        monthSummary={{
+                            income: data?.totalIncome || 0,
+                            expenses: data?.totalExpenses || 0,
+                            savings: (data?.totalIncome || 0) - (data?.totalExpenses || 0)
                         }}
                     />
                 )}

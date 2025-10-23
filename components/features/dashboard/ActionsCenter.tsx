@@ -400,7 +400,7 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
                                                     fontSize: 'var(--font-size-s)', 
                                                     color: 'var(--text-secondary)'
                                                 }}>
-                                                    {getCategoryIcon(action.category)} {getCategoryName(action.category)}
+                                                    {getCategoryIcon(action.category || '')} {getCategoryName(action.category || '')}
                                                 </span>
                                             </div>
                                         )}

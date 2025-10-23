@@ -37,6 +37,14 @@ export function IncomeModal({ onClose, onSave }: Props) {
         freedom: 20
     })
 
+    // Stany dla pensji
+    const [toJoint, setToJoint] = useState('')
+    const [toSavings, setToSavings] = useState('')
+    const [toVacation, setToVacation] = useState('')
+    const [toWedding, setToWedding] = useState('')
+    const [toGroceries, setToGroceries] = useState('')
+    const [toInvestment, setToInvestment] = useState('')
+
     useEffect(() => {
         let isMounted = true
 

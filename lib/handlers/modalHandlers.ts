@@ -2,13 +2,6 @@ import { authorizedFetch } from '../utils/api'
 
 interface IncomeData {
     amount: number
-    toSavings: number
-    toVacation: number
-    toWedding: number
-    toGroceries: number
-    toInvestment: number
-    toJoint: number
-    forExpenses: number
     description?: string
     includeInStats?: boolean
     type?: string

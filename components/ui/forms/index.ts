@@ -1,1 +1,2 @@
-// Placeholder for future form components
+// Forms components will be exported here when needed
+export {}
