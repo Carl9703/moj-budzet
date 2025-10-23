@@ -37,16 +37,18 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
         authorizedFetch('/api/dashboard')
             .then(res => res.json())
             .then(data => {
-                const status = data.monthlyEnvelopes?.map((e: EnvelopeStatus) => {
-                    const remaining = e.planned - e.spent // Pozostałe środki (planowane - wydane)
-                    return {
-                        name: e.name,
-                        icon: e.icon,
-                        current: remaining, // Pozostałe środki
-                        planned: e.planned,
-                        spent: e.spent
-                    }
-                })
+                const status = data.monthlyEnvelopes
+                    ?.filter(e => e.name !== 'Budowanie Przyszłości' && e.name !== 'Fundusz Awaryjny') // Wyklucz fundusze oszczędnościowe
+                    ?.map((e: EnvelopeStatus) => {
+                        const remaining = e.planned - e.spent // Pozostałe środki (planowane - wydane)
+                        return {
+                            name: e.name,
+                            icon: e.icon,
+                            current: remaining, // Pozostałe środki
+                            planned: e.planned,
+                            spent: e.spent
+                        }
+                    })
                 setEnvelopeStatus(status || [])
                 setLoading(false)
             })
