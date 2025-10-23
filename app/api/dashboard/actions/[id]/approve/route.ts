@@ -96,28 +96,30 @@ export async function POST(
 
             } else {
                 // Dla płatności - standardowa logika
-                await tx.transaction.create({
-                    data: {
-                        userId: userId,
-                        type: 'expense',
-                        amount: recurringPayment.amount,
-                        description: recurringPayment.name,
-                        date: new Date(),
-                        envelopeId: recurringPayment.envelopeId,
-                        category: recurringPayment.category,
-                        includeInStats: true
-                    }
-                })
-
-                // Zwiększ saldo koperty
-                await tx.envelope.update({
-                    where: { id: recurringPayment.envelopeId },
-                    data: {
-                        currentAmount: {
-                            increment: recurringPayment.amount
+                if (recurringPayment.envelopeId) {
+                    await tx.transaction.create({
+                        data: {
+                            userId: userId,
+                            type: 'expense',
+                            amount: recurringPayment.amount,
+                            description: recurringPayment.name,
+                            date: new Date(),
+                            envelopeId: recurringPayment.envelopeId,
+                            category: recurringPayment.category,
+                            includeInStats: true
                         }
-                    }
-                })
+                    })
+
+                    // Zwiększ saldo koperty
+                    await tx.envelope.update({
+                        where: { id: recurringPayment.envelopeId },
+                        data: {
+                            currentAmount: {
+                                increment: recurringPayment.amount
+                            }
+                        }
+                    })
+                }
             }
 
             // Ustaw dismissedUntil na początek następnego miesiąca
