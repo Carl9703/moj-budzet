@@ -529,6 +529,11 @@ body {
     left: 0;
   }
   
+  /* Mobile sidebar open state */
+  aside.sidebar-open {
+    left: 0 !important;
+  }
+  
   .sidebar-layout main {
     width: 100% !important;
     margin-left: 0 !important;

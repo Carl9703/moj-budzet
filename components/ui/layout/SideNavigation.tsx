@@ -82,7 +82,7 @@ export function SideNavigation() {
                     transition: isMobile ? 'left 0.3s ease' : 'width 0.3s ease',
                     position: isMobile ? 'fixed' : 'sticky',
                     top: 0,
-                    left: isMobile ? '-240px' : 'auto',
+                    left: isMobile ? (isMobileMenuOpen ? '0' : '-240px') : 'auto',
                     height: '100vh',
                     overflow: 'hidden',
                     zIndex: 1000
