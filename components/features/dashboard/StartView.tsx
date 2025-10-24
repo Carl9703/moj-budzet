@@ -15,6 +15,15 @@ interface DashboardData {
     dailyBudget: number
     monthProgress: number
     totalDays: number
+    yearlyEnvelopes: Array<{
+        id: string
+        name: string
+        icon: string
+        spent: number
+        planned: number
+        current: number
+        group?: string
+    }>
 }
 
 export function StartView() {
@@ -38,7 +47,8 @@ export function StartView() {
                         daysRemaining: result.daysRemaining || 0,
                         dailyBudget: result.dailyBudget || 0,
                         monthProgress: result.monthProgress || 0,
-                        totalDays: result.totalDays || 31
+                        totalDays: result.totalDays || 31,
+                        yearlyEnvelopes: result.yearlyEnvelopes || []
                     })
                 }
             } catch (error) {
@@ -258,7 +268,7 @@ export function StartView() {
                             fontWeight: 'var(--font-weight-bold)',
                             color: 'var(--brand-primary)'
                         }}>
-                            {data.availableFunds.toFixed(2)} zł
+                            {(data.yearlyEnvelopes?.find(e => e.name.toLowerCase().includes('wolne środki'))?.current || 0).toFixed(2)} zł
                         </div>
                     </div>
                 </div>
