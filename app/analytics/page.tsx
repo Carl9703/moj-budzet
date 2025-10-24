@@ -359,8 +359,8 @@ export default function AnalyticsPage() {
 
     return (
         <div className="min-h-screen bg-theme-primary">
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-        <h1 style={{
+            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+        <h1 className="section-header" style={{
           fontSize: '32px',
           fontWeight: 'bold',
           color: 'var(--text-primary)',
@@ -390,9 +390,9 @@ export default function AnalyticsPage() {
         />
 
         {/* Sekcja C: Wizualizacje */}
-                        <div style={{
+                        <div className="grid-responsive" style={{
                             display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
           gap: '24px',
           marginBottom: '24px'
         }}>

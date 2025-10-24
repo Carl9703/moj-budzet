@@ -133,7 +133,7 @@ export default function ConfigPage() {
 
   return (
     <div className="min-h-screen bg-theme-primary">
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
+      <div className="container-wide" style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '22px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>⚙️ Konfigurator budżetu</h1>
 
         {/* Zakładki */}

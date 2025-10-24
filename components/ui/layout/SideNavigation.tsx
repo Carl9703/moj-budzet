@@ -58,22 +58,34 @@ export function SideNavigation() {
                 <div 
                     className="sidebar-overlay show"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: 999,
+                        display: 'block'
+                    }}
                 />
             )}
             
             <aside 
                 className={isMobile && isMobileMenuOpen ? 'sidebar-open' : ''}
                 style={{
-                    width: isCollapsed ? '60px' : '240px',
+                    width: isMobile ? '240px' : (isCollapsed ? '60px' : '240px'),
                     backgroundColor: 'var(--bg-secondary)',
                     borderRight: '1px solid var(--border-primary)',
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'width 0.3s ease',
-                    position: 'sticky',
+                    transition: isMobile ? 'left 0.3s ease' : 'width 0.3s ease',
+                    position: isMobile ? 'fixed' : 'sticky',
                     top: 0,
+                    left: isMobile ? '-240px' : 'auto',
                     height: '100vh',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    zIndex: 1000
                 }}
             >
             {/* Header with Logo and Toggle */}

@@ -153,7 +153,12 @@ export default function HomePage() {
     return (
         <div className="min-h-screen fade-in-up bg-theme-primary">
             <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                <div className="stagger-children dashboard-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                    gap: '16px', 
+                    marginBottom: '16px' 
+                }}>
                     <div className="smooth-all hover-lift">
                         <MainBalance balance={data.balance || 0} />
                         {/* Wolne środki pod MainBalance */}

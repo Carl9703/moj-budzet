@@ -80,12 +80,14 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
         <Card 
             onClick={handleClick}
             hover={!!(id && onTransactionClick)}
+            className="envelope-card"
             style={{
                 border: isOverBudget ? '2px solid var(--color-error)' : undefined,
                 boxShadow: isOverBudget 
                     ? '0 4px 12px rgba(231, 76, 60, 0.15), 0 2px 4px rgba(231, 76, 60, 0.1)' 
                     : undefined,
-                cursor: id && onTransactionClick ? 'pointer' : 'default'
+                cursor: id && onTransactionClick ? 'pointer' : 'default',
+                minHeight: '120px'
             }}
         >
             {/* Header */}

@@ -64,32 +64,33 @@ export default function SignUpPage() {
   }
 
   return (
-    <div style={{
+    <div className="min-h-screen bg-theme-primary" style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f9fafb',
+      backgroundColor: 'var(--bg-primary)',
       padding: '20px'
     }}>
-      <div style={{
-        backgroundColor: 'white',
+      <div className="card" style={{
+        backgroundColor: 'var(--bg-secondary)',
         padding: '40px',
         borderRadius: '12px',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+        boxShadow: 'var(--shadow-lg)',
         width: '100%',
-        maxWidth: '400px'
+        maxWidth: '400px',
+        border: '1px solid var(--border-primary)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{
+          <h1 className="section-header" style={{
             fontSize: '28px',
             fontWeight: '700',
-            color: '#111827',
+            color: 'var(--text-primary)',
             marginBottom: '8px'
           }}>
             💰 Budżet Domowy
           </h1>
-          <p style={{ color: '#6b7280', fontSize: '16px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
             Stwórz nowe konto
           </p>
         </div>

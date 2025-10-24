@@ -159,7 +159,7 @@ export default function ArchivePage() {
 
     return (
         <div className="min-h-screen bg-theme-primary">
-            <div style={{ 
+            <div className="container-wide" style={{ 
                 maxWidth: '1400px', 
                 margin: '0 auto', 
                 padding: '16px'
@@ -203,9 +203,9 @@ export default function ArchivePage() {
                         </p>
                     </div>
                 ) : (
-                    <div style={{
+                    <div className="grid-responsive" style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                         gap: '24px'
                     }}>
                         {monthsData.map((monthData) => (

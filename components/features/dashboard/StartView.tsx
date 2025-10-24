@@ -154,16 +154,16 @@ export function StartView() {
             </div>
 
             {/* GŁÓWNE INFORMACJE - GRID */}
-            <div style={{
+            <div className="grid-responsive start-view-grid" style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                 gap: 'var(--space-s)',
                 alignItems: 'stretch',
-                height: '400px',
+                minHeight: '400px',
                 flexShrink: 0
             }}>
                 {/* KONTO GŁÓWNE */}
-                <div style={{
+                <div className="start-view-card" style={{
                     background: 'linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)',
                     borderRadius: 'var(--border-radius-small)',
                     padding: 'var(--space-m)',
@@ -191,7 +191,7 @@ export function StartView() {
                         marginBottom: 'var(--space-s)'
                     }}>
                         <div>
-                            <h2 style={{
+                            <h2 className="start-view-header" style={{
                                 fontSize: 'var(--font-size-l)',
                                 fontWeight: 'var(--font-weight-bold)',
                                 color: 'var(--text-primary)',
@@ -264,7 +264,7 @@ export function StartView() {
                 </div>
 
                 {/* STATUS MIESIĄCA */}
-                <div style={{
+                <div className="start-view-card" style={{
                     background: 'linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)',
                     borderRadius: 'var(--border-radius-small)',
                     padding: 'var(--space-l)',
@@ -292,7 +292,7 @@ export function StartView() {
                         marginBottom: 'var(--space-s)'
                     }}>
                         <div>
-                            <h2 style={{
+                            <h2 className="start-view-header" style={{
                                 fontSize: 'var(--font-size-l)',
                                 fontWeight: 'var(--font-weight-bold)',
                                 color: 'var(--text-primary)',
@@ -318,7 +318,7 @@ export function StartView() {
                     </div>
 
                     {/* Przychody i Wydatki */}
-                    <div style={{
+                    <div className="start-view-stats" style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
                         gap: 'var(--space-s)',
@@ -408,7 +408,7 @@ export function StartView() {
                     </div>
 
                     {/* Bilans i Oszczędności */}
-                    <div style={{
+                    <div className="start-view-stats" style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
                         gap: 'var(--space-s)',

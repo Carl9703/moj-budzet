@@ -26,7 +26,7 @@ export default function StartPage() {
 
     return (
         <div className="min-h-screen fade-in-up bg-theme-primary">
-            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
                 <StartView />
             </div>
         </div>

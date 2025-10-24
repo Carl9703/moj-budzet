@@ -129,7 +129,7 @@ export default function HistoryPage() {
   
   return (
     <div className="min-h-screen bg-theme-primary">
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+      <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
           📜 Historia transakcji
         </h1>

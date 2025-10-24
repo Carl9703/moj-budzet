@@ -17,16 +17,57 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end space-y-3">
+        <div className="floating-button" style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 50,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '12px'
+        }}>
             {/* Menu opcji */}
             {isOpen && (
-                <div className="flex flex-col space-y-2 mb-2">
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginBottom: '8px'
+                }}>
                     <button
                         onClick={() => {
                             onAddIncome()
                             setIsOpen(false)
                         }}
-                        className="flex items-center space-x-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 text-sm font-medium"
+                        className="btn-mobile"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '12px 16px',
+                            backgroundColor: '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '25px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                            transition: 'all 0.2s ease',
+                            minHeight: '44px',
+                            minWidth: '44px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#059669'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#10b981'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)'
+                        }}
                     >
                         <span>💵</span>
                         <span>Dodaj przychód</span>
@@ -37,7 +78,34 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             onAddExpense()
                             setIsOpen(false)
                         }}
-                        className="flex items-center space-x-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 text-sm font-medium"
+                        className="btn-mobile"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '12px 16px',
+                            backgroundColor: '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '25px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                            transition: 'all 0.2s ease',
+                            minHeight: '44px',
+                            minWidth: '44px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#dc2626'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.4)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ef4444'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)'
+                        }}
                     >
                         <span>💸</span>
                         <span>Dodaj wydatek</span>
@@ -121,11 +189,36 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
             {/* Główny przycisk */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 ${
-                    isOpen 
-                        ? 'bg-red-500 hover:bg-red-600 rotate-45' 
-                        : 'bg-blue-500 hover:bg-blue-600'
-                }`}
+                className="btn-mobile"
+                style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    boxShadow: 'var(--shadow-lg)',
+                    transition: 'all 0.3s ease',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: isOpen ? '#ef4444' : '#3b82f6',
+                    minWidth: '56px',
+                    minHeight: '56px',
+                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = isOpen ? '#dc2626' : '#2563eb'
+                    e.currentTarget.style.transform = isOpen ? 'rotate(45deg) scale(1.1)' : 'rotate(0deg) scale(1.1)'
+                    e.currentTarget.style.boxShadow = 'var(--shadow-xl)'
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = isOpen ? '#ef4444' : '#3b82f6'
+                    e.currentTarget.style.transform = isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
+                }}
             >
                 {isOpen ? '✕' : '+'}
             </button>
