@@ -87,61 +87,33 @@ export async function POST(req: NextRequest) {
 }
 
 async function createDefaultEnvelopes(userId: string) {
-  // GRUPA 1: POTRZEBY (miesięczne)
-  const needsEnvelopes = [
-    { name: 'Mieszkanie', plannedAmount: 1500, icon: '🏠', group: 'needs' },
-    { name: 'Żywność', plannedAmount: 1200, icon: '🍕', group: 'needs' },
-    { name: 'Transport', plannedAmount: 400, icon: '🚗', group: 'needs' },
-    { name: 'Zdrowie i Higiena', plannedAmount: 300, icon: '💊', group: 'needs' },
-    { name: 'Rachunki i Subskrypcje', plannedAmount: 200, icon: '📱', group: 'needs' }
+  const defaultEnvelopes = [
+    // Koperty miesięczne
+    { name: 'Mieszkanie', type: 'monthly', plannedAmount: 1500, icon: '🏠', group: 'needs' },
+    { name: 'Żywność', type: 'monthly', plannedAmount: 1200, icon: '🍕', group: 'needs' },
+    { name: 'Transport', type: 'monthly', plannedAmount: 400, icon: '🚗', group: 'needs' },
+    { name: 'Zdrowie i Higiena', type: 'monthly', plannedAmount: 300, icon: '💊', group: 'needs' },
+    { name: 'Rachunki i Subskrypcje', type: 'monthly', plannedAmount: 200, icon: '📱', group: 'needs' },
+    { name: 'Wydatki Osobiste', type: 'monthly', plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
+    { name: 'Gastronomia', type: 'monthly', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
+    { name: 'Ubrania i Akcesoria', type: 'monthly', plannedAmount: 200, icon: '👕', group: 'lifestyle' },
+    { name: 'Fundusz Awaryjny', type: 'monthly', plannedAmount: 1000, icon: '🚨', group: 'financial' },
+    
+    // Koperty roczne
+    { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', plannedAmount: 2000, icon: '🚗', group: 'target' },
+    { name: 'Prezenty i Okazje', type: 'yearly', plannedAmount: 1500, icon: '🎁', group: 'target' },
+    { name: 'Podróże', type: 'yearly', plannedAmount: 5000, icon: '✈️', group: 'target' },
+    { name: 'Wesele', type: 'yearly', plannedAmount: 15000, icon: '💍', group: 'target' },
+    { name: 'Budowanie Przyszłości', type: 'yearly', plannedAmount: 9600, icon: '📈', group: 'target' },
+    { name: 'Wolne środki (roczne)', type: 'yearly', plannedAmount: 2000, icon: '🎉', group: 'target' },
   ]
 
-  // GRUPA 2: STYL ŻYCIA (miesięczne)
-  const lifestyleEnvelopes = [
-    { name: 'Wydatki Osobiste', plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
-    { name: 'Gastronomia', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
-    { name: 'Ubrania i Akcesoria', plannedAmount: 200, icon: '👕', group: 'lifestyle' }
-  ]
-
-  // GRUPA 3: CELE FINANSOWE (miesięczne)
-  const financialGoalsEnvelopes = [
-    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'financial' }
-  ]
-
-  // FUNDUSZE CELOWE (roczne)
-  const targetFundsEnvelopes = [
-    { name: 'Auto: Serwis i Ubezpieczenie', plannedAmount: 2000, icon: '🚗', group: 'target' },
-    { name: 'Prezenty i Okazje', plannedAmount: 1500, icon: '🎁', group: 'target' },
-    { name: 'Podróże', plannedAmount: 5000, icon: '✈️', group: 'target' },
-    { name: 'Wesele', plannedAmount: 15000, icon: '💍', group: 'target' },
-    { name: 'Budowanie Przyszłości', plannedAmount: 9600, icon: '📈', group: 'target' },
-    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '🎉', group: 'target' }
-  ]
-
-  // Stwórz wszystkie koperty miesięczne
-  const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...financialGoalsEnvelopes]
-  
-  for (const envelope of allMonthlyEnvelopes) {
+  for (const envelope of defaultEnvelopes) {
     await prisma.envelope.create({
       data: {
         userId,
         name: envelope.name,
-        type: 'monthly',
-        plannedAmount: envelope.plannedAmount,
-        currentAmount: 0, // Nowy użytkownik zaczyna z pustymi kopertami
-        icon: envelope.icon,
-        group: envelope.group
-      }
-    })
-  }
-
-  // Stwórz wszystkie koperty roczne
-  for (const envelope of targetFundsEnvelopes) {
-    await prisma.envelope.create({
-      data: {
-        userId,
-        name: envelope.name,
-        type: 'yearly',
+        type: envelope.type,
         plannedAmount: envelope.plannedAmount,
         currentAmount: 0,
         icon: envelope.icon,
