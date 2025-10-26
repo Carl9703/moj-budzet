@@ -93,7 +93,7 @@ export function TrendsVisualization({
       </div>
 
       {/* Wykres */}
-      <div className="h-80 w-full">
+      <div className="h-80 w-full" style={{ paddingLeft: '20px' }}>
         <LineChart
           data={chartData}
           index="period"
@@ -104,6 +104,8 @@ export function TrendsVisualization({
           showAnimation={true}
           showTooltip={true}
           showGridLines={true}
+          yAxisWidth={80}
+          showLegend={false}
           onValueChange={(value) => {
             if (onPeriodClick && value) {
               // Znajdź oryginalny okres na podstawie sformatowanego

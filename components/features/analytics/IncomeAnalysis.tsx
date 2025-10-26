@@ -134,7 +134,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
         {/* Wykres trendów przychodów */}
         <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <Title className="mb-4 text-gray-900 dark:text-white">Trend Przychodów</Title>
-          <div className="h-64">
+          <div className="h-64" style={{ paddingLeft: '20px' }}>
             <LineChart
               data={trendsData}
               index="period"
@@ -142,6 +142,8 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
               colors={['blue']}
               valueFormatter={(number: number) => formatMoneyWithSeparators(number)}
               className="h-full"
+              yAxisWidth={80}
+              showLegend={false}
             />
           </div>
         </Card>

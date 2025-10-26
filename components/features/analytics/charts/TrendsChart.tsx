@@ -136,7 +136,7 @@ const TrendsChart = ({
       </div>
 
       {/* Wykres Tremor */}
-      <div style={{ width: '100%', height: '400px' }}>
+      <div style={{ width: '100%', height: '400px', paddingLeft: '20px' }}>
         <LineChart
           data={chartData}
           index="period"
@@ -145,6 +145,8 @@ const TrendsChart = ({
           valueFormatter={valueFormatter}
           className="h-full w-full"
           showAnimation
+          yAxisWidth={80}
+          showLegend={false}
           onValueChange={(value) => {
             if (onPeriodClick && value) {
               // Znajdź oryginalny okres na podstawie sformatowanego
