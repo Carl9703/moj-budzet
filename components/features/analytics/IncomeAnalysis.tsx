@@ -117,6 +117,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
               category="value"
               index="name"
               colors={chartData.map(item => item.color)}
+              valueFormatter={(number: number) => formatMoneyWithSeparators(number)}
               onValueChange={(value) => {
                 if (value) {
                   handleSegmentClick(value.name)
@@ -139,6 +140,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
               index="period"
               categories={['value']}
               colors={['blue']}
+              valueFormatter={(number: number) => formatMoneyWithSeparators(number)}
               className="h-full"
             />
           </div>
