@@ -1,8 +1,9 @@
 ﻿'use client'
 import { useState, useEffect, useMemo } from 'react'
-import { GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts } from '@/components'
+import { GlobalFilters, KeyMetricsCards, SpendingBreakdownVisualization, TrendsVisualization, InteractiveExpenseExplorer, AnalyticsCharts, IncomeAnalysis, ViewModeToggle } from '@/components'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useIncomeAnalytics } from '@/lib/hooks/useIncomeAnalytics'
 
 interface DateRange {
   from: Date | undefined
@@ -99,6 +100,7 @@ export default function AnalyticsPage() {
     const { isAuthenticated, isCheckingAuth } = useAuth()
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
+    const [viewMode, setViewMode] = useState<'expenses' | 'income'>('expenses')
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // Bieżący miesiąc
     to: new Date()
@@ -108,6 +110,9 @@ export default function AnalyticsPage() {
   const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
   const [highlightedEnvelope, setHighlightedEnvelope] = useState<string | null>(null)
   const [forceCollapseAll, setForceCollapseAll] = useState(false)
+
+  // Hook dla analizy przychodów
+  const { data: incomeData, loading: incomeLoading } = useIncomeAnalytics(dateRange)
   
 
   const fetchData = async (newDateRange: DateRange, newCompareMode: boolean) => {
@@ -381,6 +386,13 @@ export default function AnalyticsPage() {
           loading={loading}
         />
 
+        {/* Profesjonalny Przełącznik Widoku */}
+        <ViewModeToggle
+          currentMode={viewMode}
+          onModeChange={setViewMode}
+          loading={loading || incomeLoading}
+        />
+
         {/* Sekcja B: Kluczowe Wskaźniki */}
         <KeyMetricsCards
           currentPeriod={data.mainMetrics.currentPeriod}
@@ -389,38 +401,51 @@ export default function AnalyticsPage() {
           loading={loading}
         />
 
-        {/* Sekcja C: Wizualizacje */}
-                        <div className="grid-responsive" style={{
-                            display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '24px',
-          marginBottom: '24px'
-        }}>
-          {/* NOWY KOMPONENT Z WYKRESAMI - Client Component */}
-          <AnalyticsCharts 
-            data={chartData} 
-            total={data.mainMetrics.currentPeriod.expense}
-            onSegmentClick={handleSegmentClick}
-          />
-          <TrendsVisualization
-            data={trendsData}
-            selectedItem={selectedItem?.name}
-            loading={loading}
-          />
-                                        </div>
+        {/* Sekcja C: Wizualizacje - Renderowanie warunkowe */}
+        {viewMode === 'expenses' ? (
+          <>
+            {/* Tryb Wydatki */}
+            <div className="grid-responsive" style={{
+                display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+      gap: '24px',
+      marginBottom: '24px'
+    }}>
+              {/* NOWY KOMPONENT Z WYKRESAMI - Client Component */}
+              <AnalyticsCharts 
+                data={chartData} 
+                total={data.mainMetrics.currentPeriod.expense}
+                onSegmentClick={handleSegmentClick}
+              />
+              <TrendsVisualization
+                data={trendsData}
+                selectedItem={selectedItem?.name}
+                loading={loading}
+              />
+            </div>
 
-        {/* Sekcja D: Interaktywny Eksplorator Wydatków */}
-        <div id="expense-explorer">
-          <InteractiveExpenseExplorer
-            data={data.spendingTree}
-            compareMode={compareMode}
-            onItemClick={handleExplorerItemClick}
-            loading={loading}
-            highlightedGroup={highlightedGroup}
-            highlightedEnvelope={highlightedEnvelope}
-            forceCollapseAll={forceCollapseAll}
-          />
-        </div>
+            {/* Sekcja D: Interaktywny Eksplorator Wydatków */}
+            <div id="expense-explorer">
+              <InteractiveExpenseExplorer
+                data={data.spendingTree}
+                compareMode={compareMode}
+                onItemClick={handleExplorerItemClick}
+                loading={loading}
+                highlightedGroup={highlightedGroup}
+                highlightedEnvelope={highlightedEnvelope}
+                forceCollapseAll={forceCollapseAll}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Tryb Przychody */}
+            <IncomeAnalysis 
+              data={incomeData} 
+              loading={incomeLoading} 
+            />
+          </>
+        )}
 
             </div>
         </div>
