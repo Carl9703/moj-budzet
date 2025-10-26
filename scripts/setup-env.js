@@ -17,8 +17,10 @@ const nodeEnv = currentBranch === 'dev' ? 'development' : 'production';
 const envContent = `# Auto-generated environment file for ${currentBranch} branch
 # Generated on: ${new Date().toISOString()}
 
-# Database
+# Database URLs for different branches
 DATABASE_URL=${databaseUrl}
+DATABASE_URL_DEV=${databaseUrl}
+DATABASE_URL_MAIN=${databaseUrl}
 
 # NextAuth
 NEXTAUTH_SECRET=super-secret-key-for-development-only-12345
