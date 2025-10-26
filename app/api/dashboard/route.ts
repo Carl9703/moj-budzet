@@ -41,11 +41,14 @@ export async function GET(request: NextRequest) {
             orderBy: { name: 'asc' }
         })
 
-        // Pobierz WSZYSTKIE transakcje do obliczenia salda (wykluczając operacje zamknięcia)
-        const allTransactions = await prisma.transaction.findMany({
+        // Pobierz transakcje od 1 września 2025 (po imporcie historycznych danych)
+        const startOfAppUsage = new Date('2025-09-01')
+        
+        const transactionsFromSeptember = await prisma.transaction.findMany({
             where: {
                 userId,
                 type: { in: ['income', 'expense'] },
+                date: { gte: startOfAppUsage },
                 NOT: [
                     {
                         description: {
@@ -61,20 +64,21 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // Oblicz rzeczywiste saldo konta głównego
-        const totalAllIncome = Math.round(allTransactions
+        // Oblicz saldo z transakcji od września (normalna logika)
+        const incomeFromSeptember = Math.round(transactionsFromSeptember
             .filter(t => t.type === 'income')
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        const totalAllExpenses = Math.round(allTransactions
+        const expensesFromSeptember = Math.round(transactionsFromSeptember
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        // Znajdź kopertę Fundusz Awaryjny i odejmij jej wartość od salda głównego
+        // Znajdź kopertę Fundusz Awaryjny
         const emergencyFundEnvelope = envelopes.find(e => e.name === 'Fundusz Awaryjny')
         const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
 
-        const balance = Math.round((totalAllIncome - totalAllExpenses - emergencyFundAmount) * 100) / 100
+        // Oblicz saldo: przychody od września - wydatki od września - fundusz awaryjny
+        const balance = Math.round((incomeFromSeptember - expensesFromSeptember - emergencyFundAmount) * 100) / 100
 
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -238,7 +242,7 @@ export async function GET(request: NextRequest) {
             totalExpenses,
             monthlyEnvelopes,
             yearlyEnvelopes,
-            transactions: allTransactions.slice(0, 20),
+            transactions: transactionsFromSeptember.slice(0, 20),
             isMonthClosed
         })
 
