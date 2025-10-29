@@ -26,6 +26,23 @@ export async function POST(request: NextRequest) {
 
         const data = validation.data
 
+        // Parsuj datę w lokalnej strefie czasowej
+        let transactionDate: Date
+        if (data.date) {
+            // Jeśli data jest tylko datą (YYYY-MM-DD), ustaw na lokalny czas
+            const dateString = data.date
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                // Data bez czasu - ustaw na lokalną godzinę 12:00 zamiast UTC północy
+                const [year, month, day] = dateString.split('-').map(Number)
+                transactionDate = new Date(year, month - 1, day, 12, 0, 0)
+            } else {
+                // Pełna data z czasem - użyj bezpośrednio
+                transactionDate = new Date(dateString)
+            }
+        } else {
+            transactionDate = new Date()
+        }
+
         // Prosty zapis przychodu bez automatycznego podziału
             await prisma.transaction.create({
                 data: {
@@ -33,7 +50,7 @@ export async function POST(request: NextRequest) {
                     type: 'income',
                     amount: data.amount,
                 description: data.description || (data.type === 'salary' ? 'Wypłata' : data.type === 'bonus' ? 'Premia' : 'Inny przychód'),
-                    date: data.date ? new Date(data.date) : new Date(),
+                    date: transactionDate,
                 includeInStats: data.includeInStats !== false
             }
         })

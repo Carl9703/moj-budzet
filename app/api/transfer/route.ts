@@ -69,6 +69,23 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Parsuj datę w lokalnej strefie czasowej
+        let transferDate: Date
+        if (data.date) {
+            // Jeśli data jest tylko datą (YYYY-MM-DD), ustaw na lokalny czas
+            const dateString = data.date
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                // Data bez czasu - ustaw na lokalną godzinę 12:00 zamiast UTC północy
+                const [year, month, day] = dateString.split('-').map(Number)
+                transferDate = new Date(year, month - 1, day, 12, 0, 0)
+            } else {
+                // Pełna data z czasem - użyj bezpośrednio
+                transferDate = new Date(dateString)
+            }
+        } else {
+            transferDate = new Date()
+        }
+
         // Wykonaj transfer w transakcji
         await prisma.$transaction(async (tx) => {
             // Generuj unikalny ID dla pary transferów
@@ -98,7 +115,7 @@ export async function POST(request: NextRequest) {
                     type: 'expense',
                     amount: data.amount,
                     description: `Transfer: ${toEnvelope.name}`,
-                    date: data.date ? new Date(data.date) : new Date(),
+                    date: transferDate,
                     envelopeId: fromEnvelope.id,
                     includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
                     transferPairId: transferPairId
@@ -112,7 +129,7 @@ export async function POST(request: NextRequest) {
                     type: 'income',
                     amount: data.amount,
                     description: `Transfer: ${fromEnvelope.name}`,
-                    date: data.date ? new Date(data.date) : new Date(),
+                    date: transferDate,
                     envelopeId: toEnvelope.id,
                     includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
                     transferPairId: transferPairId
@@ -127,7 +144,7 @@ export async function POST(request: NextRequest) {
                         type: 'expense',
                         amount: data.amount,
                         description: data.toCategory,
-                        date: data.date ? new Date(data.date) : new Date(),
+                        date: transferDate,
                         envelopeId: toEnvelope.id,
                         includeInStats: true, // Wydatek z kategorią wpływa na statystyki
                         category: data.toCategory
