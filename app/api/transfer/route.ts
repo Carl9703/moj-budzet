@@ -72,12 +72,13 @@ export async function POST(request: NextRequest) {
         // Parsuj datę w lokalnej strefie czasowej
         let transferDate: Date
         if (data.date) {
-            // Jeśli data jest tylko datą (YYYY-MM-DD), ustaw na lokalny czas
+            // Jeśli data jest tylko datą (YYYY-MM-DD), dodaj aktualną godzinę
             const dateString = data.date
             if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-                // Data bez czasu - ustaw na lokalną godzinę 12:00 zamiast UTC północy
+                // Data bez czasu - użyj aktualnej godziny z tej daty
                 const [year, month, day] = dateString.split('-').map(Number)
-                transferDate = new Date(year, month - 1, day, 12, 0, 0)
+                const now = new Date()
+                transferDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds())
             } else {
                 // Pełna data z czasem - użyj bezpośrednio
                 transferDate = new Date(dateString)
