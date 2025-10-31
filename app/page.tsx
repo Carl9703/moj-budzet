@@ -32,7 +32,7 @@ export default function HomePage() {
     const { showToast } = useToast()
     const { data, loading, error, refetch } = useDashboard()
     const { config, loading: configLoading } = useConfig()
-    const { previousMonthStatus, currentMonthStatus } = usePreviousMonth()
+    const { previousMonthStatus, currentMonthStatus, refetch: refetchMonthStatus } = usePreviousMonth()
     
     const [showIncomeModal, setShowIncomeModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
@@ -190,6 +190,7 @@ export default function HomePage() {
 
                                     const result = await response.json()
                                     await refetch()
+                                    await refetchMonthStatus()
                                     showToast(result.message || 'Zamknięcie miesiąca zostało cofnięte!', 'success')
                                 } catch (error) {
                                     console.error('Error undoing close month:', error)
@@ -373,6 +374,7 @@ export default function HomePage() {
                                 const result = await response.json()
                                 setShowCloseMonthModal(false)
                                 await refetch()
+                                await refetchMonthStatus()
                                 showToast(result.message || 'Miesiąc został zamknięty!', 'success')
                             } catch (error) {
                                 console.error('Error closing month:', error)

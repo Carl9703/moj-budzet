@@ -25,6 +25,11 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
     
     // Inteligentna logika dla przycisku zamknij miesiąc
     const canCloseMonth = () => {
+        // Jeśli bieżący miesiąc jest zamknięty, nie można zamykać (tylko cofnąć)
+        if (currentMonthStatus?.isClosed) {
+            return false
+        }
+        
         // Jeśli poprzedni miesiąc już zamknięty, nie można zamykać
         if (previousMonthStatus.isClosed) {
             return false
