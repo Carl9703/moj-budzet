@@ -174,6 +174,31 @@ export default function HomePage() {
                             totalExpenses={data.totalExpenses || 0}
                             daysLeft={calculateDaysLeft()}
                             onCloseMonth={() => setShowCloseMonthModal(true)}
+                            onUndoCloseMonth={async () => {
+                                try {
+                                    const response = await authorizedFetch('/api/close-month/undo', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                    })
+
+                                    if (!response.ok) {
+                                        const errorData = await response.json()
+                                        throw new Error(errorData.error || 'Błąd cofania zamknięcia miesiąca')
+                                    }
+
+                                    const result = await response.json()
+                                    await refetch()
+                                    showToast(result.message || 'Zamknięcie miesiąca zostało cofnięte!', 'success')
+                                } catch (error) {
+                                    console.error('Error undoing close month:', error)
+                                    showToast(
+                                        error instanceof Error ? error.message : 'Błąd cofania zamknięcia miesiąca',
+                                        'error'
+                                    )
+                                }
+                            }}
                             previousMonthStatus={previousMonthStatus}
                             currentDay={getCurrentDayAndTotalDays().currentDay}
                             totalDays={getCurrentDayAndTotalDays().totalDays}

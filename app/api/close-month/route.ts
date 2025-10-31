@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { roundToCents } from '@/lib/utils/money'
 
 export async function POST(request: NextRequest) {
     try {
@@ -60,20 +61,25 @@ export async function POST(request: NextRequest) {
         })
 
         // Osobno przychody w statystykach i poza nimi
+        // Wyklucz transfery (transakcje z transferPairId) - to są tylko wewnętrzne przepływy między kopertami
         const statsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean }) => 
-                t.type === 'income' && t.includeInStats !== false
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+                t.type === 'income' && t.includeInStats !== false && !t.transferPairId
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
+        // Zwroty i refundacje - przychody poza statystykami, ale NIE transfery
         const nonStatsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean }) => 
-                t.type === 'income' && t.includeInStats === false
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+                t.type === 'income' && t.includeInStats === false && !t.transferPairId
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
+        // Wydatki - wyklucz transfery
         const totalExpenses = monthTransactions
-            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+                t.type === 'expense' && t.includeInStats !== false && !t.transferPairId
+            )
             .reduce((sum, t) => sum + t.amount, 0)
 
         // Oblicz składowe
@@ -132,13 +138,16 @@ export async function POST(request: NextRequest) {
                 })
 
                 // Utwórz transakcję księgową z rozpisaniem
+                const roundedMonthBalance = roundToCents(monthBalance)
+                const roundedReturnsBalance = roundToCents(returnsBalance)
+                
                 let description = '🔒 Zamknięcie miesiąca'
-                if (monthBalance > 0 && returnsBalance > 0) {
-                    description += ` - oszczędności: ${monthBalance} zł, zwroty: ${returnsBalance} zł`
-                } else if (monthBalance > 0) {
-                    description += ` - oszczędności: ${monthBalance} zł`
-                } else if (returnsBalance > 0) {
-                    description += ` - zwroty: ${returnsBalance} zł`
+                if (roundedMonthBalance > 0 && roundedReturnsBalance > 0) {
+                    description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł, zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
+                } else if (roundedMonthBalance > 0) {
+                    description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł`
+                } else if (roundedReturnsBalance > 0) {
+                    description += ` - zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
                 }
 
                 await prisma.transaction.create({
@@ -156,7 +165,15 @@ export async function POST(request: NextRequest) {
         }
 
         // Reset wszystkich kopert miesięcznych do 0
+        // WAŻNE: Nie zeruj kopert rocznych (nawet jeśli są błędnie oznaczone jako monthly)
+        const rocznyEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)']
+        
         for (const envelope of monthlyEnvelopes) {
+            // Pomiń koperty roczne nawet jeśli są oznaczone jako monthly
+            if (rocznyEnvelopeNames.includes(envelope.name)) {
+                continue
+            }
+            
             await prisma.envelope.update({
                 where: { id: envelope.id },
                 data: {
