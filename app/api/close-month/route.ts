@@ -88,28 +88,28 @@ export async function POST(request: NextRequest) {
         const totalToTransfer = monthBalance + returnsBalance // całkowite saldo do przeniesienia
 
 
-        // Pobierz WSZYSTKIE koperty użytkownika, aby mieć pełną listę do ochrony
+        // Pobierz WSZYSTKIE koperty użytkownika
         const allEnvelopes = await prisma.envelope.findMany({
             where: {
                 userId: userId
             }
         })
 
-        // Rozdziel na miesięczne i roczne
-        const monthlyEnvelopes = allEnvelopes.filter(e => e.type === 'monthly')
-        const yearlyEnvelopes = allEnvelopes.filter(e => e.type === 'yearly')
-        
-        // Utwórz set ID kopert rocznych dla szybkiego sprawdzania
-        const yearlyEnvelopeIds = new Set(yearlyEnvelopes.map(e => e.id))
-        
-        // Również utwórz set NAZW kopert rocznych (na wypadek błędnego oznaczenia typu)
-        const yearlyEnvelopeNames = new Set(yearlyEnvelopes.map(e => e.name))
+        // Lista chronionych nazw kopert rocznych (NIE mogą być zerowane)
+        const protectedEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)', 'Cele finansowe']
+        const protectedNamesSet = new Set(protectedEnvelopeNames)
 
-        // Zbierz informacje o stanie kopert (tylko informacyjnie)
+        // Zbierz informacje o stanie kopert miesięcznych (tylko informacyjnie)
         const envelopeDetails = []
         let totalUnusedFunds = 0
 
-        for (const envelope of monthlyEnvelopes) {
+        // Tylko koperty miesięczne (nie roczne i nie chronione) do informacji
+        const actualMonthlyEnvelopes = allEnvelopes.filter(e => 
+            e.type === 'monthly' && 
+            !protectedNamesSet.has(e.name)
+        )
+
+        for (const envelope of actualMonthlyEnvelopes) {
             if (envelope.currentAmount > 0) {
                 totalUnusedFunds += envelope.currentAmount
                 envelopeDetails.push({
@@ -173,34 +173,31 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Reset wszystkich kopert miesięcznych do 0
-        // WAŻNE: Nie zeruj kopert rocznych (nawet jeśli są błędnie oznaczone jako monthly)
-        const rocznyEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)', 'Cele finansowe']
-        
-        for (const envelope of monthlyEnvelopes) {
-            // Pomiń koperty roczne - sprawdź na 3 sposoby:
-            // 1. Po ID (czy jest w Set kopert rocznych z type='yearly')
-            // 2. Po nazwie (czy nazwa jest w Set nazw kopert rocznych)
-            // 3. Po nazwie na liście chronionych kopert
-            const isYearlyById = yearlyEnvelopeIds.has(envelope.id)
-            const isYearlyByName = yearlyEnvelopeNames.has(envelope.name)
-            const isProtectedName = rocznyEnvelopeNames.includes(envelope.name)
-            
-            const shouldSkip = isYearlyById || isYearlyByName || isProtectedName
-            
-            if (shouldSkip) {
-                console.log(`[Close Month] Pomijam kopertę roczną: ${envelope.name} (ID: ${envelope.id}, type: ${envelope.type}, isYearlyById: ${isYearlyById}, isYearlyByName: ${isYearlyByName}, isProtected: ${isProtectedName})`)
+        // Reset TYLKO kopert miesięcznych do 0
+        // WAŻNE: NIGDY nie zeruj kopert rocznych (type='yearly') ani chronionych nazw
+        for (const envelope of allEnvelopes) {
+            // Pomiń koperty roczne (type='yearly')
+            if (envelope.type === 'yearly') {
+                console.log(`[Close Month] Pomijam kopertę roczną (type=yearly): ${envelope.name} (ID: ${envelope.id})`)
                 continue
             }
             
-            console.log(`[Close Month] Zeruję kopertę miesięczną: ${envelope.name} (ID: ${envelope.id})`)
+            // Pomiń koperty z chronionymi nazwami (nawet jeśli są błędnie oznaczone jako monthly)
+            if (protectedNamesSet.has(envelope.name)) {
+                console.log(`[Close Month] Pomijam kopertę chronioną: ${envelope.name} (ID: ${envelope.id}, type: ${envelope.type})`)
+                continue
+            }
             
-            await prisma.envelope.update({
-                where: { id: envelope.id },
-                data: {
-                    currentAmount: 0
-                }
-            })
+            // Tylko koperty miesięczne (type='monthly') i bez chronionej nazwy
+            if (envelope.type === 'monthly') {
+                console.log(`[Close Month] Zeruję kopertę miesięczną: ${envelope.name} (ID: ${envelope.id})`)
+                await prisma.envelope.update({
+                    where: { id: envelope.id },
+                    data: {
+                        currentAmount: 0
+                    }
+                })
+            }
         }
 
 
