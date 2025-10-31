@@ -30,15 +30,31 @@ export function usePreviousMonth() {
                 const monthName = previousMonthStart.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
                 
                 // Sprawdź czy poprzedni miesiąc był zamknięty
+                // Szukaj transakcji zamknięcia zarówno w poprzednim miesiącu, jak i w pierwszych dniach bieżącego miesiąca
+                // (bo można zamykać miesiąc w pierwszych 3 dniach nowego miesiąca)
                 const checkResponse = await authorizedFetch('/api/transactions', {
                     method: 'GET'
                 }).then(res => res.json())
                 
-                const isClosed = checkResponse.some((t: any) => 
-                    t.description?.includes('Zamknięcie miesiąca') && 
-                    new Date(t.date) >= previousMonthStart && 
-                    new Date(t.date) <= previousMonthEnd
-                )
+                const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                const firstDaysOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 3, 23, 59, 59)
+                
+                const isClosed = checkResponse.some((t: any) => {
+                    if (!t.description?.includes('Zamknięcie miesiąca')) {
+                        return false
+                    }
+                    
+                    const transactionDate = new Date(t.date)
+                    
+                    // Sprawdź czy transakcja jest w poprzednim miesiącu
+                    const inPreviousMonth = transactionDate >= previousMonthStart && transactionDate <= previousMonthEnd
+                    
+                    // Sprawdź czy transakcja jest w pierwszych 3 dniach bieżącego miesiąca
+                    // (bo można zamykać miesiąc w pierwszych 3 dniach - wtedy zamknięcie dotyczy poprzedniego miesiąca)
+                    const inFirstDaysOfCurrent = transactionDate >= currentMonthStart && transactionDate <= firstDaysOfCurrentMonth
+                    
+                    return inPreviousMonth || inFirstDaysOfCurrent
+                })
                 
                 setPreviousMonthStatus({
                     isClosed,
