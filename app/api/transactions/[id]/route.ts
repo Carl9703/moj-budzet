@@ -104,9 +104,53 @@ export async function PATCH(
                 let newCurrentAmount = envelope.currentAmount
 
                 if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
                     newCurrentAmount = envelope.currentAmount + amountDifference
                 } else if (envelope.type === 'yearly') {
-                    newCurrentAmount = envelope.currentAmount + amountDifference
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: expense zwiększa saldo, więc przy zmianie kwoty zmieniamy znak
+                        newCurrentAmount = envelope.currentAmount - amountDifference
+                    } else {
+                        // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
+                        newCurrentAmount = envelope.currentAmount + amountDifference
+                    }
+                }
+
+                await prisma.envelope.update({
+                    where: { id: originalTransaction.envelopeId },
+                    data: {
+                        currentAmount: newCurrentAmount
+                    }
+                })
+            }
+        }
+
+        // Jeśli to przychód z kopertą, zaktualizuj stan koperty
+        if (originalTransaction.type === 'income' && originalTransaction.envelopeId) {
+            const envelope = await prisma.envelope.findUnique({
+                where: { id: originalTransaction.envelopeId }
+            })
+
+            if (envelope) {
+                let newCurrentAmount = envelope.currentAmount
+
+                if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
+                    newCurrentAmount = envelope.currentAmount - amountDifference
+                } else if (envelope.type === 'yearly') {
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: income zmniejsza saldo, więc przy zmianie kwoty zmieniamy znak
+                        newCurrentAmount = envelope.currentAmount + amountDifference
+                    } else {
+                        // Koperty wydatkowe roczne: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
+                        newCurrentAmount = envelope.currentAmount - amountDifference
+                    }
                 }
 
                 await prisma.envelope.update({
@@ -222,9 +266,19 @@ export async function DELETE(
                 let newCurrentAmount: number
                 
                 if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
                     newCurrentAmount = envelope.currentAmount + transaction.amount
                 } else if (envelope.type === 'yearly') {
-                    newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: expense zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
+                        newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                    } else {
+                        // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
+                        newCurrentAmount = envelope.currentAmount + transaction.amount
+                    }
                 } else {
                     newCurrentAmount = envelope.currentAmount
                 }
@@ -244,10 +298,31 @@ export async function DELETE(
             })
 
             if (envelope) {
+                let newCurrentAmount: number
+                
+                if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
+                    // Przy usuwaniu odwracamy: zmniejszamy saldo
+                    newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                } else if (envelope.type === 'yearly') {
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: income zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
+                        newCurrentAmount = envelope.currentAmount + transaction.amount
+                    } else {
+                        // Koperty wydatkowe roczne: income zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
+                        newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                    }
+                } else {
+                    newCurrentAmount = envelope.currentAmount
+                }
+
                 await prisma.envelope.update({
                     where: { id: transaction.envelopeId },
                     data: {
-                        currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
+                        currentAmount: newCurrentAmount
                     }
                 })
             }

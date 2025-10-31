@@ -5,6 +5,7 @@ interface DashboardData {
     balance: number
     totalIncome: number
     totalExpenses: number
+    isMonthClosed?: boolean
     monthlyEnvelopes: Array<{
         id: string
         name: string

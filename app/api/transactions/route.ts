@@ -258,6 +258,7 @@ export async function POST(request: NextRequest) {
 
             if (envelope) {
                 if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
                     await prisma.envelope.update({
                         where: { id: data.envelopeId },
                         data: {
@@ -265,12 +266,69 @@ export async function POST(request: NextRequest) {
                         }
                     })
                 } else if (envelope.type === 'yearly') {
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    // "Budowanie Przyszłości" - expense zwiększa saldo (oszczędzanie)
+                    // "Wesele", "Podróże" itp. - expense zmniejsza saldo (wydawanie z oszczędzonych środków)
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: expense zwiększa saldo (oszczędzanie)
+                        await prisma.envelope.update({
+                            where: { id: data.envelopeId },
+                            data: {
+                                currentAmount: envelope.currentAmount + data.amount
+                            }
+                        })
+                    } else {
+                        // Koperty wydatkowe roczne: expense zmniejsza saldo (wydawanie z oszczędzonych środków)
+                        await prisma.envelope.update({
+                            where: { id: data.envelopeId },
+                            data: {
+                                currentAmount: envelope.currentAmount - data.amount
+                            }
+                        })
+                    }
+                }
+            }
+        }
+
+        if (data.type === 'income' && data.envelopeId) {
+            const envelope = await prisma.envelope.findUnique({
+                where: { id: data.envelopeId }
+            })
+
+            if (envelope) {
+                if (envelope.type === 'monthly') {
+                    // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
                     await prisma.envelope.update({
                         where: { id: data.envelopeId },
                         data: {
-                            currentAmount: envelope.currentAmount - data.amount
+                            currentAmount: envelope.currentAmount + data.amount
                         }
                     })
+                } else if (envelope.type === 'yearly') {
+                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
+                    // "Budowanie Przyszłości" - income zmniejsza saldo (wypłata z oszczędności)
+                    // "Wesele", "Podróże" itp. - income zwiększa saldo (zwrot/wpłata do koperty)
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
+                        // Koperty oszczędnościowe: income zmniejsza saldo (wypłata z oszczędności)
+                        await prisma.envelope.update({
+                            where: { id: data.envelopeId },
+                            data: {
+                                currentAmount: envelope.currentAmount - data.amount
+                            }
+                        })
+                    } else {
+                        // Koperty wydatkowe roczne: income zwiększa saldo (zwrot/wpłata do koperty)
+                        await prisma.envelope.update({
+                            where: { id: data.envelopeId },
+                            data: {
+                                currentAmount: envelope.currentAmount + data.amount
+                            }
+                        })
+                    }
                 }
             }
         }

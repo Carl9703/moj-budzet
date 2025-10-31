@@ -177,6 +177,7 @@ export default function HomePage() {
                             previousMonthStatus={previousMonthStatus}
                             currentDay={getCurrentDayAndTotalDays().currentDay}
                             totalDays={getCurrentDayAndTotalDays().totalDays}
+                            isMonthClosed={data.isMonthClosed}
                         />
                     </div>
                     <div className="smooth-all hover-lift">

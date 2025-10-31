@@ -12,14 +12,20 @@ interface Props {
     }
     currentDay: number
     totalDays: number
+    isMonthClosed?: boolean
 }
 
-export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus, currentDay, totalDays }: Props) {
+export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus, currentDay, totalDays, isMonthClosed }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
     
     // Inteligentna logika dla przycisku zamknij miesiąc
     const canCloseMonth = () => {
+        // Jeśli bieżący miesiąc jest już zamknięty, przycisk nie powinien być widoczny
+        if (isMonthClosed) {
+            return false
+        }
+        
         // Jeśli poprzedni miesiąc już zamknięty, nie można zamykać
         if (previousMonthStatus.isClosed) {
             return false
@@ -70,11 +76,13 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                         fontWeight: '500',
                         opacity: 0.6
                     }}>
-                        {previousMonthStatus.isClosed 
-                            ? `✅ ${previousMonthStatus.monthName} zamknięty`
-                            : daysLeft > 3 
-                                ? `⏰ Dostępne za ${daysLeft - 3} dni`
-                                : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
+                        {isMonthClosed 
+                            ? `✅ Miesiąc zamknięty`
+                            : previousMonthStatus.isClosed 
+                                ? `✅ ${previousMonthStatus.monthName} zamknięty`
+                                : daysLeft > 3 
+                                    ? `⏰ Dostępne za ${daysLeft - 3} dni`
+                                    : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
                         }
                     </div>
                 )}
