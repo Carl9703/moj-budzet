@@ -15,7 +15,7 @@ interface EnvelopeStatus {
 
 interface Props {
     onClose: () => void
-    onConfirm: () => void
+    onConfirm: () => void | Promise<void>
     surplus?: number
     monthSummary: {
         income: number
@@ -28,6 +28,7 @@ interface Props {
 export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, monthName }: Props) {
     const [envelopeStatus, setEnvelopeStatus] = useState<EnvelopeStatus[]>([])
     const [loading, setLoading] = useState(true)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const displayMonth = monthName || new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
     // Użyj surplus jeśli podany, inaczej oblicz z monthSummary
@@ -151,30 +152,41 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
                     onClick={onClose}
+                    disabled={isSubmitting}
                     style={{
                         padding: '8px 16px',
                         border: '1px solid var(--border-primary)',
                         borderRadius: '4px',
                         backgroundColor: 'var(--bg-primary)',
                         color: 'var(--text-primary)',
-                        cursor: 'pointer'
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1
                     }}
                 >
                     Anuluj
                 </button>
                 <button
-                    onClick={onConfirm}
+                    onClick={async () => {
+                        setIsSubmitting(true)
+                        try {
+                            await onConfirm()
+                        } finally {
+                            setIsSubmitting(false)
+                        }
+                    }}
+                    disabled={isSubmitting}
                     style={{
                         padding: '8px 16px',
                         border: 'none',
                         borderRadius: '4px',
                         backgroundColor: 'var(--accent-primary)',
                         color: 'white',
-                        cursor: 'pointer',
-                        fontWeight: '500'
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        fontWeight: '500',
+                        opacity: isSubmitting ? 0.6 : 1
                     }}
                 >
-                    ✓ Zamknij miesiąc
+                    {isSubmitting ? '⏳ Zamykanie...' : '✓ Zamknij miesiąc'}
                 </button>
             </div>
         </Modal>

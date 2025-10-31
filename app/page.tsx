@@ -330,10 +330,31 @@ export default function HomePage() {
                 {showCloseMonthModal && (
                     <CloseMonthModal
                         onClose={() => setShowCloseMonthModal(false)}
-                        onConfirm={() => {
-                            setShowCloseMonthModal(false)
-                            refetch()
-                            showToast('Miesiąc został zamknięty!', 'success')
+                        onConfirm={async () => {
+                            try {
+                                const response = await authorizedFetch('/api/close-month', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                })
+
+                                if (!response.ok) {
+                                    const errorData = await response.json()
+                                    throw new Error(errorData.error || 'Błąd zamykania miesiąca')
+                                }
+
+                                const result = await response.json()
+                                setShowCloseMonthModal(false)
+                                await refetch()
+                                showToast(result.message || 'Miesiąc został zamknięty!', 'success')
+                            } catch (error) {
+                                console.error('Error closing month:', error)
+                                showToast(
+                                    error instanceof Error ? error.message : 'Błąd zamykania miesiąca',
+                                    'error'
+                                )
+                            }
                         }}
                         monthSummary={{
                             income: data?.totalIncome || 0,
