@@ -45,7 +45,9 @@ export function usePreviousMonth() {
                     method: 'GET'
                 }).then(res => res.json())
                 
+                // Oblicz daty bieżącego miesiąca (używane zarówno dla poprzedniego jak i bieżącego miesiąca)
                 const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
                 const firstDaysOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 3, 23, 59, 59)
                 
                 const isClosed = checkResponse.some((t: any) => {
@@ -72,8 +74,6 @@ export function usePreviousMonth() {
                 })
 
                 // Sprawdź czy bieżący miesiąc jest zamknięty
-                const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-                const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
                 const currentMonthName = currentMonthStart.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
                 
                 const currentIsClosed = checkResponse.some((t: any) => {
