@@ -174,30 +174,27 @@ export async function POST(request: NextRequest) {
         }
 
         // Reset TYLKO kopert miesięcznych do 0
-        // WAŻNE: NIGDY nie zeruj kopert rocznych (type='yearly') ani chronionych nazw
-        for (const envelope of allEnvelopes) {
-            // Pomiń koperty roczne (type='yearly')
-            if (envelope.type === 'yearly') {
-                console.log(`[Close Month] Pomijam kopertę roczną (type=yearly): ${envelope.name} (ID: ${envelope.id})`)
-                continue
-            }
-            
-            // Pomiń koperty z chronionymi nazwami (nawet jeśli są błędnie oznaczone jako monthly)
-            if (protectedNamesSet.has(envelope.name)) {
-                console.log(`[Close Month] Pomijam kopertę chronioną: ${envelope.name} (ID: ${envelope.id}, type: ${envelope.type})`)
-                continue
-            }
-            
-            // Tylko koperty miesięczne (type='monthly') i bez chronionej nazwy
-            if (envelope.type === 'monthly') {
-                console.log(`[Close Month] Zeruję kopertę miesięczną: ${envelope.name} (ID: ${envelope.id})`)
-                await prisma.envelope.update({
-                    where: { id: envelope.id },
-                    data: {
-                        currentAmount: 0
+        // WAŻNE: Wyklucz koperty roczne (type='yearly') i koperty z chronionymi nazwami
+        const monthlyEnvelopesToReset = await prisma.envelope.findMany({
+            where: {
+                userId: userId,
+                type: 'monthly',
+                NOT: {
+                    name: {
+                        in: Array.from(protectedNamesSet)
                     }
-                })
+                }
             }
+        })
+        
+        // Resetuj koperty miesięczne (chronione są już wykluczone przez zapytanie)
+        for (const envelope of monthlyEnvelopesToReset) {
+            await prisma.envelope.update({
+                where: { id: envelope.id },
+                data: {
+                    currentAmount: 0
+                }
+            })
         }
 
 
