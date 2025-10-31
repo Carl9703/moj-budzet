@@ -88,24 +88,22 @@ export async function POST(request: NextRequest) {
         const totalToTransfer = monthBalance + returnsBalance // całkowite saldo do przeniesienia
 
 
-        // Pobierz koperty miesięczne (tylko do informacji o stanie)
-        const monthlyEnvelopes = await prisma.envelope.findMany({
+        // Pobierz WSZYSTKIE koperty użytkownika, aby mieć pełną listę do ochrony
+        const allEnvelopes = await prisma.envelope.findMany({
             where: {
-                userId: userId,
-                type: 'monthly'
+                userId: userId
             }
         })
 
-        // Również pobierz wszystkie koperty roczne, aby mieć pełną listę kopert do ochrony
-        const yearlyEnvelopes = await prisma.envelope.findMany({
-            where: {
-                userId: userId,
-                type: 'yearly'
-            }
-        })
+        // Rozdziel na miesięczne i roczne
+        const monthlyEnvelopes = allEnvelopes.filter(e => e.type === 'monthly')
+        const yearlyEnvelopes = allEnvelopes.filter(e => e.type === 'yearly')
         
         // Utwórz set ID kopert rocznych dla szybkiego sprawdzania
         const yearlyEnvelopeIds = new Set(yearlyEnvelopes.map(e => e.id))
+        
+        // Również utwórz set NAZW kopert rocznych (na wypadek błędnego oznaczenia typu)
+        const yearlyEnvelopeNames = new Set(yearlyEnvelopes.map(e => e.name))
 
         // Zbierz informacje o stanie kopert (tylko informacyjnie)
         const envelopeDetails = []
@@ -180,10 +178,22 @@ export async function POST(request: NextRequest) {
         const rocznyEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)', 'Cele finansowe']
         
         for (const envelope of monthlyEnvelopes) {
-            // Pomiń koperty roczne - sprawdź po ID (z listy yearly) i po nazwie
-            if (yearlyEnvelopeIds.has(envelope.id) || rocznyEnvelopeNames.includes(envelope.name)) {
+            // Pomiń koperty roczne - sprawdź na 3 sposoby:
+            // 1. Po ID (czy jest w Set kopert rocznych z type='yearly')
+            // 2. Po nazwie (czy nazwa jest w Set nazw kopert rocznych)
+            // 3. Po nazwie na liście chronionych kopert
+            const isYearlyById = yearlyEnvelopeIds.has(envelope.id)
+            const isYearlyByName = yearlyEnvelopeNames.has(envelope.name)
+            const isProtectedName = rocznyEnvelopeNames.includes(envelope.name)
+            
+            const shouldSkip = isYearlyById || isYearlyByName || isProtectedName
+            
+            if (shouldSkip) {
+                console.log(`[Close Month] Pomijam kopertę roczną: ${envelope.name} (ID: ${envelope.id}, type: ${envelope.type}, isYearlyById: ${isYearlyById}, isYearlyByName: ${isYearlyByName}, isProtected: ${isProtectedName})`)
                 continue
             }
+            
+            console.log(`[Close Month] Zeruję kopertę miesięczną: ${envelope.name} (ID: ${envelope.id})`)
             
             await prisma.envelope.update({
                 where: { id: envelope.id },
