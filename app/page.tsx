@@ -32,7 +32,7 @@ export default function HomePage() {
     const { showToast } = useToast()
     const { data, loading, error, refetch } = useDashboard()
     const { config, loading: configLoading } = useConfig()
-    const { previousMonthStatus, currentMonthStatus, refetch: refetchMonthStatus } = usePreviousMonth()
+    const { previousMonthStatus } = usePreviousMonth()
     
     const [showIncomeModal, setShowIncomeModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
@@ -174,34 +174,7 @@ export default function HomePage() {
                             totalExpenses={data.totalExpenses || 0}
                             daysLeft={calculateDaysLeft()}
                             onCloseMonth={() => setShowCloseMonthModal(true)}
-                            onUndoCloseMonth={async () => {
-                                try {
-                                    const response = await authorizedFetch('/api/close-month/undo', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                    })
-
-                                    if (!response.ok) {
-                                        const errorData = await response.json()
-                                        throw new Error(errorData.error || 'Błąd cofania zamknięcia miesiąca')
-                                    }
-
-                                    const result = await response.json()
-                                    await refetch()
-                                    await refetchMonthStatus()
-                                    showToast(result.message || 'Zamknięcie miesiąca zostało cofnięte!', 'success')
-                                } catch (error) {
-                                    console.error('Error undoing close month:', error)
-                                    showToast(
-                                        error instanceof Error ? error.message : 'Błąd cofania zamknięcia miesiąca',
-                                        'error'
-                                    )
-                                }
-                            }}
                             previousMonthStatus={previousMonthStatus}
-                            currentMonthStatus={currentMonthStatus}
                             currentDay={getCurrentDayAndTotalDays().currentDay}
                             totalDays={getCurrentDayAndTotalDays().totalDays}
                         />
@@ -374,7 +347,6 @@ export default function HomePage() {
                                 const result = await response.json()
                                 setShowCloseMonthModal(false)
                                 await refetch()
-                                await refetchMonthStatus()
                                 showToast(result.message || 'Miesiąc został zamknięty!', 'success')
                             } catch (error) {
                                 console.error('Error closing month:', error)

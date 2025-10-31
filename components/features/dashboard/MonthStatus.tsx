@@ -5,31 +5,21 @@ interface Props {
     totalExpenses: number
     daysLeft: number
     onCloseMonth: () => void
-    onUndoCloseMonth?: () => void
     previousMonthStatus: {
         isClosed: boolean
         monthName: string
         monthStr: string
     }
-    currentMonthStatus?: {
-        isClosed: boolean
-        monthName: string
-    }
     currentDay: number
     totalDays: number
 }
 
-export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, onUndoCloseMonth, previousMonthStatus, currentMonthStatus, currentDay, totalDays }: Props) {
+export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, previousMonthStatus, currentDay, totalDays }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
     
     // Inteligentna logika dla przycisku zamknij miesiąc
     const canCloseMonth = () => {
-        // Jeśli bieżący miesiąc jest zamknięty, nie można zamykać (tylko cofnąć)
-        if (currentMonthStatus?.isClosed) {
-            return false
-        }
-        
         // Jeśli poprzedni miesiąc już zamknięty, nie można zamykać
         if (previousMonthStatus.isClosed) {
             return false
@@ -70,44 +60,22 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                         🔒 Zamknij {previousMonthStatus.monthName}
                     </button>
                 ) : (
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        {(previousMonthStatus.isClosed || currentMonthStatus?.isClosed) && onUndoCloseMonth ? (
-                            <button
-                                onClick={onUndoCloseMonth}
-                                style={{
-                                    padding: '6px 12px',
-                                    backgroundColor: 'var(--accent-error)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    fontWeight: '500',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ↶ Cofnij zamknięcie {currentMonthStatus?.isClosed ? currentMonthStatus.monthName : previousMonthStatus.monthName}
-                            </button>
-                        ) : (
-                            <div style={{
-                                padding: '6px 12px',
-                                backgroundColor: 'var(--text-tertiary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                opacity: 0.6
-                            }}>
-                                {previousMonthStatus.isClosed 
-                                    ? `✅ ${previousMonthStatus.monthName} zamknięty`
-                                    : currentMonthStatus?.isClosed
-                                        ? `✅ ${currentMonthStatus.monthName} zamknięty`
-                                        : daysLeft > 3 
-                                            ? `⏰ Dostępne za ${daysLeft - 3} dni`
-                                            : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
-                                }
-                            </div>
-                        )}
+                    <div style={{
+                        padding: '6px 12px',
+                        backgroundColor: 'var(--text-tertiary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        opacity: 0.6
+                    }}>
+                        {previousMonthStatus.isClosed 
+                            ? `✅ ${previousMonthStatus.monthName} zamknięty`
+                            : daysLeft > 3 
+                                ? `⏰ Dostępne za ${daysLeft - 3} dni`
+                                : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
+                        }
                     </div>
                 )}
             </div>

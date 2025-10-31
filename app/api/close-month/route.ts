@@ -96,6 +96,17 @@ export async function POST(request: NextRequest) {
             }
         })
 
+        // Również pobierz wszystkie koperty roczne, aby mieć pełną listę kopert do ochrony
+        const yearlyEnvelopes = await prisma.envelope.findMany({
+            where: {
+                userId: userId,
+                type: 'yearly'
+            }
+        })
+        
+        // Utwórz set ID kopert rocznych dla szybkiego sprawdzania
+        const yearlyEnvelopeIds = new Set(yearlyEnvelopes.map(e => e.id))
+
         // Zbierz informacje o stanie kopert (tylko informacyjnie)
         const envelopeDetails = []
         let totalUnusedFunds = 0
@@ -166,11 +177,11 @@ export async function POST(request: NextRequest) {
 
         // Reset wszystkich kopert miesięcznych do 0
         // WAŻNE: Nie zeruj kopert rocznych (nawet jeśli są błędnie oznaczone jako monthly)
-        const rocznyEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)']
+        const rocznyEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)', 'Cele finansowe']
         
         for (const envelope of monthlyEnvelopes) {
-            // Pomiń koperty roczne nawet jeśli są oznaczone jako monthly
-            if (rocznyEnvelopeNames.includes(envelope.name)) {
+            // Pomiń koperty roczne - sprawdź po ID (z listy yearly) i po nazwie
+            if (yearlyEnvelopeIds.has(envelope.id) || rocznyEnvelopeNames.includes(envelope.name)) {
                 continue
             }
             
