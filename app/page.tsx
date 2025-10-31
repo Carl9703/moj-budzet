@@ -225,15 +225,29 @@ export default function HomePage() {
                                 onEnvelopeClick={handleEnvelopeClick}
                             />
                             
-                            {/* GRUPA 4: CELE FINANSOWE */}
-                            <EnvelopeGroup
-                                title="Cele finansowe"
-                                icon="🎯"
-                                color="rgba(59, 130, 246, 0.1)"
-                                envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
-                                type="monthly"
-                                onEnvelopeClick={handleEnvelopeClick}
-                            />
+                            {/* GRUPA 4: CELE FINANSOWE - koperty miesięczne */}
+                            {data.monthlyEnvelopes.filter(e => e.group === 'financial').length > 0 && (
+                                <EnvelopeGroup
+                                    title="Cele finansowe"
+                                    icon="🎯"
+                                    color="rgba(59, 130, 246, 0.1)"
+                                    envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
+                                    type="monthly"
+                                    onEnvelopeClick={handleEnvelopeClick}
+                                />
+                            )}
+                            
+                            {/* GRUPA 5: CELE FINANSOWE - koperty roczne */}
+                            {data.yearlyEnvelopes?.filter(e => e.group === 'financial').length > 0 && (
+                                <EnvelopeGroup
+                                    title="Cele finansowe"
+                                    icon="📈"
+                                    color="rgba(59, 130, 246, 0.1)"
+                                    envelopes={data.yearlyEnvelopes.filter(e => e.group === 'financial')}
+                                    type="yearly"
+                                    onEnvelopeClick={handleEnvelopeClick}
+                                />
+                            )}
                         </>
                     ) : (
                         <div className="slide-in-left">
