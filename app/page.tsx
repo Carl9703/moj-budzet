@@ -32,7 +32,7 @@ export default function HomePage() {
     const { showToast } = useToast()
     const { data, loading, error, refetch } = useDashboard()
     const { config, loading: configLoading } = useConfig()
-    const { previousMonthStatus } = usePreviousMonth()
+    const { previousMonthStatus, currentMonthStatus } = usePreviousMonth()
     
     const [showIncomeModal, setShowIncomeModal] = useState(false)
     const [showExpenseModal, setShowExpenseModal] = useState(false)
@@ -200,6 +200,7 @@ export default function HomePage() {
                                 }
                             }}
                             previousMonthStatus={previousMonthStatus}
+                            currentMonthStatus={currentMonthStatus}
                             currentDay={getCurrentDayAndTotalDays().currentDay}
                             totalDays={getCurrentDayAndTotalDays().totalDays}
                         />

@@ -7,11 +7,20 @@ interface PreviousMonthStatus {
     monthStr: string
 }
 
+interface CurrentMonthStatus {
+    isClosed: boolean
+    monthName: string
+}
+
 export function usePreviousMonth() {
     const [previousMonthStatus, setPreviousMonthStatus] = useState<PreviousMonthStatus>({
         isClosed: false,
         monthName: '',
         monthStr: ''
+    })
+    const [currentMonthStatus, setCurrentMonthStatus] = useState<CurrentMonthStatus>({
+        isClosed: false,
+        monthName: ''
     })
 
     useEffect(() => {
@@ -61,6 +70,27 @@ export function usePreviousMonth() {
                     monthName,
                     monthStr: previousMonthStr
                 })
+
+                // Sprawdź czy bieżący miesiąc jest zamknięty
+                const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+                const currentMonthName = currentMonthStart.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
+                
+                const currentIsClosed = checkResponse.some((t: any) => {
+                    if (!t.description?.includes('Zamknięcie miesiąca')) {
+                        return false
+                    }
+                    
+                    const transactionDate = new Date(t.date)
+                    
+                    // Sprawdź czy transakcja jest w bieżącym miesiącu
+                    return transactionDate >= currentMonthStart && transactionDate <= currentMonthEnd
+                })
+                
+                setCurrentMonthStatus({
+                    isClosed: currentIsClosed,
+                    monthName: currentMonthName
+                })
             } catch {
                 // ignore
             }
@@ -69,5 +99,5 @@ export function usePreviousMonth() {
         checkPreviousMonth()
     }, [])
 
-    return { previousMonthStatus, setPreviousMonthStatus }
+    return { previousMonthStatus, currentMonthStatus, setPreviousMonthStatus }
 }

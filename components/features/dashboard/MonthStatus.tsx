@@ -11,11 +11,15 @@ interface Props {
         monthName: string
         monthStr: string
     }
+    currentMonthStatus?: {
+        isClosed: boolean
+        monthName: string
+    }
     currentDay: number
     totalDays: number
 }
 
-export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, onUndoCloseMonth, previousMonthStatus, currentDay, totalDays }: Props) {
+export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpenses, daysLeft, onCloseMonth, onUndoCloseMonth, previousMonthStatus, currentMonthStatus, currentDay, totalDays }: Props) {
     const balance = totalIncome - totalExpenses
     const savingsRate = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
     
@@ -62,7 +66,7 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                     </button>
                 ) : (
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        {previousMonthStatus.isClosed && onUndoCloseMonth ? (
+                        {(previousMonthStatus.isClosed || currentMonthStatus?.isClosed) && onUndoCloseMonth ? (
                             <button
                                 onClick={onUndoCloseMonth}
                                 style={{
@@ -76,7 +80,7 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                                     cursor: 'pointer'
                                 }}
                             >
-                                ↶ Cofnij zamknięcie {previousMonthStatus.monthName}
+                                ↶ Cofnij zamknięcie {currentMonthStatus?.isClosed ? currentMonthStatus.monthName : previousMonthStatus.monthName}
                             </button>
                         ) : (
                             <div style={{
@@ -91,9 +95,11 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
                             }}>
                                 {previousMonthStatus.isClosed 
                                     ? `✅ ${previousMonthStatus.monthName} zamknięty`
-                                    : daysLeft > 3 
-                                        ? `⏰ Dostępne za ${daysLeft - 3} dni`
-                                        : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
+                                    : currentMonthStatus?.isClosed
+                                        ? `✅ ${currentMonthStatus.monthName} zamknięty`
+                                        : daysLeft > 3 
+                                            ? `⏰ Dostępne za ${daysLeft - 3} dni`
+                                            : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
                                 }
                             </div>
                         )}
