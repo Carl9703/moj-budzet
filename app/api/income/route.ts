@@ -44,17 +44,77 @@ export async function POST(request: NextRequest) {
             transactionDate = new Date()
         }
 
-        // Prosty zapis przychodu bez automatycznego podziału
+        // Obsługa premii - rozdzielenie na koperty roczne
+        if (data.type === 'bonus') {
+            await prisma.$transaction(async (tx) => {
+                // Utwórz główną transakcję premii
+                await tx.transaction.create({
+                    data: {
+                        userId: userId,
+                        type: 'income',
+                        amount: data.amount,
+                        description: data.description || 'Premia',
+                        date: transactionDate,
+                        includeInStats: data.includeInStats !== false
+                    }
+                })
+
+                // Znajdź koperty roczne po nazwach
+                const envelopeNames = [
+                    { name: 'Prezenty i Okazje', amount: data.toGifts || 0 },
+                    { name: 'Auto: Serwis i Ubezpieczenie', amount: data.toInsurance || 0 },
+                    { name: 'Wolne środki (roczne)', amount: data.toFreedom || 0 }
+                ]
+
+                for (const { name, amount } of envelopeNames) {
+                    if (amount > 0) {
+                        // Znajdź kopertę użytkownika
+                        const envelope = await tx.envelope.findFirst({
+                            where: {
+                                userId: userId,
+                                name: name,
+                                type: 'yearly'
+                            }
+                        })
+
+                        if (envelope) {
+                            // Utwórz transakcję typu income z przypisaną kopertą
+                            await tx.transaction.create({
+                                data: {
+                                    userId: userId,
+                                    type: 'income',
+                                    amount: amount,
+                                    description: `Premia → ${name}`,
+                                    date: transactionDate,
+                                    envelopeId: envelope.id,
+                                    includeInStats: false // Nie wliczaj transferów do statystyk
+                                }
+                            })
+
+                            // Zwiększ saldo koperty (dla kopert rocznych oprócz "Budowanie Przyszłości", income zwiększa saldo)
+                            await tx.envelope.update({
+                                where: { id: envelope.id },
+                                data: {
+                                    currentAmount: envelope.currentAmount + amount
+                                }
+                            })
+                        }
+                    }
+                }
+            })
+        } else {
+            // Prosty zapis przychodu bez automatycznego podziału
             await prisma.transaction.create({
                 data: {
                     userId: userId,
                     type: 'income',
                     amount: data.amount,
-                description: data.description || (data.type === 'salary' ? 'Wypłata' : data.type === 'bonus' ? 'Premia' : 'Inny przychód'),
+                    description: data.description || (data.type === 'salary' ? 'Wypłata' : 'Inny przychód'),
                     date: transactionDate,
-                includeInStats: data.includeInStats !== false
-            }
-        })
+                    includeInStats: data.includeInStats !== false
+                }
+            })
+        }
 
         const response = NextResponse.json({ success: true })
         

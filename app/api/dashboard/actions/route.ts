@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
                 dayOfMonth: { lte: dayOfMonth }, // Wszystkie dni od początku miesiąca do dziś
                 OR: [
                     { dismissedUntil: null },
-                    { dismissedUntil: { lt: startOfMonth } } // Tylko te, które nie zostały zatwierdzone w tym miesiącu
+                    { dismissedUntil: { lte: startOfMonth } } // Tylko te, które nie zostały zatwierdzone w tym miesiącu (lte aby uwzględnić te odrzucone na początek miesiąca)
                 ]
             },
             include: {
