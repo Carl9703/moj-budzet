@@ -66,6 +66,9 @@ export async function POST(request: NextRequest) {
                     { name: 'Wolne środki (roczne)', amount: data.toFreedom || 0 }
                 ]
 
+                // Generuj unikalny ID dla transferów premii
+                const bonusTransferPairId = `bonus_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
                 for (const { name, amount } of envelopeNames) {
                     if (amount > 0) {
                         // Znajdź kopertę użytkownika
@@ -78,7 +81,9 @@ export async function POST(request: NextRequest) {
                         })
 
                         if (envelope) {
-                            // Utwórz transakcję typu income z przypisaną kopertą
+                            // Utwórz tylko transakcję income do koperty docelowej (podobnie jak w transferach)
+                            // Ma includeInStats: false więc nie wpływa na główne saldo w statystykach
+                            // Główne saldo jest już zwiększone przez główną transakcję premii
                             await tx.transaction.create({
                                 data: {
                                     userId: userId,
@@ -87,7 +92,8 @@ export async function POST(request: NextRequest) {
                                     description: `Premia → ${name}`,
                                     date: transactionDate,
                                     envelopeId: envelope.id,
-                                    includeInStats: false // Nie wliczaj transferów do statystyk
+                                    includeInStats: false, // Transfer nie wpływa na statystyki miesięczne
+                                    transferPairId: `${bonusTransferPairId}_${envelope.id}`
                                 }
                             })
 

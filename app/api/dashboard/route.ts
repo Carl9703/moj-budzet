@@ -65,12 +65,13 @@ export async function GET(request: NextRequest) {
         })
 
         // Oblicz saldo z transakcji od września (normalna logika)
+        // Ignoruj transakcje z transferPairId - to są transfery wewnętrzne, nie wpływają na główne saldo
         const incomeFromSeptember = Math.round(transactionsFromSeptember
-            .filter(t => t.type === 'income')
+            .filter(t => t.type === 'income' && !(t as { transferPairId?: string | null }).transferPairId)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const expensesFromSeptember = Math.round(transactionsFromSeptember
-            .filter(t => t.type === 'expense')
+            .filter(t => t.type === 'expense' && !(t as { transferPairId?: string | null }).transferPairId)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         // Znajdź kopertę Fundusz Awaryjny
