@@ -95,13 +95,29 @@ export function IncomeModal({ onClose, onSave }: Props) {
             return
         }
 
-        onSave({
+        // Dla premii sprawdź czy suma procentów to 100%
+        if (incomeType === 'bonus' && totalBonusPercentage !== 100) {
+            showToast('Suma procentów musi wynosić 100%!', 'warning')
+            return
+        }
+
+        const saveData: any = {
             amount: amountNum,
             description: description || (incomeType === 'salary' ? 'Wypłata' : incomeType === 'bonus' ? 'Premia' : 'Inny przychód'),
             includeInStats,
             type: incomeType,
             date: date
-        })
+        }
+
+        // Dla premii dodaj kwoty podziału
+        if (incomeType === 'bonus') {
+            saveData.toGifts = calculateAmount(bonusPercentages.gifts)
+            saveData.toInsurance = calculateAmount(bonusPercentages.insurance)
+            saveData.toFreedom = calculateAmount(bonusPercentages.freedom)
+            saveData.toHolidays = 0 // Nie używamy już osobno
+        }
+
+        onSave(saveData)
         onClose()
     }
 

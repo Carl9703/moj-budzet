@@ -46,14 +46,6 @@ export async function POST(request: NextRequest) {
 
         // Obsługa premii - rozdzielenie na koperty roczne
         if (data.type === 'bonus') {
-            console.log('💰 Rozdzielanie premii:', {
-                amount: data.amount,
-                toGifts: data.toGifts || 0,
-                toInsurance: data.toInsurance || 0,
-                toFreedom: data.toFreedom || 0,
-                userId
-            })
-            
             await prisma.$transaction(async (tx) => {
                 // Utwórz główną transakcję premii
                 await tx.transaction.create({
@@ -100,16 +92,12 @@ export async function POST(request: NextRequest) {
                             })
 
                             // Zwiększ saldo koperty (dla kopert rocznych oprócz "Budowanie Przyszłości", income zwiększa saldo)
-                            const oldAmount = envelope.currentAmount
                             await tx.envelope.update({
                                 where: { id: envelope.id },
                                 data: {
-                                    currentAmount: {
-                                        increment: amount
-                                    }
+                                    currentAmount: envelope.currentAmount + amount
                                 }
                             })
-                            console.log(`✅ Premia: ${name} - dodano ${amount} zł (było: ${oldAmount}, będzie: ${oldAmount + amount})`)
                         } else {
                             console.error(`❌ Koperta nie znaleziona: ${name} dla użytkownika ${userId}`)
                         }
@@ -128,43 +116,6 @@ export async function POST(request: NextRequest) {
                     includeInStats: data.includeInStats !== false
                 }
             })
-        }
-
-        // Sprawdź czy wszystkie koperty zostały znalezione (tylko dla premii)
-        if (data.type === 'bonus') {
-            const envelopeNames = [
-                { name: 'Prezenty i Okazje', amount: data.toGifts || 0 },
-                { name: 'Auto: Serwis i Ubezpieczenie', amount: data.toInsurance || 0 },
-                { name: 'Wolne środki (roczne)', amount: data.toFreedom || 0 }
-            ]
-            
-            const missingEnvelopes = []
-            for (const { name, amount } of envelopeNames) {
-                if (amount > 0) {
-                    const envelope = await prisma.envelope.findFirst({
-                        where: {
-                            userId: userId,
-                            name: name,
-                            type: 'yearly'
-                        }
-                    })
-                    if (!envelope) {
-                        missingEnvelopes.push(name)
-                    }
-                }
-            }
-            
-            if (missingEnvelopes.length > 0) {
-                console.error(`⚠️ Nie znaleziono kopert: ${missingEnvelopes.join(', ')}`)
-                return NextResponse.json(
-                    { 
-                        success: false, 
-                        error: `Nie znaleziono kopert: ${missingEnvelopes.join(', ')}`,
-                        missingEnvelopes 
-                    },
-                    { status: 400 }
-                )
-            }
         }
 
         const response = NextResponse.json({ success: true })
