@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String?
+  createdAt         DateTime           @default(now())
+  emailVerified     DateTime?
+  image             String?
+  hashedPassword    String?
+  role              String             @default("USER")
+  updatedAt         DateTime           @updatedAt
+  isActive          Boolean            @default(true)
+  lastLoginAt       DateTime?
+  loginAttempts     Int                @default(0)
+  lockedUntil       DateTime?
+  accounts          Account[]
+  envelopes         Envelope[]
+  recurringPayments RecurringPayment[]
+  sessions          Session[]
+  transactions      Transaction[]
+  userConfig        UserConfig?
+}
+
+model Envelope {
+  id                     String             @id @default(cuid())
+  userId                 String
+  name                   String
+  type                   String
+  plannedAmount          Float
+  currentAmount          Float
+  icon                   String?
+  group                  String?
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recurringPayments      RecurringPayment[]
+  recurringFromTransfers RecurringPayment[] @relation("RecurringPaymentFrom")
+  recurringToTransfers   RecurringPayment[] @relation("RecurringPaymentTo")
+  transactions           Transaction[]
+
+  @@index([userId, type])
+  @@index([userId, group])
+}
+
+model Transaction {
+  id             String    @id @default(cuid())
+  userId         String
+  type           String
+  amount         Float
+  description    String?
+  includeInStats Boolean   @default(true)
+  date           DateTime
+  envelopeId     String?
+  category       String?
+  editHistory    String    @default("[]")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  transferPairId String?
+  envelope       Envelope? @relation(fields: [envelopeId], references: [id])
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([envelopeId])
+  @@index([transferPairId])
+}
+
+model UserConfig {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  defaultSalary       Float    @default(0)
+  defaultToJoint      Float    @default(0)
+  defaultToSavings    Float    @default(0)
+  defaultToVacation   Float    @default(0)
+  defaultToInvestment Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  defaultToWedding    Float    @default(0)
+  defaultToGroceries  Float    @default(0)
+  bonusDistribution   String?
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RecurringPayment {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  amount         Float
+  dayOfMonth     Int
+  envelopeId     String?
+  category       String?
+  isActive       Boolean   @default(true)
+  dismissedUntil DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  fromEnvelopeId String?
+  toEnvelopeId   String?
+  type           String    @default("expense")
+  envelope       Envelope? @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+  fromEnvelope   Envelope? @relation("RecurringPaymentFrom", fields: [fromEnvelopeId], references: [id], onDelete: Cascade)
+  toEnvelope     Envelope? @relation("RecurringPaymentTo", fields: [toEnvelopeId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dayOfMonth])
+  @@index([userId, isActive])
+  @@index([userId, type])
+}

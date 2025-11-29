@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\api",
+    "\\app\\api\\analytics",
+    "\\app\\api\\income",
+    "\\app\\config",
+    "\\app\\history",
+    "\\components\\modals",
+    "\\components\\transactions",
+    "\\lib\\contexts"
+  ],
+  "SelectedNode": "\\package.json",
+  "PreviewInSolutionExplorer": false
+}
