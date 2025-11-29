@@ -4,7 +4,7 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Pobierz userId z JWT tokenu
@@ -15,7 +15,7 @@ export async function PATCH(
       return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
     }
 
-    const envelopeId = params.id
+    const { id: envelopeId } = await params
     const body = await request.json()
     const { name, icon, plannedAmount } = body as {
       name?: string
@@ -56,7 +56,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Pobierz userId z JWT tokenu
@@ -67,7 +67,7 @@ export async function DELETE(
       return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
     }
 
-    const envelopeId = params.id
+    const { id: envelopeId } = await params
 
     // Sprawdź czy koperta należy do użytkownika
     const envelope = await prisma.envelope.findFirst({
