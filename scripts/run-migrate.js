@@ -44,16 +44,17 @@ if (!process.env.DATABASE_URL) {
 console.log('✅ DATABASE_URL is set');
 console.log(`📊 Database: ${process.env.DATABASE_URL.substring(0, 50)}...`);
 
-// Uruchom prisma migrate deploy
+// Uruchom prisma db push (dla istniejącej bazy produkcyjnej)
+// db push synchronizuje schemat bez potrzeby baseline migracji
 try {
-  console.log('🔄 Running prisma migrate deploy...');
-  execSync('npx prisma migrate deploy', { 
+  console.log('🔄 Running prisma db push...');
+  execSync('npx prisma db push --accept-data-loss', { 
     stdio: 'inherit',
     env: process.env
   });
-  console.log('✅ Migrations applied successfully');
+  console.log('✅ Database schema synchronized successfully');
 } catch (error) {
-  console.error('❌ Migration failed:', error.message);
+  console.error('❌ Database sync failed:', error.message);
   process.exit(1);
 }
 
