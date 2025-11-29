@@ -30,12 +30,9 @@ export function IncomeModal({ onClose, onSave }: Props) {
     const [includeInStats, setIncludeInStats] = useState(true)
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     
-    // Stany dla premii
-    const [bonusPercentages, setBonusPercentages] = useState({
-        gifts: 40,
-        insurance: 40,
-        freedom: 20
-    })
+    // Stany dla premii - załadowane z konfiguracji
+    const [bonusDistribution, setBonusDistribution] = useState<Array<{ envelopeId: string; envelopeName: string; percentage: number }>>([])
+    const [allEnvelopes, setAllEnvelopes] = useState<Array<{ id: string; name: string; icon: string | null }>>([])
 
     // Stany dla pensji
     const [toJoint, setToJoint] = useState('')
@@ -57,34 +54,67 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 if (!cfg) return
 
                 if (!isMounted) return
-                // Ustaw domyślne wartości dla pensji i stałych przelewów
-                setAmount(String(cfg.defaultSalary ?? ''))
-                setToJoint(String(cfg.defaultToJoint ?? ''))
-                setToSavings(String(cfg.defaultToSavings ?? ''))
-                setToVacation(String(cfg.defaultToVacation ?? ''))
-                setToWedding(String(cfg.defaultToWedding ?? ''))
-                setToGroceries(String(cfg.defaultToGroceries ?? ''))
-                setToInvestment(String(cfg.defaultToInvestment ?? ''))
+                
+                // Załaduj wszystkie koperty
+                const envelopes = [
+                    ...(data?.monthlyEnvelopes || []),
+                    ...(data?.yearlyEnvelopes || [])
+                ]
+                setAllEnvelopes(envelopes.map((e: any) => ({
+                    id: e.id,
+                    name: e.name,
+                    icon: e.icon
+                })))
+                
+                // Ustaw domyślne wartości dla pensji
+                if (incomeType === 'salary') {
+                    setAmount(String(cfg.defaultSalary ?? ''))
+                    setToJoint(String(cfg.defaultToJoint ?? ''))
+                    setToSavings(String(cfg.defaultToSavings ?? ''))
+                    setToVacation(String(cfg.defaultToVacation ?? ''))
+                    setToWedding(String(cfg.defaultToWedding ?? ''))
+                    setToGroceries(String(cfg.defaultToGroceries ?? ''))
+                    setToInvestment(String(cfg.defaultToInvestment ?? ''))
+                } else if (incomeType === 'bonus') {
+                    // Załaduj konfigurację premii
+                    if (cfg.bonusDistribution) {
+                        try {
+                            const dist = JSON.parse(cfg.bonusDistribution)
+                            setBonusDistribution(dist)
+                        } catch {
+                            // Jeśli błąd parsowania, użyj domyślnych wartości
+                            setBonusDistribution([])
+                        }
+                    } else {
+                        setBonusDistribution([])
+                    }
+                    setAmount('')
+                } else {
+                    setAmount('')
+                }
             } catch {
                 // cicho pomiń, pozostaną wartości domyślne
             }
         }
 
-        if (incomeType === 'salary') {
-            loadDefaults()
-        } else if (incomeType === 'bonus') {
-            setAmount('1300')
-        } else {
-            setAmount('')
-        }
-
+        loadDefaults()
         return () => { isMounted = false }
     }, [incomeType])
 
-    const totalBonusPercentage = Object.values(bonusPercentages).reduce((a, b) => a + b, 0)
+    const totalBonusPercentage = bonusDistribution.reduce((sum, d) => sum + d.percentage, 0)
     
     const calculateAmount = (percentage: number) => {
         return Math.round((Number(amount) * percentage) / 100)
+    }
+    
+    const getEnvelopeName = (envelopeId: string) => {
+        const env = allEnvelopes.find(e => e.id === envelopeId)
+        return env?.name || 'Nieznana koperta'
+    }
+    
+    const getEnvelopeIcon = (envelopeId: string) => {
+        const env = allEnvelopes.find(e => e.id === envelopeId)
+        return env?.icon || '📦'
     }
 
     const handleSubmit = () => {
@@ -100,6 +130,12 @@ export function IncomeModal({ onClose, onSave }: Props) {
             showToast('Suma procentów musi wynosić 100%!', 'warning')
             return
         }
+        
+        // Dla premii sprawdź czy wszystkie koperty są wybrane
+        if (incomeType === 'bonus' && bonusDistribution.some(d => !d.envelopeId)) {
+            showToast('Wszystkie koperty muszą być wybrane!', 'warning')
+            return
+        }
 
         const saveData: any = {
             amount: amountNum,
@@ -109,12 +145,19 @@ export function IncomeModal({ onClose, onSave }: Props) {
             date: date
         }
 
-        // Dla premii dodaj kwoty podziału
+        // Dla premii dodaj kwoty podziału na podstawie konfiguracji
         if (incomeType === 'bonus') {
-            saveData.toGifts = calculateAmount(bonusPercentages.gifts)
-            saveData.toInsurance = calculateAmount(bonusPercentages.insurance)
-            saveData.toFreedom = calculateAmount(bonusPercentages.freedom)
-            saveData.toHolidays = 0 // Nie używamy już osobno
+            bonusDistribution.forEach(dist => {
+                const amount = calculateAmount(dist.percentage)
+                // Użyj nazwy koperty jako klucza (dla kompatybilności wstecznej)
+                const key = `to${dist.envelopeName.replace(/\s+/g, '')}`
+                saveData[key] = amount
+                // Dodaj również envelopeId dla nowego API
+                saveData.bonusDistribution = bonusDistribution.map(d => ({
+                    envelopeId: d.envelopeId,
+                    amount: calculateAmount(d.percentage)
+                }))
+            })
         }
 
         onSave(saveData)
@@ -359,104 +402,72 @@ export function IncomeModal({ onClose, onSave }: Props) {
             {incomeType === 'bonus' && (
                 <div style={{ marginBottom: '12px' }}>
                     <h3 style={{ fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>PODZIAŁ PROCENTOWY:</h3>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {/* Prezenty */}
+                    
+                    {bonusDistribution.length === 0 ? (
                         <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '40px 1fr 80px 100px',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '8px',
-                            backgroundColor: 'var(--bg-tertiary)',
-                            borderRadius: '6px'
+                            padding: '16px',
+                            backgroundColor: 'var(--bg-warning)',
+                            borderRadius: '8px',
+                            textAlign: 'center',
+                            color: 'var(--accent-warning)'
                         }}>
-                            <span style={{ fontSize: '20px' }}>🎁</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Prezenty i Okazje</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <input
-                                    type="number"
-                                    value={bonusPercentages.gifts}
-                                    onChange={(e) => setBonusPercentages(prev => ({...prev, gifts: parseInt(e.target.value) || 0}))}
-                                    style={inputStyle}
-                                />
-                                <span style={{ color: 'var(--text-primary)' }}>%</span>
-                            </div>
-                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateAmount(bonusPercentages.gifts)} zł
-                            </span>
+                            ⚠️ Skonfiguruj podział premii w ustawieniach (Konfiguracja → Główne)
                         </div>
-
-                        {/* Auto: Serwis i Ubezpieczenie */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '40px 1fr 80px 100px',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '8px',
-                            backgroundColor: 'var(--bg-tertiary)',
-                            borderRadius: '6px'
-                        }}>
-                            <span style={{ fontSize: '20px' }}>🚗</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Auto: Serwis i Ubezpieczenie</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <input
-                                    type="number"
-                                    value={bonusPercentages.insurance}
-                                    onChange={(e) => setBonusPercentages(prev => ({...prev, insurance: parseInt(e.target.value) || 0}))}
-                                    style={inputStyle}
-                                />
-                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                    ) : (
+                        <>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {bonusDistribution.map((dist, index) => (
+                                    <div key={dist.envelopeId || index} style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '40px 1fr 80px 100px',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '8px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        borderRadius: '6px'
+                                    }}>
+                                        <span style={{ fontSize: '20px' }}>{getEnvelopeIcon(dist.envelopeId)}</span>
+                                        <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+                                            {getEnvelopeName(dist.envelopeId)}
+                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <input
+                                                type="number"
+                                                value={dist.percentage}
+                                                onChange={(e) => {
+                                                    const newDist = [...bonusDistribution]
+                                                    newDist[index].percentage = parseInt(e.target.value) || 0
+                                                    setBonusDistribution(newDist)
+                                                }}
+                                                style={inputStyle}
+                                            />
+                                            <span style={{ color: 'var(--text-primary)' }}>%</span>
+                                        </div>
+                                        <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
+                                            {calculateAmount(dist.percentage)} zł
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
-                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateAmount(bonusPercentages.insurance)} zł
-                            </span>
-                        </div>
 
-
-                        {/* Wolne środki (roczne) */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '40px 1fr 80px 100px',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '8px',
-                            backgroundColor: 'var(--bg-tertiary)',
-                            borderRadius: '6px'
-                        }}>
-                            <span style={{ fontSize: '20px' }}>💰</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>Wolne środki (roczne)</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <input
-                                    type="number"
-                                    value={bonusPercentages.freedom}
-                                    onChange={(e) => setBonusPercentages(prev => ({...prev, freedom: parseInt(e.target.value) || 0}))}
-                                    style={inputStyle}
-                                />
-                                <span style={{ color: 'var(--text-primary)' }}>%</span>
+                            <div style={{
+                                marginTop: '12px',
+                                padding: '8px',
+                                backgroundColor: totalBonusPercentage === 100 ? 'var(--bg-success)' : 'var(--error-light)',
+                                borderRadius: '6px',
+                                textAlign: 'center',
+                                border: `1px solid ${totalBonusPercentage === 100 ? 'var(--success-border)' : 'var(--error-border)'}`
+                            }}>
+                                <span style={{
+                                    fontWeight: '600',
+                                    color: totalBonusPercentage === 100 ? 'var(--success-primary)' : 'var(--error-primary)'
+                                }}>
+                                    Suma: {totalBonusPercentage}%
+                                    {totalBonusPercentage !== 100 && ' (musi być 100%)'}
+                                </span>
                             </div>
-                            <span style={{ textAlign: 'right', fontWeight: '600', color: 'var(--success-primary)' }}>
-                                {calculateAmount(bonusPercentages.freedom)} zł
-                            </span>
-                        </div>
-                    </div>
-
-                    <div style={{
-                        marginTop: '12px',
-                        padding: '8px',
-                        backgroundColor: totalBonusPercentage === 100 ? 'var(--bg-success)' : 'var(--error-light)',
-                        borderRadius: '6px',
-                        textAlign: 'center',
-                        border: `1px solid ${totalBonusPercentage === 100 ? 'var(--success-border)' : 'var(--error-border)'}`
-                    }}>
-                        <span style={{
-                            fontWeight: '600',
-                            color: totalBonusPercentage === 100 ? 'var(--success-primary)' : 'var(--error-primary)'
-                        }}>
-                            Suma: {totalBonusPercentage}%
-                            {totalBonusPercentage !== 100 && ' (musi być 100%)'}
-                        </span>
-                    </div>
+                        </>
+                    )}
                 </div>
             )}
 

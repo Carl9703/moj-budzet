@@ -60,6 +60,9 @@ export const EXPENSE_CATEGORIES: Category[] = [
     // FUNDUSZE CELOWE - Wesele
     { id: 'wedding', name: 'Wesele', icon: '💍', defaultEnvelope: 'Wesele', type: 'yearly' },
     
+    // FUNDUSZE CELOWE - Prezenty i Okazje
+    { id: 'gifts', name: 'Prezenty', icon: '🎁', defaultEnvelope: 'Prezenty i Okazje', type: 'yearly' },
+    
     // FUNDUSZE CELOWE - Fundusz Awaryjny
     { id: 'emergency', name: 'Fundusz Awaryjny', icon: '🚨', defaultEnvelope: 'Fundusz Awaryjny', type: 'monthly' },
     
@@ -70,6 +73,19 @@ export const EXPENSE_CATEGORIES: Category[] = [
     { id: 'investments', name: 'Inwestycje', icon: '📈', defaultEnvelope: '', type: 'monthly' },
 ]
 
+// Funkcja do pobrania mapy kategorii do kopert (dynamicznie z localStorage)
+export function getCategoryToEnvelopeMap(): Record<string, string> {
+    const allCategories = getAllCategories()
+    return allCategories.reduce(
+        (acc, category) => {
+            acc[category.id] = category.defaultEnvelope
+            return acc
+        },
+        {} as Record<string, string>
+    )
+}
+
+// Dla kompatybilności wstecznej - używa domyślnych kategorii
 export const CATEGORY_TO_ENVELOPE_MAP: Record<string, string> = EXPENSE_CATEGORIES.reduce(
     (acc, category) => {
         acc[category.id] = category.defaultEnvelope
@@ -117,7 +133,8 @@ export function findEnvelopeForCategory(
     categoryId: string,
     envelopes: { id: string; name: string }[]
 ): string | null {
-    const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+    const allCategories = getAllCategories()
+    const category = allCategories.find(c => c.id === categoryId)
     if (!category) return null
 
     const envelope = envelopes.find(e => e.name === category.defaultEnvelope)
@@ -125,26 +142,49 @@ export function findEnvelopeForCategory(
 }
 
 export function getCategoryById(categoryId: string): Category | undefined {
-    return EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+    const allCategories = getAllCategories()
+    return allCategories.find(c => c.id === categoryId)
 }
 
 export function getCategoryIcon(categoryId: string): string {
-    const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+    const allCategories = getAllCategories()
+    const category = allCategories.find(c => c.id === categoryId)
     return category?.icon || '📦'
 }
 
 export function getCategoryName(categoryId: string): string {
-    const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+    const allCategories = getAllCategories()
+    const category = allCategories.find(c => c.id === categoryId)
     return category?.name || 'Inne'
+}
+
+// Pobierz wszystkie kategorie (z localStorage jeśli dostępne, w przeciwnym razie domyślne)
+export function getAllCategories(): Category[] {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('expenseCategories')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed
+                }
+            } catch {
+                // Jeśli błąd parsowania, użyj domyślnych
+            }
+        }
+    }
+    return EXPENSE_CATEGORIES
 }
 
 // Filtruj kategorie wydatków (z przypisanymi kopertami)
 export function getExpenseCategories(): Category[] {
-    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope !== '')
+    const allCategories = getAllCategories()
+    return allCategories.filter(c => c.defaultEnvelope !== '')
 }
 
 
 // Filtruj kategorie dla konkretnej koperty
 export function getCategoriesForEnvelope(envelopeName: string): Category[] {
-    return EXPENSE_CATEGORIES.filter(c => c.defaultEnvelope === envelopeName)
+    const allCategories = getAllCategories()
+    return allCategories.filter(c => c.defaultEnvelope === envelopeName)
 }

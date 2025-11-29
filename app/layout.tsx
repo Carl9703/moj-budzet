@@ -42,7 +42,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pl" suppressHydrationWarning>
-                <body style={{ backgroundColor: 'var(--bg-primary)' }} suppressHydrationWarning>
+                <body style={{ backgroundColor: '#020617' }} suppressHydrationWarning> {/* slate-950 */}
                 <ErrorBoundary>
                     <ThemeProvider>
                         <ToastProvider>

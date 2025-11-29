@@ -116,21 +116,22 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-theme-primary" style={{ 
+      <div className="min-h-screen" style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '100vh' 
+        height: '100vh',
+        backgroundColor: '#020617' // slate-950
       }}>
-        <div className="text-theme-secondary" style={{ fontSize: '24px' }}>📜 Ładowanie historii...</div>
+        <div style={{ fontSize: '24px', color: '#94a3b8' }}>📜 Ładowanie historii...</div> {/* slate-400 */}
       </div>
     )
   }
   
   return (
-    <div className="min-h-screen bg-theme-primary">
+    <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
       <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
-        <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>
+        <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: '#f1f5f9', marginBottom: '24px' }}> {/* slate-100 */}
           📜 Historia transakcji
         </h1>
         

@@ -3,15 +3,13 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { MonthStatus } from '@/components/features/dashboard/MonthStatus'
-import { MainBalance } from '@/components/features/dashboard/MainBalance'
-import { AvailableFunds } from '@/components/features/dashboard/AvailableFunds'
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
 import { EnvelopeGroup } from '@/components/features/dashboard/EnvelopeGroup'
-import { QuickActions } from '@/components/features/dashboard/QuickActions'
+import { PendingActions } from '@/components/features/dashboard/PendingActions'
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
-import { EnvelopeCardSkeleton, MainBalanceSkeleton, MonthStatusSkeleton, QuickActionsSkeleton } from '@/components/ui/SkeletonLoader'
+import { EnvelopeCardSkeleton, MonthStatusSkeleton } from '@/components/ui/SkeletonLoader'
 import { useToast } from '@/components/ui/feedback/Toast'
 import { useDashboard } from '../lib/hooks/useDashboard'
 import { authorizedFetch } from '../lib/utils/api'
@@ -82,15 +80,9 @@ export default function HomePage() {
         return (
             <div className="min-h-screen fade-in-up bg-theme-primary">
                 <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                    <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                        <div className="smooth-all hover-lift">
-                            <MainBalanceSkeleton />
-                        </div>
+                    <div className="stagger-children dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px' }}>
                         <div className="smooth-all hover-lift">
                             <MonthStatusSkeleton />
-                        </div>
-                        <div className="smooth-all hover-lift">
-                            <QuickActionsSkeleton />
                         </div>
                     </div>
                     <div className="grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
@@ -151,47 +143,125 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen fade-in-up bg-theme-primary">
-            <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
-                <div className="stagger-children dashboard-grid" style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                    gap: '16px', 
-                    marginBottom: '16px' 
+        <div className="min-h-screen fade-in-up" style={{ 
+            backgroundColor: '#020617' // slate-950
+        }}>
+            {/* Header - Quantum Budget Style */}
+            <header style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                marginBottom: '32px'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '16px'
                 }}>
-                    <div className="smooth-all hover-lift">
-                        <MainBalance balance={data.balance || 0} />
-                        {/* Wolne środki pod MainBalance */}
-                        {data.yearlyEnvelopes?.find(e => e.name.toLowerCase().includes('wolne środki')) && (
-                            <AvailableFunds 
-                                availableFunds={data.yearlyEnvelopes.find(e => e.name.toLowerCase().includes('wolne środki'))?.current || 0} 
-                            />
-                        )}
+                    <div>
+                        <h2 style={{
+                            fontSize: '30px',
+                            fontWeight: '700',
+                            color: '#f1f5f9', // white
+                            margin: '0 0 4px 0'
+                        }}>
+                            Panel Główny
+                        </h2>
+                        <p style={{
+                            fontSize: '14px',
+                            color: '#94a3b8', // slate-400
+                            margin: 0
+                        }}>
+                            Twoje centrum dowodzenia finansami.
+                        </p>
                     </div>
-                    <div className="smooth-all hover-lift">
-                        <MonthStatus
-                            totalIncome={data.totalIncome || 0}
-                            totalExpenses={data.totalExpenses || 0}
-                            daysLeft={calculateDaysLeft()}
-                            onCloseMonth={() => setShowCloseMonthModal(true)}
-                            previousMonthStatus={previousMonthStatus}
-                            currentDay={getCurrentDayAndTotalDays().currentDay}
-                            totalDays={getCurrentDayAndTotalDays().totalDays}
-                            isMonthClosed={data.isMonthClosed}
-                        />
-                    </div>
-                    <div className="smooth-all hover-lift">
-                        <QuickActions
-                            onAddIncome={() => setShowIncomeModal(true)}
-                            onAddExpense={() => setShowExpenseModal(true)}
-                        />
+                    <div style={{
+                        display: 'flex',
+                        gap: '8px'
+                    }}>
+                        <button
+                            onClick={() => setShowIncomeModal(true)}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#059669', // emerald-600
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: '#ffffff',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 4px 6px rgba(5, 150, 105, 0.2)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#10b981' // emerald-500
+                                e.currentTarget.style.transform = 'translateY(-1px)'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#059669' // emerald-600
+                                e.currentTarget.style.transform = 'translateY(0)'
+                            }}
+                        >
+                            + Przychód
+                        </button>
+                        <button
+                            onClick={() => setShowExpenseModal(true)}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#4f46e5', // indigo-600
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: '#ffffff',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
+                                e.currentTarget.style.transform = 'translateY(-1px)'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
+                                e.currentTarget.style.transform = 'translateY(0)'
+                            }}
+                        >
+                            - Wydatek
+                        </button>
                     </div>
                 </div>
+            </header>
 
+                {/* Top Cards - Desktop Grid */}
+                <div className="stagger-children dashboard-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                    gap: '16px', 
+                    marginBottom: '24px' 
+                }}>
+                    <MonthStatus
+                        totalIncome={data.totalIncome || 0}
+                        totalExpenses={data.totalExpenses || 0}
+                        daysLeft={calculateDaysLeft()}
+                        onCloseMonth={() => setShowCloseMonthModal(true)}
+                        previousMonthStatus={previousMonthStatus}
+                        currentDay={getCurrentDayAndTotalDays().currentDay}
+                        totalDays={getCurrentDayAndTotalDays().totalDays}
+                        isMonthClosed={data.isMonthClosed}
+                    />
+                </div>
+
+                {/* Pending Actions */}
+                <PendingActions />
+
+                {/* Envelopes Section */}
                 <div className="grid-responsive" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '20px'
+                    gap: '16px'
                 }}>
                     {/* Sprawdź czy użytkownik ma koperty miesięczne */}
                     {data.monthlyEnvelopes && data.monthlyEnvelopes.length > 0 ? (
@@ -206,16 +276,31 @@ export default function HomePage() {
                                 onEnvelopeClick={handleEnvelopeClick}
                             />
 
-                            {/* GRUPA 2: FUNDUSZE CELOWE */}
-                            <EnvelopeGroup
-                                title="Fundusze celowe"
-                                icon="🎯"
-                                color="rgba(245, 158, 11, 0.1)"
-                                envelopes={data.yearlyEnvelopes?.filter(e => e.group === 'target' && !e.name.toLowerCase().includes('wolne środki')) || []}
-                                type="yearly"
-                                onEnvelopeClick={handleEnvelopeClick}
-                            />
-                            
+                            {/* GRUPA: CELE I MAJĄTEK - połączone financial i target */}
+                            {(() => {
+                                const financialMonthly = data.monthlyEnvelopes.filter(e => e.group === 'financial' && e.name !== 'Fundusz Awaryjny').map(e => ({ ...e, envelopeType: 'monthly' as const }))
+                                const financialYearly = (data.yearlyEnvelopes?.filter(e => e.group === 'financial' && e.name !== 'Fundusz Awaryjny') || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                const targetYearly = (data.yearlyEnvelopes?.filter(e => e.group === 'target' && !e.name.toLowerCase().includes('wolne środki')) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                const allAssets = [...financialMonthly, ...financialYearly, ...targetYearly]
+                                
+                                if (allAssets.length === 0) return null
+                                
+                                // Oblicz sumę dla wyświetlenia w nagłówku
+                                const monthlySpent = financialMonthly.reduce((sum, e) => sum + e.spent, 0)
+                                const yearlyAvailable = [...financialYearly, ...targetYearly].reduce((sum, e) => sum + e.current, 0)
+                                
+                                return (
+                                    <EnvelopeGroup
+                                        title="Cele i majątek"
+                                        icon="💰"
+                                        color="rgba(59, 130, 246, 0.1)"
+                                        envelopes={allAssets}
+                                        type="monthly" // Domyślny typ, ale każda koperta ma swój envelopeType
+                                        onEnvelopeClick={handleEnvelopeClick}
+                                    />
+                                )
+                            })()}
+
                             {/* GRUPA 3: STYL ŻYCIA */}
                             <EnvelopeGroup
                                 title="Styl życia"
@@ -225,30 +310,6 @@ export default function HomePage() {
                                 type="monthly"
                                 onEnvelopeClick={handleEnvelopeClick}
                             />
-                            
-                            {/* GRUPA 4: CELE FINANSOWE - koperty miesięczne */}
-                            {data.monthlyEnvelopes.filter(e => e.group === 'financial').length > 0 && (
-                                <EnvelopeGroup
-                                    title="Cele finansowe"
-                                    icon="🎯"
-                                    color="rgba(59, 130, 246, 0.1)"
-                                    envelopes={data.monthlyEnvelopes.filter(e => e.group === 'financial')}
-                                    type="monthly"
-                                    onEnvelopeClick={handleEnvelopeClick}
-                                />
-                            )}
-                            
-                            {/* GRUPA 5: CELE FINANSOWE - koperty roczne */}
-                            {data.yearlyEnvelopes?.filter(e => e.group === 'financial').length > 0 && (
-                                <EnvelopeGroup
-                                    title="Cele finansowe"
-                                    icon="📈"
-                                    color="rgba(59, 130, 246, 0.1)"
-                                    envelopes={data.yearlyEnvelopes.filter(e => e.group === 'financial')}
-                                    type="yearly"
-                                    onEnvelopeClick={handleEnvelopeClick}
-                                />
-                            )}
                         </>
                     ) : (
                         <div className="slide-in-left">
@@ -279,7 +340,6 @@ export default function HomePage() {
                         </div>
                     )}
                 </div>
-            </div>
 
             {/* Floating Action Button */}
             <FloatingActionButton

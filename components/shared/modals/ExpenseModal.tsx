@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
-import { EXPENSE_CATEGORIES, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage, trackEnvelopeUsage, getPopularEnvelopes } from '@/lib/constants/categories'
+import { getAllCategories, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage, trackEnvelopeUsage, getPopularEnvelopes } from '@/lib/constants/categories'
 import { useToast } from '@/components/ui/feedback/Toast'
 
 interface Props {
@@ -30,6 +30,7 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const [showAllEnvelopes, setShowAllEnvelopes] = useState(false)
 
     const amountInputRef = useRef<HTMLInputElement>(null)
+    const [categoriesVersion, setCategoriesVersion] = useState(0) // Wersja do wymuszenia re-renderu
 
     // Pobierz kategorie dla wybranej koperty
     const selectedEnvelopeData = envelopes?.find(e => e.id === selectedEnvelope)
@@ -49,6 +50,29 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         }
     }, [])
 
+    // Nasłuchuj zmian w localStorage dla kategorii
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'expenseCategories') {
+                setCategoriesVersion(prev => prev + 1)
+            }
+        }
+        
+        // Nasłuchuj zmian w localStorage (z innych zakładek)
+        window.addEventListener('storage', handleStorageChange)
+        
+        // Nasłuchuj zmian w tej samej zakładce (custom event)
+        const handleCustomStorageChange = () => {
+            setCategoriesVersion(prev => prev + 1)
+        }
+        window.addEventListener('categoriesUpdated', handleCustomStorageChange)
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange)
+            window.removeEventListener('categoriesUpdated', handleCustomStorageChange)
+        }
+    }, [])
+
     const handleEnvelopeSelect = (envelopeId: string) => {
         setSelectedEnvelope(envelopeId)
         setSelectedCategory('') // Reset kategorii przy zmianie koperty
@@ -64,7 +88,8 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         
         // Automatycznie wybierz kopertę na podstawie kategorii TYLKO jeśli nie wybrano jeszcze koperty
         if (!selectedEnvelope) {
-            const category = EXPENSE_CATEGORIES.find(c => c.id === categoryId)
+            const allCategories = getAllCategories()
+            const category = allCategories.find(c => c.id === categoryId)
             if (category && category.defaultEnvelope) {
                 const envelope = envelopes?.find(e => e.name === category.defaultEnvelope)
                 if (envelope) {
@@ -96,6 +121,9 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     // Grupuj kategorie według typu (miesięczne/roczne)
     const monthlyCategories = displayCategories.filter(c => c.type === 'monthly')
     const yearlyCategories = displayCategories.filter(c => c.type === 'yearly')
+    
+    // Pokazuj podział tylko jeśli są kategorie obu typów
+    const showTypeDivision = monthlyCategories.length > 0 && yearlyCategories.length > 0
 
     return (
         <Modal title="💸 DODAJ WYDATEK" onClose={onClose}>
@@ -316,98 +344,143 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
                         )}
                     </label>
 
-                    {/* Kategorie miesięczne */}
-                    {monthlyCategories.length > 0 && (
+                    {/* Kategorie - pokazuj podział tylko jeśli są kategorie obu typów */}
+                    {showTypeDivision && monthlyCategories.length > 0 && yearlyCategories.length > 0 ? (
                         <>
-                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                📅 Miesięczne
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(5, 1fr)',
-                                gap: '4px',
-                                marginBottom: '8px'
-                            }}>
-                                {monthlyCategories.map((cat) => {
-                                    const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
-                                    return (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => handleCategorySelect(cat.id)}
-                                            style={{
-                                                padding: '4px 2px',
-                                                border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                borderRadius: '4px',
-                                                backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: '1px',
-                                                transition: 'all 0.2s',
-                                                fontSize: '10px',
-                                                opacity: isFromSelectedEnvelope ? 1 : 0.7
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '16px' }}>{cat.icon}</span>
-                                            <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                            {!isFromSelectedEnvelope && (
-                                                <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
-                                                    {cat.defaultEnvelope}
-                                                </span>
-                                            )}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        </>
-                    )}
+                            {/* Kategorie miesięczne */}
+                            {monthlyCategories.length > 0 && (
+                                <>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                                        📅 Miesięczne
+                                    </div>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(5, 1fr)',
+                                        gap: '4px',
+                                        marginBottom: '8px'
+                                    }}>
+                                        {monthlyCategories.map((cat) => {
+                                            const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => handleCategorySelect(cat.id)}
+                                                    style={{
+                                                        padding: '4px 2px',
+                                                        border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                        borderRadius: '4px',
+                                                        backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '1px',
+                                                        transition: 'all 0.2s',
+                                                        fontSize: '10px',
+                                                        opacity: isFromSelectedEnvelope ? 1 : 0.7
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: '16px' }}>{cat.icon}</span>
+                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
+                                                    {!isFromSelectedEnvelope && (
+                                                        <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
+                                                            {cat.defaultEnvelope}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </>
+                            )}
 
-                    {/* Kategorie roczne */}
-                    {yearlyCategories.length > 0 && (
-                        <>
-                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                📆 Roczne
-                            </div>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(5, 1fr)',
-                                gap: '4px',
-                                marginBottom: '8px'
-                            }}>
-                                {yearlyCategories.map((cat) => {
-                                    const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
-                                    return (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => handleCategorySelect(cat.id)}
-                                            style={{
-                                                padding: '4px 2px',
-                                                border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                borderRadius: '4px',
-                                                backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: '1px',
-                                                transition: 'all 0.2s',
-                                                fontSize: '10px',
-                                                opacity: isFromSelectedEnvelope ? 1 : 0.7
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '16px' }}>{cat.icon}</span>
-                                            <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                            {!isFromSelectedEnvelope && (
-                                                <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
-                                                    {cat.defaultEnvelope}
-                                                </span>
-                                            )}
-                                        </button>
-                                    )
-                                })}
-                            </div>
+                            {/* Kategorie roczne */}
+                            {yearlyCategories.length > 0 && (
+                                <>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                                        📆 Roczne
+                                    </div>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(5, 1fr)',
+                                        gap: '4px',
+                                        marginBottom: '8px'
+                                    }}>
+                                        {yearlyCategories.map((cat) => {
+                                            const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => handleCategorySelect(cat.id)}
+                                                    style={{
+                                                        padding: '4px 2px',
+                                                        border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                                        borderRadius: '4px',
+                                                        backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '1px',
+                                                        transition: 'all 0.2s',
+                                                        fontSize: '10px',
+                                                        opacity: isFromSelectedEnvelope ? 1 : 0.7
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: '16px' }}>{cat.icon}</span>
+                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
+                                                    {!isFromSelectedEnvelope && (
+                                                        <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
+                                                            {cat.defaultEnvelope}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </>
+                            )}
                         </>
+                    ) : (
+                        /* Wszystkie kategorie bez podziału (gdy są tylko jednego typu) */
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(5, 1fr)',
+                            gap: '4px',
+                            marginBottom: '8px'
+                        }}>
+                            {displayCategories.map((cat) => {
+                                const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => handleCategorySelect(cat.id)}
+                                        style={{
+                                            padding: '4px 2px',
+                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
+                                            borderRadius: '4px',
+                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '1px',
+                                            transition: 'all 0.2s',
+                                            fontSize: '10px',
+                                            opacity: isFromSelectedEnvelope ? 1 : 0.7
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '16px' }}>{cat.icon}</span>
+                                        <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
+                                        {!isFromSelectedEnvelope && (
+                                            <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
+                                                {cat.defaultEnvelope}
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
+                        </div>
                     )}
 
                     {/* Przyciski przełączania widoku kategorii */}

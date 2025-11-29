@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
                     defaultToSavings: 0,
                     defaultToVacation: 0,
                     defaultToInvestment: 0,
+                    defaultToWedding: 0,
+                    defaultToGroceries: 0,
+                    bonusDistribution: null,
                 },
             })
         }
@@ -88,6 +91,7 @@ export async function PUT(request: NextRequest) {
             defaultToWedding,
             defaultToGroceries,
             defaultToInvestment,
+            bonusDistribution,
             monthlyEnvelopes,
             yearlyEnvelopes,
         } = body as {
@@ -98,21 +102,27 @@ export async function PUT(request: NextRequest) {
             defaultToWedding?: number
             defaultToGroceries?: number
             defaultToInvestment?: number
+            bonusDistribution?: string
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
         }
 
+        const updateData: any = {}
+        if (defaultSalary !== undefined) updateData.defaultSalary = defaultSalary
+        if (defaultToJoint !== undefined) updateData.defaultToJoint = defaultToJoint
+        if (defaultToSavings !== undefined) updateData.defaultToSavings = defaultToSavings
+        if (defaultToVacation !== undefined) updateData.defaultToVacation = defaultToVacation
+        if (defaultToWedding !== undefined) updateData.defaultToWedding = defaultToWedding
+        if (defaultToGroceries !== undefined) updateData.defaultToGroceries = defaultToGroceries
+        if (defaultToInvestment !== undefined) updateData.defaultToInvestment = defaultToInvestment
+        // bonusDistribution może być string (JSON) lub null
+        if (bonusDistribution !== undefined) {
+            updateData.bonusDistribution = bonusDistribution === null || bonusDistribution === '' ? null : bonusDistribution
+        }
+
         const updated = await prisma.userConfig.upsert({
             where: { userId },
-            update: {
-                defaultSalary: defaultSalary ?? undefined,
-                defaultToJoint: defaultToJoint ?? undefined,
-                defaultToSavings: defaultToSavings ?? undefined,
-                defaultToVacation: defaultToVacation ?? undefined,
-                defaultToWedding: defaultToWedding ?? undefined,
-                defaultToGroceries: defaultToGroceries ?? undefined,
-                defaultToInvestment: defaultToInvestment ?? undefined,
-            },
+            update: updateData,
             create: {
                 userId,
                 defaultSalary: defaultSalary ?? 0,
@@ -122,6 +132,7 @@ export async function PUT(request: NextRequest) {
                 defaultToWedding: defaultToWedding ?? 0,
                 defaultToGroceries: defaultToGroceries ?? 0,
                 defaultToInvestment: defaultToInvestment ?? 0,
+                bonusDistribution: bonusDistribution ?? null,
             },
         })
 
@@ -147,7 +158,9 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({ success: true, config: updated })
     } catch (error) {
-        return NextResponse.json({ error: 'Błąd zapisu konfiguracji' }, { status: 500 })
+        console.error('Error saving config:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Błąd zapisu konfiguracji'
+        return NextResponse.json({ error: errorMessage }, { status: 500 })
     }
 }
 

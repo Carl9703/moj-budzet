@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { ThemeToggle } from '../ThemeToggle'
 import { useSidebar } from '@/lib/contexts/SidebarContext'
+import { useDashboard } from '@/lib/hooks/useDashboard'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export function SideNavigation() {
     const router = useRouter()
@@ -11,6 +13,8 @@ export function SideNavigation() {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const { isMobileMenuOpen, setIsMobileMenuOpen } = useSidebar()
+    const { isAuthenticated } = useAuth()
+    const { data: dashboardData } = useDashboard()
 
     useEffect(() => {
         const checkMobile = () => {
@@ -36,12 +40,11 @@ export function SideNavigation() {
     }
 
     const navItems = [
-        { label: 'Start', path: '/start', icon: '🚀' },
-        { label: 'Dashboard', path: '/', icon: '🏠' },
-        { label: 'Analizy', path: '/analytics', icon: '📊' },
-        { label: 'Archiwum', path: '/archive', icon: '📁' },
-        { label: 'Historia', path: '/history', icon: '📜' },
-        { label: 'Konfigurator', path: '/config', icon: '⚙️' }
+        { label: 'Pulpit', path: '/', icon: '📊' },
+        { label: 'Transakcje', path: '/history', icon: '💳' },
+        { label: 'Ustawienia', path: '/config', icon: '⚙️' },
+        { label: 'Analizy', path: '/analytics', icon: '📈' },
+        { label: 'Archiwum', path: '/archive', icon: '📁' }
     ]
 
     const isActive = (path: string) => {
@@ -74,153 +77,64 @@ export function SideNavigation() {
             <aside 
                 className={isMobile && isMobileMenuOpen ? 'sidebar-open' : ''}
                 style={{
-                    width: isMobile ? '240px' : (isCollapsed ? '60px' : '240px'),
-                    backgroundColor: 'var(--bg-secondary)',
-                    borderRight: '1px solid var(--border-primary)',
+                    width: isMobile ? '240px' : '256px', // w-64 = 256px (quantum-budget)
+                    backgroundColor: '#0f172a', // slate-900
+                    borderRight: '1px solid #1e293b', // slate-800
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: isMobile ? 'left 0.3s ease' : 'width 0.3s ease',
-                    position: isMobile ? 'fixed' : 'sticky',
+                    transition: isMobile ? 'left 0.3s ease' : 'none',
+                    position: isMobile ? 'fixed' : 'fixed', // fixed like quantum-budget
                     top: 0,
-                    left: isMobile ? (isMobileMenuOpen ? '0' : '-240px') : 'auto',
+                    left: isMobile ? (isMobileMenuOpen ? '0' : '-240px') : '0',
                     height: '100vh',
                     overflow: 'hidden',
-                    zIndex: 1000
+                    zIndex: 10 // quantum-budget uses z-10
                 }}
             >
-            {/* Header with Logo and Toggle */}
+            {/* Header with Logo - Quantum Budget Style */}
             <div style={{
-                padding: '20px 16px',
-                borderBottom: '1px solid var(--border-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'space-between',
-                minHeight: '60px'
+                padding: '24px',
+                borderBottom: '1px solid #1e293b', // slate-800
             }}>
-                {!isCollapsed && (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px'
+                <div 
+                    onClick={() => router.push('/')}
+                    style={{
+                        cursor: 'pointer'
+                    }}
+                >
+                    <h1 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        margin: 0,
+                        background: 'linear-gradient(135deg, #818cf8, #22d3ee)', // indigo-400 to cyan-400
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        lineHeight: '1.2'
                     }}>
-                        {/* Hamburger Menu */}
-                        <button
-                            onClick={() => setIsCollapsed(!isCollapsed)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '32px',
-                                height: '32px',
-                                backgroundColor: 'var(--bg-tertiary)',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                fontSize: '14px'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
-                                e.currentTarget.style.borderColor = 'var(--accent-primary)'
-                                e.currentTarget.style.color = '#ffffff'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.borderColor = 'var(--border-primary)'
-                                e.currentTarget.style.color = 'var(--text-primary)'
-                            }}
-                            title={isCollapsed ? 'Rozwiń menu' : 'Zwiń menu'}
-                        >
-                            ☰
-                        </button>
-                        
-                        {/* Logo */}
-                        <div 
-                            onClick={() => router.push('/')}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                cursor: 'pointer',
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.transform = 'translateY(-1px)'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent'
-                                e.currentTarget.style.transform = 'translateY(0)'
-                            }}
-                        >
-                            <h1 className="text-theme-primary" style={{
-                                fontSize: '18px',
-                                fontWeight: '700',
-                                margin: 0,
-                                transition: 'color 0.3s ease',
-                                background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text'
-                            }}>
-                                Quantum Budget
-                            </h1>
-                        </div>
-                    </div>
-                )}
-                
-                {isCollapsed && (
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '8px'
+                        Quantum
+                    </h1>
+                    <p style={{
+                        fontSize: '12px',
+                        color: '#64748b', // slate-500
+                        margin: 0,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        fontWeight: '600'
                     }}>
-                        {/* Hamburger Menu */}
-                        <button
-                            onClick={() => setIsCollapsed(!isCollapsed)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '32px',
-                                height: '32px',
-                                backgroundColor: 'var(--bg-tertiary)',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                fontSize: '14px'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
-                                e.currentTarget.style.borderColor = 'var(--accent-primary)'
-                                e.currentTarget.style.color = '#ffffff'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.borderColor = 'var(--border-primary)'
-                                e.currentTarget.style.color = 'var(--text-primary)'
-                            }}
-                            title="Rozwiń menu"
-                        >
-                            ☰
-                        </button>
-                        
-                    </div>
-                )}
-
+                        System Budżetowy
+                    </p>
+                </div>
             </div>
 
-            {/* Navigation Items */}
+            {/* Navigation Items - Quantum Budget Style */}
             <nav style={{
                 flex: 1,
-                padding: '16px 8px',
+                padding: '16px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '4px'
+                gap: '8px',
+                overflowY: 'auto'
             }}>
                 {navItems.map((item) => (
                     <button
@@ -229,119 +143,141 @@ export function SideNavigation() {
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: isCollapsed ? '0' : '12px',
-                            padding: isCollapsed ? '12px' : '12px 16px',
-                            backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent',
+                            gap: '12px',
+                            padding: '12px 16px',
+                            backgroundColor: isActive(item.path) ? '#4f46e5' : 'transparent', // indigo-600
                             border: 'none',
                             borderRadius: '8px',
                             fontSize: '14px',
                             fontWeight: isActive(item.path) ? '600' : '500',
-                            color: isActive(item.path) ? '#ffffff' : 'var(--text-primary)',
+                            color: isActive(item.path) ? '#f1f5f9' : '#94a3b8', // slate-100 : slate-400
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
-                            textAlign: isCollapsed ? 'center' : 'left',
-                            justifyContent: isCollapsed ? 'center' : 'flex-start',
-                            position: 'relative'
+                            textAlign: 'left',
+                            justifyContent: 'flex-start',
+                            width: '100%'
                         }}
                         onMouseEnter={(e) => {
                             if (!isActive(item.path)) {
-                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
-                                e.currentTarget.style.transform = 'translateX(4px)'
+                                e.currentTarget.style.backgroundColor = '#1e293b' // slate-800
+                                e.currentTarget.style.color = '#e2e8f0' // slate-200
                             }
                         }}
                         onMouseLeave={(e) => {
                             if (!isActive(item.path)) {
                                 e.currentTarget.style.backgroundColor = 'transparent'
-                                e.currentTarget.style.transform = 'translateX(0)'
+                                e.currentTarget.style.color = '#94a3b8' // slate-400
                             }
                         }}
-                        title={isCollapsed ? item.label : undefined}
                     >
-                        <span style={{ fontSize: '18px', minWidth: '20px' }}>{item.icon}</span>
-                        {!isCollapsed && <span>{item.label}</span>}
-                        
-                        {/* Active indicator */}
-                        {isActive(item.path) && (
-                            <div style={{
-                                position: 'absolute',
-                                left: '0',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                width: '3px',
-                                height: '20px',
-                                backgroundColor: '#ffffff',
-                                borderRadius: '0 2px 2px 0'
-                            }} />
-                        )}
+                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                        <span>{item.label}</span>
                     </button>
                 ))}
             </nav>
 
-            {/* Footer with Theme Toggle and User Profile */}
+            {/* Footer - Quantum Budget Style (Wolne Środki section) */}
             <div style={{
                 padding: '16px',
-                borderTop: '1px solid var(--border-primary)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
+                borderTop: '1px solid #1e293b', // slate-800
+                backgroundColor: '#0f172a' // slate-900
             }}>
-                {/* Theme Toggle */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: isCollapsed ? 'center' : 'space-between',
-                    padding: '8px 12px',
-                    backgroundColor: 'var(--bg-tertiary)',
+                    backgroundColor: '#1e293b', // slate-800
                     borderRadius: '8px',
-                    border: '1px solid var(--border-primary)'
+                    padding: '12px',
+                    border: '1px solid #334155' // slate-700
                 }}>
-                    {!isCollapsed && (
-                        <span style={{
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            color: 'var(--text-primary)'
+                    <div style={{ marginBottom: '12px' }}>
+                        <p style={{
+                            fontSize: '12px',
+                            color: '#818cf8', // indigo-400
+                            margin: '0 0 4px 0',
+                            fontWeight: '700',
+                            textTransform: 'uppercase'
                         }}>
-                            Motyw
-                        </span>
-                    )}
-                    <ThemeToggle size="small" />
+                            Konto główne
+                        </p>
+                        <p style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#f1f5f9', // white
+                            margin: 0
+                        }}>
+                            {isAuthenticated && dashboardData?.balance?.toFixed(2) || '0.00'} PLN
+                        </p>
+                    </div>
+                    <div style={{ marginBottom: '12px' }}>
+                        <p style={{
+                            fontSize: '12px',
+                            color: '#818cf8', // indigo-400
+                            margin: '0 0 4px 0',
+                            fontWeight: '700',
+                            textTransform: 'uppercase'
+                        }}>
+                            Wolne Środki
+                        </p>
+                        <p style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#f1f5f9', // white
+                            margin: 0
+                        }}>
+                            {isAuthenticated && dashboardData?.yearlyEnvelopes?.find(e => e.name.toLowerCase().includes('wolne środki'))?.current?.toFixed(2) || '0.00'} PLN
+                        </p>
+                    </div>
+                    <p style={{
+                        fontSize: '12px',
+                        color: '#64748b', // slate-500
+                        margin: '0 0 4px 0'
+                    }}>
+                        Fundusz Awaryjny
+                    </p>
+                    <p style={{
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: '#cbd5e1', // slate-300
+                        margin: 0
+                    }}>
+                        {isAuthenticated && dashboardData?.monthlyEnvelopes?.find(e => e.name === 'Fundusz Awaryjny')?.current?.toFixed(2) || 
+                         dashboardData?.yearlyEnvelopes?.find(e => e.name === 'Fundusz Awaryjny')?.current?.toFixed(2) || '0.00'} PLN
+                    </p>
                 </div>
-
-                {/* User Profile / Logout */}
+                
+                {/* Logout Button */}
                 <button
                     onClick={handleLogout}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: isCollapsed ? '0' : '12px',
-                        padding: isCollapsed ? '12px' : '12px 16px',
-                        backgroundColor: '#fee',
-                        border: '1px solid #fcc',
+                        gap: '12px',
+                        padding: '12px 16px',
+                        backgroundColor: '#1e293b', // slate-800
+                        border: '1px solid #334155', // slate-700
                         borderRadius: '8px',
                         fontSize: '14px',
                         fontWeight: '500',
-                        color: '#c33',
+                        color: '#fb7185', // rose-400
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        textAlign: isCollapsed ? 'center' : 'left',
-                        justifyContent: isCollapsed ? 'center' : 'flex-start'
+                        textAlign: 'left',
+                        justifyContent: 'flex-start',
+                        width: '100%',
+                        marginTop: '8px'
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#dc3545'
-                        e.currentTarget.style.borderColor = '#dc3545'
+                        e.currentTarget.style.backgroundColor = '#fb7185' // rose-400
+                        e.currentTarget.style.borderColor = '#fb7185'
                         e.currentTarget.style.color = '#ffffff'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fee'
-                        e.currentTarget.style.borderColor = '#fcc'
-                        e.currentTarget.style.color = '#c33'
-                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.backgroundColor = '#1e293b' // slate-800
+                        e.currentTarget.style.borderColor = '#334155' // slate-700
+                        e.currentTarget.style.color = '#fb7185' // rose-400
                     }}
-                    title={isCollapsed ? 'Wyloguj się' : undefined}
                 >
                     <span style={{ fontSize: '16px' }}>🚪</span>
-                    {!isCollapsed && <span>Wyloguj</span>}
+                    <span>Wyloguj</span>
                 </button>
             </div>
         </aside>

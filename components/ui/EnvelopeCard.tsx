@@ -54,27 +54,29 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
         }
     }
 
-    const getProgressColor = () => {
-        if (type === 'monthly') {
-            if (percentage > 100) return '#991b1b'
-            if (percentage >= 90) return '#ef4444'
-            if (percentage >= 75) return '#f59e0b'
-            if (percentage >= 50) return '#3b82f6'
-            return '#10b981'
-        } else {
-            if (isFreedomFunds) return '#6366f1'
-            if (percentage >= 100) return '#10b981'
-            if (percentage >= 75) return '#3b82f6'
-            if (percentage >= 50) return '#f59e0b'
-            return '#ef4444'
-        }
-    }
-
     const handleClick = () => {
         if (id && onTransactionClick) {
             onTransactionClick(id, name, icon)
         }
     }
+
+    // Quantum style colors
+    const getProgressColor = () => {
+        if (type === 'monthly') {
+            if (percentage > 100) return '#f43f5e' // rose-500
+            if (percentage > 85) return '#f59e0b' // amber-500
+            return '#34d399' // emerald-400
+        } else {
+            if (isFreedomFunds) return '#818cf8' // indigo-400
+            if (percentage >= 100) return '#34d399' // emerald-400
+            if (percentage >= 75) return '#4f46e5' // indigo-600
+            if (percentage >= 50) return '#f59e0b' // amber-500
+            return '#f43f5e' // rose-500
+        }
+    }
+
+    const progressColor = getProgressColor()
+    const textColor = percentage > 100 ? '#fb7185' : (percentage > 85 ? '#fbbf24' : '#cbd5e1') // rose-400 : amber-400 : slate-300
 
     return (
         <Card 
@@ -82,87 +84,117 @@ export const EnvelopeCard = memo(function EnvelopeCard({ name, icon, spent, plan
             hover={!!(id && onTransactionClick)}
             className="envelope-card"
             style={{
-                border: isOverBudget ? '2px solid var(--color-error)' : undefined,
-                boxShadow: isOverBudget 
-                    ? '0 4px 12px rgba(231, 76, 60, 0.15), 0 2px 4px rgba(231, 76, 60, 0.1)' 
-                    : undefined,
+                border: isOverBudget 
+                    ? '1px solid #f43f5e' // rose-500
+                    : '1px solid #334155', // slate-700
                 cursor: id && onTransactionClick ? 'pointer' : 'default',
-                minHeight: '120px'
+                padding: '12px',
+                backgroundColor: '#0f172a', // slate-900
+                borderRadius: '8px',
+                transition: 'all 0.2s ease'
             }}
         >
-            {/* Header */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: 'var(--space-s)'
+                marginBottom: '10px'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-s)' }}>
-                    <span style={{ fontSize: '20px' }}>{icon}</span>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px',
+                    flex: 1,
+                    minWidth: 0
+                }}>
+                    <span style={{ fontSize: '16px' }}>{icon}</span>
                     <span style={{ 
-                        fontWeight: 'var(--font-weight-medium)', 
-                        fontSize: 'var(--font-size-s)', 
-                        color: 'var(--text-primary)' 
+                        fontWeight: '500', 
+                        fontSize: '13px', 
+                        color: '#cbd5e1', // slate-300
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                     }}>
                         {name}
                     </span>
                 </div>
-                <span style={{ 
-                    fontSize: 'var(--font-size-xs)', 
-                    color: isOverBudget ? 'var(--color-error)' : 'var(--text-secondary)', 
-                    whiteSpace: 'nowrap' 
+                <div style={{ 
+                    textAlign: 'right',
+                    flexShrink: 0
                 }}>
-                    {type === 'monthly' ?
-                        `${formatMoney(spent, false)}/${formatMoney(planned, false)} zł` :
-                        isFreedomFunds ?
-                            formatMoney(current) :
-                            `${formatMoney(current, false)}/${formatMoney(planned, false)} zł`
-                    }
-                </span>
+                    <div style={{ 
+                        fontSize: '14px', 
+                        fontWeight: '700',
+                        color: isOverBudget ? '#fb7185' : '#f1f5f9', // rose-400 : slate-100
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {type === 'monthly' ?
+                            formatMoney(spent, false) :
+                            isFreedomFunds ?
+                                formatMoney(current) :
+                                formatMoney(current, false)
+                        }
+                    </div>
+                    {!isFreedomFunds && (
+                        <div style={{
+                            fontSize: '10px',
+                            color: '#64748b' // slate-500
+                        }}>
+                            / {formatMoney(planned, false)}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Progress Bar - tylko dla kopert z budżetem */}
+            {/* Progress Bar - Quantum Style */}
             {!isFreedomFunds && (
-                <div style={{ marginBottom: 'var(--space-s)' }}>
-                    <ProgressBar
-                        value={type === 'monthly' ? spent : current}
-                        max={planned}
-                        showLabel={false}
-                        size="small"
-                    />
+                <div style={{ marginBottom: '8px' }}>
+                    <div style={{
+                        width: '100%',
+                        height: '6px',
+                        backgroundColor: '#0f172a', // slate-900
+                        borderRadius: '3px',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            width: `${Math.min(percentage, 100)}%`,
+                            height: '100%',
+                            backgroundColor: progressColor,
+                            transition: 'width 0.5s ease'
+                        }} />
+                    </div>
                 </div>
             )}
 
-            {/* Footer - tylko status, bez procentów */}
+            {/* Status - Quantum Style */}
             <div style={{
+                fontSize: '10px',
+                color: textColor,
                 display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                fontSize: 'var(--font-size-xs)'
+                justifyContent: 'space-between',
+                alignItems: 'center'
             }}>
-                {/* Status - różny dla wolnych środków */}
-                <span style={{
-                    fontWeight: 'var(--font-weight-medium)',
-                    color: isFreedomFunds 
-                        ? 'var(--brand-primary)'  // Wolne środki - niebieski
-                        : type === 'monthly' ?
-                            (isOverBudget ? 'var(--color-error)' : (remaining > 0 ? 'var(--color-success)' : 'var(--text-secondary)')) :
-                            (percentage >= 100 ? 'var(--color-success)' : 'var(--text-secondary)')
-                }}>
+                <span>
                     {isFreedomFunds ? (
-                        `💰 Dostępne środki`
+                        'Dostępne środki'
                     ) : type === 'monthly' ? (
                         isOverBudget ?
-                            `⚠️ Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100, false)} zł` :
+                            `Przekroczono o ${formatMoney(Math.round((spent - planned) * 100) / 100, false)}` :
                             (name === 'Fundusz Awaryjny' || name === 'Budowanie Przyszłości' ?
-                                `Brakuje: ${formatMoney(Math.abs(remaining), false)} zł` :
-                                `Zostało: ${formatMoney(remaining, false)} zł`)
+                                `Brakuje ${formatMoney(Math.abs(remaining), false)}` :
+                                `Zostało ${formatMoney(remaining, false)}`)
                     ) : (
                         percentage >= 100 ?
-                            `Zebrano! +${formatMoney(Math.abs(remaining), false)} zł` :
-                            `Brakuje: ${formatMoney(Math.abs(remaining), false)} zł`
+                            `Zebrano! +${formatMoney(Math.abs(remaining), false)}` :
+                            `Brakuje ${formatMoney(Math.abs(remaining), false)}`
                     )}
                 </span>
+                {!isFreedomFunds && (
+                    <span style={{ fontWeight: '600' }}>
+                        {percentage.toFixed(0)}%
+                    </span>
+                )}
             </div>
         </Card>
     )

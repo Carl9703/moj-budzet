@@ -25,7 +25,7 @@ export default function StartPage() {
     }
 
     return (
-        <div className="min-h-screen fade-in-up bg-theme-primary">
+        <div className="min-h-screen fade-in-up" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
             <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '12px' }}>
                 <StartView />
             </div>

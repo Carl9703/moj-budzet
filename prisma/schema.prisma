@@ -117,6 +117,7 @@ model UserConfig {
   updatedAt           DateTime @updatedAt
   defaultToWedding    Float    @default(0)
   defaultToGroceries  Float    @default(0)
+  bonusDistribution   String?
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

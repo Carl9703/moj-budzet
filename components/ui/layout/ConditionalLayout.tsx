@@ -19,8 +19,8 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
         // Dla stron autoryzacji - bez sidebaru
         return (
             <div style={{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
+                backgroundColor: '#020617', // slate-950
+                color: '#f1f5f9', // slate-100
                 minHeight: '100vh'
             }}>
                 {children}
@@ -28,14 +28,14 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
         )
     }
     
-    // Dla pozostałych stron - z sidebar
+    // Dla pozostałych stron - z sidebar (quantum-budget style)
     return (
         <div style={{
-            display: 'grid',
-            gridTemplateColumns: '240px 1fr',
-            backgroundColor: 'var(--bg-primary)',
-            color: 'var(--text-primary)'
-        }} className="sidebar-layout">
+            display: 'flex',
+            backgroundColor: '#020617', // slate-950
+            color: '#f1f5f9', // slate-100
+            minHeight: '100vh'
+        }} className="quantum-layout">
             <SideNavigation />
             <MainContent>
                 {children}

@@ -63,7 +63,7 @@ export function ProgressBar({
       <div style={{
         width: '100%',
         height: sizeStyles.height,
-        backgroundColor: 'var(--bg-tertiary)',
+        backgroundColor: '#0f172a', // slate-900
         borderRadius: '999px',
         overflow: 'hidden',
         position: 'relative'
@@ -71,9 +71,13 @@ export function ProgressBar({
         <div style={{
           width: `${percentage}%`,
           height: '100%',
-          backgroundColor: getProgressColor(),
+          backgroundColor: isOverBudget 
+            ? '#f43f5e' // rose-500
+            : percentage > 80
+              ? '#f59e0b' // amber-500
+              : '#34d399', // emerald-400
           borderRadius: '999px',
-          transition: 'var(--transition-normal)',
+          transition: 'width 0.5s ease',
           position: 'relative'
         }} />
       </div>

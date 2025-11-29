@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
 
   if (loading && !data) {
         return (
-            <div className="min-h-screen bg-theme-primary">
+            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -323,14 +323,14 @@ export default function AnalyticsPage() {
             <div style={{
               width: '60px',
               height: '60px',
-              border: '4px solid var(--border-primary)',
-              borderTop: '4px solid var(--accent-primary)',
+              border: '4px solid #334155', // slate-700
+              borderTop: '4px solid #4f46e5', // indigo-600
               borderRadius: '50%',
               animation: 'spin 1s linear infinite'
             }} />
             <div style={{
               fontSize: '18px',
-              color: 'var(--text-secondary)'
+              color: '#94a3b8' // slate-400
             }}>
                         📊 Ładowanie analiz...
             </div>
@@ -342,12 +342,12 @@ export default function AnalyticsPage() {
 
     if (!data) {
         return (
-            <div className="min-h-screen bg-theme-primary">
+            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
           <div style={{
             textAlign: 'center',
             padding: '40px',
-            color: 'var(--text-secondary)'
+            color: '#94a3b8' // slate-400
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
             <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
@@ -363,12 +363,12 @@ export default function AnalyticsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-theme-primary">
+        <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
             <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         <h1 className="section-header" style={{
           fontSize: '32px',
           fontWeight: 'bold',
-          color: 'var(--text-primary)',
+          color: '#f1f5f9', // slate-100
           marginBottom: '24px',
           display: 'flex',
           alignItems: 'center',

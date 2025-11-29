@@ -38,9 +38,9 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
   const isWarningSavings = savingsRate >= 10 && savingsRate < 20
   
   const getStatusColor = () => {
-    if (isGoodSavings) return 'var(--accent-success)'
-    if (isWarningSavings) return 'var(--accent-warning)'
-    return 'var(--accent-error)'
+    if (isGoodSavings) return '#34d399' // emerald-400
+    if (isWarningSavings) return '#fbbf24' // amber-400
+    return '#fb7185' // rose-400
   }
   
   const getStatusIcon = () => {
@@ -61,10 +61,10 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: 'var(--bg-secondary)',
+        backgroundColor: '#1e293b', // slate-800
         borderRadius: '16px',
-        border: '1px solid var(--border-primary)',
-        boxShadow: isHovered ? 'var(--shadow-lg)' : 'var(--shadow-md)',
+        border: '1px solid #334155', // slate-700
+        boxShadow: isHovered ? '0 4px 12px rgba(0, 0, 0, 0.7)' : '0 2px 8px rgba(0, 0, 0, 0.5)',
         padding: '24px',
         cursor: 'pointer',
         transition: 'all 0.3s ease',
@@ -95,7 +95,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <h3 style={{
             fontSize: '20px',
             fontWeight: '700',
-            color: 'var(--text-primary)',
+            color: '#f1f5f9', // slate-100
             margin: '0 0 4px 0',
             display: 'flex',
             alignItems: 'center',
@@ -121,7 +121,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           display: 'flex',
           alignItems: 'center',
           gap: '4px',
-          color: 'var(--text-secondary)',
+          color: '#94a3b8', // slate-400
           fontSize: '14px',
           opacity: isHovered ? 1 : 0.7,
           transition: 'opacity 0.2s ease'
@@ -143,10 +143,10 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
       }}>
         {/* Income */}
         <div style={{
-          backgroundColor: 'var(--bg-tertiary)',
+          backgroundColor: '#0f172a', // slate-900
           padding: '16px',
           borderRadius: '12px',
-          border: '1px solid var(--border-primary)',
+          border: '1px solid #334155', // slate-700
           textAlign: 'center'
         }}>
           <div style={{
@@ -155,7 +155,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
             justifyContent: 'center',
             gap: '6px',
             marginBottom: '8px',
-            color: 'var(--accent-success)'
+            color: '#34d399' // emerald-400
           }}>
             <TrendingUp size={16} />
             <span style={{ fontSize: '12px', fontWeight: '600' }}>Przychody</span>
@@ -163,7 +163,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <div style={{
             fontSize: '18px',
             fontWeight: '700',
-            color: 'var(--accent-success)'
+            color: '#34d399' // emerald-400
           }}>
             +{formatMoney(monthData.income)}
           </div>
@@ -171,10 +171,10 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
 
         {/* Expenses */}
         <div style={{
-          backgroundColor: 'var(--bg-tertiary)',
+          backgroundColor: '#0f172a', // slate-900
           padding: '16px',
           borderRadius: '12px',
-          border: '1px solid var(--border-primary)',
+          border: '1px solid #334155', // slate-700
           textAlign: 'center'
         }}>
           <div style={{
@@ -183,7 +183,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
             justifyContent: 'center',
             gap: '6px',
             marginBottom: '8px',
-            color: 'var(--accent-error)'
+            color: '#fb7185' // rose-400
           }}>
             <TrendingDown size={16} />
             <span style={{ fontSize: '12px', fontWeight: '600' }}>Wydatki</span>
@@ -191,7 +191,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <div style={{
             fontSize: '18px',
             fontWeight: '700',
-            color: 'var(--accent-error)'
+            color: '#fb7185' // rose-400
           }}>
             -{formatMoney(monthData.expenses)}
           </div>
@@ -200,10 +200,10 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
 
       {/* Balance and savings */}
       <div style={{
-        backgroundColor: 'var(--bg-tertiary)',
+        backgroundColor: '#0f172a', // slate-900
         padding: '16px',
         borderRadius: '12px',
-        border: '1px solid var(--border-primary)',
+        border: '1px solid #334155', // slate-700
         marginBottom: '16px'
       }}>
         <div style={{
@@ -216,7 +216,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            color: 'var(--text-secondary)',
+            color: '#94a3b8', // slate-400
             fontSize: '13px',
             fontWeight: '600'
           }}>
@@ -226,7 +226,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <div style={{
             fontSize: '20px',
             fontWeight: '700',
-            color: isPositiveBalance ? 'var(--accent-success)' : 'var(--accent-error)'
+            color: isPositiveBalance ? '#34d399' : '#fb7185' // emerald-400 : rose-400
           }}>
             {isPositiveBalance ? '+' : ''}{formatMoney(monthData.balance)}
           </div>
@@ -239,7 +239,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
         }}>
           <span style={{
             fontSize: '12px',
-            color: 'var(--text-secondary)',
+            color: '#94a3b8', // slate-400
             fontWeight: '500'
           }}>
             Oszczędności
@@ -266,9 +266,9 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
         display: 'flex',
         justifyContent: 'space-between',
         fontSize: '12px',
-        color: 'var(--text-secondary)',
+        color: '#94a3b8', // slate-400
         paddingTop: '12px',
-        borderTop: '1px solid var(--border-primary)'
+        borderTop: '1px solid #334155' // slate-700
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span>📦</span>

@@ -98,16 +98,17 @@ export default function ArchivePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-theme-primary">
+            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh'
                 }}>
-                    <div className="text-theme-secondary" style={{
+                    <div style={{
                         fontSize: '24px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        color: '#94a3b8' // slate-400
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
                         <div>Ładowanie archiwum...</div>
@@ -119,7 +120,7 @@ export default function ArchivePage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-theme-primary">
+            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -130,9 +131,10 @@ export default function ArchivePage() {
                         padding: '32px',
                         borderRadius: '8px',
                         textAlign: 'center',
-                        color: 'var(--accent-error)',
-                        border: '1px solid var(--accent-error)',
-                        maxWidth: '400px'
+                        color: '#fb7185', // rose-400
+                        border: '1px solid #fb7185', // rose-400
+                        maxWidth: '400px',
+                        backgroundColor: '#1e293b' // slate-800
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
                         <p style={{ fontSize: '18px', marginBottom: '8px', fontWeight: '600' }}>Błąd ładowania</p>
@@ -142,8 +144,8 @@ export default function ArchivePage() {
                             className="nav-button"
                             style={{
                                 padding: '8px 16px',
-                                backgroundColor: 'var(--accent-error)',
-                                color: 'white',
+                                backgroundColor: '#fb7185', // rose-400
+                                color: '#f1f5f9', // slate-100
                                 border: 'none',
                                 borderRadius: '6px',
                                 cursor: 'pointer'
@@ -158,7 +160,7 @@ export default function ArchivePage() {
     }
 
     return (
-        <div className="min-h-screen bg-theme-primary">
+        <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
             <div className="container-wide" style={{ 
                 maxWidth: '1400px', 
                 margin: '0 auto', 
@@ -167,7 +169,7 @@ export default function ArchivePage() {
                 <h1 className="section-header" style={{ 
                     fontSize: '32px', 
                     fontWeight: 'bold', 
-                    color: 'var(--text-primary)', 
+                    color: '#f1f5f9', // slate-100
                     marginBottom: '24px',
                     display: 'flex',
                     alignItems: 'center',
@@ -178,7 +180,7 @@ export default function ArchivePage() {
                 
                 <p style={{
                     fontSize: '16px',
-                    color: 'var(--text-secondary)',
+                    color: '#94a3b8', // slate-400
                     marginBottom: '32px',
                     maxWidth: '600px'
                 }}>
@@ -191,8 +193,9 @@ export default function ArchivePage() {
                         padding: '48px',
                         borderRadius: '12px',
                         textAlign: 'center',
-                        color: 'var(--text-secondary)',
-                        border: '1px solid var(--border-primary)'
+                        color: '#94a3b8', // slate-400
+                        border: '1px solid #334155', // slate-700
+                        backgroundColor: '#1e293b' // slate-800
                     }}>
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📂</div>
                         <p style={{ fontSize: '20px', marginBottom: '8px', fontWeight: '600' }}>

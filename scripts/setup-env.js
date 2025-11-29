@@ -1,8 +1,15 @@
 const fs = require('fs');
 
-// Sprawdź aktualną gałąź
-const { execSync } = require('child_process');
-const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+// Sprawdź aktualną gałąź (lub użyj domyślnej wartości jeśli git nie jest dostępny)
+let currentBranch = 'main';
+try {
+    const { execSync } = require('child_process');
+    currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim() || 'main';
+} catch (error) {
+    // Jeśli git nie jest dostępny, użyj domyślnej wartości
+    currentBranch = process.env.GIT_BRANCH || 'main';
+    console.log(`Git not available, using default branch: ${currentBranch}`);
+}
 
 console.log(`Current branch: ${currentBranch}`);
 

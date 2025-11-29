@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Card } from '@/components/ui/layout/Card'
 
 interface Props {
     totalIncome: number
@@ -40,117 +41,211 @@ export const MonthStatus = memo(function MonthStatus({ totalIncome, totalExpense
     
     const shouldShowCloseButton = canCloseMonth()
 
+    const monthName = new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
+
     return (
-        <div className="bg-theme-secondary card rounded-lg p-6" style={{
-            boxShadow: 'var(--shadow-md)',
-            border: '1px solid var(--border-primary)'
+        <Card style={{
+            backgroundColor: '#1e293b', // slate-800
+            border: '1px solid #334155', // slate-700
+            padding: '16px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
         }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h2 className="section-header" style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
-                    📊 Status miesiąca
-                </h2>
+            {/* Header */}
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '16px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid #334155' // slate-700
+            }}>
+                <div>
+                    <h3 style={{ 
+                        fontSize: '14px', 
+                        fontWeight: '700', 
+                        color: '#f1f5f9', // slate-100
+                        margin: '0 0 2px 0'
+                    }}>
+                        {monthName}
+                    </h3>
+                    <p style={{ 
+                        fontSize: '10px', 
+                        color: '#64748b', // slate-500
+                        margin: 0,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em'
+                    }}>
+                        Status miesiąca
+                    </p>
+                </div>
                 {shouldShowCloseButton ? (
                     <button
                         onClick={onCloseMonth}
                         style={{
                             padding: '6px 12px',
-                            backgroundColor: 'var(--accent-info)',
-                            color: 'white',
+                            backgroundColor: '#4f46e5', // indigo-600
+                            color: '#f1f5f9', // slate-100
                             border: 'none',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            cursor: 'pointer'
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 2px 4px rgba(79, 70, 229, 0.3)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
+                            e.currentTarget.style.transform = 'translateY(-1px)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
+                            e.currentTarget.style.transform = 'translateY(0)'
                         }}
                     >
-                        🔒 Zamknij {previousMonthStatus.monthName}
+                        Zamknij
                     </button>
                 ) : (
                     <div style={{
                         padding: '6px 12px',
-                        backgroundColor: 'var(--text-tertiary)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '12px',
+                        backgroundColor: '#0f172a', // slate-900
+                        color: '#64748b', // slate-500
+                        borderRadius: '6px',
+                        fontSize: '11px',
                         fontWeight: '500',
-                        opacity: 0.6
+                        border: '1px solid #1e293b' // slate-800
                     }}>
                         {isMonthClosed 
-                            ? `✅ Miesiąc zamknięty`
+                            ? '✓ Zamknięty'
                             : previousMonthStatus.isClosed 
-                                ? `✅ ${previousMonthStatus.monthName} zamknięty`
+                                ? previousMonthStatus.monthName
                                 : daysLeft > 3 
-                                    ? `⏰ Dostępne za ${daysLeft - 3} dni`
-                                    : `⏰ Dostępne w ostatnich 3 dniach miesiąca`
+                                    ? `Za ${daysLeft - 3} dni`
+                                    : 'Wkrótce'
                         }
                     </div>
                 )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
-                <div>
-                    <div className="text-theme-secondary">Przychody</div>
-                    <div style={{ fontWeight: 'bold', color: 'var(--accent-success)' }}>+{totalIncome.toLocaleString()} zł</div>
-                </div>
-                <div>
-                    <div className="text-theme-secondary">Wydatki</div>
-                    <div style={{ fontWeight: 'bold', color: 'var(--accent-error)' }}>-{totalExpenses.toLocaleString()} zł</div>
-                </div>
-                <div>
-                    <div className="text-theme-secondary">Bilans</div>
-                    <div style={{ fontWeight: 'bold', color: balance >= 0 ? 'var(--accent-success)' : 'var(--accent-error)' }}>
-                        {balance >= 0 ? '+' : ''}{balance.toLocaleString()} zł
+            {/* Financial Metrics - Single Row */}
+            <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr 1fr 1fr', 
+                gap: '10px'
+            }}>
+                <div style={{
+                    padding: '12px',
+                    backgroundColor: '#0f172a', // slate-900
+                    borderRadius: '8px',
+                    border: '1px solid #1e293b' // slate-800
+                }}>
+                    <div style={{ 
+                        fontSize: '10px', 
+                        color: '#64748b', // slate-500
+                        marginBottom: '6px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <span>💰</span> Przychody
+                    </div>
+                    <div style={{ 
+                        fontSize: '18px',
+                        fontWeight: '700', 
+                        color: '#34d399', // emerald-400
+                        lineHeight: '1.2'
+                    }}>
+                        +{totalIncome.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>PLN</span>
                     </div>
                 </div>
-                <div>
-                    <div className="text-theme-secondary">Oszczędności</div>
-                    <div style={{ fontWeight: 'bold', color: 'var(--accent-info)' }}>{savingsRate}%</div>
-                </div>
-            </div>
-
-            <div style={{
-                marginTop: '12px',
-                padding: '8px',
-                backgroundColor: 'var(--bg-warning)',
-                borderRadius: '4px',
-                fontSize: '12px',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--accent-warning)'
-            }}>
-                📅 Do końca miesiąca: <strong>{daysLeft} dni</strong> • Dzienny budżet: <strong>{Math.round(balance / daysLeft)} zł</strong>
-            </div>
-
-            {/* Pasek postępu miesiąca */}
-            <div style={{ marginTop: '12px' }}>
                 <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '6px',
-                    fontSize: '12px'
+                    padding: '12px',
+                    backgroundColor: '#0f172a', // slate-900
+                    borderRadius: '8px',
+                    border: '1px solid #1e293b' // slate-800
                 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Postęp miesiąca</span>
-                    <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                        {currentDay}/{totalDays} dni ({Math.round((currentDay / totalDays) * 100)}%)
-                    </span>
+                    <div style={{ 
+                        fontSize: '10px', 
+                        color: '#64748b', // slate-500
+                        marginBottom: '6px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <span>💸</span> Wydatki
+                    </div>
+                    <div style={{ 
+                        fontSize: '18px',
+                        fontWeight: '700', 
+                        color: '#fb7185', // rose-400
+                        lineHeight: '1.2'
+                    }}>
+                        -{totalExpenses.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>PLN</span>
+                    </div>
                 </div>
                 <div style={{
-                    width: '100%',
-                    height: '8px',
-                    backgroundColor: 'var(--bg-tertiary)',
-                    borderRadius: '4px',
-                    overflow: 'hidden'
+                    padding: '12px',
+                    backgroundColor: '#0f172a', // slate-900
+                    borderRadius: '8px',
+                    border: '1px solid #1e293b' // slate-800
                 }}>
-                    <div style={{
-                        width: `${Math.round((currentDay / totalDays) * 100)}%`,
-                        height: '100%',
-                        backgroundColor: '#3b82f6',
-                        borderRadius: '4px',
-                        transition: 'width 0.3s ease'
-                    }} />
+                    <div style={{ 
+                        fontSize: '10px', 
+                        color: '#64748b', // slate-500
+                        marginBottom: '6px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <span>📊</span> Bilans
+                    </div>
+                    <div style={{ 
+                        fontSize: '18px',
+                        fontWeight: '700', 
+                        color: balance >= 0 ? '#34d399' : '#fb7185', // emerald-400 : rose-400
+                        lineHeight: '1.2'
+                    }}>
+                        {balance >= 0 ? '+' : ''}{balance.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>PLN</span>
+                    </div>
+                </div>
+                <div style={{
+                    padding: '12px',
+                    backgroundColor: '#0f172a', // slate-900
+                    borderRadius: '8px',
+                    border: '1px solid #1e293b' // slate-800
+                }}>
+                    <div style={{ 
+                        fontSize: '10px', 
+                        color: '#64748b', // slate-500
+                        marginBottom: '6px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <span>💎</span> Oszczędności
+                    </div>
+                    <div style={{ 
+                        fontSize: '18px',
+                        fontWeight: '700', 
+                        color: savingsRate >= 20 ? '#34d399' : (savingsRate > 0 ? '#fbbf24' : '#fb7185'), // emerald-400 : amber-400 : rose-400
+                        lineHeight: '1.2'
+                    }}>
+                        {savingsRate.toFixed(1)}%
+                    </div>
                 </div>
             </div>
-        </div>
+        </Card>
     )
 })

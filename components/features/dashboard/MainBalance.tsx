@@ -9,100 +9,49 @@ interface Props {
 export const MainBalance = memo(function MainBalance({ balance }: Props) {
     return (
         <Card 
-            hover 
             style={{
-                background: 'linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)',
-                color: 'var(--text-primary)',
-                position: 'relative',
-                overflow: 'hidden'
+                backgroundColor: '#1e293b', // slate-800
+                border: '1px solid #334155', // slate-700
+                padding: '20px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
             }}
         >
             <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                position: 'relative',
-                zIndex: 2
+                flexDirection: 'column',
+                gap: '12px'
             }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-m)' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--space-s)'
-                    }}>
-                        <div style={{
-                            width: '8px',
-                            height: '8px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                            borderRadius: '50%'
-                        }} />
-                        <p style={{
-                            fontSize: 'var(--font-size-s)',
-                            fontWeight: 'var(--font-weight-medium)',
-                            color: 'rgba(255, 255, 255, 0.9)',
-                            margin: 0
-                        }}>
-                            Konto główne
-                        </p>
-                    </div>
-                    
+                <div style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#64748b', // slate-500
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em'
+                }}>
+                    Konto główne
+                </div>
+                
+                <div>
                     <p style={{
-                        fontSize: 'var(--font-size-xl)',
-                        fontWeight: 'var(--font-weight-bold)',
-                        color: 'var(--text-primary)',
+                        fontSize: '28px',
+                        fontWeight: '700',
+                        color: '#f1f5f9', // slate-100
                         margin: 0,
-                        letterSpacing: '-0.02em'
+                        letterSpacing: '-0.02em',
+                        lineHeight: '1.2'
                     }}>
                         {formatMoney(balance)}
                     </p>
-                    
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--space-xs)',
-                        fontSize: 'var(--font-size-xs)',
-                        color: 'rgba(255, 255, 255, 0.8)'
+                        fontSize: '12px',
+                        color: '#94a3b8',
+                        marginTop: '4px'
                     }}>
-                        <span>💰</span>
-                        <span>Dostępne środki</span>
+                        Dostępne środki
                     </div>
                 </div>
-                
-                <div style={{
-                    width: '64px',
-                    height: '64px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: 'var(--border-radius-main)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backdropFilter: 'blur(10px)'
-                }}>
-                    <span style={{ fontSize: '24px' }}>💳</span>
-                </div>
             </div>
-            
-            {/* Decorative elements */}
-            <div style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                width: '80px',
-                height: '80px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '50%',
-                zIndex: 1
-            }} />
-            <div style={{
-                position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                width: '48px',
-                height: '48px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '50%',
-                zIndex: 1
-            }} />
         </Card>
     )
 })

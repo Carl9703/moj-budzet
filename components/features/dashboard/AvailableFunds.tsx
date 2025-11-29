@@ -9,45 +9,35 @@ interface Props {
 export const AvailableFunds = memo(function AvailableFunds({ availableFunds }: Props) {
     return (
         <Card style={{
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid var(--border-primary)',
-            marginTop: 'var(--space-m)'
+                backgroundColor: '#1e293b', // slate-800
+                border: '1px solid #334155', // slate-700
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
         }}>
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-s)' }}>
-                    <span style={{ fontSize: '20px' }}>💰</span>
-                    <div>
-                        <h3 style={{
-                            fontSize: 'var(--font-size-s)',
-                            fontWeight: 'var(--font-weight-medium)',
-                            color: 'var(--text-primary)',
-                            margin: 0
-                        }}>
-                            Wolne środki
-                        </h3>
-                        <p style={{
-                            fontSize: 'var(--font-size-xs)',
-                            color: 'var(--text-secondary)',
-                            margin: 0
-                        }}>
-                            Dostępne do wydania
-                        </p>
+                <div>
+                    <div style={{
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#64748b', // slate-500
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em'
+                    }}>
+                        Wolne środki
                     </div>
-                </div>
-                
-                <div style={{ textAlign: 'right' }}>
-                    <p style={{
-                        fontSize: 'var(--font-size-l)',
-                        fontWeight: 'var(--font-weight-bold)',
-                        color: 'var(--brand-primary)',
-                        margin: 0
+                    <div style={{
+                        fontSize: '28px',
+                        fontWeight: '700',
+                        color: '#818cf8' // indigo-400
                     }}>
                         {formatMoney(availableFunds)}
-                    </p>
+                    </div>
                 </div>
             </div>
         </Card>
