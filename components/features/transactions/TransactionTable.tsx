@@ -5,6 +5,7 @@ import { ChevronUp, ChevronDown, Edit, Trash2, Check, X } from 'lucide-react'
 import { authorizedFetch } from '@/lib/utils/api'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 import { ConfirmationModal } from '@/components/ui/feedback/ConfirmationModal'
+import { useToast } from '@/components/ui/feedback/Toast'
 
 interface Transaction {
   id: string
@@ -29,6 +30,7 @@ type SortField = 'date' | 'amount' | 'description' | 'type'
 type SortOrder = 'asc' | 'desc'
 
 export function TransactionTable({ transactions, onTransactionDeleted, loading = false }: TransactionTableProps) {
+  const { showToast } = useToast()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editAmount, setEditAmount] = useState<string>('')
   const [sortField, setSortField] = useState<SortField>('date')
@@ -130,7 +132,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
       }
       
       if (isNaN(newAmount) || newAmount < 0) {
-        alert('Nieprawidłowa kwota. Możesz używać działań matematycznych (np. 750/2)')
+        showToast('Nieprawidłowa kwota. Możesz używać działań matematycznych (np. 750/2)', 'warning')
         return
       }
       
@@ -145,12 +147,17 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
           })
 
           if (response.ok) {
-            window.location.reload()
+            showToast('Transakcja zaktualizowana pomyślnie!', 'success')
+            if (onTransactionDeleted) {
+              onTransactionDeleted()
+            } else {
+              window.location.reload()
+            }
           } else {
-            alert('Błąd podczas edycji')
+            showToast('Błąd podczas edycji transakcji', 'error')
           }
         } catch {
-          alert('Błąd podczas edycji')
+          showToast('Błąd podczas edycji transakcji', 'error')
         }
       }
       setEditingId(null)
@@ -193,11 +200,11 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
           window.location.reload()
         }
       } else {
-        alert('Błąd podczas usuwania')
+        showToast('Błąd podczas usuwania transakcji', 'error')
         setDeleteModal(prev => ({ ...prev, loading: false }))
       }
     } catch {
-      alert('Błąd podczas usuwania')
+      showToast('Błąd podczas usuwania transakcji', 'error')
       setDeleteModal(prev => ({ ...prev, loading: false }))
     }
   }

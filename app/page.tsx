@@ -183,6 +183,7 @@ export default function HomePage() {
                     }}>
                         <button
                             onClick={() => setShowIncomeModal(true)}
+                            aria-label="Dodaj przychód"
                             style={{
                                 padding: '10px 20px',
                                 backgroundColor: '#059669', // emerald-600
@@ -193,7 +194,8 @@ export default function HomePage() {
                                 color: '#ffffff',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                boxShadow: '0 4px 6px rgba(5, 150, 105, 0.2)'
+                                boxShadow: '0 4px 6px rgba(5, 150, 105, 0.2)',
+                                outline: 'none'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = '#10b981' // emerald-500
@@ -203,11 +205,19 @@ export default function HomePage() {
                                 e.currentTarget.style.backgroundColor = '#059669' // emerald-600
                                 e.currentTarget.style.transform = 'translateY(0)'
                             }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.outline = '2px solid #10b981'
+                                e.currentTarget.style.outlineOffset = '2px'
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.outline = 'none'
+                            }}
                         >
                             + Przychód
                         </button>
                         <button
                             onClick={() => setShowExpenseModal(true)}
+                            aria-label="Dodaj wydatek"
                             style={{
                                 padding: '10px 20px',
                                 backgroundColor: '#4f46e5', // indigo-600
@@ -218,7 +228,8 @@ export default function HomePage() {
                                 color: '#ffffff',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)'
+                                boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)',
+                                outline: 'none'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
@@ -227,6 +238,13 @@ export default function HomePage() {
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
                                 e.currentTarget.style.transform = 'translateY(0)'
+                            }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.outline = '2px solid #6366f1'
+                                e.currentTarget.style.outlineOffset = '2px'
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.outline = 'none'
                             }}
                         >
                             - Wydatek

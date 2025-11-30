@@ -10,7 +10,6 @@ import { useAuth } from '@/lib/hooks/useAuth'
 export function SideNavigation() {
     const router = useRouter()
     const pathname = usePathname()
-    const [isCollapsed, setIsCollapsed] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const { isMobileMenuOpen, setIsMobileMenuOpen } = useSidebar()
     const { isAuthenticated } = useAuth()
@@ -61,6 +60,8 @@ export function SideNavigation() {
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className="mobile-menu-btn"
+                    aria-label={isMobileMenuOpen ? 'Zamknij menu' : 'Otwórz menu'}
+                    aria-expanded={isMobileMenuOpen}
                     style={{
                         position: 'fixed',
                         top: '16px',
@@ -80,7 +81,8 @@ export function SideNavigation() {
                         fontSize: '24px',
                         color: '#f1f5f9', // slate-100
                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        outline: 'none'
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = '#1e293b' // slate-800
@@ -89,6 +91,13 @@ export function SideNavigation() {
                     onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = '#0f172a' // slate-900
                         e.currentTarget.style.transform = 'scale(1)'
+                    }}
+                    onFocus={(e) => {
+                        e.currentTarget.style.outline = '2px solid #818cf8'
+                        e.currentTarget.style.outlineOffset = '2px'
+                    }}
+                    onBlur={(e) => {
+                        e.currentTarget.style.outline = 'none'
                     }}
                 >
                     {isMobileMenuOpen ? '✕' : '☰'}
@@ -179,6 +188,8 @@ export function SideNavigation() {
                     <button
                         key={item.path}
                         onClick={() => handleNavClick(item.path)}
+                        aria-label={item.label}
+                        aria-current={isActive(item.path) ? 'page' : undefined}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -194,7 +205,8 @@ export function SideNavigation() {
                             transition: 'all 0.2s ease',
                             textAlign: 'left',
                             justifyContent: 'flex-start',
-                            width: '100%'
+                            width: '100%',
+                            outline: 'none'
                         }}
                         onMouseEnter={(e) => {
                             if (!isActive(item.path)) {
@@ -208,8 +220,21 @@ export function SideNavigation() {
                                 e.currentTarget.style.color = '#94a3b8' // slate-400
                             }
                         }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.outline = '2px solid #818cf8'
+                            e.currentTarget.style.outlineOffset = '2px'
+                            if (!isActive(item.path)) {
+                                e.currentTarget.style.backgroundColor = '#1e293b'
+                            }
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.outline = 'none'
+                            if (!isActive(item.path)) {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                            }
+                        }}
                     >
-                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                        <span style={{ fontSize: '20px' }} aria-hidden="true">{item.icon}</span>
                         <span>{item.label}</span>
                     </button>
                 ))}

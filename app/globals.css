@@ -1124,9 +1124,9 @@ body {
         display: block !important;
         margin-bottom: 12px !important;
         border: 1px solid var(--border-primary) !important;
-        borderRadius: 8px !important;
+        border-radius: 8px !important;
         padding: 12px !important;
-        backgroundColor: var(--bg-secondary) !important;
+        background-color: var(--bg-secondary) !important;
     }
     
     .transaction-table td {
@@ -1140,6 +1140,66 @@ body {
         content: attr(data-label) ": ";
         font-weight: 600;
         color: var(--text-secondary);
+    }
+}
+
+/* Accessibility improvements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--accent-primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* Skip to main content link for screen readers */
+.skip-to-main {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+}
+
+.skip-to-main:focus {
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background-color: var(--accent-primary);
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Better focus states for interactive elements */
+button:not(:disabled):hover,
+a:hover {
+    opacity: 0.9;
+}
+
+button:not(:disabled):active,
+a:active {
+    transform: scale(0.98);
+}
+
+/* Loading states */
+.loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary) 0%,
+        var(--bg-secondary) 50%,
+        var(--bg-tertiary) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
     }
 }
 

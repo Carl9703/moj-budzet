@@ -41,6 +41,7 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             setIsOpen(false)
                         }}
                         className="btn-mobile"
+                        aria-label="Dodaj przychód"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -56,7 +57,8 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                             transition: 'all 0.2s ease',
                             minHeight: '44px',
-                            minWidth: '44px'
+                            minWidth: '44px',
+                            outline: 'none'
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#059669'
@@ -68,8 +70,15 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             e.currentTarget.style.transform = 'translateY(0)'
                             e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)'
                         }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.outline = '2px solid #10b981'
+                            e.currentTarget.style.outlineOffset = '2px'
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.outline = 'none'
+                        }}
                     >
-                        <span>💵</span>
+                        <span aria-hidden="true">💵</span>
                         <span>Dodaj przychód</span>
                     </button>
                     
@@ -79,6 +88,7 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             setIsOpen(false)
                         }}
                         className="btn-mobile"
+                        aria-label="Dodaj wydatek"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -94,7 +104,8 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
                             transition: 'all 0.2s ease',
                             minHeight: '44px',
-                            minWidth: '44px'
+                            minWidth: '44px',
+                            outline: 'none'
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#dc2626'
@@ -106,8 +117,15 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                             e.currentTarget.style.transform = 'translateY(0)'
                             e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)'
                         }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.outline = '2px solid #ef4444'
+                            e.currentTarget.style.outlineOffset = '2px'
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.outline = 'none'
+                        }}
                     >
-                        <span>💸</span>
+                        <span aria-hidden="true">💸</span>
                         <span>Dodaj wydatek</span>
                     </button>
 
@@ -190,6 +208,8 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="btn-mobile"
+                aria-label={isOpen ? 'Zamknij menu akcji' : 'Otwórz menu akcji'}
+                aria-expanded={isOpen}
                 style={{
                     width: '56px',
                     height: '56px',
@@ -207,7 +227,8 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                     backgroundColor: isOpen ? '#ef4444' : '#3b82f6',
                     minWidth: '56px',
                     minHeight: '56px',
-                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                    outline: 'none'
                 }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = isOpen ? '#dc2626' : '#2563eb'
@@ -219,8 +240,15 @@ export function FloatingActionButton({ onAddIncome, onAddExpense, onAddBonus, on
                     e.currentTarget.style.transform = isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
                     e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
                 }}
+                onFocus={(e) => {
+                    e.currentTarget.style.outline = '2px solid #3b82f6'
+                    e.currentTarget.style.outlineOffset = '2px'
+                }}
+                onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none'
+                }}
             >
-                {isOpen ? '✕' : '+'}
+                <span aria-hidden="true">{isOpen ? '✕' : '+'}</span>
             </button>
 
             {/* Overlay do zamykania */}
