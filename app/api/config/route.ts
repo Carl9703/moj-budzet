@@ -39,7 +39,15 @@ export async function GET(request: NextRequest) {
 
         
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
-        let monthlyEnvelopes
+        let monthlyEnvelopes: Array<{
+            id: string
+            name: string
+            icon: string | null
+            plannedAmount: number
+            currentAmount: number
+            group: string | null
+            isArchived: boolean
+        }> = []
         try {
             monthlyEnvelopes = await prisma.envelope.findMany({
                 where: { 
@@ -70,7 +78,15 @@ export async function GET(request: NextRequest) {
         }
 
         // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
-        let yearlyEnvelopes
+        let yearlyEnvelopes: Array<{
+            id: string
+            name: string
+            icon: string | null
+            plannedAmount: number
+            currentAmount: number
+            group: string | null
+            isArchived: boolean
+        }> = []
         try {
             yearlyEnvelopes = await prisma.envelope.findMany({
                 where: { 
