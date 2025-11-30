@@ -76,12 +76,21 @@ export async function GET(request: NextRequest) {
 
         // Oblicz saldo z transakcji od września (normalna logika)
         // Ignoruj transakcje z transferPairId - to są transfery wewnętrzne, nie wpływają na główne saldo
+        // Ignoruj transakcje z includeInStats: false - to są zwroty/refundacje, nie wpływają na saldo główne
         const incomeFromSeptember = Math.round(transactionsFromSeptember
-            .filter(t => t.type === 'income' && !(t as { transferPairId?: string | null }).transferPairId)
+            .filter(t => {
+                const hasTransferPairId = !!(t as { transferPairId?: string | null }).transferPairId
+                const includeInStats = (t as { includeInStats?: boolean }).includeInStats !== false
+                return t.type === 'income' && !hasTransferPairId && includeInStats
+            })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const expensesFromSeptember = Math.round(transactionsFromSeptember
-            .filter(t => t.type === 'expense' && !(t as { transferPairId?: string | null }).transferPairId)
+            .filter(t => {
+                const hasTransferPairId = !!(t as { transferPairId?: string | null }).transferPairId
+                const includeInStats = (t as { includeInStats?: boolean }).includeInStats !== false
+                return t.type === 'expense' && !hasTransferPairId && includeInStats
+            })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         // Znajdź kopertę Fundusz Awaryjny
