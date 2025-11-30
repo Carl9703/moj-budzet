@@ -56,6 +56,45 @@ export function SideNavigation() {
 
     return (
         <>
+            {/* Mobile Menu Button */}
+            {isMobile && (
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="mobile-menu-btn"
+                    style={{
+                        position: 'fixed',
+                        top: '16px',
+                        left: '16px',
+                        zIndex: 1001,
+                        width: '48px',
+                        height: '48px',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                        backgroundColor: '#0f172a', // slate-900
+                        border: '1px solid #1e293b', // slate-800
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        color: '#f1f5f9', // slate-100
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                        transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#1e293b' // slate-800
+                        e.currentTarget.style.transform = 'scale(1.05)'
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#0f172a' // slate-900
+                        e.currentTarget.style.transform = 'scale(1)'
+                    }}
+                >
+                    {isMobileMenuOpen ? '✕' : '☰'}
+                </button>
+            )}
+
             {/* Mobile Overlay */}
             {isMobile && isMobileMenuOpen && (
                 <div 
@@ -88,7 +127,7 @@ export function SideNavigation() {
                     left: isMobile ? (isMobileMenuOpen ? '0' : '-240px') : '0',
                     height: '100vh',
                     overflow: 'hidden',
-                    zIndex: 10 // quantum-budget uses z-10
+                    zIndex: isMobile ? 1000 : 10 // Higher z-index on mobile
                 }}
             >
             {/* Header with Logo - Quantum Budget Style */}

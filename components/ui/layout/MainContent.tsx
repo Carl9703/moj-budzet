@@ -26,10 +26,11 @@ export function MainContent({ children }: MainContentProps) {
             backgroundColor: '#020617', // slate-950
             position: 'relative',
             flex: 1,
-            marginLeft: '256px', // Space for sidebar w-64 = 256px (quantum-budget style)
-            padding: '32px',
+            marginLeft: isMobile ? '0' : '256px', // Space for sidebar w-64 = 256px (quantum-budget style)
+            padding: isMobile ? '16px' : '32px',
             overflow: 'auto',
-            minHeight: '100vh'
+            minHeight: '100vh',
+            transition: 'margin-left 0.3s ease, padding 0.3s ease'
         }}>
             {children}
         </main>
