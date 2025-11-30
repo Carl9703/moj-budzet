@@ -36,10 +36,20 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const envelopes = await prisma.envelope.findMany({
-            where: { userId },
-            orderBy: { name: 'asc' }
-        })
+        let envelopes
+        try {
+            envelopes = await prisma.envelope.findMany({
+                where: { userId, isArchived: false },
+                orderBy: { name: 'asc' }
+            })
+        } catch (error) {
+            // Fallback jeśli kolumna isArchived nie istnieje
+            console.error('Error fetching envelopes with isArchived filter:', error)
+            envelopes = await prisma.envelope.findMany({
+                where: { userId },
+                orderBy: { name: 'asc' }
+            })
+        }
 
         // Pobierz transakcje od 1 września 2025 (po imporcie historycznych danych)
         const startOfAppUsage = new Date('2025-09-01')

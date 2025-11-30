@@ -119,23 +119,23 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Ubrania i Akcesoria', plannedAmount: 200, icon: '👕', group: 'lifestyle' }
   ]
 
-  // GRUPA 3: CELE FINANSOWE (miesięczne)
-  const financialGoalsEnvelopes = [
-    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'financial' }
+  // GRUPA 3: CELE I MAJĄTEK (miesięczne)
+  const assetsMonthlyEnvelopes = [
+    { name: 'Fundusz Awaryjny', plannedAmount: 1000, icon: '🚨', group: 'assets' }
   ]
 
-  // FUNDUSZE CELOWE (roczne)
-  const targetFundsEnvelopes = [
-    { name: 'Auto: Serwis i Ubezpieczenie', plannedAmount: 2000, icon: '🚗', group: 'target' },
-    { name: 'Prezenty i Okazje', plannedAmount: 1500, icon: '🎁', group: 'target' },
-    { name: 'Podróże', plannedAmount: 5000, icon: '✈️', group: 'target' },
-    { name: 'Wesele', plannedAmount: 15000, icon: '💍', group: 'target' },
-    { name: 'Budowanie Przyszłości', plannedAmount: 9600, icon: '📈', group: 'target' },
-    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '🎉', group: 'target' }
+  // CELE I MAJĄTEK (roczne)
+  const assetsYearlyEnvelopes = [
+    { name: 'Auto: Serwis i Ubezpieczenie', plannedAmount: 2000, icon: '🚗', group: 'assets' },
+    { name: 'Prezenty i Okazje', plannedAmount: 1500, icon: '🎁', group: 'assets' },
+    { name: 'Podróże', plannedAmount: 5000, icon: '✈️', group: 'assets' },
+    { name: 'Wesele', plannedAmount: 15000, icon: '💍', group: 'assets' },
+    { name: 'Budowanie Przyszłości', plannedAmount: 9600, icon: '📈', group: 'assets' },
+    { name: 'Wolne środki (roczne)', plannedAmount: 2000, icon: '🎉', group: 'assets' }
   ]
 
   // Stwórz wszystkie koperty miesięczne (demo user zaczyna z pełnymi kopertami)
-  const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...financialGoalsEnvelopes]
+  const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...assetsMonthlyEnvelopes]
   
   for (const envelope of allMonthlyEnvelopes) {
     await prisma.envelope.create({
@@ -152,7 +152,7 @@ async function createDefaultEnvelopes(userId: string) {
   }
 
   // Stwórz wszystkie koperty roczne (demo user ma 30% wypełnienia)
-  for (const envelope of targetFundsEnvelopes) {
+  for (const envelope of assetsYearlyEnvelopes) {
     await prisma.envelope.create({
       data: {
         userId,

@@ -97,15 +97,15 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Wydatki Osobiste', type: 'monthly', plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
     { name: 'Gastronomia', type: 'monthly', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
     { name: 'Ubrania i Akcesoria', type: 'monthly', plannedAmount: 200, icon: '👕', group: 'lifestyle' },
-    { name: 'Fundusz Awaryjny', type: 'monthly', plannedAmount: 1000, icon: '🚨', group: 'financial' },
+    { name: 'Fundusz Awaryjny', type: 'monthly', plannedAmount: 1000, icon: '🚨', group: 'assets' },
     
     // Koperty roczne
-    { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', plannedAmount: 2000, icon: '🚗', group: 'target' },
-    { name: 'Prezenty i Okazje', type: 'yearly', plannedAmount: 1500, icon: '🎁', group: 'target' },
-    { name: 'Podróże', type: 'yearly', plannedAmount: 5000, icon: '✈️', group: 'target' },
-    { name: 'Wesele', type: 'yearly', plannedAmount: 15000, icon: '💍', group: 'target' },
-    { name: 'Budowanie Przyszłości', type: 'yearly', plannedAmount: 9600, icon: '📈', group: 'target' },
-    { name: 'Wolne środki (roczne)', type: 'yearly', plannedAmount: 2000, icon: '🎉', group: 'target' },
+    { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', plannedAmount: 2000, icon: '🚗', group: 'assets' },
+    { name: 'Prezenty i Okazje', type: 'yearly', plannedAmount: 1500, icon: '🎁', group: 'assets' },
+    { name: 'Podróże', type: 'yearly', plannedAmount: 5000, icon: '✈️', group: 'assets' },
+    { name: 'Wesele', type: 'yearly', plannedAmount: 15000, icon: '💍', group: 'assets' },
+    { name: 'Budowanie Przyszłości', type: 'yearly', plannedAmount: 9600, icon: '📈', group: 'assets' },
+    { name: 'Wolne środki (roczne)', type: 'yearly', plannedAmount: 2000, icon: '🎉', group: 'assets' },
   ]
 
   for (const envelope of defaultEnvelopes) {

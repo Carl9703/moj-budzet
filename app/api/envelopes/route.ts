@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Utwórz kopertę
+    // Utwórz kopertę (domyślnie nie zarchiwizowana)
     const envelope = await prisma.envelope.create({
       data: {
         userId,
@@ -37,9 +37,42 @@ export async function POST(request: NextRequest) {
         plannedAmount: plannedAmount || 0,
         currentAmount: 0,
         type,
-        group: group || null
+        group: group || null,
+        isArchived: false // Jawnie ustawiamy, że nowa koperta nie jest zarchiwizowana
+      },
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        type: true,
+        plannedAmount: true,
+        currentAmount: true,
+        icon: true,
+        group: true,
+        isArchived: true // Upewnij się, że isArchived jest zwracane
       }
     })
+
+    // Sprawdź, czy koperta rzeczywiście nie jest zarchiwizowana
+    if (envelope.isArchived) {
+      // Spróbuj zaktualizować
+      const updated = await prisma.envelope.update({
+        where: { id: envelope.id },
+        data: { isArchived: false },
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          type: true,
+          plannedAmount: true,
+          currentAmount: true,
+          icon: true,
+          group: true,
+          isArchived: true
+        }
+      })
+      return NextResponse.json({ success: true, envelope: updated }, { status: 201 })
+    }
 
     return NextResponse.json({ success: true, envelope }, { status: 201 })
   } catch (error) {

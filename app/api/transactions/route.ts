@@ -177,24 +177,51 @@ async function getAvailableCategories(userId: string) {
 }
 
 async function getAvailableGroups(userId: string) {
-    const groups = await prisma.envelope.findMany({
-        where: { userId },
-        select: { group: true },
-        distinct: ['group']
-    })
+    let groups
+    try {
+        groups = await prisma.envelope.findMany({
+            where: { userId, isArchived: false },
+            select: { group: true },
+            distinct: ['group']
+        })
+    } catch (error) {
+        // Fallback jeśli kolumna isArchived nie istnieje
+        console.error('Error fetching groups with isArchived filter:', error)
+        groups = await prisma.envelope.findMany({
+            where: { userId },
+            select: { group: true },
+            distinct: ['group']
+        })
+    }
     return groups.map(g => g.group).filter(Boolean)
 }
 
 async function getAvailableEnvelopes(userId: string) {
-    const envelopes = await prisma.envelope.findMany({
-        where: { userId },
-        select: { 
-            id: true,
-            name: true,
-            icon: true,
-            group: true
-        }
-    })
+    let envelopes
+    try {
+        envelopes = await prisma.envelope.findMany({
+            where: { userId, isArchived: false },
+            select: { 
+                id: true,
+                name: true,
+                icon: true,
+                group: true
+            }
+        })
+    } catch (error) {
+        // Fallback jeśli kolumna isArchived nie istnieje
+        console.error('Error fetching envelopes with isArchived filter:', error)
+        envelopes = await prisma.envelope.findMany({
+            where: { userId },
+            select: { 
+                id: true,
+                name: true,
+                icon: true,
+                group: true
+            }
+        })
+    }
+    return envelopes
     return envelopes
 }
 

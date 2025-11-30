@@ -276,18 +276,18 @@ export default function HomePage() {
                                 onEnvelopeClick={handleEnvelopeClick}
                             />
 
-                            {/* GRUPA: CELE I MAJĄTEK - połączone financial i target */}
+                            {/* GRUPA: CELE I MAJĄTEK */}
                             {(() => {
-                                const financialMonthly = data.monthlyEnvelopes.filter(e => e.group === 'financial' && e.name !== 'Fundusz Awaryjny').map(e => ({ ...e, envelopeType: 'monthly' as const }))
-                                const financialYearly = (data.yearlyEnvelopes?.filter(e => e.group === 'financial' && e.name !== 'Fundusz Awaryjny') || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
-                                const targetYearly = (data.yearlyEnvelopes?.filter(e => e.group === 'target' && !e.name.toLowerCase().includes('wolne środki')) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
-                                const allAssets = [...financialMonthly, ...financialYearly, ...targetYearly]
+                                // Wyklucz "Fundusz Awaryjny" i "Wolne środki" - są wyświetlane w sidebarze
+                                const assetsMonthly = data.monthlyEnvelopes
+                                    .filter(e => e.group === 'assets' && e.name !== 'Fundusz Awaryjny')
+                                    .map(e => ({ ...e, envelopeType: 'monthly' as const }))
+                                const assetsYearly = (data.yearlyEnvelopes?.filter(e => 
+                                    e.group === 'assets' && !e.name.toLowerCase().includes('wolne środki')
+                                ) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                const allAssets = [...assetsMonthly, ...assetsYearly]
                                 
                                 if (allAssets.length === 0) return null
-                                
-                                // Oblicz sumę dla wyświetlenia w nagłówku
-                                const monthlySpent = financialMonthly.reduce((sum, e) => sum + e.spent, 0)
-                                const yearlyAvailable = [...financialYearly, ...targetYearly].reduce((sum, e) => sum + e.current, 0)
                                 
                                 return (
                                     <EnvelopeGroup

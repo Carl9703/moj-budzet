@@ -59,7 +59,6 @@ export default function HistoryPage() {
     try {
       setLoading(true)
       const activeFilters = currentFilters || filters
-      console.log('History: fetchTransactions called with:', activeFilters)
       
       // Buduj URL z parametrami
       const params = new URLSearchParams()
@@ -68,8 +67,6 @@ export default function HistoryPage() {
           params.append(key, value)
         }
       })
-      
-      console.log('History: API URL:', `/api/transactions?${params.toString()}`)
       const response = await authorizedFetch(`/api/transactions?${params.toString()}`)
       const data = await response.json()
       
@@ -91,7 +88,6 @@ export default function HistoryPage() {
   }
   
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    console.log('History: handleFiltersChange called with:', newFilters)
     setFilters(newFilters)
     fetchTransactions(newFilters)
   }, [])

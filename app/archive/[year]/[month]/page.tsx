@@ -165,7 +165,6 @@ export default function ArchiveMonthPage() {
       setError('')
       
       const dateRange = getMonthDateRange(year, month)
-      console.log('Fetching analytics for date range:', dateRange)
       
       const params = new URLSearchParams()
       if (dateRange.from && dateRange.to) {

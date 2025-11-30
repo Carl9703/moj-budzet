@@ -72,6 +72,7 @@ model Envelope {
   currentAmount          Float
   icon                   String?
   group                  String?
+  isArchived             Boolean            @default(false)
   user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   recurringPayments      RecurringPayment[]
   recurringFromTransfers RecurringPayment[] @relation("RecurringPaymentFrom")
@@ -80,6 +81,7 @@ model Envelope {
 
   @@index([userId, type])
   @@index([userId, group])
+  @@index([userId, isArchived])
 }
 
 model Transaction {

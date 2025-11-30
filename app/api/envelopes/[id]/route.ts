@@ -17,10 +17,12 @@ export async function PATCH(
 
     const { id: envelopeId } = await params
     const body = await request.json()
-    const { name, icon, plannedAmount } = body as {
+    const { name, icon, plannedAmount, group, isArchived } = body as {
       name?: string
       icon?: string | null
       plannedAmount?: number
+      group?: string
+      isArchived?: boolean
     }
 
     // Sprawdź czy koperta należy do użytkownika
@@ -43,7 +45,9 @@ export async function PATCH(
       data: {
         ...(name !== undefined && { name }),
         ...(icon !== undefined && { icon }),
-        ...(plannedAmount !== undefined && { plannedAmount })
+        ...(plannedAmount !== undefined && { plannedAmount }),
+        ...(group !== undefined && { group }),
+        ...(isArchived !== undefined && { isArchived })
       }
     })
 
@@ -89,13 +93,24 @@ export async function DELETE(
     })
 
     if (transactionsCount > 0) {
-      return NextResponse.json(
-        { error: 'Nie można usunąć koperty z istniejącymi transakcjami' },
-        { status: 400 }
-      )
+      // Jeśli koperta ma transakcje, zarchiwizuj ją zamiast usuwać
+      const archived = await prisma.envelope.update({
+        where: {
+          id: envelopeId
+        },
+        data: {
+          isArchived: true
+        }
+      })
+
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Koperta została zarchiwizowana (ma transakcje)',
+        envelope: archived
+      })
     }
 
-    // Usuń kopertę
+    // Jeśli koperta nie ma transakcji, usuń ją
     await prisma.envelope.delete({
       where: {
         id: envelopeId

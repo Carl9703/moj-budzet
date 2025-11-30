@@ -124,12 +124,10 @@ function getGroupDisplayName(groupName: string): string {
   const groupNames: { [key: string]: string } = {
     'needs': 'Potrzeby',
     'lifestyle': 'Styl Życia',
-    'financial': 'Cele Finansowe', 
-    'target': 'Fundusze Celowe',
+    'assets': 'Cele i majątek',
     'Potrzeby': 'Potrzeby',
     'Styl Życia': 'Styl Życia',
-    'Cele Finansowe': 'Cele Finansowe',
-    'Fundusze Celowe': 'Fundusze Celowe',
+    'Cele i majątek': 'Cele i majątek',
     'Inne': 'Inne'
   }
   return groupNames[groupName] || 'Inne'
@@ -137,14 +135,12 @@ function getGroupDisplayName(groupName: string): string {
 
 function getGroupIcon(groupName: string): string {
   const groupIcons: { [key: string]: string } = {
-    'needs': '🏠',
-    'lifestyle': '🎯', 
-    'financial': '💰',
-    'target': '🎯',
-    'Potrzeby': '🏠',
-    'Styl Życia': '🎯',
-    'Cele Finansowe': '💰',
-    'Fundusze Celowe': '🎯',
+    'needs': '🏡',
+    'lifestyle': '🎉', 
+    'assets': '💰',
+    'Potrzeby': '🏡',
+    'Styl Życia': '🎉',
+    'Cele i majątek': '💰',
     'Inne': '📦'
   }
   return groupIcons[groupName] || '📦'

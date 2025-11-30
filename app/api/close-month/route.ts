@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
             where: {
                 userId: userId,
                 type: 'monthly',
+                isArchived: false,
                 NOT: {
                     name: {
                         in: Array.from(protectedNamesSet)

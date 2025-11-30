@@ -13,6 +13,11 @@ export async function GET(request: NextRequest) {
             return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
         }
 
+        // Pobierz parametr archived z query string (domyślnie false - aktywne koperty)
+        const { searchParams } = new URL(request.url)
+        const archivedParam = searchParams.get('archived')
+        const isArchived = archivedParam === 'true'
+
         let config = await prisma.userConfig.findUnique({ where: { userId } })
 
         if (!config) {
@@ -37,26 +42,62 @@ export async function GET(request: NextRequest) {
         let monthlyEnvelopes
         try {
             monthlyEnvelopes = await prisma.envelope.findMany({
-                where: { userId, type: 'monthly' },
+                where: { 
+                    userId, 
+                    type: 'monthly',
+                    isArchived: isArchived
+                },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
             })
-            
         } catch (dbError) {
-            throw dbError
+            // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
+            try {
+                monthlyEnvelopes = await prisma.envelope.findMany({
+                    where: { userId, type: 'monthly' },
+                    orderBy: { name: 'asc' },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                })
+                // Filtruj ręcznie jeśli kolumna nie istnieje
+                if (!isArchived) {
+                    monthlyEnvelopes = monthlyEnvelopes.filter(e => !e.isArchived)
+                } else {
+                    monthlyEnvelopes = monthlyEnvelopes.filter(e => e.isArchived)
+                }
+            } catch (fallbackError) {
+                monthlyEnvelopes = []
+            }
         }
 
         // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
         let yearlyEnvelopes
         try {
             yearlyEnvelopes = await prisma.envelope.findMany({
-                where: { userId, type: 'yearly' },
+                where: { 
+                    userId, 
+                    type: 'yearly',
+                    isArchived: isArchived
+                },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
             })
-            
         } catch (dbError) {
-            throw dbError
+            // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
+            try {
+                yearlyEnvelopes = await prisma.envelope.findMany({
+                    where: { userId, type: 'yearly' },
+                    orderBy: { name: 'asc' },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                })
+                // Filtruj ręcznie jeśli kolumna nie istnieje
+                if (!isArchived) {
+                    yearlyEnvelopes = yearlyEnvelopes.filter(e => !e.isArchived)
+                } else {
+                    yearlyEnvelopes = yearlyEnvelopes.filter(e => e.isArchived)
+                }
+            } catch (fallbackError) {
+                yearlyEnvelopes = []
+            }
         }
 
         const response = NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })

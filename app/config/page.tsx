@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { ConfirmationModal } from '@/components/ui/feedback/ConfirmationModal'
 import { RecurringPayments } from '@/components/features/config/RecurringPayments'
 import { EXPENSE_CATEGORIES, Category } from '@/lib/constants/categories'
 
@@ -26,11 +27,47 @@ export default function ConfigPage() {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('general')
   
+  // Modals for confirmations
+  const [deleteEnvelopeModal, setDeleteEnvelopeModal] = useState<{ isOpen: boolean; envelopeId: string | null; envelopeName: string; envelopeType: 'monthly' | 'yearly' | null }>({
+    isOpen: false,
+    envelopeId: null,
+    envelopeName: '',
+    envelopeType: null
+  })
+  const [deleteCategoryModal, setDeleteCategoryModal] = useState<{ isOpen: boolean; categoryId: string | null; categoryName: string }>({
+    isOpen: false,
+    categoryId: null,
+    categoryName: ''
+  })
+  const [addEnvelopeModal, setAddEnvelopeModal] = useState<{ isOpen: boolean; groupName: string | null }>({
+    isOpen: false,
+    groupName: null
+  })
+  const [newEnvelopeData, setNewEnvelopeData] = useState<{
+    name: string
+    icon: string
+    type: 'monthly' | 'yearly'
+    group: string
+    plannedAmount: number
+  }>({
+    name: '',
+    icon: '📦',
+    type: 'monthly',
+    group: 'needs',
+    plannedAmount: 0
+  })
+  const [addEnvelopeLoading, setAddEnvelopeLoading] = useState(false)
+  const [deleteEnvelopeLoading, setDeleteEnvelopeLoading] = useState(false)
+  const [deleteCategoryLoading, setDeleteCategoryLoading] = useState(false)
+  
   // State
   const [defaultSalary, setDefaultSalary] = useState<number>(0)
   const [bonusDistribution, setBonusDistribution] = useState<Array<{ envelopeId: string; envelopeName: string; percentage: number }>>([])
   const [envelopes, setEnvelopes] = useState<Envelope[]>([])
   const [yearlyEnvelopes, setYearlyEnvelopes] = useState<Envelope[]>([])
+  const [archivedEnvelopes, setArchivedEnvelopes] = useState<Envelope[]>([])
+  const [archivedYearlyEnvelopes, setArchivedYearlyEnvelopes] = useState<Envelope[]>([])
+  const [showArchived, setShowArchived] = useState(false)
   const [categories, setCategories] = useState<Category[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('expenseCategories')
@@ -45,42 +82,75 @@ export default function ConfigPage() {
     return EXPENSE_CATEGORIES
   })
 
-  // Group envelopes by group - combine financial and target into "assets"
-  const groupedEnvelopes = useMemo(() => {
-    const groups: { [key: string]: Envelope[] } = {}
+  // Combine monthly and yearly envelopes by group for display (active)
+  const allGroupedEnvelopes = useMemo(() => {
+    const combined: { [key: string]: Array<Envelope & { envelopeType: 'monthly' | 'yearly' }> } = {}
+    
+    // Add monthly envelopes
     envelopes.forEach(e => {
-      // Combine 'financial' and 'target' into 'assets'
-      let group = e.group || 'other'
-      if (group === 'financial' || group === 'target') {
-        group = 'assets'
-      }
-      if (!groups[group]) groups[group] = []
-      groups[group].push(e)
+      const group = e.group || 'needs'
+      if (!combined[group]) combined[group] = []
+      combined[group].push({ ...e, envelopeType: 'monthly' as const })
     })
-    return groups
-  }, [envelopes])
-
-  const groupedYearlyEnvelopes = useMemo(() => {
-    const groups: { [key: string]: Envelope[] } = {}
+    
+    // Add yearly envelopes
     yearlyEnvelopes.forEach(e => {
-      // Combine 'financial' and 'target' into 'assets'
-      let group = e.group || 'other'
-      if (group === 'financial' || group === 'target') {
-        group = 'assets'
-      }
-      if (!groups[group]) groups[group] = []
-      groups[group].push(e)
+      const group = e.group || 'needs'
+      if (!combined[group]) combined[group] = []
+      combined[group].push({ ...e, envelopeType: 'yearly' as const })
     })
-    return groups
-  }, [yearlyEnvelopes])
+    
+    // Sort envelopes in each group: monthly first, then yearly, then by name
+    Object.keys(combined).forEach(group => {
+      combined[group].sort((a, b) => {
+        if (a.envelopeType !== b.envelopeType) {
+          return a.envelopeType === 'monthly' ? -1 : 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+    })
+    
+    return combined
+  }, [envelopes, yearlyEnvelopes])
 
-  // Calculate totals - wyklucz koperty z grupy "assets" (financial + target), bo to są transfery/oszczędności, nie wydatki
+  // Combine archived monthly and yearly envelopes by group for display
+  const allGroupedArchivedEnvelopes = useMemo(() => {
+    const combined: { [key: string]: Array<Envelope & { envelopeType: 'monthly' | 'yearly' }> } = {}
+    
+    // Add monthly envelopes
+    archivedEnvelopes.forEach(e => {
+      const group = e.group || 'needs'
+      if (!combined[group]) combined[group] = []
+      combined[group].push({ ...e, envelopeType: 'monthly' as const })
+    })
+    
+    // Add yearly envelopes
+    archivedYearlyEnvelopes.forEach(e => {
+      const group = e.group || 'needs'
+      if (!combined[group]) combined[group] = []
+      combined[group].push({ ...e, envelopeType: 'yearly' as const })
+    })
+    
+    // Sort envelopes in each group: monthly first, then yearly, then by name
+    Object.keys(combined).forEach(group => {
+      combined[group].sort((a, b) => {
+        if (a.envelopeType !== b.envelopeType) {
+          return a.envelopeType === 'monthly' ? -1 : 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+    })
+    
+    return combined
+  }, [archivedEnvelopes, archivedYearlyEnvelopes])
+
+  // Calculate totals - wyklucz koperty z grupy "assets", bo to są transfery/oszczędności, nie wydatki
   const totalBudgeted = useMemo(() => {
     return [...envelopes, ...yearlyEnvelopes]
       .filter(e => {
-        // Wyklucz koperty z grupy "assets" (financial + target)
-        const group = e.group || 'other'
-        return group !== 'financial' && group !== 'target'
+        // Wyklucz koperty z grupy "assets"
+        const group = e.group || 'needs'
+        return group !== 'assets'
       })
       .reduce((sum, e) => sum + e.plannedAmount, 0)
   }, [envelopes, yearlyEnvelopes])
@@ -99,29 +169,21 @@ export default function ConfigPage() {
         const cfg = data?.config
         if (cfg) {
           setDefaultSalary(cfg.defaultSalary ?? 0)
-          // Załaduj konfigurację premii
+          // Załaduj konfigurację premii - jeśli jest null/undefined, ustaw pustą tablicę
           if (cfg.bonusDistribution) {
-            setBonusDistribution(JSON.parse(cfg.bonusDistribution))
-          } else {
-            // Domyślna konfiguracja - znajdź koperty roczne
-            const allEnvelopes = [...(data?.monthlyEnvelopes || []), ...(data?.yearlyEnvelopes || [])]
-            const defaultEnvelopes = [
-              allEnvelopes.find(e => e.name === 'Prezenty i Okazje'),
-              allEnvelopes.find(e => e.name === 'Auto: Serwis i Ubezpieczenie'),
-              allEnvelopes.find(e => e.name?.toLowerCase().includes('wolne środki'))
-            ].filter(Boolean)
-            
-            if (defaultEnvelopes.length > 0) {
-              const percentages = [40, 40, 20]
-              setBonusDistribution(defaultEnvelopes.map((e, i) => ({
-                envelopeId: e.id,
-                envelopeName: e.name,
-                percentage: percentages[i] || 0
-              })))
+            try {
+              const parsed = JSON.parse(cfg.bonusDistribution)
+              setBonusDistribution(Array.isArray(parsed) ? parsed : [])
+            } catch {
+              setBonusDistribution([])
             }
+          } else {
+            // Jeśli bonusDistribution jest null/undefined, ustaw pustą tablicę (nie tworzymy domyślnych wartości)
+            setBonusDistribution([])
           }
         }
-        setEnvelopes((data?.monthlyEnvelopes || []).map((e: any) => ({
+        // Filtruj tylko aktywne koperty (isArchived === false lub undefined)
+        setEnvelopes((data?.monthlyEnvelopes || []).filter((e: any) => !e.isArchived).map((e: any) => ({
           id: e.id,
           name: e.name,
           icon: e.icon,
@@ -130,7 +192,7 @@ export default function ConfigPage() {
           group: e.group,
           type: 'monthly' as const
         })))
-        setYearlyEnvelopes((data?.yearlyEnvelopes || []).map((e: any) => ({
+        setYearlyEnvelopes((data?.yearlyEnvelopes || []).filter((e: any) => !e.isArchived).map((e: any) => ({
           id: e.id,
           name: e.name,
           icon: e.icon,
@@ -139,6 +201,35 @@ export default function ConfigPage() {
           group: e.group,
           type: 'yearly' as const
         })))
+        
+        // Pobierz zarchiwizowane koperty
+        try {
+          const archivedRes = await authorizedFetch('/api/config?archived=true', { cache: 'no-store' })
+          const archivedData = await archivedRes.json()
+          if (!mounted) return
+          
+          // Filtruj tylko zarchiwizowane koperty (isArchived === true)
+          setArchivedEnvelopes((archivedData?.monthlyEnvelopes || []).filter((e: any) => e.isArchived === true).map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            icon: e.icon,
+            plannedAmount: e.plannedAmount,
+            currentAmount: e.currentAmount,
+            group: e.group,
+            type: 'monthly' as const
+          })))
+          setArchivedYearlyEnvelopes((archivedData?.yearlyEnvelopes || []).filter((e: any) => e.isArchived === true).map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            icon: e.icon,
+            plannedAmount: e.plannedAmount,
+            currentAmount: e.currentAmount,
+            group: e.group,
+            type: 'yearly' as const
+          })))
+        } catch {
+          // ignore errors for archived envelopes
+        }
       } catch {
         // ignore
       } finally {
@@ -175,10 +266,135 @@ export default function ConfigPage() {
     }
   }
 
+  const handleDeleteEnvelope = async () => {
+    if (!deleteEnvelopeModal.envelopeId || !deleteEnvelopeModal.envelopeType) return
+    
+    setDeleteEnvelopeLoading(true)
+    try {
+      const response = await authorizedFetch(`/api/envelopes/${deleteEnvelopeModal.envelopeId}`, {
+        method: 'DELETE'
+      })
+      if (response.ok) {
+        const result = await response.json().catch(() => ({}))
+        if (deleteEnvelopeModal.envelopeType === 'yearly') {
+          setYearlyEnvelopes(prev => prev.filter(e => e.id !== deleteEnvelopeModal.envelopeId))
+        } else {
+          setEnvelopes(prev => prev.filter(e => e.id !== deleteEnvelopeModal.envelopeId))
+        }
+        const message = result.message || 'Koperta została usunięta'
+        showToast(message, 'success')
+        setDeleteEnvelopeModal({ isOpen: false, envelopeId: null, envelopeName: '', envelopeType: null })
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || 'Błąd usuwania koperty'
+        showToast(errorMessage, 'error')
+      }
+    } catch (error) {
+      showToast('Błąd usuwania koperty', 'error')
+    } finally {
+      setDeleteEnvelopeLoading(false)
+    }
+  }
+
+  const handleDeleteCategory = () => {
+    if (!deleteCategoryModal.categoryId) return
+    
+    setDeleteCategoryLoading(true)
+    try {
+      setCategories(prev => prev.filter(c => c.id !== deleteCategoryModal.categoryId))
+      showToast('Kategoria została usunięta', 'success')
+      setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })
+    } catch (error) {
+      showToast('Błąd usuwania kategorii', 'error')
+    } finally {
+      setDeleteCategoryLoading(false)
+    }
+  }
+
+  const handleAddEnvelope = async () => {
+    if (!newEnvelopeData.name.trim()) {
+      showToast('Nazwa koperty jest wymagana', 'error')
+      return
+    }
+
+    setAddEnvelopeLoading(true)
+    try {
+      const response = await authorizedFetch('/api/envelopes', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newEnvelopeData.name.trim(),
+          icon: newEnvelopeData.icon || '📦',
+          plannedAmount: Number(newEnvelopeData.plannedAmount) || 0,
+          type: newEnvelopeData.type,
+          group: newEnvelopeData.group
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Sprawdź, czy koperta jest zarchiwizowana
+        if (data.envelope?.isArchived === true) {
+          throw new Error('Koperta została utworzona jako zarchiwizowana')
+        }
+        
+        // Odśwież dane z API
+        try {
+          const configRes = await authorizedFetch('/api/config', { cache: 'no-store' })
+          const configData = await configRes.json()
+          
+          // Filtruj tylko aktywne koperty
+          const activeMonthly = (configData?.monthlyEnvelopes || []).filter((e: any) => !e.isArchived)
+          const activeYearly = (configData?.yearlyEnvelopes || []).filter((e: any) => !e.isArchived)
+          
+          setEnvelopes(activeMonthly.map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            icon: e.icon,
+            plannedAmount: e.plannedAmount,
+            currentAmount: e.currentAmount,
+            group: e.group,
+            type: 'monthly' as const
+          })))
+          
+          setYearlyEnvelopes(activeYearly.map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            icon: e.icon,
+            plannedAmount: e.plannedAmount,
+            currentAmount: e.currentAmount,
+            group: e.group,
+            type: 'yearly' as const
+          })))
+        } catch (refreshError) {
+          // Ignore refresh errors
+        }
+        
+        // Resetuj formularz i zamknij modal
+        setNewEnvelopeData({
+          name: '',
+          icon: '📦',
+          type: 'monthly',
+          group: addEnvelopeModal.groupName || 'needs',
+          plannedAmount: 0
+        })
+        setAddEnvelopeModal({ isOpen: false, groupName: null })
+        showToast('Koperta została dodana', 'success')
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Błąd dodawania koperty')
+      }
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Błąd dodawania koperty', 'error')
+    } finally {
+      setAddEnvelopeLoading(false)
+    }
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
-      // Zapisz koperty (nazwy, ikony, limity)
+      // Zapisz koperty (nazwy, ikony, limity, grupy)
       for (const env of [...envelopes, ...yearlyEnvelopes]) {
         try {
           const response = await authorizedFetch(`/api/envelopes/${env.id}`, {
@@ -186,7 +402,8 @@ export default function ConfigPage() {
             body: JSON.stringify({
               name: env.name,
               icon: env.icon,
-              plannedAmount: Number(env.plannedAmount || 0)
+              plannedAmount: Number(env.plannedAmount || 0),
+              group: env.group || 'needs'
             })
           })
           if (!response.ok) {
@@ -194,7 +411,6 @@ export default function ConfigPage() {
             throw new Error(errorData.error || `Błąd zapisu koperty ${env.name}`)
           }
         } catch (error) {
-          console.error(`Error saving envelope ${env.name}:`, error)
           throw error
         }
       }
@@ -231,11 +447,9 @@ export default function ConfigPage() {
         showToast('Zapisano konfigurację pomyślnie!', 'success')
       } else {
         const errorData = await res.json().catch(() => ({ error: 'Nieznany błąd' }))
-        console.error('Error saving config:', errorData)
         showToast(errorData.error || 'Błąd zapisu konfiguracji', 'error')
       }
     } catch (error) {
-      console.error('Error saving config:', error)
       showToast(error instanceof Error ? error.message : 'Błąd zapisu konfiguracji', 'error')
     } finally {
       setSaving(false)
@@ -246,9 +460,7 @@ export default function ConfigPage() {
     const names: { [key: string]: string } = {
       'needs': 'Potrzeby',
       'lifestyle': 'Styl życia',
-      'assets': 'Cele i majątek',
-      'financial': 'Cele finansowe',
-      'target': 'Fundusze celowe'
+      'assets': 'Cele i majątek'
     }
     return names[group] || group
   }
@@ -257,9 +469,7 @@ export default function ConfigPage() {
     const icons: { [key: string]: string } = {
       'needs': '🏡',
       'lifestyle': '🎉',
-      'assets': '💰',
-      'financial': '🎯',
-      'target': '🎯'
+      'assets': '💰'
     }
     return icons[group] || '📦'
   }
@@ -336,7 +546,7 @@ export default function ConfigPage() {
           marginBottom: '24px',
           overflowX: 'auto'
         }}>
-          <button 
+          <button
             onClick={() => setActiveTab('general')}
             style={{
               padding: '12px 16px',
@@ -596,11 +806,141 @@ export default function ConfigPage() {
         )}
 
         {/* TAB 2: ENVELOPES AND CATEGORIES */}
-        {activeTab === 'envelopes' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* ENVELOPES WITH CATEGORIES */}
-            {[...envelopes.map(e => ({ ...e, envelopeType: 'monthly' as const })), ...yearlyEnvelopes.map(e => ({ ...e, envelopeType: 'yearly' as const }))].map((env) => {
-              const envelopeCategories = categories.filter(c => c.defaultEnvelope === env.name)
+        {activeTab === 'envelopes' && (() => {
+          // Define group order
+          const groupOrder = ['needs', 'lifestyle', 'assets']
+          
+          // Wybierz aktywne lub zarchiwizowane koperty
+          const displayGroupedEnvelopes = showArchived ? allGroupedArchivedEnvelopes : allGroupedEnvelopes
+          
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Toggle between active and archived envelopes */}
+              <div style={{
+                backgroundColor: '#0f172a',
+                border: '1px solid #334155',
+                borderRadius: '12px',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#f1f5f9', margin: '0 0 4px 0' }}>
+                    {showArchived ? '📦 Zarchiwizowane koperty' : '✅ Aktywne koperty'}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                    {showArchived 
+                      ? `${archivedEnvelopes.length + archivedYearlyEnvelopes.length} zarchiwizowanych kopert`
+                      : `${envelopes.length + yearlyEnvelopes.length} aktywnych kopert`
+                    }
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowArchived(!showArchived)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: showArchived ? '#4f46e5' : '#1e293b',
+                    color: '#f1f5f9',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = showArchived ? '#6366f1' : '#334155'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = showArchived ? '#4f46e5' : '#1e293b'
+                  }}
+                >
+                  {showArchived ? '← Pokaż aktywne' : 'Pokaż zarchiwizowane →'}
+                </button>
+              </div>
+              
+              {/* ENVELOPES GROUPED BY GROUP */}
+              {groupOrder
+                .filter(groupName => displayGroupedEnvelopes[groupName] && displayGroupedEnvelopes[groupName].length > 0)
+                .concat(Object.keys(displayGroupedEnvelopes).filter(g => !groupOrder.includes(g)))
+                .map((groupName) => {
+                  const groupEnvelopes = displayGroupedEnvelopes[groupName]
+                  
+                  return (
+                    <div key={groupName} style={{
+                      backgroundColor: '#0f172a', // slate-900
+                      border: '1px solid #334155', // slate-700
+                      borderRadius: '12px',
+                      overflow: 'hidden'
+                    }}>
+                      {/* GROUP HEADER */}
+                      <div style={{
+                        backgroundColor: '#1e293b', // slate-800
+                        padding: '16px 20px',
+                        borderBottom: '1px solid #334155', // slate-700
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}>
+                        <span style={{ fontSize: '20px' }}>{getGroupIcon(groupName)}</span>
+                        <h3 style={{
+                          fontSize: '16px',
+                          fontWeight: '700',
+                          color: '#f1f5f9',
+                          margin: 0,
+                          flex: 1
+                        }}>
+                          {getGroupName(groupName)}
+                        </h3>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#94a3b8',
+                          padding: '4px 8px',
+                          backgroundColor: '#0f172a',
+                          borderRadius: '4px'
+                        }}>
+                          {groupEnvelopes.length} {groupEnvelopes.length === 1 ? 'koperta' : 'kopert'}
+                        </span>
+                        {!showArchived && (
+                          <button
+                            onClick={() => {
+                              setNewEnvelopeData({
+                                name: '',
+                                icon: '📦',
+                                type: 'monthly',
+                                group: groupName,
+                                plannedAmount: 0
+                              })
+                              setAddEnvelopeModal({ isOpen: true, groupName })
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#4f46e5', // indigo-600
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
+                            }}
+                          >
+                            + Dodaj kopertę do {getGroupName(groupName)}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* ENVELOPES IN THIS GROUP */}
+                      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {groupEnvelopes.map((env) => {
+                          const envelopeCategories = categories.filter(c => c.defaultEnvelope === env.name)
               
               return (
                 <div key={env.id} style={{
@@ -657,13 +997,25 @@ export default function ConfigPage() {
                         
                         // Aktualizuj nazwę koperty
                         if (env.envelopeType === 'yearly') {
-                          setYearlyEnvelopes(prev => prev.map(envelope => 
-                            envelope.id === env.id ? { ...envelope, name: newName } : envelope
-                          ))
+                          if (showArchived) {
+                            setArchivedYearlyEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, name: newName } : envelope
+                            ))
+                          } else {
+                            setYearlyEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, name: newName } : envelope
+                            ))
+                          }
                         } else {
-                          setEnvelopes(prev => prev.map(envelope => 
-                            envelope.id === env.id ? { ...envelope, name: newName } : envelope
-                          ))
+                          if (showArchived) {
+                            setArchivedEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, name: newName } : envelope
+                            ))
+                          } else {
+                            setEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, name: newName } : envelope
+                            ))
+                          }
                         }
                         
                         // Aktualizuj defaultEnvelope we wszystkich kategoriach przypisanych do tej koperty
@@ -726,79 +1078,163 @@ export default function ConfigPage() {
                       }}>
                         {env.envelopeType === 'yearly' ? 'Roczne' : 'Miesięczna'}
                       </span>
-                      <button
-                        onClick={async () => {
-                          if (confirm(`Czy na pewno chcesz usunąć kopertę "${env.name}"?`)) {
+                      <select
+                        value={env.group || 'needs'}
+                        onChange={(e) => {
+                          if (showArchived) {
+                            // Dla zarchiwizowanych kopert nie można zmieniać grupy
+                            return
+                          }
+                          const newGroup = e.target.value
+                          if (env.envelopeType === 'yearly') {
+                            setYearlyEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, group: newGroup } : envelope
+                            ))
+                          } else {
+                            setEnvelopes(prev => prev.map(envelope => 
+                              envelope.id === env.id ? { ...envelope, group: newGroup } : envelope
+                            ))
+                          }
+                        }}
+                        disabled={showArchived}
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#1e293b', // slate-800
+                          border: '1px solid #334155', // slate-700
+                          borderRadius: '4px',
+                          color: '#f1f5f9', // white
+                          fontSize: '11px',
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#4f46e5' // indigo-600
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#334155' // slate-700
+                        }}
+                      >
+                        <option value="needs">Potrzeby</option>
+                        <option value="lifestyle">Styl życia</option>
+                        <option value="assets">Cele i majątek</option>
+                      </select>
+                      {showArchived ? (
+                        <button
+                          onClick={async () => {
                             try {
                               const response = await authorizedFetch(`/api/envelopes/${env.id}`, {
-                                method: 'DELETE'
+                                method: 'PATCH',
+                                body: JSON.stringify({
+                                  isArchived: false
+                                })
                               })
                               if (response.ok) {
                                 if (env.envelopeType === 'yearly') {
-                                  setYearlyEnvelopes(prev => prev.filter(e => e.id !== env.id))
+                                  setArchivedYearlyEnvelopes(prev => prev.filter(e => e.id !== env.id))
+                                  // Dodaj z powrotem do aktywnych
+                                  const restored = archivedYearlyEnvelopes.find(e => e.id === env.id)
+                                  if (restored) {
+                                    setYearlyEnvelopes(prev => [...prev, restored])
+                                  }
                                 } else {
-                                  setEnvelopes(prev => prev.filter(e => e.id !== env.id))
+                                  setArchivedEnvelopes(prev => prev.filter(e => e.id !== env.id))
+                                  // Dodaj z powrotem do aktywnych
+                                  const restored = archivedEnvelopes.find(e => e.id === env.id)
+                                  if (restored) {
+                                    setEnvelopes(prev => [...prev, restored])
+                                  }
                                 }
-                                showToast('Koperta została usunięta', 'success')
+                                showToast('Koperta została przywrócona', 'success')
                               } else {
-                                throw new Error('Błąd usuwania koperty')
+                                throw new Error('Błąd przywracania koperty')
                               }
                             } catch (error) {
-                              showToast('Błąd usuwania koperty', 'error')
+                              showToast('Błąd przywracania koperty', 'error')
                             }
-                          }
-                        }}
-                        style={{
-                          padding: '4px 8px',
-                          backgroundColor: '#dc2626', // red-600
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#b91c1c' // red-700
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#dc2626' // red-600
-                        }}
-                        title="Usuń kopertę"
-                      >
-                        🗑️
-                      </button>
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#22c55e', // green-500
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#16a34a' // green-600
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#22c55e' // green-500
+                          }}
+                          title="Przywróć kopertę"
+                        >
+                          ♻️
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setDeleteEnvelopeModal({
+                              isOpen: true,
+                              envelopeId: env.id,
+                              envelopeName: env.name,
+                              envelopeType: env.envelopeType
+                            })
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#dc2626', // red-600
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#b91c1c' // red-700
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#dc2626' // red-600
+                          }}
+                          title="Usuń kopertę"
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </div>
                   </div>
                   
-                  {/* CATEGORIES FOR THIS ENVELOPE */}
-                  <div style={{ padding: '16px' }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '12px'
-                    }}>
-                      <h3 style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#94a3b8', // slate-400
-                        margin: 0
+                  {/* CATEGORIES FOR THIS ENVELOPE - tylko dla aktywnych kopert */}
+                  {!showArchived && (
+                    <div style={{ padding: '16px' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '12px'
                       }}>
-                        Kategorie ({envelopeCategories.length})
-                      </h3>
-                      <button
-                        onClick={() => {
-                          const newCategory: Category = {
-                            id: `category-${Date.now()}`,
-                            name: 'Nowa kategoria',
-                            icon: '📦',
-                            defaultEnvelope: env.name,
-                            type: env.envelopeType
-                          }
-                          setCategories(prev => [...prev, newCategory])
-                          showToast('Nowa kategoria została dodana', 'success')
-                        }}
+                        <h3 style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#94a3b8', // slate-400
+                          margin: 0
+                        }}>
+                          Kategorie ({envelopeCategories.length})
+                        </h3>
+                        <button
+                          onClick={() => {
+                            const newCategory: Category = {
+                              id: `category-${Date.now()}`,
+                              name: 'Nowa kategoria',
+                              icon: '📦',
+                              defaultEnvelope: env.name,
+                              type: env.envelopeType
+                            }
+                            setCategories(prev => [...prev, newCategory])
+                            showToast('Nowa kategoria została dodana', 'success')
+                          }}
                         style={{
                           padding: '4px 12px',
                           backgroundColor: '#4f46e5', // indigo-600
@@ -923,10 +1359,11 @@ export default function ConfigPage() {
                             </select>
                             <button
                               onClick={() => {
-                                if (confirm(`Czy na pewno chcesz usunąć kategorię "${category.name}"?`)) {
-                                  setCategories(prev => prev.filter(c => c.id !== category.id))
-                                  showToast('Kategoria została usunięta', 'success')
-                                }
+                                setDeleteCategoryModal({
+                                  isOpen: true,
+                                  categoryId: category.id,
+                                  categoryName: category.name
+                                })
                               }}
                               style={{
                                 padding: '4px 8px',
@@ -961,75 +1398,55 @@ export default function ConfigPage() {
                         Brak kategorii dla tej koperty
                       </p>
                     )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )
-            })}
-            
-            {/* Add new envelope button */}
-            <div style={{
-              backgroundColor: '#0f172a', // slate-900
-              border: '1px solid #334155', // slate-700
-              borderRadius: '12px',
-              padding: '16px',
-              textAlign: 'center'
-            }}>
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await authorizedFetch('/api/envelopes', {
-                      method: 'POST',
-                      body: JSON.stringify({
-                        name: 'Nowa koperta',
-                        icon: '📦',
-                        plannedAmount: 0,
-                        type: 'monthly',
-                        group: 'needs'
-                      })
-                    })
-                    if (response.ok) {
-                      const data = await response.json()
-                      const newEnvelope: Envelope = {
-                        id: data.envelope.id,
-                        name: data.envelope.name,
-                        icon: data.envelope.icon,
-                        plannedAmount: data.envelope.plannedAmount,
-                        currentAmount: 0,
-                        group: data.envelope.group,
-                        type: 'monthly'
-                      }
-                      setEnvelopes(prev => [...prev, newEnvelope])
-                      showToast('Koperta została dodana', 'success')
-                    } else {
-                      throw new Error('Błąd dodawania koperty')
-                    }
-                  } catch (error) {
-                    showToast('Błąd dodawania koperty', 'error')
-                  }
-                }}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#4f46e5', // indigo-600
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
-                }}
-              >
-                + Dodaj nową kopertę
-              </button>
+                        )
+                      })}
+                      
+                      {/* Add new envelope button for this group */}
+                      {!showArchived && (
+                        <button
+                          onClick={() => {
+                            setNewEnvelopeData({
+                              name: '',
+                              icon: '📦',
+                              type: 'monthly',
+                              group: groupName,
+                              plannedAmount: 0
+                            })
+                            setAddEnvelopeModal({ isOpen: true, groupName })
+                          }}
+                          style={{
+                            padding: '10px 16px',
+                            backgroundColor: '#4f46e5', // indigo-600
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            marginTop: '8px',
+                            width: '100%'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#6366f1' // indigo-500
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
+                          }}
+                        >
+                          + Dodaj kopertę do {getGroupName(groupName)}
+                        </button>
+                      )}
+                      </div>
+                    </div>
+                  )
+                })}
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* TAB 3: AUTOMATION */}
         {activeTab === 'automation' && (
@@ -1134,6 +1551,390 @@ export default function ConfigPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={deleteEnvelopeModal.isOpen}
+        onClose={() => setDeleteEnvelopeModal({ isOpen: false, envelopeId: null, envelopeName: '', envelopeType: null })}
+        onConfirm={handleDeleteEnvelope}
+        title="Usuń kopertę"
+        message={`Czy na pewno chcesz usunąć kopertę "${deleteEnvelopeModal.envelopeName}"?${deleteEnvelopeModal.envelopeId ? ' Jeśli koperta ma transakcje, zostanie zarchiwizowana zamiast usunięta.' : ''}`}
+        confirmText="Usuń"
+        cancelText="Anuluj"
+        type="danger"
+        loading={deleteEnvelopeLoading}
+      />
+
+      <ConfirmationModal
+        isOpen={deleteCategoryModal.isOpen}
+        onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}
+        onConfirm={handleDeleteCategory}
+        title="Usuń kategorię"
+        message={`Czy na pewno chcesz usunąć kategorię "${deleteCategoryModal.categoryName}"? Ta operacja jest nieodwracalna.`}
+        confirmText="Usuń"
+        cancelText="Anuluj"
+        type="danger"
+        loading={deleteCategoryLoading}
+      />
+
+      {/* Add Envelope Modal */}
+      {addEnvelopeModal.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#0f172a',
+            borderRadius: '16px',
+            border: '1px solid #334155',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            width: '100%',
+            maxWidth: '500px',
+            animation: 'modalSlideIn 0.2s ease-out'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '20px 24px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #334155'
+            }}>
+              <h2 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#f1f5f9',
+                margin: 0
+              }}>
+                Dodaj nową kopertę
+              </h2>
+              <button
+                onClick={() => {
+                  setAddEnvelopeModal({ isOpen: false, groupName: null })
+                  setNewEnvelopeData({
+                    name: '',
+                    icon: '📦',
+                    type: 'monthly',
+                    group: 'needs',
+                    plannedAmount: 0
+                  })
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  color: '#94a3b8',
+                  transition: 'all 0.2s ease',
+                  fontSize: '20px',
+                  lineHeight: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#1e293b'
+                  e.currentTarget.style.color = '#f1f5f9'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#94a3b8'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div style={{
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              {/* Nazwa */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#f1f5f9',
+                  marginBottom: '8px'
+                }}>
+                  Nazwa koperty *
+                </label>
+                <input
+                  type="text"
+                  value={newEnvelopeData.name}
+                  onChange={(e) => setNewEnvelopeData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Np. Zakupy spożywcze"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    color: '#f1f5f9',
+                    fontSize: '14px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                  autoFocus
+                />
+              </div>
+
+              {/* Ikona i Typ */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#f1f5f9',
+                    marginBottom: '8px'
+                  }}>
+                    Ikona
+                  </label>
+                  <input
+                    type="text"
+                    value={newEnvelopeData.icon}
+                    onChange={(e) => setNewEnvelopeData(prev => ({ ...prev, icon: e.target.value }))}
+                    placeholder="📦"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      color: '#f1f5f9',
+                      fontSize: '16px',
+                      textAlign: 'center',
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                  />
+                </div>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#f1f5f9',
+                    marginBottom: '8px'
+                  }}>
+                    Typ
+                  </label>
+                  <select
+                    value={newEnvelopeData.type}
+                    onChange={(e) => setNewEnvelopeData(prev => ({ ...prev, type: e.target.value as 'monthly' | 'yearly' }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      color: '#f1f5f9',
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                  >
+                    <option value="monthly">Miesięczna</option>
+                    <option value="yearly">Roczna</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Grupa i Planowana kwota */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#f1f5f9',
+                    marginBottom: '8px'
+                  }}>
+                    Grupa
+                  </label>
+                  <select
+                    value={newEnvelopeData.group}
+                    onChange={(e) => setNewEnvelopeData(prev => ({ ...prev, group: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      color: '#f1f5f9',
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                  >
+                    <option value="needs">Potrzeby</option>
+                    <option value="lifestyle">Styl życia</option>
+                    <option value="assets">Cele i majątek</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#f1f5f9',
+                    marginBottom: '8px'
+                  }}>
+                    Planowana kwota
+                  </label>
+                  <input
+                    type="number"
+                    value={newEnvelopeData.plannedAmount || ''}
+                    onChange={(e) => setNewEnvelopeData(prev => ({ ...prev, plannedAmount: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      color: '#f1f5f9',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#4f46e5'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = '#334155'}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{
+              padding: '16px 24px 24px',
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              borderTop: '1px solid #334155'
+            }}>
+              <button
+                onClick={() => {
+                  setAddEnvelopeModal({ isOpen: false, groupName: null })
+                  setNewEnvelopeData({
+                    name: '',
+                    icon: '📦',
+                    type: 'monthly',
+                    group: 'needs',
+                    plannedAmount: 0
+                  })
+                }}
+                disabled={addEnvelopeLoading}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#1e293b',
+                  color: '#f1f5f9',
+                  border: '1px solid #334155',
+                  borderRadius: '8px',
+                  cursor: addEnvelopeLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  opacity: addEnvelopeLoading ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!addEnvelopeLoading) {
+                    e.currentTarget.style.backgroundColor = '#334155'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!addEnvelopeLoading) {
+                    e.currentTarget.style.backgroundColor = '#1e293b'
+                  }
+                }}
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={handleAddEnvelope}
+                disabled={addEnvelopeLoading || !newEnvelopeData.name.trim()}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: addEnvelopeLoading || !newEnvelopeData.name.trim() ? '#475569' : '#4f46e5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: addEnvelopeLoading || !newEnvelopeData.name.trim() ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  opacity: addEnvelopeLoading || !newEnvelopeData.name.trim() ? 0.6 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  if (!addEnvelopeLoading && newEnvelopeData.name.trim()) {
+                    e.currentTarget.style.backgroundColor = '#6366f1'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!addEnvelopeLoading && newEnvelopeData.name.trim()) {
+                    e.currentTarget.style.backgroundColor = '#4f46e5'
+                  }
+                }}
+              >
+                {addEnvelopeLoading && (
+                  <div style={{
+                    width: '14px',
+                    height: '14px',
+                    border: '2px solid transparent',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                )}
+                Dodaj kopertę
+              </button>
+            </div>
+          </div>
+
+          <style jsx>{`
+            @keyframes modalSlideIn {
+              from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   )
 }

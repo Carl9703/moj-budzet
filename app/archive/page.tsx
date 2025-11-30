@@ -76,7 +76,6 @@ export default function ArchivePage() {
 
             if (response.ok) {
                 const data = await response.json()
-                console.log('Archive data:', data)
                 setMonthsData(data)
             } else {
                 const errorText = await response.text()

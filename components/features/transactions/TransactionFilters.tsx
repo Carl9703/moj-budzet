@@ -122,8 +122,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading: _l
     const translations: Record<string, string> = {
       'needs': 'Potrzeby',
       'lifestyle': 'Styl życia',
-      'financial': 'Cele finansowe',
-      'target': 'Fundusze celowe'
+      'assets': 'Cele i majątek'
     }
     return translations[group] || group
   }
