@@ -51,7 +51,11 @@ export const incomeSchema = z.object({
   toGifts: z.number().nonnegative().optional(),
   toInsurance: z.number().nonnegative().optional(),
   toHolidays: z.number().nonnegative().optional(),
-  toFreedom: z.number().nonnegative().optional()
+  toFreedom: z.number().nonnegative().optional(),
+  bonusDistribution: z.array(z.object({
+    envelopeId: z.string().min(1, 'Envelope ID is required'),
+    amount: z.number().nonnegative('Amount must be non-negative')
+  })).optional()
 })
 
 export const expenseSchema = z.object({

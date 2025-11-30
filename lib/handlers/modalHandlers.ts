@@ -1,5 +1,10 @@
 import { authorizedFetch } from '../utils/api'
 
+// Funkcja do wywołania globalnego odświeżenia salda w sidebar
+const triggerDashboardRefresh = () => {
+    window.dispatchEvent(new CustomEvent('dashboardRefresh'))
+}
+
 interface IncomeData {
     amount: number
     description?: string
@@ -42,6 +47,7 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
 
             if (response.ok) {
                 refetch()
+                triggerDashboardRefresh() // Trigger global refresh
                 const result = await response.json()
                 showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
             } else {
@@ -66,6 +72,7 @@ export const createBonusHandler = (refetch: () => void, showToast: (message: str
 
             if (response.ok) {
                 refetch()
+                triggerDashboardRefresh() // Trigger global refresh
                 showToast('Premia została rozdzielona na koperty roczne!', 'success')
             } else {
                 showToast('Błąd podczas zapisywania premii', 'error')
@@ -94,6 +101,7 @@ export const createExpenseHandler = (refetch: () => void, showToast: (message: s
 
             if (response.ok) {
                 refetch()
+                triggerDashboardRefresh() // Trigger global refresh
                 showToast('Wydatek zapisany pomyślnie!', 'success')
             } else {
                 showToast('Błąd podczas zapisywania wydatku', 'error')

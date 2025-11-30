@@ -56,6 +56,9 @@ export function useDashboard() {
 
     useEffect(() => {
         fetchData()
+        const handleRefresh = () => fetchData()
+        window.addEventListener('dashboardRefresh', handleRefresh)
+        return () => window.removeEventListener('dashboardRefresh', handleRefresh)
     }, [])
 
     return { data, loading, error, refetch: fetchData }

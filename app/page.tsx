@@ -385,6 +385,7 @@ export default function HomePage() {
                         onSave={() => {
                             setShowTransferModal(false)
                             refetch()
+                            window.dispatchEvent(new CustomEvent('dashboardRefresh'))
                             showToast('Transfer został wykonany!', 'success')
                         }}
                         envelopes={[
@@ -425,6 +426,7 @@ export default function HomePage() {
                                 const result = await response.json()
                                 setShowCloseMonthModal(false)
                                 await refetch()
+                                window.dispatchEvent(new CustomEvent('dashboardRefresh'))
                                 showToast(result.message || 'Miesiąc został zamknięty!', 'success')
                             } catch (error) {
                                 console.error('Error closing month:', error)
