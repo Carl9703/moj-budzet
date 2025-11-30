@@ -75,21 +75,19 @@ export async function GET(request: NextRequest) {
         })
 
         // Oblicz saldo z transakcji od września (normalna logika)
-        // Ignoruj transakcje z transferPairId - to są transfery wewnętrzne, nie wpływają na główne saldo
-        // Ignoruj transakcje z includeInStats: false - to są zwroty/refundacje, nie wpływają na saldo główne
+        // Ignoruj TYLKO transakcje z transferPairId - to są transfery wewnętrzne, nie wpływają na główne saldo
+        // NIE filtruj po includeInStats - wszystkie transakcje wpływają na saldo główne
         const incomeFromSeptember = Math.round(transactionsFromSeptember
             .filter(t => {
                 const hasTransferPairId = !!(t as { transferPairId?: string | null }).transferPairId
-                const includeInStats = (t as { includeInStats?: boolean }).includeInStats !== false
-                return t.type === 'income' && !hasTransferPairId && includeInStats
+                return t.type === 'income' && !hasTransferPairId
             })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const expensesFromSeptember = Math.round(transactionsFromSeptember
             .filter(t => {
                 const hasTransferPairId = !!(t as { transferPairId?: string | null }).transferPairId
-                const includeInStats = (t as { includeInStats?: boolean }).includeInStats !== false
-                return t.type === 'expense' && !hasTransferPairId && includeInStats
+                return t.type === 'expense' && !hasTransferPairId
             })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
