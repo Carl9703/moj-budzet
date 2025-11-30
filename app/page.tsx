@@ -282,9 +282,12 @@ export default function HomePage() {
                                 const assetsMonthly = data.monthlyEnvelopes
                                     .filter(e => e.group === 'assets' && e.name !== 'Fundusz Awaryjny')
                                     .map(e => ({ ...e, envelopeType: 'monthly' as const }))
-                                const assetsYearly = (data.yearlyEnvelopes?.filter(e => 
-                                    e.group === 'assets' && !e.name.toLowerCase().includes('wolne środki')
-                                ) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                const assetsYearly = (data.yearlyEnvelopes?.filter(e => {
+                                    const nameLower = e.name.toLowerCase()
+                                    return e.group === 'assets' 
+                                        && !nameLower.includes('wolne środki')
+                                        && e.name !== 'Fundusz Awaryjny'
+                                }) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
                                 const allAssets = [...assetsMonthly, ...assetsYearly]
                                 
                                 if (allAssets.length === 0) return null
