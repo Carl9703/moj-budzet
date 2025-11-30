@@ -43,10 +43,11 @@ const getItemIcon = (type: string, name?: string, categoryId?: string): string =
   
   const iconMap: Record<string, Record<string, string>> = {
     GROUP: {
-      'Potrzeby': '🏠',
-      'Styl Życia': '🎯', 
+      'Potrzeby': '🏡',
+      'Styl Życia': '🎉', 
+      'Cele i majątek': '💰',
       'Cele Finansowe': '💰',
-      'Fundusze Celowe': '🎯',
+      'Fundusze Celowe': '💰',
       'default': '📦'
     },
     ENVELOPE: {
