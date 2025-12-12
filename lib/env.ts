@@ -14,8 +14,8 @@ function isMainBranch() {
 
 // Wybieramy odpowiednią zmienną DATABASE_URL
 function getDatabaseUrl() {
-  // TEMPORARY: Force MAIN database for local testing
-  return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL_DEV
+  // Try MAIN first, then DEV, then standard DATABASE_URL
+  return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL_DEV || process.env.DATABASE_URL
 }
 
 // Funkcja do sprawdzenia czy jesteśmy w trybie buildowania
