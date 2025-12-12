@@ -3,6 +3,8 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { incomeSchema } from '@/lib/validations/transaction'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
                 for (const dist of distributions) {
                     if (dist.amount > 0) {
                         let envelope
-                        
+
                         if (dist.envelopeId) {
                             // Nowy sposób: znajdź kopertę po ID
                             envelope = await tx.envelope.findFirst({
@@ -153,12 +155,12 @@ export async function POST(request: NextRequest) {
         }
 
         const response = NextResponse.json({ success: true })
-        
+
         // Wyłącz cache dla świeżych danych
         response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
         response.headers.set('Pragma', 'no-cache')
         response.headers.set('Expires', '0')
-        
+
         return response
 
     } catch (error) {

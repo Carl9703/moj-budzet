@@ -3,6 +3,8 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const recurringPaymentSchema = z.object({
     name: z.string().min(1, 'Nazwa jest wymagana'),
     amount: z.number().positive('Kwota musi być większa od 0'),

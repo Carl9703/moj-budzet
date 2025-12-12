@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -136,7 +138,7 @@ export async function POST(
             })
         })
 
-        const message = recurringPayment.type === 'transfer' 
+        const message = recurringPayment.type === 'transfer'
             ? `Transfer "${recurringPayment.name}" został zatwierdzony`
             : `Płatność "${recurringPayment.name}" została zatwierdzona`
 

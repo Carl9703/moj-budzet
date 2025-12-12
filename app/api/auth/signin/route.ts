@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken'
 import { env } from '@/lib/env'
 import { signinSchema } from '@/lib/validations/auth'
 
+export const dynamic = 'force-dynamic'
+
 const JWT_SECRET = env.JWT_SECRET
 
 export async function POST(req: NextRequest) {

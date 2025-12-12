@@ -3,6 +3,8 @@ import { prisma } from '@/lib/utils/prisma'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 interface TransactionData {
     id: string
     type: string
@@ -131,9 +133,9 @@ export async function GET(request: NextRequest) {
 
             if (!transaction.category && !isTransfer && transaction.envelope?.name) {
                 // Sprawdź czy to transfer do koperty rocznej
-                const isYearlyEnvelopeTransfer = transaction.type === 'income' && 
+                const isYearlyEnvelopeTransfer = transaction.type === 'income' &&
                     ['Wesele', 'Wakacje', 'Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(transaction.envelope.name)
-                
+
                 if (isYearlyEnvelopeTransfer) {
                     categoryName = transaction.envelope.name
                     isTransfer = true
@@ -181,15 +183,15 @@ export async function GET(request: NextRequest) {
             const expenseTransactions = monthData.transactions.filter(t => {
                 const originalTransaction = allTransactions.find(at => at.id === t.id)
                 const isTransfer = t.description?.toLowerCase().includes('transfer:') || false
-                
+
                 // WYKLUCZ transfery z wydatków - tylko rzeczywiste wydatki
                 if (isTransfer) {
                     return false
                 }
-                
+
                 // Dla zwykłych transakcji sprawdź includeInStats - TYLKO WYDATKI
-                return (t.type === 'expense') && 
-                       originalTransaction?.includeInStats !== false
+                return (t.type === 'expense') &&
+                    originalTransaction?.includeInStats !== false
             })
 
             // Osobna lista dla transferów
@@ -218,7 +220,7 @@ export async function GET(request: NextRequest) {
                 } else {
                     const originalTransaction = allTransactions.find(at => at.id === transaction.id)
                     let envelopeName = originalTransaction?.envelope?.name || 'Inne'
-                    
+
                     // Mapuj nazwy kopert na nazwy transferów
                     if (envelopeName === 'Podróże') {
                         envelopeName = 'Wakacje'
@@ -263,15 +265,15 @@ export async function GET(request: NextRequest) {
             for (const transaction of transferTransactions) {
                 const originalTransaction = allTransactions.find(at => at.id === transaction.id)
                 let envelopeName = originalTransaction?.envelope?.name || 'Inne'
-                
+
                 // Mapuj nazwy kopert na nazwy transferów
                 if (envelopeName === 'Podróże') {
                     envelopeName = 'Wakacje'
                 }
-                
+
                 // Sprawdź czy to transfer do koperty rocznej
                 const isYearlyEnvelopeTransfer = ['Wesele', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(envelopeName)
-                
+
                 if (isYearlyEnvelopeTransfer) {
                     if (!transferMap.has(envelopeName)) {
                         transferMap.set(envelopeName, {

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
 
+export const dynamic = 'force-dynamic'
+
 interface Transaction {
     id: string
     userId: string
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
 
         // Pobierz transakcje od 1 września 2025 (po imporcie historycznych danych)
         const startOfAppUsage = new Date('2025-09-01')
-        
+
         const transactionsFromSeptember = await prisma.transaction.findMany({
             where: {
                 userId,
@@ -173,14 +175,14 @@ export async function GET(request: NextRequest) {
         const monthlyEnvelopes = envelopes
             .filter(e => e.type === 'monthly')
             .map(e => {
-                const envelopeTransactions = monthTransactions.filter(t => 
+                const envelopeTransactions = monthTransactions.filter(t =>
                     t.envelopeId === e.id
                 )
                 const spent = roundToCents(envelopeTransactions.reduce((sum, t) => {
                     // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
                     // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
                     const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
-                    
+
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
                         return t.type === 'income' ? sum + t.amount : sum - t.amount
@@ -211,7 +213,7 @@ export async function GET(request: NextRequest) {
         const yearlyEnvelopes = envelopes
             .filter(e => e.type === 'yearly')
             .map(e => {
-                const envelopeTransactions = monthTransactions.filter(t => 
+                const envelopeTransactions = monthTransactions.filter(t =>
                     t.envelopeId === e.id
                 )
                 return {

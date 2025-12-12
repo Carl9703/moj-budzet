@@ -4,6 +4,8 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { createTransactionSchema } from '@/lib/validations/transaction'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -15,12 +17,12 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url)
-        
+
         // Podstawowe parametry
         const envelopeId = searchParams.get('envelopeId')
         const limit = parseInt(searchParams.get('limit') || '100')
         const currentMonth = searchParams.get('currentMonth') === 'true'
-        
+
         // Zaawansowane filtry
         const startDate = searchParams.get('startDate')
         const endDate = searchParams.get('endDate')
@@ -32,16 +34,16 @@ export async function GET(request: NextRequest) {
         const sortOrder = searchParams.get('sortOrder') || 'desc'
 
         const whereClause: any = { userId }
-        
+
         // Filtry podstawowe
         if (transactionType) {
             whereClause.type = transactionType
         }
-        
+
         if (category) {
             whereClause.category = category
         }
-        
+
         // Wyszukiwanie tekstowe
         if (searchText) {
             whereClause.description = {
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
                 mode: 'insensitive'
             }
         }
-        
+
         // Filtry dat
         if (currentMonth) {
             const now = new Date()
@@ -68,7 +70,7 @@ export async function GET(request: NextRequest) {
                 whereClause.date.lte = new Date(endDate)
             }
         }
-        
+
         // Filtrowanie po kopertach - priorytet: konkretna koperta > grupa > envelopeId
         const envelope = searchParams.get('envelope')
         if (envelope) {
@@ -166,7 +168,7 @@ export async function GET(request: NextRequest) {
 // Funkcje pomocnicze do pobierania opcji filtrów
 async function getAvailableCategories(userId: string) {
     const categories = await prisma.transaction.findMany({
-        where: { 
+        where: {
             userId,
             category: { not: null }
         },
@@ -201,7 +203,7 @@ async function getAvailableEnvelopes(userId: string) {
     try {
         envelopes = await prisma.envelope.findMany({
             where: { userId, isArchived: false },
-            select: { 
+            select: {
                 id: true,
                 name: true,
                 icon: true,
@@ -213,7 +215,7 @@ async function getAvailableEnvelopes(userId: string) {
         console.error('Error fetching envelopes with isArchived filter:', error)
         envelopes = await prisma.envelope.findMany({
             where: { userId },
-            select: { 
+            select: {
                 id: true,
                 name: true,
                 icon: true,
@@ -297,7 +299,7 @@ export async function POST(request: NextRequest) {
                     // "Budowanie Przyszłości" - expense zwiększa saldo (oszczędzanie)
                     // "Wesele", "Podróże" itp. - expense zmniejsza saldo (wydawanie z oszczędzonych środków)
                     const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
-                    
+
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: expense zwiększa saldo (oszczędzanie)
                         await prisma.envelope.update({
@@ -338,7 +340,7 @@ export async function POST(request: NextRequest) {
                     // "Budowanie Przyszłości" - income zmniejsza saldo (wypłata z oszczędności)
                     // "Wesele", "Podróże" itp. - income zwiększa saldo (zwrot/wpłata do koperty)
                     const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
-                    
+
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zmniejsza saldo (wypłata z oszczędności)
                         await prisma.envelope.update({

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 // === INTERFEJSY DLA ANALIZY PRZYCHODÓW ===
 
 interface IncomeSource {
@@ -40,14 +42,14 @@ interface IncomeAnalyticsResponse {
 async function getIncomeTrendsData(userId: string, startDate: Date, endDate: Date) {
   const trends = []
   const currentDate = new Date(startDate)
-  
+
   // Upewnij się, że zaczynamy od pierwszego dnia miesiąca
   currentDate.setDate(1)
-  
+
   while (currentDate <= endDate) {
     const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
-    
+
     const monthTransactions = await prisma.transaction.findMany({
       where: {
         userId: userId,
@@ -59,7 +61,7 @@ async function getIncomeTrendsData(userId: string, startDate: Date, endDate: Dat
         ]
       }
     })
-    
+
     const totalIncome = monthTransactions
       .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
       .reduce((sum, t) => sum + t.amount, 0)
@@ -68,11 +70,11 @@ async function getIncomeTrendsData(userId: string, startDate: Date, endDate: Dat
       period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
       value: totalIncome
     })
-    
+
     // Przejdź do następnego miesiąca
     currentDate.setMonth(currentDate.getMonth() + 1)
   }
-  
+
   return trends
 }
 
@@ -88,7 +90,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
-    
+
     let start: Date, end: Date
     if (startDate && endDate) {
       start = new Date(startDate)
@@ -120,18 +122,20 @@ export async function GET(request: NextRequest) {
     )
 
     // === GRUPOWANIE WEDŁUG ŹRÓDŁA PRZYCHODU ===
-    const sourceData: { [key: string]: {
-      transactions: any[]
-      totalAmount: number
-    } } = {}
+    const sourceData: {
+      [key: string]: {
+        transactions: any[]
+        totalAmount: number
+      }
+    } = {}
 
     filteredTransactions.forEach(transaction => {
       // Używamy description jako źródło przychodu
       let source = transaction.description || 'Inne przychody'
-      
+
       // Grupuj wypłaty miesięczne razem - bardziej zaawansowana logika
       const description = source.toLowerCase()
-      
+
       // Wzorce dla wypłat miesięcznych
       const monthlySalaryPatterns = [
         /wypłata.*\d{4}/i,           // "Wypłata - Marzec 2025"
@@ -141,7 +145,7 @@ export async function GET(request: NextRequest) {
         /wypłata\s+miesięczna/i,    // "Wypłata miesięczna"
         /miesięczna\s+wypłata/i     // "Miesięczna wypłata"
       ]
-      
+
       // Wzorce dla premii miesięcznych
       const monthlyBonusPatterns = [
         /premia.*\d{4}/i,            // "Premia - Luty 2025"
@@ -152,7 +156,7 @@ export async function GET(request: NextRequest) {
         /dodatek.*\d{4}/i,          // "Dodatek - Luty 2025"
         /dodatek.*(styczeń|luty|marzec|kwiecień|maj|czerwiec|lipiec|sierpień|wrzesień|październik|listopad|grudzień)/i
       ]
-      
+
       // Wzorce dla innych przychodów miesięcznych
       const monthlyOtherIncomePatterns = [
         /inne\s+przychody.*\d{4}/i,  // "Inne przychody - Luty 2025"
@@ -162,26 +166,26 @@ export async function GET(request: NextRequest) {
         /pozostałe\s+przychody.*\d{4}/i,  // "Pozostałe przychody - Luty 2025"
         /pozostałe\s+przychody.*(styczeń|luty|marzec|kwiecień|maj|czerwiec|lipiec|sierpień|wrzesień|październik|listopad|grudzień)/i
       ]
-      
+
       // Wzorce dla Multisport
       const multisportPatterns = [
         /multisport/i,              // "Multisport"
         /multisport\s+karolina/i,   // "Multisport Karolina"
         /multisport\s+.*/i          // "Multisport [dowolny tekst]"
       ]
-      
+
       // Sprawdź czy to wypłata miesięczna
       const isMonthlySalary = monthlySalaryPatterns.some(pattern => pattern.test(description))
-      
+
       // Sprawdź czy to premia miesięczna
       const isMonthlyBonus = monthlyBonusPatterns.some(pattern => pattern.test(description))
-      
+
       // Sprawdź czy to inne przychody miesięczne
       const isMonthlyOtherIncome = monthlyOtherIncomePatterns.some(pattern => pattern.test(description))
-      
+
       // Sprawdź czy to Multisport
       const isMultisport = multisportPatterns.some(pattern => pattern.test(description))
-      
+
       if (isMonthlySalary) {
         source = 'Wypłata miesięczna'
       } else if (isMonthlyBonus) {
@@ -191,7 +195,7 @@ export async function GET(request: NextRequest) {
       } else if (isMultisport) {
         source = 'Multisport'
       }
-      
+
       if (!sourceData[source]) {
         sourceData[source] = {
           transactions: [],
@@ -209,7 +213,7 @@ export async function GET(request: NextRequest) {
     // Stwórz analizę źródeł przychodów
     const sources: IncomeSource[] = Object.entries(sourceData).map(([source, data]) => {
       const avgAmount = Math.round(data.totalAmount / data.transactions.length)
-      
+
       return {
         source,
         total: data.totalAmount,
@@ -239,19 +243,19 @@ export async function GET(request: NextRequest) {
       summary: {
         totalSources: sources.length,
         totalTransactions: filteredTransactions.length,
-        avgTransactionAmount: filteredTransactions.length > 0 
-          ? Math.round(totalIncome / filteredTransactions.length) 
+        avgTransactionAmount: filteredTransactions.length > 0
+          ? Math.round(totalIncome / filteredTransactions.length)
           : 0
       }
     }
 
     const nextResponse = NextResponse.json(response)
-    
+
     // Wyłącz cache dla świeżych danych
     nextResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
     nextResponse.headers.set('Pragma', 'no-cache')
     nextResponse.headers.set('Expires', '0')
-    
+
     return nextResponse
 
   } catch (error) {

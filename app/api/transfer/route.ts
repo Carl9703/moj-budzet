@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken } from '../../../lib/auth/jwt'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const transferSchema = z.object({
     fromEnvelopeId: z.string().min(1, 'Koperta źródłowa jest wymagana'),
     toEnvelopeId: z.string().min(1, 'Koperta docelowa jest wymagana'),
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
         await prisma.$transaction(async (tx) => {
             // Generuj unikalny ID dla pary transferów
             const transferPairId = `transfer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-            
+
             // Zmniejsz saldo koperty źródłowej
             await tx.envelope.update({
                 where: { id: fromEnvelope.id },
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
                     currentAmount: toEnvelope.currentAmount + data.amount
                 }
             })
-            
+
 
             // Utwórz transakcję "expense" dla koperty źródłowej (wyjście środków)
             await tx.transaction.create({
@@ -161,7 +163,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Transfer error:', error)
-        
+
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 { error: error.issues[0].message },

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
     try {
         let userId: string
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
         // - expense z transferPairId = wyjście z koperty źródłowej (już zmienione w transferze)
         // - income z transferPairId = wejście do koperty docelowej (już zmienione w transferze)
         // Więc dla transferów po prostu uwzględniamy je jako już zmienione saldo
-        
+
         let calculatedBalance = 0
         const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
 

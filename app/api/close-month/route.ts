@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
 
         // Pobierz transakcje z docelowego miesiąca (wykluczając operacje zamknięcia)
         const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0, 23, 59, 59)
-        
+
         const monthTransactions = await prisma.transaction.findMany({
             where: {
                 userId: userId,
@@ -63,21 +65,21 @@ export async function POST(request: NextRequest) {
         // Osobno przychody w statystykach i poza nimi
         // Wyklucz transfery (transakcje z transferPairId) - to są tylko wewnętrzne przepływy między kopertami
         const statsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) =>
                 t.type === 'income' && t.includeInStats !== false && !t.transferPairId
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
         // Zwroty i refundacje - przychody poza statystykami, ale NIE transfery
         const nonStatsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) =>
                 t.type === 'income' && t.includeInStats === false && !t.transferPairId
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
         // Wydatki - wyklucz transfery
         const totalExpenses = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) => 
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) =>
                 t.type === 'expense' && t.includeInStats !== false && !t.transferPairId
             )
             .reduce((sum, t) => sum + t.amount, 0)
@@ -104,8 +106,8 @@ export async function POST(request: NextRequest) {
         let totalUnusedFunds = 0
 
         // Tylko koperty miesięczne (nie roczne i nie chronione) do informacji
-        const actualMonthlyEnvelopes = allEnvelopes.filter(e => 
-            e.type === 'monthly' && 
+        const actualMonthlyEnvelopes = allEnvelopes.filter(e =>
+            e.type === 'monthly' &&
             !protectedNamesSet.has(e.name)
         )
 
@@ -149,7 +151,7 @@ export async function POST(request: NextRequest) {
                 // Utwórz transakcję księgową z rozpisaniem
                 const roundedMonthBalance = roundToCents(monthBalance)
                 const roundedReturnsBalance = roundToCents(returnsBalance)
-                
+
                 let description = '🔒 Zamknięcie miesiąca'
                 if (roundedMonthBalance > 0 && roundedReturnsBalance > 0) {
                     description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł, zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
@@ -187,7 +189,7 @@ export async function POST(request: NextRequest) {
                 }
             }
         })
-        
+
         // Resetuj koperty miesięczne (chronione są już wykluczone przez zapytanie)
         for (const envelope of monthlyEnvelopesToReset) {
             await prisma.envelope.update({

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/utils/prisma'
 import { getCategoryName, getCategoryIcon, EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 // === INTERFEJSY DLA NOWEJ STRUKTURY ===
 
 interface MainMetrics {
@@ -22,14 +24,14 @@ interface MainMetrics {
 
 interface ComparisonData {
   previousTotal: number
-    change: number
-    changePercent: number
+  change: number
+  changePercent: number
 }
 
 interface SpendingTreeNode {
   type: 'GROUP' | 'ENVELOPE' | 'CATEGORY' | 'TRANSACTION'
   id: string
-    name: string
+  name: string
   total: number
   comparison?: ComparisonData
   children?: SpendingTreeNode[]
@@ -104,20 +106,20 @@ interface AnalyticsResponse {
 // === FUNKCJE POMOCNICZE ===
 
 function getStartDate(period: string): Date {
-    const now = new Date()
-    
-    switch (period) {
-        case '1month':
-            return new Date(now.getFullYear(), now.getMonth() - 1, 1)
-        case 'currentMonth':
-            return new Date(now.getFullYear(), now.getMonth(), 1)
-        case '6months':
-            return new Date(now.getFullYear(), now.getMonth() - 6, 1)
-        case 'currentYear':
-            return new Date(now.getFullYear(), 0, 1)
-        default: // 3months
-            return new Date(now.getFullYear(), now.getMonth() - 3, 1)
-    }
+  const now = new Date()
+
+  switch (period) {
+    case '1month':
+      return new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    case 'currentMonth':
+      return new Date(now.getFullYear(), now.getMonth(), 1)
+    case '6months':
+      return new Date(now.getFullYear(), now.getMonth() - 6, 1)
+    case 'currentYear':
+      return new Date(now.getFullYear(), 0, 1)
+    default: // 3months
+      return new Date(now.getFullYear(), now.getMonth() - 3, 1)
+  }
 }
 
 function getGroupDisplayName(groupName: string): string {
@@ -136,7 +138,7 @@ function getGroupDisplayName(groupName: string): string {
 function getGroupIcon(groupName: string): string {
   const groupIcons: { [key: string]: string } = {
     'needs': '🏡',
-    'lifestyle': '🎉', 
+    'lifestyle': '🎉',
     'assets': '💰',
     'Potrzeby': '🏡',
     'Styl Życia': '🎉',
@@ -149,54 +151,54 @@ function getGroupIcon(groupName: string): string {
 async function getTrendsData(userId: string, startDate: Date, endDate: Date, envelopeId?: string) {
   const trends = []
   const currentDate = new Date(startDate)
-  
+
   // Upewnij się, że zaczynamy od pierwszego dnia miesiąca
   currentDate.setDate(1)
-  
+
   while (currentDate <= endDate) {
     const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
-    
+
     const whereClause: any = {
-                userId: userId,
+      userId: userId,
       type: 'expense',
       date: { gte: monthStart, lte: monthEnd },
-                NOT: [
-                    { description: { contains: 'Zamknięcie miesiąca' } },
-                    { description: { contains: 'przeniesienie bilansu' } }
-                ]
-            }
-    
+      NOT: [
+        { description: { contains: 'Zamknięcie miesiąca' } },
+        { description: { contains: 'przeniesienie bilansu' } }
+      ]
+    }
+
     if (envelopeId) {
       whereClause.envelopeId = envelopeId
     }
-    
+
     const monthTransactions = await prisma.transaction.findMany({
       where: whereClause
     })
-    
+
     const totalExpenses = monthTransactions
       .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
-            .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + t.amount, 0)
 
     trends.push({
       period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
       value: totalExpenses
     })
-    
+
     // Przejdź do następnego miesiąca
     currentDate.setMonth(currentDate.getMonth() + 1)
   }
-  
+
   return trends
 }
 
 async function buildSpendingTree(userId: string, startDate: Date, endDate: Date, compare: boolean): Promise<SpendingTreeNode[]> {
   // Pobierz wszystkie transakcje dla okresu
   const transactions = await prisma.transaction.findMany({
-                where: {
-                    userId: userId,
-                    type: 'expense',
+    where: {
+      userId: userId,
+      type: 'expense',
       date: { gte: startDate, lte: endDate },
       NOT: [
         { description: { contains: 'Zamknięcie miesiąca' } },
@@ -211,7 +213,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     where: { userId: userId },
     select: { id: true, name: true, plannedAmount: true }
   })
-  
+
   const envelopeBudgets = new Map<string, number>()
   for (const envelope of envelopes) {
     envelopeBudgets.set(envelope.name, envelope.plannedAmount)
@@ -223,18 +225,18 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     // Dla porównań miesięcznych - porównuj całe miesiące
     const currentMonth = startDate.getMonth()
     const currentYear = startDate.getFullYear()
-    
+
     // Poprzedni miesiąc
     const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
     const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
-    
+
     const previousStart = new Date(previousYear, previousMonth, 1)
     const previousEnd = new Date(previousYear, previousMonth + 1, 0) // Ostatni dzień poprzedniego miesiąca
 
     previousTransactions = await prisma.transaction.findMany({
-                where: {
-                    userId: userId,
-                    type: 'expense',
+      where: {
+        userId: userId,
+        type: 'expense',
         date: { gte: previousStart, lte: previousEnd },
         NOT: [
           { description: { contains: 'Zamknięcie miesiąca' } },
@@ -247,13 +249,13 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
 
   // Grupuj transakcje według struktury hierarchicznej
   const groupMap = new Map<string, any>()
-  
+
   for (const transaction of transactions.filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)) {
     const envelope = transaction.envelope
     const groupName = envelope?.group || 'Inne'
     const envelopeName = envelope?.name || 'Inne'
     const category = transaction.category || 'other'
-    
+
     // Grupa
     if (!groupMap.has(groupName)) {
       groupMap.set(groupName, {
@@ -264,10 +266,10 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         children: new Map()
       })
     }
-    
+
     const group = groupMap.get(groupName)
     group.total += transaction.amount
-    
+
     // Koperta
     if (!group.children.has(envelopeName)) {
       group.children.set(envelopeName, {
@@ -278,10 +280,10 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         children: new Map()
       })
     }
-    
+
     const envelopeNode = group.children.get(envelopeName)
     envelopeNode.total += transaction.amount
-    
+
     // Kategoria
     if (!envelopeNode.children.has(category)) {
       envelopeNode.children.set(category, {
@@ -292,10 +294,10 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         children: []
       })
     }
-    
+
     const categoryNode = envelopeNode.children.get(category)
     categoryNode.total += transaction.amount
-    
+
     // Transakcja
     categoryNode.children.push({
       type: 'TRANSACTION',
@@ -310,7 +312,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
 
   // Konwertuj Map na Array i dodaj dane porównawcze
   const spendingTree: SpendingTreeNode[] = []
-  
+
   for (const [groupName, group] of Array.from(groupMap.entries())) {
     // Oblicz budżet grupy (suma budżetów wszystkich kopert w grupie)
     let groupBudget = 0
@@ -319,7 +321,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       groupBudget += envelopeBudget
     }
     const groupBudgetPercentage = groupBudget > 0 ? (group.total / groupBudget) * 100 : 0
-    
+
     const groupNode: SpendingTreeNode = {
       type: 'GROUP',
       id: group.id,
@@ -329,14 +331,14 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       budget: groupBudget,
       budgetPercentage: groupBudgetPercentage
     }
-    
+
     // Dodaj dane porównawcze dla grupy
     if (compare) {
       const previousGroupTotal = previousTransactions
         .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
         .filter(t => t.envelope?.group === groupName)
         .reduce((sum, t) => sum + t.amount, 0)
-      
+
       if (previousGroupTotal > 0) {
         groupNode.comparison = {
           previousTotal: previousGroupTotal,
@@ -345,13 +347,13 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         }
       }
     }
-    
+
     // Przetwórz koperty
     for (const [envelopeName, envelope] of Array.from((group.children as Map<string, any>).entries())) {
       // Pobierz budżet dla koperty
       const budget = envelopeBudgets.get(envelopeName) || 0
       const budgetPercentage = budget > 0 ? (envelope.total / budget) * 100 : 0
-      
+
       const envelopeNode: SpendingTreeNode = {
         type: 'ENVELOPE',
         id: envelope.id,
@@ -361,14 +363,14 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         budget: budget,
         budgetPercentage: budgetPercentage
       }
-      
+
       // Dodaj dane porównawcze dla koperty
       if (compare) {
         const previousEnvelopeTotal = previousTransactions
           .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
           .filter(t => t.envelope?.name === envelopeName)
           .reduce((sum, t) => sum + t.amount, 0)
-        
+
         if (previousEnvelopeTotal > 0) {
           envelopeNode.comparison = {
             previousTotal: previousEnvelopeTotal,
@@ -377,7 +379,7 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
           }
         }
       }
-      
+
       // Przetwórz kategorie
       for (const [categoryName, category] of Array.from((envelope.children as Map<string, any>).entries())) {
         const categoryNode: SpendingTreeNode = {
@@ -388,14 +390,14 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
           children: category.children,
           categoryId: categoryName // Przekazujemy categoryId dla kategorii
         }
-        
+
         // Dodaj dane porównawcze dla kategorii
         if (compare) {
           const previousCategoryTotal = previousTransactions
             .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
             .filter(t => t.envelope?.name === envelopeName && t.category === categoryName)
             .reduce((sum, t) => sum + t.amount, 0)
-          
+
           if (previousCategoryTotal > 0) {
             categoryNode.comparison = {
               previousTotal: previousCategoryTotal,
@@ -404,39 +406,39 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
             }
           }
         }
-        
+
         envelopeNode.children!.push(categoryNode)
       }
-      
+
       groupNode.children!.push(envelopeNode)
     }
-    
+
     spendingTree.push(groupNode)
   }
-  
+
   return spendingTree.sort((a, b) => b.total - a.total)
 }
 
 export async function GET(request: NextRequest) {
+  try {
+    let userId: string
     try {
-        let userId: string
-        try {
-            userId = await getUserIdFromToken(request)
-        } catch (error) {
-            return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
-        }
+      userId = await getUserIdFromToken(request)
+    } catch (error) {
+      return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+    }
 
-        const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const compare = searchParams.get('compare') === 'true'
-    
+
     let start: Date, end: Date
     if (startDate && endDate) {
       start = new Date(startDate)
       end = new Date(endDate)
     } else {
-        const period = searchParams.get('period') || '3months'
+      const period = searchParams.get('period') || '3months'
       start = getStartDate(period)
       end = new Date()
     }
@@ -474,14 +476,14 @@ export async function GET(request: NextRequest) {
       const previousEnd = new Date(start.getTime() - 1)
 
       const previousPeriodTransactions = await prisma.transaction.findMany({
-            where: {
-                userId: userId,
-                type: { in: ['income', 'expense'] },
+        where: {
+          userId: userId,
+          type: { in: ['income', 'expense'] },
           date: { gte: previousStart, lte: previousEnd },
-                NOT: [
-                    { description: { contains: 'Zamknięcie miesiąca' } },
-                    { description: { contains: 'przeniesienie bilansu' } }
-                ]
+          NOT: [
+            { description: { contains: 'Zamknięcie miesiąca' } },
+            { description: { contains: 'przeniesienie bilansu' } }
+          ]
         }
       })
 
@@ -512,14 +514,14 @@ export async function GET(request: NextRequest) {
     const yearStart = new Date(new Date().getFullYear(), 0, 1)
     const yearEnd = new Date()
     const totalExpensesTrend = await getTrendsData(userId, yearStart, yearEnd)
-    
+
     // Pobierz trendy dla każdej koperty
     const byEnvelope: { [envelopeId: string]: any[] } = {}
     const byEnvelopeName: { [envelopeName: string]: any[] } = {} // Dodaj mapowanie po nazwie
     const envelopes = await prisma.envelope.findMany({
       where: { userId: userId }
     })
-    
+
     for (const envelope of envelopes) {
       const envelopeTrend = await getTrendsData(userId, yearStart, yearEnd, envelope.id)
       byEnvelope[envelope.id] = envelopeTrend
@@ -539,7 +541,7 @@ export async function GET(request: NextRequest) {
       .filter(transaction => {
         // Sprawdź opis transakcji - wyklucz tylko wyraźne transfery
         const description = transaction.description?.toLowerCase() || ''
-        
+
         // Wyklucz tylko transakcje z wyraźnymi słowami kluczowymi transferów
         const transferKeywords = [
           'transfer:',
@@ -550,27 +552,29 @@ export async function GET(request: NextRequest) {
           'fundusz',
           'celowy'
         ]
-        
-        const isTransfer = transferKeywords.some(keyword => 
+
+        const isTransfer = transferKeywords.some(keyword =>
           description.includes(keyword)
         )
-        
+
         return !isTransfer
       })
 
     // Grupuj transakcje według kategorii
-    const categoryData: { [key: string]: {
-      transactions: any[]
-      totalAmount: number
-      envelopeBreakdown: { [key: string]: number }
-      monthlyData: { [key: string]: number }
-    } } = {}
+    const categoryData: {
+      [key: string]: {
+        transactions: any[]
+        totalAmount: number
+        envelopeBreakdown: { [key: string]: number }
+        monthlyData: { [key: string]: number }
+      }
+    } = {}
 
     expenseTransactions.forEach(transaction => {
       const categoryId = transaction.category || 'other'
       const categoryName = getCategoryName(categoryId)
       const envelopeName = transaction.envelope?.name || 'Inne'
-      
+
       if (!categoryData[categoryId]) {
         categoryData[categoryId] = {
           transactions: [],
@@ -604,7 +608,7 @@ export async function GET(request: NextRequest) {
     const categoryAnalysis: CategoryAnalysis[] = Object.entries(categoryData).map(([categoryId, data]) => {
       const categoryName = getCategoryName(categoryId)
       const categoryIcon = getCategoryIcon(categoryId)
-      
+
       // Przygotuj dane o kopertach
       const envelopeBreakdown = Object.entries(data.envelopeBreakdown).map(([envelopeName, amount]) => {
         const envelope = envelopes.find(e => e.name === envelopeName)
@@ -621,7 +625,7 @@ export async function GET(request: NextRequest) {
         .map(([monthKey, amount]) => {
           const [year, month] = monthKey.split('-')
           const monthNames = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-              'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
+            'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
           return {
             month: monthNames[parseInt(month) - 1],
             year: parseInt(year),
@@ -631,7 +635,7 @@ export async function GET(request: NextRequest) {
         .sort((a, b) => {
           if (a.year !== b.year) return a.year - b.year
           const months = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-              'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
+            'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
           return months.indexOf(a.month) - months.indexOf(b.month)
         })
 
@@ -699,26 +703,26 @@ export async function GET(request: NextRequest) {
       summary: {
         totalCategories: categoryAnalysis.length,
         totalTransactions: expenseTransactions.length,
-        avgTransactionAmount: expenseTransactions.length > 0 
-          ? Math.round(totalExpensesForCategories / expenseTransactions.length) 
+        avgTransactionAmount: expenseTransactions.length > 0
+          ? Math.round(totalExpensesForCategories / expenseTransactions.length)
           : 0
       }
     }
 
     const nextResponse = NextResponse.json(response)
-    
+
     // Wyłącz cache dla świeżych danych
     nextResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
     nextResponse.headers.set('Pragma', 'no-cache')
     nextResponse.headers.set('Expires', '0')
-    
+
     return nextResponse
 
-    } catch (error) {
-        console.error('Analytics API error:', error)
-        return NextResponse.json(
-            { error: 'Błąd pobierania analiz' },
-            { status: 500 }
-        )
-    }
+  } catch (error) {
+    console.error('Analytics API error:', error)
+    return NextResponse.json(
+      { error: 'Błąd pobierania analiz' },
+      { status: 500 }
+    )
+  }
 }
