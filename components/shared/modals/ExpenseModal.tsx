@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
-import { getAllCategories, getExpenseCategories, getCategoriesForEnvelope, trackCategoryUsage, trackEnvelopeUsage, getPopularEnvelopes } from '@/lib/constants/categories'
+import { trackCategoryUsage, trackEnvelopeUsage } from '@/lib/constants/categories'
+import { useCategories } from '@/lib/contexts/CategoryContext'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { Input } from '@/components/ui/primitives/Input'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
     onClose: () => void
@@ -21,6 +24,7 @@ interface ExpenseData {
 
 export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const { showToast } = useToast()
+    const { categories, getCategoriesForEnvelope } = useCategories()
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('')
@@ -30,18 +34,13 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
     const [showAllEnvelopes, setShowAllEnvelopes] = useState(false)
 
     const amountInputRef = useRef<HTMLInputElement>(null)
-    const [categoriesVersion, setCategoriesVersion] = useState(0) // Wersja do wymuszenia re-renderu
 
-    // Pobierz kategorie dla wybranej koperty
     const selectedEnvelopeData = envelopes?.find(e => e.id === selectedEnvelope)
-    const envelopeCategories = selectedEnvelopeData 
+    const envelopeCategories = selectedEnvelopeData
         ? getCategoriesForEnvelope(selectedEnvelopeData.name)
         : []
-    
-    // Wszystkie kategorie wydatków (dla opcji "Pokaż wszystkie")
-    const allExpenseCategories = getExpenseCategories()
-    
-    // Kategorie do wyświetlenia (domyślnie wszystkie, lub dla koperty)
+
+    const allExpenseCategories = categories
     const displayCategories = showAllCategories ? allExpenseCategories : envelopeCategories
 
     useEffect(() => {
@@ -50,46 +49,18 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         }
     }, [])
 
-    // Nasłuchuj zmian w localStorage dla kategorii
-    useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'expenseCategories') {
-                setCategoriesVersion(prev => prev + 1)
-            }
-        }
-        
-        // Nasłuchuj zmian w localStorage (z innych zakładek)
-        window.addEventListener('storage', handleStorageChange)
-        
-        // Nasłuchuj zmian w tej samej zakładce (custom event)
-        const handleCustomStorageChange = () => {
-            setCategoriesVersion(prev => prev + 1)
-        }
-        window.addEventListener('categoriesUpdated', handleCustomStorageChange)
-        
-        return () => {
-            window.removeEventListener('storage', handleStorageChange)
-            window.removeEventListener('categoriesUpdated', handleCustomStorageChange)
-        }
-    }, [])
-
     const handleEnvelopeSelect = (envelopeId: string) => {
         setSelectedEnvelope(envelopeId)
-        setSelectedCategory('') // Reset kategorii przy zmianie koperty
-        
-        // Śledź użycie koperty
+        setSelectedCategory('')
         trackEnvelopeUsage(envelopeId)
     }
 
     const handleCategorySelect = (categoryId: string) => {
         setSelectedCategory(categoryId)
-        // Zapisz użycie kategorii
         trackCategoryUsage(categoryId)
-        
-        // Automatycznie wybierz kopertę na podstawie kategorii TYLKO jeśli nie wybrano jeszcze koperty
+
         if (!selectedEnvelope) {
-            const allCategories = getAllCategories()
-            const category = allCategories.find(c => c.id === categoryId)
+            const category = categories.find(c => c.id === categoryId)
             if (category && category.defaultEnvelope) {
                 const envelope = envelopes?.find(e => e.name === category.defaultEnvelope)
                 if (envelope) {
@@ -115,478 +86,176 @@ export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
         onClose()
     }
 
-    // Znajdź wybraną kategorię
     const selectedCategoryData = envelopeCategories.find(c => c.id === selectedCategory)
-
-    // Grupuj kategorie według typu (miesięczne/roczne)
-    const monthlyCategories = displayCategories.filter(c => c.type === 'monthly')
-    const yearlyCategories = displayCategories.filter(c => c.type === 'yearly')
-    
-    // Pokazuj podział tylko jeśli są kategorie obu typów
-    const showTypeDivision = monthlyCategories.length > 0 && yearlyCategories.length > 0
+    const canSubmit = amount && selectedCategory && selectedEnvelope
 
     return (
-        <Modal title="💸 DODAJ WYDATEK" onClose={onClose}>
-            <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '8px',
-                maxHeight: '80vh',
-                overflowY: 'auto',
-                paddingRight: '8px'
-            }}>
-                {/* KWOTA */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Kwota
-                    </label>
-                    <input
-                        ref={amountInputRef}
-                        type="number"
-                        inputMode="numeric"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.00"
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            border: '2px solid var(--border-primary)',
-                            borderRadius: '8px',
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
-                        }}
-                    />
-                    
-                    {/* DATA - pod kwotą */}
-                    <div style={{ marginTop: '8px' }}>
-                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            Data wydatku
+        <Modal title="💸 Dodaj Wydatek" onClose={onClose}>
+            <div className="p-3 md:p-4 bg-slate-900/20">
+                <div className="space-y-2 md:space-y-3">
+
+                    {/* HERO AMOUNT */}
+                    <div className="bg-slate-800/30 py-2 md:py-3 rounded-xl border border-slate-700/50 transition-all focus-within:bg-slate-800/50 focus-within:border-indigo-500/50">
+                        <label className="block text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 md:mb-2 text-center">
+                            Kwota wydatku
                         </label>
+                        <div className="relative flex items-baseline justify-center group">
+                            <input
+                                ref={amountInputRef}
+                                type="number"
+                                inputMode="decimal"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="0"
+                                className="w-full bg-transparent text-3xl md:text-4xl font-black text-center text-white placeholder:text-slate-800 focus:outline-none transition-all"
+                            />
+                            <span className="absolute right-8 md:right-12 top-1 md:top-2 text-lg md:text-xl font-bold text-slate-600 pointer-events-none">PLN</span>
+                        </div>
+                    </div>
+
+                    {/* CATEGORY & ENVELOPE SELECTION */}
+                    <div className="space-y-2 md:space-y-3">
+                        {/* Category Selection - Horizontal & Modern */}
+                        <div className="space-y-1 md:space-y-2">
+                            <div className="flex items-center justify-between px-1">
+                                <label className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider">Kategoria</label>
+                                <button
+                                    onClick={() => setShowAllCategories(!showAllCategories)}
+                                    className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wide"
+                                >
+                                    {showAllCategories ? 'Mniej' : 'Więcej'}
+                                </button>
+                            </div>
+
+                            <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar snap-x">
+                                {displayCategories.length === 0 && (
+                                    <div className="text-xs md:text-sm text-slate-500 italic w-full text-center py-2 md:py-4 bg-slate-800/30 rounded-xl border border-dashed border-slate-700/50">
+                                        Brak kategorii.
+                                    </div>
+                                )}
+                                {displayCategories.map((cat) => {
+                                    const isSelected = selectedCategory === cat.id
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => handleCategorySelect(cat.id)}
+                                            className={`flex-shrink-0 flex flex-col items-center justify-center p-1.5 md:p-2 min-w-[60px] md:min-w-[70px] rounded-xl transition-all snap-start border ${isSelected
+                                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 border-indigo-500 scale-105'
+                                                : 'bg-slate-800/40 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200 hover:border-slate-600'
+                                                }`}
+                                        >
+                                            <span className={`text-lg md:text-xl filter ${isSelected ? '' : 'grayscale opacity-70'}`}>{cat.icon}</span>
+                                            <span className="text-[9px] md:text-[10px] font-bold leading-tight text-center w-full truncate">
+                                                {cat.name}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Envelope Selection - Even Grid */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between px-1">
+                                <label className="text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Z koperty
+                                </label>
+                                <button
+                                    onClick={() => setShowAllEnvelopes(!showAllEnvelopes)}
+                                    className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wide"
+                                >
+                                    {showAllEnvelopes ? 'Tylko miesięczne' : 'Pokaż wszystkie'}
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 md:gap-2">
+                                {(() => {
+                                    const filteredEnvelopes = showAllEnvelopes
+                                        ? envelopes
+                                        : envelopes.filter(e => e.type === 'monthly' || e.id === selectedEnvelope)
+
+                                    const sortedEnvelopes = [...(filteredEnvelopes || [])].sort((a, b) => {
+                                        if (a.id === selectedEnvelope) return -1
+                                        if (b.id === selectedEnvelope) return 1
+                                        if (a.type !== b.type) return a.type === 'monthly' ? -1 : 1
+                                        return a.name.localeCompare(b.name)
+                                    })
+
+                                    if (sortedEnvelopes.length === 0) {
+                                        return (
+                                            <div className="col-span-full text-center py-6 text-slate-500 text-sm">
+                                                Brak kopert
+                                            </div>
+                                        )
+                                    }
+
+                                    return sortedEnvelopes.map(env => {
+                                        const isSelected = selectedEnvelope === env.id
+                                        const isYearly = env.type === 'yearly'
+
+                                        return (
+                                            <button
+                                                key={env.id}
+                                                onClick={() => handleEnvelopeSelect(env.id)}
+                                                className={`
+                                                    flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl h-[56px] md:h-[60px] transition-all duration-150
+                                                    ${isSelected
+                                                        ? 'bg-emerald-500/20 border-2 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/20 scale-[1.02]'
+                                                        : isYearly
+                                                            ? 'bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                                                            : 'bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:bg-slate-700/60 hover:border-slate-600'
+                                                    }
+                                                `}
+                                            >
+                                                <span className="text-base md:text-lg">{env.icon}</span>
+                                                <span className="text-[9px] md:text-[10px] font-medium text-center leading-tight line-clamp-2 w-full">{env.name}</span>
+                                            </button>
+                                        )
+                                    })
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* DETAILS SECTION (Date & Desc) */}
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/50">
+                        <div className="bg-slate-800/30 p-1 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="bg-transparent text-slate-300 text-xs md:text-sm font-medium focus:outline-none w-full px-2 md:px-3 py-2 text-center date-input-icon-fix"
+                            />
+                        </div>
                         <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)'
-                            }}
+                            type="text"
+                            placeholder="Opis (opcjonalny)"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50"
                         />
                     </div>
-                </div>
 
-                {/* KOPERTY */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
-                        Wybierz kopertę
-                        {!showAllCategories && (
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
-                                (najpopularniejsze)
-                            </span>
-                        )}
-                        {selectedCategoryData && (
-                            <span style={{
-                                fontSize: '12px',
-                                color: 'var(--success-primary)',
-                                marginLeft: '8px',
-                                backgroundColor: 'var(--bg-success)',
-                                padding: '2px 6px',
-                                borderRadius: '4px'
-                            }}>
-                                ✓ Auto: {selectedCategoryData.defaultEnvelope}
-                            </span>
-                        )}
-                    </label>
-
-                    {/* Pobierz popularne koperty */}
-                    {(() => {
-                        const popularEnvelopes = getPopularEnvelopes(envelopes || [], 12) // Zwiększ limit
-                        const monthlyEnvelopes = popularEnvelopes.filter(e => e.type === 'monthly')
-                        const yearlyEnvelopes = popularEnvelopes.filter(e => e.type === 'yearly')
-                        
-                        // Zawsze pokazuj wszystkie koperty roczne, nie tylko popularne
-                        const allYearlyEnvelopes = envelopes?.filter(e => e.type === 'yearly') || []
-                        const finalYearlyEnvelopes = allYearlyEnvelopes
-                        
-                        return (
-                            <>
-                                {/* Koperty miesięczne - zawsze widoczne */}
-                                {monthlyEnvelopes.length > 0 && (
-                                    <>
-                                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                            📅 Miesięczne
-                                        </div>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(5, 1fr)',
-                                            gap: '4px',
-                                            marginBottom: '8px'
-                                        }}>
-                                            {monthlyEnvelopes.map((env) => (
-                                                <button
-                                                    key={env.id}
-                                                    onClick={() => handleEnvelopeSelect(env.id)}
-                                                    style={{
-                                                        padding: '4px 2px',
-                                                        border: selectedEnvelope === env.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                        borderRadius: '4px',
-                                                        backgroundColor: selectedEnvelope === env.id ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        gap: '1px',
-                                                        transition: 'all 0.2s',
-                                                        fontSize: '10px'
-                                                    }}
-                                                >
-                                                    <span style={{ fontSize: '16px' }}>{env.icon}</span>
-                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{env.name}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Koperty roczne - tylko po rozwinięciu */}
-                                {showAllEnvelopes && finalYearlyEnvelopes.length > 0 && (
-                                    <>
-                                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                            📆 Roczne
-                                        </div>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(5, 1fr)',
-                                            gap: '4px',
-                                            marginBottom: '8px'
-                                        }}>
-                                            {finalYearlyEnvelopes.map((env) => (
-                                                <button
-                                                    key={env.id}
-                                                    onClick={() => handleEnvelopeSelect(env.id)}
-                                                    style={{
-                                                        padding: '4px 2px',
-                                                        border: selectedEnvelope === env.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                        borderRadius: '4px',
-                                                        backgroundColor: selectedEnvelope === env.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        gap: '1px',
-                                                        transition: 'all 0.2s',
-                                                        fontSize: '10px'
-                                                    }}
-                                                >
-                                                    <span style={{ fontSize: '16px' }}>{env.icon}</span>
-                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{env.name}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Przyciski przełączania widoku kopert */}
-                                {!showAllEnvelopes ? (
-                                    <button
-                                        onClick={() => setShowAllEnvelopes(true)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '6px',
-                                            border: '1px dashed var(--border-secondary)',
-                                            borderRadius: '6px',
-                                            backgroundColor: 'transparent',
-                                            color: 'var(--text-secondary)',
-                                            cursor: 'pointer',
-                                            fontSize: '12px'
-                                        }}
-                                    >
-                                        Pokaż wszystkie koperty →
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => setShowAllEnvelopes(false)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '6px',
-                                            border: '1px solid var(--accent-primary)',
-                                            borderRadius: '6px',
-                                            backgroundColor: 'var(--accent-light)',
-                                            color: 'var(--accent-primary)',
-                                            cursor: 'pointer',
-                                            fontSize: '12px',
-                                            fontWeight: '500'
-                                        }}
-                                    >
-                                        ← Pokaż tylko popularne koperty
-                                    </button>
-                                )}
-                            </>
-                        )
-                    })()}
-                </div>
-
-                {/* KATEGORIE */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', color: 'var(--text-primary)', fontSize: '14px' }}>
-                        Wybierz kategorię
-                        {!showAllCategories && (
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '6px' }}>
-                                (najpopularniejsze)
-                            </span>
-                        )}
-                    </label>
-
-                    {/* Kategorie - pokazuj podział tylko jeśli są kategorie obu typów */}
-                    {showTypeDivision && monthlyCategories.length > 0 && yearlyCategories.length > 0 ? (
-                        <>
-                            {/* Kategorie miesięczne */}
-                            {monthlyCategories.length > 0 && (
-                                <>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                        📅 Miesięczne
-                                    </div>
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(5, 1fr)',
-                                        gap: '4px',
-                                        marginBottom: '8px'
-                                    }}>
-                                        {monthlyCategories.map((cat) => {
-                                            const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
-                                            return (
-                                                <button
-                                                    key={cat.id}
-                                                    onClick={() => handleCategorySelect(cat.id)}
-                                                    style={{
-                                                        padding: '4px 2px',
-                                                        border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                        borderRadius: '4px',
-                                                        backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        gap: '1px',
-                                                        transition: 'all 0.2s',
-                                                        fontSize: '10px',
-                                                        opacity: isFromSelectedEnvelope ? 1 : 0.7
-                                                    }}
-                                                >
-                                                    <span style={{ fontSize: '16px' }}>{cat.icon}</span>
-                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                                    {!isFromSelectedEnvelope && (
-                                                        <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
-                                                            {cat.defaultEnvelope}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </>
-                            )}
-
-                            {/* Kategorie roczne */}
-                            {yearlyCategories.length > 0 && (
-                                <>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
-                                        📆 Roczne
-                                    </div>
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(5, 1fr)',
-                                        gap: '4px',
-                                        marginBottom: '8px'
-                                    }}>
-                                        {yearlyCategories.map((cat) => {
-                                            const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
-                                            return (
-                                                <button
-                                                    key={cat.id}
-                                                    onClick={() => handleCategorySelect(cat.id)}
-                                                    style={{
-                                                        padding: '4px 2px',
-                                                        border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                                        borderRadius: '4px',
-                                                        backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-tertiary)',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        gap: '1px',
-                                                        transition: 'all 0.2s',
-                                                        fontSize: '10px',
-                                                        opacity: isFromSelectedEnvelope ? 1 : 0.7
-                                                    }}
-                                                >
-                                                    <span style={{ fontSize: '16px' }}>{cat.icon}</span>
-                                                    <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                                    {!isFromSelectedEnvelope && (
-                                                        <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
-                                                            {cat.defaultEnvelope}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </>
-                            )}
-                        </>
-                    ) : (
-                        /* Wszystkie kategorie bez podziału (gdy są tylko jednego typu) */
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(5, 1fr)',
-                            gap: '4px',
-                            marginBottom: '8px'
-                        }}>
-                            {displayCategories.map((cat) => {
-                                const isFromSelectedEnvelope = cat.defaultEnvelope === selectedEnvelopeData?.name
-                                return (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => handleCategorySelect(cat.id)}
-                                        style={{
-                                            padding: '4px 2px',
-                                            border: selectedCategory === cat.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-primary)',
-                                            borderRadius: '4px',
-                                            backgroundColor: selectedCategory === cat.id ? 'var(--success-light)' : 'var(--bg-secondary)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            gap: '1px',
-                                            transition: 'all 0.2s',
-                                            fontSize: '10px',
-                                            opacity: isFromSelectedEnvelope ? 1 : 0.7
-                                        }}
-                                    >
-                                        <span style={{ fontSize: '16px' }}>{cat.icon}</span>
-                                        <span style={{ fontSize: '9px', textAlign: 'center', color: 'var(--text-primary)' }}>{cat.name}</span>
-                                        {!isFromSelectedEnvelope && (
-                                            <span style={{ fontSize: '7px', color: 'var(--text-secondary)' }}>
-                                                {cat.defaultEnvelope}
-                                            </span>
-                                        )}
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    )}
-
-                    {/* Przyciski przełączania widoku kategorii */}
-                    {!showAllCategories ? (
+                    {/* ACTION BUTTONS */}
+                    <div className="flex gap-2 pt-1">
                         <button
-                            onClick={() => setShowAllCategories(true)}
-                            style={{
-                                width: '100%',
-                                padding: '6px',
-                                border: '1px dashed var(--border-secondary)',
-                                borderRadius: '6px',
-                                backgroundColor: 'transparent',
-                                color: 'var(--text-secondary)',
-                                cursor: 'pointer',
-                                fontSize: '12px'
-                            }}
+                            onClick={onClose}
+                            className="px-4 py-2.5 md:py-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 font-semibold transition-colors w-1/3 text-sm"
                         >
-                            Pokaż wszystkie kategorie →
+                            Anuluj
                         </button>
-                    ) : (
                         <button
-                            onClick={() => setShowAllCategories(false)}
-                            style={{
-                                width: '100%',
-                                padding: '6px',
-                                border: '1px solid var(--accent-primary)',
-                                borderRadius: '6px',
-                                backgroundColor: 'var(--accent-light)',
-                                color: 'var(--accent-primary)',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: '500'
-                            }}
+                            onClick={handleSubmit}
+                            disabled={!canSubmit}
+                            className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-white text-sm md:text-base transition-all shadow-lg ${canSubmit
+                                ? 'bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 shadow-rose-900/20 transform hover:-translate-y-0.5'
+                                : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700'
+                                }`}
                         >
-                            ← Pokaż tylko kategorie dla {selectedEnvelopeData?.name}
+                            Wydaj {canSubmit ? amount : ''} PLN
                         </button>
-                    )}
+                    </div>
                 </div>
-
-                {/* OPIS */}
-                <div>
-                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                        Opis (opcjonalnie)
-                    </label>
-                    <input
-                        type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="np. Zakupy w Biedronce"
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: '1px solid var(--border-primary)',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)'
-                        }}
-                    />
-                </div>
-
-            </div>
-
-            {/* PRZYCISKI - sticky na dole */}
-            <div style={{ 
-                position: 'sticky',
-                bottom: 0,
-                backgroundColor: 'var(--bg-primary)',
-                padding: '16px 0 0 0',
-                marginTop: '24px',
-                borderTop: '1px solid var(--border-primary)',
-                display: 'flex', 
-                gap: '8px', 
-                justifyContent: 'flex-end'
-            }}>
-                <button
-                    onClick={onClose}
-                    style={{
-                        padding: '12px 24px',
-                        border: '1px solid var(--border-primary)',
-                        borderRadius: '8px',
-                        backgroundColor: 'var(--bg-secondary)',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                    }}
-                >
-                    Anuluj
-                </button>
-                <button
-                    onClick={handleSubmit}
-                    disabled={!amount || !selectedCategory || !selectedEnvelope}
-                    style={{
-                        padding: '12px 24px',
-                        border: 'none',
-                        borderRadius: '8px',
-                        backgroundColor: amount && selectedCategory && selectedEnvelope ? 'var(--accent-error)' : 'var(--border-secondary)',
-                        color: amount && selectedCategory && selectedEnvelope ? 'white' : 'var(--text-secondary)',
-                        cursor: amount && selectedCategory && selectedEnvelope ? 'pointer' : 'not-allowed',
-                        fontWeight: '600',
-                        fontSize: '14px'
-                    }}
-                >
-                    ✓ Dodaj wydatek
-                </button>
             </div>
         </Modal>
     )

@@ -3,235 +3,215 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, LoginFormData } from '@/lib/schemas'
+import { api } from '@/lib/api'
+import { motion } from 'framer-motion'
 
 export default function SignInPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
   const router = useRouter()
+  const [globalError, setGlobalError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
-    setError('')
+    setGlobalError('')
 
     try {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        // Zapisz token w localStorage (prosta implementacja)
-        localStorage.setItem('authToken', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        router.push('/')
-      } else {
-        setError(data.error || 'Nieprawidłowy email lub hasło')
-      }
-    } catch (error) {
-      setError('Wystąpił błąd podczas logowania')
+      const result = await api.post<{ token: string; user: { id: string; email: string; name?: string } }>('/api/auth/signin', data)
+      localStorage.setItem('authToken', result.token)
+      localStorage.setItem('user', JSON.stringify(result.user))
+      router.push('/')
+    } catch (err) {
+      const error = err as { data?: { error?: string } }
+      setGlobalError(error.data?.error || 'Nieprawidłowy email lub hasło')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleDemoLogin = async () => {
-    setEmail('demo@example.com')
-    setPassword('demo123')
-    
-    // Automatycznie wyślij formularz
-    setTimeout(() => {
-      const form = document.querySelector('form') as HTMLFormElement
-      form.requestSubmit()
-    }, 100)
-  }
+
 
   return (
-    <div className="min-h-screen bg-theme-primary" style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'var(--bg-primary)',
-      padding: '20px'
-    }}>
-      <div className="card" style={{
-        backgroundColor: 'var(--bg-secondary)',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: 'var(--shadow-lg)',
-        width: '100%',
-        maxWidth: '400px',
-        border: '1px solid var(--border-primary)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 className="section-header" style={{
-            fontSize: '28px',
-            fontWeight: '700',
-            color: 'var(--text-primary)',
-            marginBottom: '8px'
-          }}>
-            💰 Budżet Domowy
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
-            Zaloguj się do swojego konta
-          </p>
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center p-5 overflow-hidden">
+      {/* Animated gradient background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(135deg, #020617 0%, #0f172a 25%, #1e1b4b 50%, #0f172a 75%, #020617 100%)',
+          backgroundSize: '400% 400%',
+          animation: 'gradientShift 15s ease infinite',
+        }}
+      />
 
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '20px',
-            color: '#991b1b',
-            fontSize: '14px'
-          }}>
-            {error}
-          </div>
-        )}
+      {/* Floating orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl" />
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: 'var(--text-primary)',
-              marginBottom: '6px'
-            }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="btn-mobile"
+      {/* Login card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <div className="glass-card-static p-8 md:p-10">
+          {/* Logo & Title */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
               style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid var(--border-primary)',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: 'var(--text-primary)',
-                backgroundColor: 'var(--bg-primary)',
-                minHeight: '44px'
-              }}
-              placeholder="twoj@email.com"
-            />
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: 'var(--text-primary)',
-              marginBottom: '6px'
-            }}>
-              Hasło
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="btn-mobile"
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid var(--border-primary)',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: 'var(--text-primary)',
-                backgroundColor: 'var(--bg-primary)',
-                minHeight: '44px'
-              }}
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn-mobile nav-button"
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: isLoading ? 'var(--text-disabled)' : 'var(--accent-primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              marginBottom: '16px',
-              transition: 'background-color 0.2s',
-              minHeight: '44px'
-            }}
-          >
-            {isLoading ? 'Logowanie...' : 'Zaloguj się'}
-          </button>
-        </form>
-
-        <div style={{
-          textAlign: 'center',
-          marginTop: '20px',
-          paddingTop: '20px',
-          borderTop: '1px solid #e5e7eb'
-        }}>
-          <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '12px' }}>
-            Nie masz konta?{' '}
-            <Link 
-              href="/auth/signup"
-              style={{ 
-                color: '#3b82f6', 
-                textDecoration: 'none',
-                fontWeight: '500'
+                background: 'var(--gradient-primary)',
+                boxShadow: 'var(--glow-primary)'
               }}
             >
-              Zarejestruj się
-            </Link>
-          </p>
-          
-          <div style={{ margin: '16px 0' }}>
-            <span style={{ color: '#9ca3af', fontSize: '12px' }}>lub</span>
+              <span className="text-3xl">💰</span>
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl md:text-3xl font-bold gradient-text mb-2"
+            >
+              Quantum Budget
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-slate-400"
+            >
+              Inteligentne zarządzanie finansami
+            </motion.p>
           </div>
-          
-          <button
-            onClick={handleDemoLogin}
-            disabled={isLoading}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-              color: '#10b981',
-              border: '1px solid #10b981',
-              borderRadius: '6px',
-              fontSize: '14px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
-            }}
+
+          {/* Error message */}
+          {globalError && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mb-6 text-rose-400 text-sm backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                {globalError}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="twoj@email.com"
+                {...register('email')}
+                className="input-glass"
+              />
+              {errors.email && (
+                <p className="mt-1.5 text-sm text-rose-400">{errors.email.message}</p>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Hasło
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                {...register('password')}
+                className="input-glass"
+              />
+              {errors.password && (
+                <p className="mt-1.5 text-sm text-rose-400">{errors.password.message}</p>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full btn-primary py-3.5 text-base relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Logowanie...
+                  </span>
+                ) : (
+                  <>
+                    <span className="relative z-10">Zaloguj się</span>
+                    <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  </>
+                )}
+              </button>
+            </motion.div>
+          </form>
+
+          {/* Divider & Links */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mt-8"
           >
-            🚀 Wypróbuj demo
-          </button>
+            <div className="space-y-3">
+              {/* Demo login removed */}
+            </div>
+
+            <p className="text-center text-sm text-slate-400 mt-6">
+              Nie masz konta?{' '}
+              <Link
+                href="/auth/signup"
+                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors hover:underline underline-offset-2"
+              >
+                Zarejestruj się
+              </Link>
+            </p>
+          </motion.div>
         </div>
-      </div>
+
+        {/* Bottom accent line */}
+        <div
+          className="h-1 mx-4 rounded-b-full opacity-60"
+          style={{ background: 'var(--gradient-primary)' }}
+        />
+      </motion.div>
     </div>
   )
 }

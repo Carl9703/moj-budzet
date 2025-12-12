@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
+import { isEmergencyEnvelope } from '@/lib/constants/envelopeTypes'
 
 interface Transaction {
     id: string
@@ -11,6 +13,8 @@ interface Transaction {
     description: string | null
     date: Date
     envelopeId: string | null
+    transferPairId: string | null
+    includeInStats: boolean
 }
 
 export async function GET(request: NextRequest) {
@@ -53,7 +57,7 @@ export async function GET(request: NextRequest) {
 
         // Pobierz transakcje od 1 września 2025 (po imporcie historycznych danych)
         const startOfAppUsage = new Date('2025-09-01')
-        
+
         const transactionsFromSeptember = await prisma.transaction.findMany({
             where: {
                 userId,
@@ -91,8 +95,8 @@ export async function GET(request: NextRequest) {
             })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        // Znajdź kopertę Fundusz Awaryjny
-        const emergencyFundEnvelope = envelopes.find(e => e.name === 'Fundusz Awaryjny')
+        // Znajdź kopertę Fundusz Awaryjny (emergency type)
+        const emergencyFundEnvelope = envelopes.find(e => isEmergencyEnvelope(e.envelopeType))
         const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
 
         // Oblicz saldo: przychody od września - wydatki od września - fundusz awaryjny
@@ -152,11 +156,11 @@ export async function GET(request: NextRequest) {
         }
 
         const totalIncome = Math.round(monthTransactions
-            .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .filter(t => t.type === 'income' && t.includeInStats !== false && !t.transferPairId)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const totalExpenses = Math.round(monthTransactions
-            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .filter(t => t.type === 'expense' && t.includeInStats !== false && !t.transferPairId)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const isMonthClosed = !!monthCloseTransaction
@@ -173,15 +177,14 @@ export async function GET(request: NextRequest) {
         const monthlyEnvelopes = envelopes
             .filter(e => e.type === 'monthly')
             .map(e => {
-                const envelopeTransactions = monthTransactions.filter(t => 
+                const envelopeTransactions = monthTransactions.filter(t =>
                     t.envelopeId === e.id
                 )
                 const spent = roundToCents(envelopeTransactions.reduce((sum, t) => {
-                    // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
-                    // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
-                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
-                    
-                    if (isSavingsEnvelope) {
+                    // Dla kopert typu emergency: income zwiększa spent (więcej oszczędności)
+                    const isEmergency = isEmergencyEnvelope(e.envelopeType)
+
+                    if (isEmergency) {
                         // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
                         return t.type === 'income' ? sum + t.amount : sum - t.amount
                     } else {
@@ -198,7 +201,8 @@ export async function GET(request: NextRequest) {
                     planned: e.plannedAmount,
                     current: e.currentAmount,
                     activityCount: envelopeActivity[e.id] || 0,
-                    group: e.group
+                    group: e.group,
+                    isAccumulating: e.isAccumulating
                 }
             })
             .sort((a, b) => {
@@ -211,7 +215,7 @@ export async function GET(request: NextRequest) {
         const yearlyEnvelopes = envelopes
             .filter(e => e.type === 'yearly')
             .map(e => {
-                const envelopeTransactions = monthTransactions.filter(t => 
+                const envelopeTransactions = monthTransactions.filter(t =>
                     t.envelopeId === e.id
                 )
                 return {
@@ -221,7 +225,8 @@ export async function GET(request: NextRequest) {
                     spent: e.currentAmount, // Dla kopert rocznych używamy currentAmount
                     planned: e.plannedAmount,
                     current: e.currentAmount,
-                    group: e.group
+                    group: e.group,
+                    isAccumulating: e.isAccumulating
                 }
             })
             .sort((a, b) => a.name.localeCompare(b.name))

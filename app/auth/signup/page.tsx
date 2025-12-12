@@ -3,287 +3,133 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { registerSchema, RegisterFormData } from '@/lib/schemas'
+import { api } from '@/lib/api'
+import { Input, Text } from '@/components/ui/primitives'
+import { Button } from '@/components/ui/buttons/Button'
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const router = useRouter()
+  const [globalError, setGlobalError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  })
+
+  // Rozszerzamy typ danych formularza o confirmPassword tylko dla walidacji w komponencie
+  // Schema w Zod waliduje podstawowe pola, ale porównanie haseł zrobimy tutaj lub w resolverze (lepiej w resolverze, ale dla uproszczenia tutaj manually check if needed, though Zod .refine is better)
+  // W schemas/index.ts registerSchema nie ma confirmPassword, dodajmy to manualnie do walidacji
+
+  const onSubmit = async (data: RegisterFormData & { confirmPassword?: string }) => {
+    // Basic confirmation check (should be in schema ideally but keeping it simple for now as requested schema didn't have it)
+    const formData = new FormData(document.querySelector('form') as HTMLFormElement)
+    const confirmPass = formData.get('confirmPassword') as string
+
+    if (data.password !== confirmPass) {
+      setGlobalError('Hasła nie są identyczne')
+      return
+    }
+
     setIsLoading(true)
-    setError('')
+    setGlobalError('')
     setSuccess('')
 
-    // Podstawowa walidacja
-    if (password !== confirmPassword) {
-      setError('Hasła nie są identyczne')
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Hasło musi mieć co najmniej 6 znaków')
-      setIsLoading(false)
-      return
-    }
-
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-        }),
+      await api.post('/api/auth/signup', {
+        email: data.email,
+        password: data.password,
+        name: data.name
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
-        setSuccess('Konto zostało utworzone! Przekierowuję na stronę logowania...')
-        setTimeout(() => {
-          router.push('/auth/signin')
-        }, 2000)
-      } else {
-        setError(data.error || 'Wystąpił błąd podczas rejestracji')
-      }
-    } catch (error) {
-      setError('Wystąpił błąd podczas rejestracji')
+      setSuccess('Konto zostało utworzone! Przekierowuję na stronę logowania...')
+      setTimeout(() => {
+        router.push('/auth/signin')
+      }, 2000)
+    } catch (err) {
+      const error = err as { data?: { error?: string } }
+      setGlobalError(error.data?.error || 'Wystąpił błąd podczas rejestracji')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-theme-primary" style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'var(--bg-primary)',
-      padding: '20px'
-    }}>
-      <div className="card" style={{
-        backgroundColor: 'var(--bg-secondary)',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: 'var(--shadow-lg)',
-        width: '100%',
-        maxWidth: '400px',
-        border: '1px solid var(--border-primary)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 className="section-header" style={{
-            fontSize: '28px',
-            fontWeight: '700',
-            color: 'var(--text-primary)',
-            marginBottom: '8px'
-          }}>
-            💰 Budżet Domowy
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
-            Stwórz nowe konto
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-5">
+      <div className="bg-slate-800 p-10 rounded-xl shadow-lg w-full max-w-md border border-slate-700">
+        <div className="text-center mb-8">
+          <Text variant="h1" className="mb-2">💰 Budżet Domowy</Text>
+          <Text variant="body" color="secondary">Stwórz nowe konto</Text>
         </div>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '20px',
-            color: '#991b1b',
-            fontSize: '14px'
-          }}>
-            {error}
+        {globalError && (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-lg p-3 mb-5 text-rose-400 text-sm">
+            {globalError}
           </div>
         )}
 
         {success && (
-          <div style={{
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '20px',
-            color: '#166534',
-            fontSize: '14px'
-          }}>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-5 text-emerald-400 text-sm">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Imię
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: '#111827',
-                backgroundColor: '#ffffff'
-              }}
-              placeholder="Twoje imię"
-            />
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <Input
+            label="Imię"
+            placeholder="Twoje imię"
+            {...register('name')}
+            error={errors.name?.message}
+          />
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: '#111827',
-                backgroundColor: '#ffffff'
-              }}
-              placeholder="twoj@email.com"
-            />
-          </div>
+          <Input
+            label="Email"
+            placeholder="twoj@email.com"
+            type="email"
+            {...register('email')}
+            error={errors.email?.message}
+          />
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Hasło
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: '#111827',
-                backgroundColor: '#ffffff'
-              }}
-              placeholder="••••••••"
-            />
-          </div>
+          <Input
+            label="Hasło"
+            placeholder="••••••••"
+            type="password"
+            {...register('password')}
+            error={errors.password?.message}
+          />
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Potwierdź hasło
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                color: '#111827',
-                backgroundColor: '#ffffff'
-              }}
-              placeholder="••••••••"
-            />
-          </div>
+          <Input
+            label="Potwierdź hasło"
+            placeholder="••••••••"
+            type="password"
+            name="confirmPassword" // Not in schema, handled manually/via form data for now
+            id="confirmPassword"
+          />
 
-          <button
+          <Button
             type="submit"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: isLoading ? '#9ca3af' : '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              marginBottom: '16px',
-              transition: 'background-color 0.2s'
-            }}
+            fullWidth
+            loading={isLoading}
+            variant="success"
           >
-            {isLoading ? 'Tworzenie konta...' : 'Stwórz konto'}
-          </button>
+            Stwórz konto
+          </Button>
         </form>
 
-        <div style={{
-          textAlign: 'center',
-          marginTop: '20px',
-          paddingTop: '20px',
-          borderTop: '1px solid #e5e7eb'
-        }}>
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+        <div className="text-center mt-6 pt-6 border-t border-slate-700">
+          <Text variant="caption" color="secondary">
             Masz już konto?{' '}
-            <Link 
-              href="/auth/signin"
-              style={{ 
-                color: '#3b82f6', 
-                textDecoration: 'none',
-                fontWeight: '500'
-              }}
-            >
+            <Link href="/auth/signin" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
               Zaloguj się
             </Link>
-          </p>
+          </Text>
         </div>
       </div>
     </div>
