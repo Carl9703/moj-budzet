@@ -49,18 +49,12 @@ export async function POST(req: NextRequest) {
     await prisma.userConfig.create({
       data: {
         userId: user.id,
-        defaultSalary: 5000,
-        defaultToJoint: 1500,
-        defaultToSavings: 1000,
-        defaultToVacation: 400,
-        defaultToWedding: 0,
-        defaultToGroceries: 0,
-        defaultToInvestment: 500
+        defaultSalary: 5000
       }
     })
 
     return NextResponse.json(
-      { 
+      {
         message: 'Konto zostało utworzone pomyślnie',
         user: {
           id: user.id,
@@ -75,9 +69,9 @@ export async function POST(req: NextRequest) {
     console.error('❌ SIGNUP ERROR:', error)
     console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Wystąpił błąd podczas tworzenia konta',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -98,7 +92,7 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Gastronomia', type: 'monthly', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
     { name: 'Ubrania i Akcesoria', type: 'monthly', plannedAmount: 200, icon: '👕', group: 'lifestyle' },
     { name: 'Fundusz Awaryjny', type: 'monthly', plannedAmount: 1000, icon: '🚨', group: 'assets' },
-    
+
     // Koperty roczne
     { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', plannedAmount: 2000, icon: '🚗', group: 'assets' },
     { name: 'Prezenty i Okazje', type: 'yearly', plannedAmount: 1500, icon: '🎁', group: 'assets' },
