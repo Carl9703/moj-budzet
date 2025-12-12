@@ -136,7 +136,7 @@ async function createDefaultEnvelopes(userId: string) {
 
   // Stwórz wszystkie koperty miesięczne (demo user zaczyna z pełnymi kopertami)
   const allMonthlyEnvelopes = [...needsEnvelopes, ...lifestyleEnvelopes, ...assetsMonthlyEnvelopes]
-  
+
   for (const envelope of allMonthlyEnvelopes) {
     await prisma.envelope.create({
       data: {
@@ -171,13 +171,7 @@ async function createDemoConfig(userId: string) {
   await prisma.userConfig.create({
     data: {
       userId,
-      defaultSalary: 6000,
-      defaultToJoint: 1500,
-      defaultToSavings: 1000,
-      defaultToVacation: 420,
-      defaultToWedding: 0,
-      defaultToGroceries: 0,
-      defaultToInvestment: 600
+      defaultSalary: 6000
     }
   })
 }
