@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode, useState, useEffect } from 'react'
+import { useSidebar } from '@/lib/contexts/SidebarContext'
 
 interface MainContentProps {
     children: ReactNode
@@ -8,16 +9,29 @@ interface MainContentProps {
 
 export function MainContent({ children }: MainContentProps) {
     const [isMobile, setIsMobile] = useState(false)
+    const { isMobileMenuOpen, setIsMobileMenuOpen } = useSidebar()
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth <= 768)
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768)
+        }
+        
         checkMobile()
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
     return (
-        <main className={`bg-slate-950 relative flex-1 overflow-auto min-h-screen transition-all duration-300 ${isMobile ? 'ml-0 p-4 pb-24' : 'ml-64 p-8'}`}>
+        <main style={{
+            backgroundColor: '#020617', // slate-950
+            position: 'relative',
+            flex: 1,
+            marginLeft: isMobile ? '0' : '256px', // Space for sidebar w-64 = 256px (quantum-budget style)
+            padding: isMobile ? '16px' : '32px',
+            overflow: 'auto',
+            minHeight: '100vh',
+            transition: 'margin-left 0.3s ease, padding 0.3s ease'
+        }}>
             {children}
         </main>
     )

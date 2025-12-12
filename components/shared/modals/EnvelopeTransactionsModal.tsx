@@ -1,11 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
-import { api } from '@/lib/api/client'
-import { Modal } from '@/components/ui/layout/Modal'
-import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
-import { useCategories } from '@/lib/contexts/CategoryContext'
+import { X, Calendar, DollarSign, FileText, TrendingUp, TrendingDown } from 'lucide-react'
+import { authorizedFetch } from '@/lib/utils/api'
 
 interface Transaction {
   id: string
@@ -24,18 +21,16 @@ interface EnvelopeTransactionsModalProps {
   envelopeIcon: string
 }
 
-export function EnvelopeTransactionsModal({
-  isOpen,
-  onClose,
-  envelopeId,
-  envelopeName,
-  envelopeIcon
+export function EnvelopeTransactionsModal({ 
+  isOpen, 
+  onClose, 
+  envelopeId, 
+  envelopeName, 
+  envelopeIcon 
 }: EnvelopeTransactionsModalProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const { getCategoryName, getCategoryIcon } = useCategories()
 
   useEffect(() => {
     if (isOpen && envelopeId) {
@@ -46,12 +41,24 @@ export function EnvelopeTransactionsModal({
   const fetchTransactions = async () => {
     setLoading(true)
     setError(null)
-
+    
     try {
-      const data = await api.get<any>(`/api/transactions?envelopeId=${envelopeId}&limit=20&currentMonth=true`)
-      const transactionsArray = Array.isArray(data) ? data : (data.transactions || [])
-      setTransactions(transactionsArray)
+      console.log('Fetching transactions for envelopeId:', envelopeId)
+      const response = await authorizedFetch(`/api/transactions?envelopeId=${envelopeId}&limit=20&currentMonth=true`)
+      const data = await response.json()
+      
+      console.log('API Response:', { response: response.ok, data })
+      
+      if (response.ok) {
+        // API zwraca dane bezpośrednio jako array, nie jako { transactions: [] }
+        const transactionsArray = Array.isArray(data) ? data : (data.transactions || [])
+        setTransactions(transactionsArray)
+        console.log('Transactions set:', transactionsArray)
+      } else {
+        setError(data.error || 'Błąd pobierania transakcji')
+      }
     } catch (err) {
+      console.error('Fetch error:', err)
       setError('Błąd połączenia z serwerem')
     } finally {
       setLoading(false)
@@ -77,97 +84,302 @@ export function EnvelopeTransactionsModal({
     })
   }
 
+  const getTransactionIcon = (type: string) => {
+    return type === 'income' ? '💰' : '💸'
+  }
+
+  const getTransactionColor = (type: string) => {
+    return type === 'income' ? '#10b981' : '#ef4444'
+  }
+
   if (!isOpen) return null
 
   return (
-    <Modal title={`${envelopeIcon} ${envelopeName}`} onClose={onClose}>
-      <div className="flex flex-col h-[60vh]">
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'var(--bg-secondary)',
+        borderRadius: '16px',
+        border: '1px solid var(--border-primary)',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        width: '100%',
+        maxWidth: '600px',
+        maxHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '20px 24px',
+          borderBottom: '1px solid var(--border-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '24px' }}>{envelopeIcon}</span>
+            <div>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                margin: 0
+              }}>
+                {envelopeName}
+              </h2>
+              <p style={{
+                fontSize: '14px',
+                color: 'var(--text-secondary)',
+                margin: 0
+              }}>
+                Ostatnie transakcje
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              borderRadius: '6px',
+              color: 'var(--text-secondary)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+              e.currentTarget.style.color = 'var(--text-primary)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = 'var(--text-secondary)'
+            }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-              <LoadingSpinner />
-              <div className="text-sm text-slate-500 font-medium animate-pulse">
-                Pobieranie historii...
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px',
+              gap: '16px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: '4px solid var(--border-primary)',
+                borderTop: '4px solid var(--accent-primary)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+              <div style={{
+                fontSize: '16px',
+                color: 'var(--text-secondary)',
+                fontWeight: '500'
+              }}>
+                Ładowanie transakcji...
               </div>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-              <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center text-3xl">❌</div>
-              <div className="text-slate-400 max-w-xs mx-auto">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px',
+              gap: '16px'
+            }}>
+              <div style={{ fontSize: '48px' }}>❌</div>
+              <div style={{
+                fontSize: '16px',
+                color: 'var(--text-secondary)',
+                textAlign: 'center'
+              }}>
                 {error}
               </div>
               <button
                 onClick={fetchTransactions}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm text-slate-300 transition-colors"
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'var(--accent-primary)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
               >
                 Spróbuj ponownie
               </button>
             </div>
           ) : transactions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-center opacity-60">
-              <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-4xl grayscale">📝</div>
-              <p className="text-slate-500">Brak transakcji w tym miesiącu</p>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px',
+              gap: '16px'
+            }}>
+              <div style={{ fontSize: '48px' }}>📝</div>
+              <div style={{
+                fontSize: '16px',
+                color: 'var(--text-secondary)',
+                textAlign: 'center'
+              }}>
+                Brak transakcji w tej kopercie
+              </div>
             </div>
           ) : (
-            <div className="space-y-3 pb-4">
-              {transactions.map((transaction, index) => (
-                <div
-                  key={transaction.id}
-                  className="group relative p-4 rounded-xl border transition-all duration-300 hover:scale-[1.01]"
-                  style={{
-                    background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                    borderColor: 'rgba(51, 65, 85, 0.5)'
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs ${transaction.type === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                          }`}>
-                          {transaction.type === 'income' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        </span>
-                        <h4 className="font-semibold text-slate-200 truncate group-hover:text-indigo-300 transition-colors">
-                          {transaction.description || 'Bez opisu'}
-                        </h4>
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '16px 24px'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {transactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 16px',
+                      backgroundColor: 'var(--bg-primary)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-primary)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-primary)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '20px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      {getTransactionIcon(transaction.type)}
+                    </div>
+                    
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: 'var(--text-primary)',
+                        marginBottom: '4px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {transaction.description || 'Brak opisu'}
                       </div>
-
-                      <div className="flex items-center gap-3 text-xs text-slate-500 ml-8">
-                        <span className="flex items-center gap-1 bg-slate-800/50 px-2 py-0.5 rounded-xl">
-                          <Calendar size={10} />
-                          {formatDate(transaction.date)}
-                        </span>
+                      <div style={{
+                        fontSize: '12px',
+                        color: 'var(--text-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <Calendar size={12} />
+                        {formatDate(transaction.date)}
                         {transaction.category && (
-                          <span className="flex items-center gap-1 bg-slate-800/50 px-2 py-0.5 rounded-xl text-slate-400">
-                            {getCategoryIcon(transaction.category)} {getCategoryName(transaction.category)}
-                          </span>
+                          <>
+                            <span>•</span>
+                            <span>{transaction.category}</span>
+                          </>
                         )}
                       </div>
                     </div>
-
-                    <div className={`text-right ${transaction.type === 'income' ? 'text-emerald-400' : 'text-rose-400'
-                      }`}>
-                      <div className="text-lg font-bold tabular-nums tracking-tight">
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      flexShrink: 0
+                    }}>
+                      <div style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: getTransactionColor(transaction.type)
+                      }}>
                         {transaction.type === 'income' ? '+' : '-'}{formatMoney(transaction.amount)}
                       </div>
+                      {transaction.type === 'income' ? (
+                        <TrendingUp size={16} color="#10b981" />
+                      ) : (
+                        <TrendingDown size={16} color="#ef4444" />
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer info */}
-        <div className="pt-4 border-t border-slate-800/50 flex justify-between items-center text-xs text-slate-500 mt-2">
-          <span>Wyświetlono {transactions.length} ostatnich transakcji</span>
+        {/* Footer */}
+        <div style={{
+          padding: '16px 24px',
+          borderTop: '1px solid var(--border-primary)',
+          backgroundColor: 'var(--bg-tertiary)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--text-secondary)'
+          }}>
+            {transactions.length} transakcji
+          </div>
           <button
             onClick={onClose}
-            className="hover:text-slate-300 transition-colors"
+            style={{
+              padding: '8px 16px',
+              backgroundColor: 'var(--accent-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
           >
-            Zamknij ESC
+            Zamknij
           </button>
         </div>
       </div>
-    </Modal>
+    </div>
   )
 }

@@ -1,20 +1,16 @@
 import { useState, useEffect } from 'react'
-import { api } from '../api/client'
-import type { AppConfig } from '../types'
-
-interface ConfigResponse {
-    config: AppConfig
-}
+import { authorizedFetch } from '../utils/api'
 
 export function useConfig() {
-    const [config, setConfig] = useState<AppConfig | null>(null)
+    const [config, setConfig] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const loadConfig = async () => {
             try {
                 setLoading(true)
-                const data = await api.get<ConfigResponse>('/api/config')
+                const res = await authorizedFetch('/api/config', { cache: 'no-store' })
+                const data = await res.json()
                 setConfig(data?.config)
             } catch {
                 // ignore
@@ -22,7 +18,7 @@ export function useConfig() {
                 setLoading(false)
             }
         }
-
+        
         loadConfig()
     }, [])
 

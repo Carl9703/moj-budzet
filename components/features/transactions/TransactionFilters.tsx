@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import type React from 'react'
-import { Search, X, Filter, ChevronDown, ChevronUp } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useCategories } from '@/lib/contexts/CategoryContext'
+import { Search, Calendar, X } from 'lucide-react'
+import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface FilterOptions {
   categories: string[]
@@ -36,8 +35,7 @@ export interface FilterState {
   sortOrder: 'asc' | 'desc'
 }
 
-export function TransactionFilters({ onFiltersChange, filterOptions, initialFilters }: TransactionFiltersProps) {
-  const { getCategoryIcon, getCategoryName } = useCategories()
+export function TransactionFilters({ onFiltersChange, filterOptions, loading: _loading = false, initialFilters }: TransactionFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     startDate: '',
@@ -53,27 +51,43 @@ export function TransactionFilters({ onFiltersChange, filterOptions, initialFilt
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [activeFiltersCount, setActiveFiltersCount] = useState(0)
 
+  // Synchronizuj stan z initialFilters
   useEffect(() => {
-    if (initialFilters) setFilters(initialFilters)
+    if (initialFilters) {
+      console.log('TransactionFilters: syncing with initialFilters:', initialFilters)
+      setFilters(initialFilters)
+    }
   }, [initialFilters])
 
+  // Aktualizuj licznik aktywnych filtrów
   useEffect(() => {
-    const count = Object.values(filters).filter(value =>
+    const count = Object.values(filters).filter(value => 
       value !== '' && value !== 'date' && value !== 'desc'
     ).length
+    console.log('Active filters count:', count, 'Filters:', filters)
     setActiveFiltersCount(count)
   }, [filters])
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value }
-    if (key === 'group' && value) newFilters.envelope = ''
-    if (key === 'envelope' && value) newFilters.group = ''
+    
+    // Jeśli wybieramy grupę, wyczyść filtr koperty
+    if (key === 'group' && value) {
+      newFilters.envelope = ''
+    }
+    
+    // Jeśli wybieramy kopertę, wyczyść filtr grupy
+    if (key === 'envelope' && value) {
+      newFilters.group = ''
+    }
+    
     setFilters(newFilters)
     onFiltersChange(newFilters)
   }
 
   const handleSearchChange = (value: string) => {
     setFilters(prev => ({ ...prev, search: value }))
+    // NIE wywołujemy onFiltersChange - tylko na Enter
   }
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -83,14 +97,20 @@ export function TransactionFilters({ onFiltersChange, filterOptions, initialFilt
     }
   }
 
-  const clearFilter = (key: keyof FilterState) => {
-    const newFilters = { ...filters, [key]: '' }
-    if (key === 'sortBy') {
-      newFilters.sortBy = 'date'
-      newFilters.sortOrder = 'desc'
+  const clearFilters = () => {
+    const clearedFilters: FilterState = {
+      search: '',
+      startDate: '',
+      endDate: '',
+      type: '',
+      category: '',
+      group: '',
+      envelope: '',
+      sortBy: 'date',
+      sortOrder: 'desc'
     }
-    setFilters(newFilters)
-    onFiltersChange(newFilters)
+    setFilters(clearedFilters)
+    onFiltersChange(clearedFilters)
   }
 
   const toggleSortOrder = () => {
@@ -119,213 +139,477 @@ export function TransactionFilters({ onFiltersChange, filterOptions, initialFilt
     return env ? `${env.icon} ${env.name}` : ''
   }
 
-  const FilterTag = ({ label, onClear }: { label: string; onClear: () => void }) => (
-    <motion.span
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.9, opacity: 0 }}
-      className="inline-flex items-center gap-1.5 bg-slate-800/50 border border-slate-700 rounded-full py-1.5 px-3 text-xs text-slate-300 backdrop-blur-sm"
-    >
-      {label}
-      <button onClick={onClear} className="border-none bg-transparent cursor-pointer text-slate-400 hover:text-white transition-colors">
-        <X size={14} />
-      </button>
-    </motion.span>
-  )
+  const clearFilter = (key: keyof FilterState) => {
+    const newFilters = { ...filters, [key]: '' }
+    
+    // Jeśli czyścimy sortBy, ustaw domyślne wartości
+    if (key === 'sortBy') {
+      newFilters.sortBy = 'date'
+      newFilters.sortOrder = 'desc'
+    }
+    
+    setFilters(newFilters)
+    onFiltersChange(newFilters)
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card mb-6 overflow-visible"
-    >
-      {/* Main filters bar */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px_auto] gap-4 items-center p-4 border-b border-[rgba(255,255,255,0.05)]">
-        {/* Search */}
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+    <div style={{
+      backgroundColor: 'var(--bg-secondary)',
+      borderRadius: '12px',
+      border: '1px solid var(--border-primary)',
+      boxShadow: 'var(--shadow-md)',
+      marginBottom: '20px',
+      overflow: 'visible'
+    }}>
+      {/* Pasek głównych filtrów zawsze widoczny */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 220px auto',
+        gap: '12px',
+        alignItems: 'center',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--border-primary)'
+      }}>
+        {/* Wyszukiwanie */}
+        <div style={{ position: 'relative' }}>
+          <Search size={16} style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--text-secondary)'
+          }} />
           <input
             type="text"
-            placeholder="Szukaj (tytuł, opis, kwota)..."
+            placeholder="Szukaj transakcji..."
             value={filters.search}
             onChange={(e) => handleSearchChange(e.target.value)}
             onKeyDown={handleSearchKeyDown}
-            className="input-glass !pl-12 py-2.5 text-sm"
+            style={{
+              width: '100%',
+              padding: '10px 12px 10px 40px',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)',
+              fontSize: '14px'
+            }}
           />
         </div>
 
-        {/* Type */}
-        <div className="relative">
-          <select
-            value={filters.type}
-            onChange={(e) => handleFilterChange('type', e.target.value)}
-            className="input-glass py-2.5 text-sm appearance-none cursor-pointer"
-          >
-            <option value="">Wszystkie typy</option>
-            <option value="income">💰 Przychody</option>
-            <option value="expense">💸 Wydatki</option>
-            <option value="transfer">🔄 Transfery</option>
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-        </div>
+        {/* Typ transakcji */}
+        <select
+          value={filters.type}
+          onChange={(e) => handleFilterChange('type', e.target.value)}
+          style={{
+            padding: '10px 12px',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '8px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
+            fontSize: '14px'
+          }}
+        >
+          <option value="">Wszystkie typy</option>
+          <option value="income">Przychody</option>
+          <option value="expense">Wydatki</option>
+          <option value="transfer">Transfery</option>
+        </select>
 
-        {/* Actions */}
-        <div className="flex gap-2 items-center justify-end">
+        {/* Akcje */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {activeFiltersCount > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                Aktywne: {activeFiltersCount}
+              </span>
+            </div>
+          )}
           <button
             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-            className={`btn-glass flex items-center gap-2 py-2.5 px-4 text-sm ${isAdvancedOpen ? 'bg-slate-700/50 border-indigo-500/50' : ''}`}
+            style={{
+              padding: '10px 12px',
+              backgroundColor: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              fontSize: '13px',
+              color: 'var(--text-primary)',
+              cursor: 'pointer'
+            }}
           >
-            <Filter size={16} className={activeFiltersCount > 0 ? "text-indigo-400" : "text-slate-400"} />
-            <span className="hidden sm:inline">{isAdvancedOpen ? 'Mniej opcji' : 'Więcej opcji'}</span>
-            {activeFiltersCount > 0 && (
-              <span className="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 min-w-[18px] text-center">
-                {activeFiltersCount}
-              </span>
-            )}
+            {isAdvancedOpen ? 'Ukryj zaawansowane' : 'Zaawansowane filtry'}{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
         </div>
       </div>
 
-      {/* Active filters */}
-      <AnimatePresence>
-        {activeFiltersCount > 0 && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="flex flex-wrap gap-2 py-3 px-4 border-b border-[rgba(255,255,255,0.05)] bg-slate-900/20"
-          >
-            {filters.search && <FilterTag label={`Szukaj: ${filters.search}`} onClear={() => clearFilter('search')} />}
-            {filters.type && <FilterTag label={`Typ: ${getTypeLabel(filters.type)}`} onClear={() => clearFilter('type')} />}
-            {filters.envelope && <FilterTag label={`Koperta: ${getEnvelopeLabel(filters.envelope)}`} onClear={() => clearFilter('envelope')} />}
-            {filters.category && <FilterTag label={`Kategoria: ${getCategoryName(filters.category)}`} onClear={() => clearFilter('category')} />}
-            {filters.group && <FilterTag label={`Grupa: ${getGroupTranslation(filters.group)}`} onClear={() => clearFilter('group')} />}
-            {filters.startDate && <FilterTag label={`Od: ${filters.startDate}`} onClear={() => clearFilter('startDate')} />}
-            {filters.endDate && <FilterTag label={`Do: ${filters.endDate}`} onClear={() => clearFilter('endDate')} />}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Advanced filters */}
-      <AnimatePresence>
-        {isAdvancedOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="p-4 border-t border-[rgba(255,255,255,0.05)] bg-slate-900/10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-                {/* Category */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Kategoria</label>
-                  <div className="relative">
-                    <select
-                      value={filters.category}
-                      onChange={(e) => handleFilterChange('category', e.target.value)}
-                      className="input-glass py-2 px-3 text-sm appearance-none cursor-pointer"
-                    >
-                      <option value="">Wszystkie kategorie</option>
-                      {filterOptions.categories.map(category => (
-                        <option key={category} value={category}>
-                          {getCategoryIcon(category)} {getCategoryName(category)}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Group */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Grupa kopert</label>
-                  <div className="relative">
-                    <select
-                      value={filters.group}
-                      onChange={(e) => handleFilterChange('group', e.target.value)}
-                      className="input-glass py-2 px-3 text-sm appearance-none cursor-pointer"
-                    >
-                      <option value="">Wszystkie grupy</option>
-                      {filterOptions.groups.map(group => (
-                        <option key={group} value={group}>{getGroupTranslation(group)}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Envelope */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Koperta</label>
-                  <div className="relative">
-                    <select
-                      value={filters.envelope}
-                      onChange={(e) => handleFilterChange('envelope', e.target.value)}
-                      className="input-glass py-2 px-3 text-sm appearance-none cursor-pointer"
-                    >
-                      <option value="">Wszystkie koperty</option>
-                      {filterOptions.envelopes.map(envelope => (
-                        <option key={envelope.id} value={envelope.id}>
-                          {envelope.icon} {envelope.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Dates */}
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Od daty</label>
-                    <input
-                      type="date"
-                      value={filters.startDate}
-                      onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                      className="input-glass py-2 px-3 text-sm"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Do daty</label>
-                    <input
-                      type="date"
-                      value={filters.endDate}
-                      onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                      className="input-glass py-2 px-3 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Sorting */}
-              <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[rgba(255,255,255,0.05)]">
-                <span className="text-sm font-medium text-slate-400">Sortowanie:</span>
-                <div className="relative min-w-[140px]">
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                    className="input-glass py-1.5 px-3 text-sm pr-8 appearance-none cursor-pointer"
-                  >
-                    <option value="date">📅 Data</option>
-                    <option value="amount">💸 Kwota</option>
-                    <option value="description">abc Opis</option>
-                    <option value="type">🏷️ Typ</option>
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
-                <button
-                  onClick={toggleSortOrder}
-                  className="btn-glass py-1.5 px-3 text-sm flex items-center gap-2 hover:bg-slate-700/50"
-                >
-                  {filters.sortOrder === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  {filters.sortOrder === 'asc' ? 'Rosnąco' : 'Malejąco'}
+      {/* Sekcja aktywnych filtrów - zawsze widoczna */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        padding: '10px 16px',
+        borderBottom: '1px solid var(--border-primary)',
+        backgroundColor: 'var(--bg-tertiary)',
+        minHeight: '40px',
+        alignItems: 'center'
+      }}>
+        {activeFiltersCount === 0 ? (
+          <span style={{
+            color: 'var(--text-secondary)',
+            fontSize: '12px',
+            fontStyle: 'italic'
+          }}>
+            Brak aktywnych filtrów
+          </span>
+        ) : (
+          <>
+            {filters.search && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Szukaj: {filters.search}
+                <button onClick={() => clearFilter('search')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
                 </button>
-              </div>
-            </div>
-          </motion.div>
+              </span>
+            )}
+            {filters.type && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Typ: {getTypeLabel(filters.type)}
+                <button onClick={() => clearFilter('type')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {filters.envelope && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Koperta: {getEnvelopeLabel(filters.envelope)}
+                <button onClick={() => clearFilter('envelope')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {filters.category && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Kategoria: {getCategoryName(filters.category)}
+                <button onClick={() => clearFilter('category')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {filters.group && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Grupa: {getGroupTranslation(filters.group)}
+                <button onClick={() => clearFilter('group')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {filters.startDate && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Od: {filters.startDate}
+                <button onClick={() => clearFilter('startDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+            {filters.endDate && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '9999px',
+                padding: '6px 10px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)'
+              }}>
+                Do: {filters.endDate}
+                <button onClick={() => clearFilter('endDate')} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+          </>
         )}
-      </AnimatePresence>
-    </motion.div>
+      </div>
+
+      {/* Zaawansowane filtry */}
+      <div style={{ padding: '16px', display: isAdvancedOpen ? 'block' : 'none' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          marginBottom: '20px'
+        }}>
+          {/* Kategoria */}
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--text-secondary)',
+              marginBottom: '6px'
+            }}>
+              Kategoria
+            </label>
+            <select
+              value={filters.category}
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+            >
+              <option value="">Wszystkie kategorie</option>
+              {filterOptions.categories.map(category => (
+                <option key={category} value={category}>
+                  {getCategoryIcon(category)} {getCategoryName(category)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Grupa kopert */}
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--text-secondary)',
+              marginBottom: '6px'
+            }}>
+              Grupa kopert
+            </label>
+            <select
+              value={filters.group}
+              onChange={(e) => handleFilterChange('group', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+            >
+              <option value="">Wszystkie grupy</option>
+              {filterOptions.groups.map(group => (
+                <option key={group} value={group}>
+                  {getGroupTranslation(group)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Koperta */}
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--text-secondary)',
+              marginBottom: '6px'
+            }}>
+              Koperta
+            </label>
+            <select
+              value={filters.envelope}
+              onChange={(e) => handleFilterChange('envelope', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+            >
+              <option value="">Wszystkie koperty</option>
+              {filterOptions.envelopes.map(envelope => (
+                <option key={envelope.id} value={envelope.id}>
+                  {envelope.icon} {envelope.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Data od */}
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--text-secondary)',
+              marginBottom: '6px'
+            }}>
+              Data od
+            </label>
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          {/* Data do */}
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--text-secondary)',
+              marginBottom: '6px'
+            }}>
+              Data do
+            </label>
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid var(--border-primary)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Sortowanie */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px',
+          backgroundColor: 'var(--bg-tertiary)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-primary)'
+        }}>
+          <span style={{
+            fontSize: '13px',
+            fontWeight: '500',
+            color: 'var(--text-secondary)'
+          }}>
+            Sortuj według:
+          </span>
+          
+          <select
+            value={filters.sortBy}
+            onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+            style={{
+              padding: '6px 10px',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)',
+              fontSize: '13px'
+            }}
+          >
+            <option value="date">Data</option>
+            <option value="amount">Kwota</option>
+            <option value="description">Opis</option>
+            <option value="type">Typ</option>
+          </select>
+
+          <button
+            onClick={toggleSortOrder}
+            style={{
+              padding: '6px 10px',
+              backgroundColor: 'var(--bg-primary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '6px',
+              color: 'var(--text-primary)',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {filters.sortOrder === 'asc' ? '↑' : '↓'} {filters.sortOrder === 'asc' ? 'Rosnąco' : 'Malejąco'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -13,13 +13,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, icon, plannedAmount, type, group, isAccumulating } = body as {
+    const { name, icon, plannedAmount, type, group } = body as {
       name: string
       icon?: string | null
       plannedAmount?: number
       type: 'monthly' | 'yearly'
       group?: string
-      isAccumulating?: boolean
     }
 
     if (!name || !type) {
@@ -39,8 +38,7 @@ export async function POST(request: NextRequest) {
         currentAmount: 0,
         type,
         group: group || null,
-        isArchived: false, // Jawnie ustawiamy, że nowa koperta nie jest zarchiwizowana
-        isAccumulating: isAccumulating || false
+        isArchived: false // Jawnie ustawiamy, że nowa koperta nie jest zarchiwizowana
       },
       select: {
         id: true,
@@ -51,8 +49,7 @@ export async function POST(request: NextRequest) {
         currentAmount: true,
         icon: true,
         group: true,
-        isArchived: true, // Upewnij się, że isArchived jest zwracane
-        isAccumulating: true
+        isArchived: true // Upewnij się, że isArchived jest zwracane
       }
     })
 
@@ -71,8 +68,7 @@ export async function POST(request: NextRequest) {
           currentAmount: true,
           icon: true,
           group: true,
-          isArchived: true,
-          isAccumulating: true
+          isArchived: true
         }
       })
       return NextResponse.json({ success: true, envelope: updated }, { status: 201 })

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { api } from '../api/client'
+import { authorizedFetch } from '../utils/api'
 
 interface DashboardData {
     balance: number
@@ -15,7 +15,6 @@ interface DashboardData {
         current: number
         activityCount: number
         group?: string
-        isAccumulating?: boolean
     }>
     yearlyEnvelopes: Array<{
         id: string
@@ -25,7 +24,6 @@ interface DashboardData {
         planned: number
         current: number
         group?: string
-        isAccumulating?: boolean
     }>
     transactions: Array<{
         id: string
@@ -44,9 +42,11 @@ export function useDashboard() {
     const fetchData = async () => {
         try {
             setError(null)
-            const json = await api.get<DashboardData>('/api/dashboard')
+            const response = await authorizedFetch('/api/dashboard')
+            const json = await response.json()
             setData(json)
         } catch (error) {
+            console.error('Error fetching dashboard:', error)
             setError(error as Error)
             setData(null)
         } finally {

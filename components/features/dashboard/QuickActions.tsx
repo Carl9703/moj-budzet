@@ -1,63 +1,85 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import { Card } from '@/components/ui/layout/Card'
+import { Button } from '@/components/ui/buttons/Button'
 
-interface QuickActionsProps {
+interface Props {
     onAddIncome: () => void
     onAddExpense: () => void
-    onTransfer: () => void
 }
 
-export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickActionsProps) => {
+export function QuickActions({ onAddIncome, onAddExpense }: Props) {
     return (
-        <div className="flex gap-3">
-            <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onAddIncome}
-                className="relative px-5 py-2.5 rounded-xl text-sm font-bold text-white overflow-hidden group"
-                style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)',
-                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
-                }}
-            >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10 flex items-center gap-2">
-                    <span className="text-lg leading-none">+</span> Przychód
-                </span>
-            </motion.button>
+        <Card style={{
+                backgroundColor: '#1e293b', // slate-800
+                border: '1px solid #334155', // slate-700
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+        }}>
+            <div style={{ 
+                fontSize: '11px', 
+                fontWeight: '600', 
+                    color: '#64748b', // slate-500
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+            }}>
+                Szybkie akcje
+            </div>
+            <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '10px'
+            }}>
+                <button
+                    onClick={onAddIncome}
+                    style={{
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        backgroundColor: '#059669', // emerald-600
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        textAlign: 'left',
+                        boxShadow: '0 0 15px rgba(5, 150, 105, 0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#047857' // emerald-700
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#059669' // emerald-600
+                    }}
+                >
+                    + Przychód
+                </button>
 
-            <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onAddExpense}
-                className="relative px-5 py-2.5 rounded-xl text-sm font-bold text-white overflow-hidden group"
-                style={{
-                    background: 'linear-gradient(135deg, #ef4444 0%, #f43f5e 100%)',
-                    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)',
-                }}
-            >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10 flex items-center gap-2">
-                    <span className="text-lg leading-none">-</span> Wydatek
-                </span>
-            </motion.button>
-
-            <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onTransfer}
-                className="relative px-5 py-2.5 rounded-xl text-sm font-bold text-white overflow-hidden group"
-                style={{
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
-                }}
-            >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <span className="relative z-10 flex items-center gap-2">
-                    <span className="text-lg leading-none">↔</span> Transfer
-                </span>
-            </motion.button>
-
-        </div>
+                <button
+                    onClick={onAddExpense}
+                    style={{
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        backgroundColor: '#4f46e5', // indigo-600
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        textAlign: 'left',
+                        boxShadow: '0 0 15px rgba(79, 70, 229, 0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#4338ca' // indigo-700
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#4f46e5' // indigo-600
+                    }}
+                >
+                    - Wydatek
+                </button>
+            </div>
+        </Card>
     )
 }

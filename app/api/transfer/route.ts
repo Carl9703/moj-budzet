@@ -32,17 +32,16 @@ export async function POST(request: NextRequest) {
         const data = transferSchema.parse(body)
 
         // Sprawdź czy koperty należą do użytkownika
-        const fromEnvelope = data.fromEnvelopeId === 'MAIN_ACCOUNT'
-            ? null
-            : await prisma.envelope.findFirst({
+        const [fromEnvelope, toEnvelope] = await Promise.all([
+            prisma.envelope.findFirst({
                 where: { id: data.fromEnvelopeId, userId }
+            }),
+            prisma.envelope.findFirst({
+                where: { id: data.toEnvelopeId, userId }
             })
+        ])
 
-        const toEnvelope = await prisma.envelope.findFirst({
-            where: { id: data.toEnvelopeId, userId }
-        })
-
-        if (data.fromEnvelopeId !== 'MAIN_ACCOUNT' && !fromEnvelope) {
+        if (!fromEnvelope) {
             return NextResponse.json(
                 { error: 'Koperta źródłowa nie została znaleziona' },
                 { status: 404 }
@@ -56,14 +55,14 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        if (fromEnvelope && fromEnvelope.id === toEnvelope.id) {
+        if (fromEnvelope.id === toEnvelope.id) {
             return NextResponse.json(
                 { error: 'Nie można transferować do tej samej koperty' },
                 { status: 400 }
             )
         }
 
-        if (fromEnvelope && fromEnvelope.currentAmount < data.amount) {
+        if (fromEnvelope.currentAmount < data.amount) {
             return NextResponse.json(
                 { error: `Brak środków! Dostępne: ${fromEnvelope.currentAmount.toFixed(2)} zł` },
                 { status: 400 }
@@ -92,16 +91,14 @@ export async function POST(request: NextRequest) {
         await prisma.$transaction(async (tx) => {
             // Generuj unikalny ID dla pary transferów
             const transferPairId = `transfer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-            // Zmniejsz saldo koperty źródłowej (jeśli nie z konta głównego)
-            if (fromEnvelope) {
-                await tx.envelope.update({
-                    where: { id: fromEnvelope.id },
-                    data: {
-                        currentAmount: fromEnvelope.currentAmount - data.amount
-                    }
-                })
-            }
+            
+            // Zmniejsz saldo koperty źródłowej
+            await tx.envelope.update({
+                where: { id: fromEnvelope.id },
+                data: {
+                    currentAmount: fromEnvelope.currentAmount - data.amount
+                }
+            })
 
             // Zwiększ saldo koperty docelowej
             const updatedToEnvelope = await tx.envelope.update({
@@ -110,7 +107,7 @@ export async function POST(request: NextRequest) {
                     currentAmount: toEnvelope.currentAmount + data.amount
                 }
             })
-
+            
 
             // Utwórz transakcję "expense" dla koperty źródłowej (wyjście środków)
             await tx.transaction.create({
@@ -120,7 +117,7 @@ export async function POST(request: NextRequest) {
                     amount: data.amount,
                     description: `Transfer: ${toEnvelope.name}`,
                     date: transferDate,
-                    envelopeId: fromEnvelope?.id || null, // null oznacza konto główne
+                    envelopeId: fromEnvelope.id,
                     includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
                     transferPairId: transferPairId
                 }
@@ -132,7 +129,7 @@ export async function POST(request: NextRequest) {
                     userId: userId,
                     type: 'income',
                     amount: data.amount,
-                    description: `Transfer: ${fromEnvelope ? fromEnvelope.name : 'Konto Główne'}`,
+                    description: `Transfer: ${fromEnvelope.name}`,
                     date: transferDate,
                     envelopeId: toEnvelope.id,
                     includeInStats: false, // Transfer wewnętrzny nie wpływa na statystyki
@@ -140,19 +137,31 @@ export async function POST(request: NextRequest) {
                 }
             })
 
-            // Jeśli transfer ma kategorię, przypisz ją do transakcji przychodzącej (opcjonalnie)
-            // Nie tworzymy dodatkowego wydatku, bo to powoduje duplikację
-
+            // Jeśli transfer ma kategorię, utwórz dodatkowy wydatek z kategorią
+            if (data.toCategory) {
+                await tx.transaction.create({
+                    data: {
+                        userId: userId,
+                        type: 'expense',
+                        amount: data.amount,
+                        description: data.toCategory,
+                        date: transferDate,
+                        envelopeId: toEnvelope.id,
+                        includeInStats: true, // Wydatek z kategorią wpływa na statystyki
+                        category: data.toCategory
+                    }
+                })
+            }
         })
 
         return NextResponse.json({
             success: true,
-            message: `Transfer ${data.amount.toFixed(2)} zł z ${fromEnvelope ? fromEnvelope.name : 'Konta Głównego'} do ${toEnvelope.name} wykonany pomyślnie!`
+            message: `Transfer ${data.amount.toFixed(2)} zł z ${fromEnvelope.name} do ${toEnvelope.name} wykonany pomyślnie!`
         })
 
     } catch (error) {
         console.error('Transfer error:', error)
-
+        
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 { error: error.issues[0].message },

@@ -2,16 +2,21 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { KeyMetricsCards } from '@/components'
+import { GlobalFilters, KeyMetricsCards } from '@/components'
+import { SpendingBreakdownVisualization } from '@/components/features/analytics/SpendingBreakdownVisualization'
 import { TrendsVisualization } from '@/components/features/analytics/TrendsVisualization'
 import { InteractiveExpenseExplorer } from '@/components/features/analytics/InteractiveExpenseExplorer'
 import { AnalyticsCharts } from '@/components/features/analytics/AnalyticsCharts'
-import { authorizedFetch } from '@/lib/api/client'
+import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { motion } from 'framer-motion'
-import { ArrowLeft, Calendar, AlertCircle, RefreshCw } from 'lucide-react'
-import type { DateRange } from '@/lib/types'
-import { useCategories } from '@/lib/contexts/CategoryContext'
+import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
+import { ArrowLeft, Calendar } from 'lucide-react'
+
+// Interfaces from Analytics
+interface DateRange {
+  from: Date | undefined
+  to: Date | undefined
+}
 
 interface MainMetrics {
   currentPeriod: {
@@ -101,10 +106,10 @@ interface AnalyticsData {
 
 export default function ArchiveMonthPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
-  const { getCategoryName } = useCategories()
   const params = useParams()
   const router = useRouter()
-
+  
+  // State exactly like Analytics
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
@@ -115,38 +120,38 @@ export default function ArchiveMonthPage() {
   const year = params.year as string
   const month = params.month as string
 
+  // Helpers for robust month parsing
   const safeDecode = (value: string): string => {
-    try { return decodeURIComponent(value) } catch { return value }
+    try {
+      return decodeURIComponent(value)
+    } catch {
+      return value
+    }
   }
 
   const monthIndexFromParam = (param: string): number => {
-    const monthNames = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
-
-    // Try numeric first
+    const monthNames = [
+      'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+    ]
     const numeric = parseInt(param)
-    if (!Number.isNaN(numeric)) return Math.max(0, Math.min(11, numeric - 1))
-
-    // Normalize string for comparison (remove diacritics)
-    const normalize = (str: string) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    const decoded = safeDecode(param)
-    const normalizedInput = normalize(decoded)
-
-    // Try exact match first, then normalized match
-    const idx = monthNames.findIndex(m => {
-      return m.toLowerCase() === decoded.toLowerCase() || normalize(m) === normalizedInput
-    })
-
+    if (!Number.isNaN(numeric)) {
+      return Math.max(0, Math.min(11, numeric - 1))
+    }
+    const decoded = safeDecode(param).toLowerCase()
+    const idx = monthNames.findIndex(m => m.toLowerCase() === decoded)
     return idx >= 0 ? idx : new Date().getMonth()
   }
 
+  // Calculate date range for the specific month
   const getMonthDateRange = (year: string, month: string): DateRange => {
     const yearNum = parseInt(year)
     const monthNum = monthIndexFromParam(month)
-    return {
-      from: new Date(yearNum, monthNum, 1),
-      to: new Date(yearNum, monthNum + 1, 0, 23, 59, 59)
-    }
+    
+    const startDate = new Date(yearNum, monthNum, 1)
+    const endDate = new Date(yearNum, monthNum + 1, 0, 23, 59, 59)
+    
+    return { from: startDate, to: endDate }
   }
 
   useEffect(() => {
@@ -158,33 +163,23 @@ export default function ArchiveMonthPage() {
     try {
       setLoading(true)
       setError('')
+      
       const dateRange = getMonthDateRange(year, month)
+      
       const params = new URLSearchParams()
-      // Always pass the context year for trends
-      params.append('year', year)
-
       if (dateRange.from && dateRange.to) {
         params.append('startDate', dateRange.from.toISOString())
         params.append('endDate', dateRange.to.toISOString())
       }
+
       const response = await authorizedFetch(`/api/analytics?${params.toString()}`)
       const analyticsData = await response.json()
-
-      // Fix category names using client-side knowledge (localStorage)
-      if (analyticsData.spendingTree) {
-        const updateNames = (nodes: any[]) => {
-          nodes.forEach(node => {
-            if (node.type === 'CATEGORY') {
-              const realId = node.id.replace('cat_', '')
-              node.name = getCategoryName(realId)
-            }
-            if (node.children) updateNames(node.children)
-          })
-        }
-        updateNames(analyticsData.spendingTree)
+      
+      if (response.ok) {
+        setData(analyticsData)
+      } else {
+        setError(analyticsData.error || 'Błąd pobierania danych analitycznych')
       }
-
-      response.ok ? setData(analyticsData) : setError(analyticsData.error || 'Błąd pobierania danych')
     } catch (err) {
       console.error('Error fetching analytics data:', err)
       setError('Błąd połączenia z serwerem')
@@ -193,9 +188,12 @@ export default function ArchiveMonthPage() {
     }
   }
 
-  const goBack = () => router.push('/archive')
+  const goBack = () => {
+    router.push('/archive')
+  }
 
-  const handleSegmentClick = (segmentName: string) => {
+  // Exact same functions as Analytics
+  const handleSegmentClick = (segmentName: string, segmentValue?: number) => {
     if (selectedItem?.name === segmentName) {
       setSelectedItem(null)
       setHighlightedGroup(null)
@@ -213,14 +211,18 @@ export default function ArchiveMonthPage() {
       }
       return null
     }
-
+    
     const item = findItem(data?.spendingTree || [])
     if (item) {
       setSelectedItem(item)
       setHighlightedGroup(segmentName)
       setHighlightedEnvelope(null)
+      
       setTimeout(() => {
-        document.getElementById('expense-explorer')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        const explorerElement = document.getElementById('expense-explorer')
+        if (explorerElement) {
+          explorerElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
       }, 100)
     }
   }
@@ -232,7 +234,9 @@ export default function ArchiveMonthPage() {
       setHighlightedEnvelope(null)
       return
     }
+
     setSelectedItem(item)
+    
     if (item.type === 'GROUP') {
       setHighlightedGroup(item.name)
       setHighlightedEnvelope(null)
@@ -245,61 +249,98 @@ export default function ArchiveMonthPage() {
     }
   }
 
+  // Prepare data for charts (exact same as Analytics)
   const chartData = useMemo(() => {
     if (!data?.spendingTree) return []
+    
     return data.spendingTree.map((group, index) => ({
       name: group.name,
       value: group.total,
-      color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
+      color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'][index % 10]
     }))
   }, [data?.spendingTree])
 
   const trendsData = useMemo(() => {
     if (!data?.trends) return []
+    
     if (selectedItem) {
       if (selectedItem.type === 'ENVELOPE') {
-        return data.trends.byEnvelopeName?.[selectedItem.name] || []
+        const envelopeName = selectedItem.name
+        const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
+        return envelopeTrends
       } else if (selectedItem.type === 'GROUP') {
         const groupEnvelopes = selectedItem.children?.filter(child => child.type === 'ENVELOPE') || []
+        
         if (groupEnvelopes.length > 0) {
           const groupTrends: { [key: string]: number } = {}
+          
           groupEnvelopes.forEach(envelope => {
-            const envelopeTrends = data.trends.byEnvelopeName?.[envelope.name] || []
-            envelopeTrends.forEach(trend => {
-              groupTrends[trend.period] = (groupTrends[trend.period] || 0) + trend.value
-            })
+            const envelopeName = envelope.name
+            const envelopeTrends = data.trends.byEnvelopeName?.[envelopeName] || []
+            
+            if (envelopeTrends.length > 0) {
+              envelopeTrends.forEach(trend => {
+                if (!groupTrends[trend.period]) {
+                  groupTrends[trend.period] = 0
+                }
+                groupTrends[trend.period] += trend.value
+              })
+            }
           })
-          return Object.entries(groupTrends)
-            .map(([period, value]) => ({ period, value }))
-            .sort((a, b) => a.period.localeCompare(b.period))
+          
+          return Object.entries(groupTrends).map(([period, value]) => ({
+            period,
+            value
+          }))
         }
       }
     }
-    return (data.trends.totalExpenses || []).sort((a, b) => a.period.localeCompare(b.period))
+    
+    return data.trends.totalExpenses || []
   }, [data?.trends, selectedItem])
-
-  const getMonthDisplayName = () => {
-    const monthNames = ['styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień']
-    return monthNames[monthIndexFromParam(month)] || safeDecode(month)
-  }
 
   if (isCheckingAuth) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <LoadingSpinner size="large" text="Sprawdzanie autoryzacji..." />
       </div>
     )
   }
 
-  if (!isAuthenticated) return null
+  if (!isAuthenticated) {
+    return null
+  }
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen flex justify-center items-center h-[calc(100vh-80px)]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin" />
-          <div className="text-lg text-slate-400 animate-pulse">📊 Ładowanie analiz...</div>
+      <div className="min-h-screen bg-theme-primary">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 'calc(100vh - 80px)'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              border: '4px solid var(--border-primary)',
+              borderTop: '4px solid var(--accent-primary)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <div style={{
+              fontSize: '18px',
+              color: 'var(--text-secondary)'
+            }}>
+              📊 Ładowanie analiz...
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -307,131 +348,142 @@ export default function ArchiveMonthPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen py-20 px-4">
-        <div className="max-w-md mx-auto p-10 text-center glass-card border-rose-500/30">
-          <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-500">
-            <AlertCircle size={32} />
+      <div className="min-h-screen bg-theme-primary">
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+          <div style={{
+            textAlign: 'center',
+            padding: '40px',
+            color: 'var(--text-secondary)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+              Błąd ładowania danych
+            </div>
+            <div style={{ fontSize: '14px', marginBottom: '16px' }}>
+              {error || 'Nie znaleziono danych dla tego miesiąca'}
+            </div>
+            <button
+              onClick={goBack}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'var(--accent-primary)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Wróć do archiwum
+            </button>
           </div>
-          <div className="text-xl font-bold mb-2 text-white">Błąd ładowania danych</div>
-          <div className="text-sm mb-6 text-slate-400">{error || 'Nie znaleziono danych'}</div>
-          <button
-            onClick={goBack}
-            className="btn-primary w-full flex items-center justify-center gap-2"
-          >
-            <RefreshCw size={16} /> Wróć do archiwum
-          </button>
         </div>
       </div>
     )
   }
 
+  // Get month name for display
+  const getMonthDisplayName = () => {
+    const monthNames = [
+      'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+      'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+    ]
+    const idx = monthIndexFromParam(month)
+    const decoded = safeDecode(month)
+    return monthNames[idx] || decoded
+  }
+
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-[1500px] mx-auto p-4 md:p-6 lg:p-8">
-
+    <div className="min-h-screen bg-theme-primary">
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-        >
-          <div className="flex items-center gap-4">
-            <button
-              onClick={goBack}
-              className="p-3 bg-slate-800/50 hover:bg-slate-700 border border-slate-700 rounded-xl cursor-pointer text-slate-400 hover:text-white transition-colors"
-              title="Wróć do archiwum"
-            >
-              <ArrowLeft size={20} />
-            </button>
-
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1 flex items-center gap-3">
-                <span className="gradient-text capitalize">{getMonthDisplayName()} {year}</span>
-              </h1>
-              <p className="text-slate-400 text-sm flex items-center gap-2">
-                <Calendar size={14} /> Analiza finansowa miesiąca
-              </p>
-            </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          marginBottom: '24px'
+        }}>
+          <button
+            onClick={goBack}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--text-primary)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
+          >
+            <ArrowLeft size={16} />
+            Wróć
+          </button>
+          
+          <div>
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              margin: '0 0 4px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <Calendar size={32} />
+              {getMonthDisplayName()} {year}
+            </h1>
+            <p style={{
+              fontSize: '16px',
+              color: 'var(--text-secondary)',
+              margin: 0
+            }}>
+              Analiza finansowa miesiąca
+            </p>
           </div>
-        </motion.div>
-
-        {/* Key Metrics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <KeyMetricsCards
-            currentPeriod={data.mainMetrics.currentPeriod}
-            previousPeriod={data.mainMetrics.previousPeriod}
-            compareMode={false}
-            loading={loading}
-          />
-        </motion.div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass-card p-6"
-          >
-            <h3 className="text-lg font-bold text-white mb-6">Rozkład Wydatków</h3>
-            <AnalyticsCharts
-              data={chartData}
-              total={data.mainMetrics.currentPeriod.expense}
-              onSegmentClick={handleSegmentClick}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="glass-card p-6"
-          >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Trendy Wydatków</h3>
-              {selectedItem && (
-                <span className="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded-full border border-indigo-500/30">
-                  {selectedItem.name}
-                </span>
-              )}
-            </div>
-            <TrendsVisualization
-              data={trendsData}
-              selectedItem={selectedItem?.name}
-              loading={loading}
-              year={year} /* Pass year to component */
-            />
-          </motion.div>
         </div>
 
-        {/* Explorer */}
-        <motion.div
-          id="expense-explorer"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-card"
-        >
-          <div className="p-6 border-b border-white/5">
-            <h3 className="text-xl font-bold text-white mb-2">Szczegółowa Analiza</h3>
-            <p className="text-slate-400 text-sm">Przeglądaj wydatki według kategorii, kopert i poszczególnych transakcji</p>
-          </div>
-          <div className="p-0">
-            <InteractiveExpenseExplorer
-              data={data.spendingTree}
-              compareMode={false}
-              onItemClick={handleExplorerItemClick}
-              loading={loading}
-              highlightedGroup={highlightedGroup}
-              highlightedEnvelope={highlightedEnvelope}
-            />
-          </div>
-        </motion.div>
+        {/* Key Metrics Cards */}
+        <KeyMetricsCards
+          currentPeriod={data.mainMetrics.currentPeriod}
+          previousPeriod={data.mainMetrics.previousPeriod}
+          compareMode={false}
+          loading={loading}
+        />
+
+        {/* Visualizations - EXACT SAME AS ANALYTICS */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+          gap: '24px',
+          marginBottom: '24px'
+        }}>
+          <AnalyticsCharts 
+            data={chartData} 
+            total={data.mainMetrics.currentPeriod.expense}
+            onSegmentClick={handleSegmentClick}
+          />
+          <TrendsVisualization
+            data={trendsData}
+            selectedItem={selectedItem?.name}
+            loading={loading}
+          />
+        </div>
+
+        {/* Interactive Expense Explorer */}
+        <div id="expense-explorer">
+          <InteractiveExpenseExplorer
+            data={data.spendingTree}
+            compareMode={false}
+            onItemClick={handleExplorerItemClick}
+            loading={loading}
+            highlightedGroup={highlightedGroup}
+            highlightedEnvelope={highlightedEnvelope}
+          />
+        </div>
       </div>
     </div>
   )

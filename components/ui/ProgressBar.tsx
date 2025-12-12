@@ -9,32 +9,79 @@ interface ProgressBarProps {
   className?: string
 }
 
-export function ProgressBar({ value, max, showLabel = true, label, size = 'medium', className = '' }: ProgressBarProps) {
+export function ProgressBar({ 
+  value, 
+  max, 
+  showLabel = true, 
+  label, 
+  size = 'medium',
+  className = '' 
+}: ProgressBarProps) {
   const percentage = Math.min((value / max) * 100, 100)
   const isOverBudget = value > max
-
-  const sizeClasses = { small: 'h-1.5', medium: 'h-2', large: 'h-3' }
-  const textSizes = { small: 'text-xs', medium: 'text-sm', large: 'text-sm' }
-
+  
   const getProgressColor = () => {
-    if (isOverBudget) return 'bg-rose-500'
-    if (percentage > 80) return 'bg-amber-500'
-    return 'bg-emerald-400'
+    if (isOverBudget) return 'var(--color-error)'
+    if (percentage > 80) return 'var(--color-warning)'
+    return 'var(--brand-primary)'
   }
-
+  
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'small':
+        return { height: '6px', fontSize: 'var(--font-size-xs)' }
+      case 'large':
+        return { height: '12px', fontSize: 'var(--font-size-s)' }
+      default:
+        return { height: '8px', fontSize: 'var(--font-size-s)' }
+    }
+  }
+  
+  const sizeStyles = getSizeStyles()
+  
   return (
-    <div className={`w-full ${className}`}>
+    <div className={className} style={{ width: '100%' }}>
       {showLabel && (
-        <div className={`flex justify-between items-center mb-1.5 ${textSizes[size]} text-slate-400`}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 'var(--space-s)',
+          fontSize: sizeStyles.fontSize,
+          color: 'var(--text-secondary)'
+        }}>
           <span>{label || 'Postęp'}</span>
-          <span className={`font-medium ${isOverBudget ? 'text-rose-400' : 'text-slate-100'}`}>
+          <span style={{
+            color: isOverBudget ? 'var(--color-error)' : 'var(--text-primary)',
+            fontWeight: 'var(--font-weight-medium)'
+          }}>
             {value.toLocaleString()} / {max.toLocaleString()} zł
           </span>
         </div>
       )}
-      <div className={`w-full ${sizeClasses[size]} bg-slate-900 rounded-full overflow-hidden`}>
-        <div className={`h-full ${getProgressColor()} rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }} />
+      
+      <div style={{
+        width: '100%',
+        height: sizeStyles.height,
+        backgroundColor: '#0f172a', // slate-900
+        borderRadius: '999px',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        <div style={{
+          width: `${percentage}%`,
+          height: '100%',
+          backgroundColor: isOverBudget 
+            ? '#f43f5e' // rose-500
+            : percentage > 80
+              ? '#f59e0b' // amber-500
+              : '#34d399', // emerald-400
+          borderRadius: '999px',
+          transition: 'width 0.5s ease',
+          position: 'relative'
+        }} />
       </div>
+      
     </div>
   )
 }

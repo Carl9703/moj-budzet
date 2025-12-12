@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, X, CreditCard, AlertCircle, ArrowRight } from 'lucide-react'
-import { api, authorizedFetch } from '@/lib/api/client'
-import { useCategories } from '@/lib/contexts/CategoryContext'
+import { Check, X, Calendar, CreditCard, AlertCircle, ArrowRight } from 'lucide-react'
+import { authorizedFetch } from '@/lib/utils/api'
+import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface Action {
     id: string
@@ -34,7 +34,6 @@ interface ActionsCenterProps {
 }
 
 export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
-    const { getCategoryIcon, getCategoryName } = useCategories()
     const [actions, setActions] = useState<Action[]>([])
     const [loading, setLoading] = useState(true)
     const [processing, setProcessing] = useState<string | null>(null)
@@ -46,7 +45,7 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
                 setLoading(true)
                 const response = await authorizedFetch('/api/dashboard/actions')
                 const data = await response.json()
-
+                
                 if (data.actions) {
                     setActions(data.actions)
                 }
@@ -107,86 +106,216 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
 
     if (loading) {
         return (
-            <div className="bg-slate-800 rounded-xl border border-slate-700 shadow-lg mb-6 p-8 flex items-center justify-center">
+            <div style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: 'var(--border-radius-large)',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)',
+                marginBottom: 'var(--space-l)',
+                padding: 'var(--space-2xl)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
                 <div className="spinner" />
             </div>
         )
     }
 
     return (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 shadow-lg mb-6 overflow-hidden relative">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-4 border-b border-slate-700 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-                        <AlertCircle size={20} className="text-white" />
+        <div style={{
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: 'var(--border-radius-large)',
+            border: '1px solid var(--border-primary)',
+            boxShadow: 'var(--shadow-lg)',
+            marginBottom: 'var(--space-l)',
+            overflow: 'hidden',
+            position: 'relative'
+        }}>
+            {/* Header z gradientem */}
+            <div style={{
+                background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%)',
+                padding: 'var(--space-l)',
+                borderBottom: '1px solid var(--border-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-s)' }}>
+                    <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--accent-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)'
+                    }}>
+                        <AlertCircle size={20} style={{ color: 'white' }} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-100 leading-tight">
+                        <h3 style={{ 
+                            fontSize: 'var(--font-size-l)', 
+                            fontWeight: 'var(--font-weight-bold)', 
+                            color: 'var(--text-primary)',
+                            margin: 0,
+                            lineHeight: 1.2
+                        }}>
                             Centrum Akcji
                         </h3>
-                        <p className="text-sm text-slate-400 font-medium mt-0.5">
+                        <p style={{ 
+                            fontSize: 'var(--font-size-s)', 
+                            color: 'var(--text-secondary)',
+                            margin: '2px 0 0 0',
+                            fontWeight: 'var(--font-weight-medium)'
+                        }}>
                             {actions.length} {actions.length === 1 ? 'zadanie' : 'zadań'} do wykonania
                         </p>
                     </div>
                 </div>
-                <div className="bg-indigo-600 text-white py-1.5 px-3 rounded-full text-xs font-bold shadow-lg shadow-indigo-600/30">
+                <div style={{
+                    backgroundColor: 'var(--accent-primary)',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 'var(--font-weight-bold)',
+                    boxShadow: '0 2px 8px rgba(74, 144, 226, 0.3)'
+                }}>
                     {actions.length}
                 </div>
             </div>
 
             {/* Message */}
             {message && (
-                <div className={`py-2 px-4 border-b border-slate-700 text-sm font-medium flex items-center gap-2 ${message.type === 'success'
-                    ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'bg-red-500/10 text-red-400'
-                    }`}>
+                <div style={{
+                    padding: 'var(--space-s) var(--space-l)',
+                    backgroundColor: message.type === 'success' ? 'var(--color-success-light)' : 'var(--color-error-light)',
+                    color: message.type === 'success' ? 'var(--color-success-dark)' : 'var(--color-error-dark)',
+                    borderBottom: '1px solid var(--border-primary)',
+                    fontSize: 'var(--font-size-s)',
+                    fontWeight: 'var(--font-weight-medium)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-s)'
+                }}>
                     <span>{message.type === 'success' ? '✅' : '❌'}</span>
                     {message.text}
                 </div>
             )}
 
-            {/* Actions list */}
-            <div className="p-4">
+            {/* Lista akcji */}
+            <div style={{ padding: 'var(--space-l)' }}>
                 {actions.length === 0 ? (
-                    <div className="text-center py-8 px-4 text-slate-400">
-                        <div className="text-5xl mb-4 opacity-50">🎉</div>
-                        <h4 className="text-base font-semibold text-slate-100 mb-2">
+                    <div style={{
+                        textAlign: 'center',
+                        padding: 'var(--space-2xl) var(--space-l)',
+                        color: 'var(--text-secondary)'
+                    }}>
+                        <div style={{
+                            fontSize: '48px',
+                            marginBottom: 'var(--space-m)',
+                            opacity: 0.5
+                        }}>
+                            🎉
+                        </div>
+                        <h4 style={{
+                            fontSize: 'var(--font-size-m)',
+                            fontWeight: 'var(--font-weight-semibold)',
+                            color: 'var(--text-primary)',
+                            margin: '0 0 var(--space-s) 0'
+                        }}>
                             Wszystko gotowe!
                         </h4>
-                        <p className="text-sm text-slate-400">
+                        <p style={{
+                            fontSize: 'var(--font-size-s)',
+                            color: 'var(--text-secondary)',
+                            margin: 0
+                        }}>
                             Brak zaplanowanych akcji na dziś. Dobrej pracy!
                         </p>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-3">
-                        {actions.map((action) => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-m)' }}>
+                        {actions.map((action, index) => (
                             <div
                                 key={action.id}
-                                className="bg-slate-900 border border-slate-700 rounded-lg p-4 flex items-start justify-between gap-4 hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                                style={{
+                                    backgroundColor: 'var(--bg-primary)',
+                                    border: '1px solid var(--border-primary)',
+                                    borderRadius: 'var(--border-radius-main)',
+                                    padding: 'var(--space-l)',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'space-between',
+                                    gap: 'var(--space-l)',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)'
+                                    e.currentTarget.style.boxShadow = 'none'
+                                }}
                             >
                                 {/* Left side - Content */}
-                                <div className="flex-1 min-w-0">
+                                <div style={{ flex: 1, minWidth: 0 }}>
                                     {/* Title row */}
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${action.type === 'transfer' ? 'bg-blue-500' : 'bg-amber-500'
-                                            }`}>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: 'var(--space-s)',
+                                        marginBottom: 'var(--space-s)'
+                                    }}>
+                                        <div style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '8px',
+                                            backgroundColor: action.type === 'transfer' ? 'var(--color-info)' : 'var(--color-warning)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0
+                                        }}>
                                             {action.type === 'transfer' ? (
-                                                <span className="text-base">🔄</span>
+                                                <span style={{ fontSize: '16px' }}>🔄</span>
                                             ) : (
-                                                <CreditCard size={16} className="text-white" />
+                                                <CreditCard size={16} style={{ color: 'white' }} />
                                             )}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="text-base font-semibold text-slate-100 leading-tight">
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <h4 style={{ 
+                                                fontSize: 'var(--font-size-m)', 
+                                                fontWeight: 'var(--font-weight-semibold)', 
+                                                color: 'var(--text-primary)',
+                                                margin: 0,
+                                                lineHeight: 1.3
+                                            }}>
                                                 {action.name}
                                             </h4>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-sm text-slate-400 font-medium">
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-s)',
+                                                marginTop: '4px'
+                                            }}>
+                                                <span style={{
+                                                    fontSize: 'var(--font-size-s)',
+                                                    color: 'var(--text-secondary)',
+                                                    fontWeight: 'var(--font-weight-medium)'
+                                                }}>
                                                     {action.type === 'transfer' ? 'Transfer' : 'Wydatek'}
                                                 </span>
-                                                <span className="text-slate-600">•</span>
-                                                <span className="text-sm text-slate-400">
+                                                <span style={{ color: 'var(--text-disabled)' }}>•</span>
+                                                <span style={{
+                                                    fontSize: 'var(--font-size-s)',
+                                                    color: 'var(--text-secondary)'
+                                                }}>
                                                     Dzień {action.dayOfMonth}
                                                 </span>
                                             </div>
@@ -194,35 +323,83 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
                                     </div>
 
                                     {/* Details row */}
-                                    <div className="flex items-center gap-3 flex-wrap">
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-m)',
+                                        flexWrap: 'wrap'
+                                    }}>
                                         {/* Amount */}
-                                        <div className="flex items-center gap-1.5 py-1.5 px-3 bg-slate-800 rounded-full border border-slate-700">
-                                            <span className="text-sm font-bold text-indigo-400">
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            padding: '6px 12px',
+                                            backgroundColor: 'var(--bg-tertiary)',
+                                            borderRadius: '20px',
+                                            border: '1px solid var(--border-primary)'
+                                        }}>
+                                            <span style={{
+                                                fontSize: 'var(--font-size-s)',
+                                                fontWeight: 'var(--font-weight-bold)',
+                                                color: 'var(--accent-primary)'
+                                            }}>
                                                 {action.amount.toFixed(2)} zł
                                             </span>
                                         </div>
 
-                                        {/* Transfer/expense details */}
+                                        {/* Transfer details */}
                                         {action.type === 'transfer' ? (
-                                            <div className="flex items-center gap-2 py-1.5 px-3 bg-blue-500/10 rounded-full border border-blue-500/30">
-                                                <span className="text-sm">{action.fromEnvelope?.icon}</span>
-                                                <span className="text-sm font-medium text-blue-400">
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-s)',
+                                                padding: '6px 12px',
+                                                backgroundColor: 'var(--color-info-light)',
+                                                borderRadius: '20px',
+                                                border: '1px solid var(--color-info)'
+                                            }}>
+                                                <span style={{ fontSize: '14px' }}>{action.fromEnvelope?.icon}</span>
+                                                <span style={{ 
+                                                    fontSize: 'var(--font-size-s)', 
+                                                    fontWeight: 'var(--font-weight-medium)',
+                                                    color: 'var(--color-info-dark)'
+                                                }}>
                                                     {action.fromEnvelope?.name}
                                                 </span>
-                                                <ArrowRight size={12} className="text-slate-500" />
-                                                <span className="text-sm">{action.toEnvelope?.icon}</span>
-                                                <span className="text-sm font-medium text-blue-400">
+                                                <ArrowRight size={12} style={{ color: 'var(--text-disabled)' }} />
+                                                <span style={{ fontSize: '14px' }}>{action.toEnvelope?.icon}</span>
+                                                <span style={{ 
+                                                    fontSize: 'var(--font-size-s)', 
+                                                    fontWeight: 'var(--font-weight-medium)',
+                                                    color: 'var(--color-info-dark)'
+                                                }}>
                                                     {action.toEnvelope?.name}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-2 py-1.5 px-3 bg-amber-500/10 rounded-full border border-amber-500/30">
-                                                <span className="text-sm">{action.envelope?.icon}</span>
-                                                <span className="text-sm font-medium text-amber-400">
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-s)',
+                                                padding: '6px 12px',
+                                                backgroundColor: 'var(--color-warning-light)',
+                                                borderRadius: '20px',
+                                                border: '1px solid var(--color-warning)'
+                                            }}>
+                                                <span style={{ fontSize: '14px' }}>{action.envelope?.icon}</span>
+                                                <span style={{ 
+                                                    fontSize: 'var(--font-size-s)', 
+                                                    fontWeight: 'var(--font-weight-medium)',
+                                                    color: 'var(--color-warning-dark)'
+                                                }}>
                                                     {action.envelope?.name}
                                                 </span>
-                                                <span className="text-slate-600">•</span>
-                                                <span className="text-sm text-slate-400">
+                                                <span style={{ color: 'var(--text-disabled)' }}>•</span>
+                                                <span style={{ 
+                                                    fontSize: 'var(--font-size-s)', 
+                                                    color: 'var(--text-secondary)'
+                                                }}>
                                                     {getCategoryIcon(action.category || '')} {getCategoryName(action.category || '')}
                                                 </span>
                                             </div>
@@ -231,17 +408,48 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
                                 </div>
 
                                 {/* Right side - Actions */}
-                                <div className="flex gap-2 flex-shrink-0 items-start">
+                                <div style={{ 
+                                    display: 'flex', 
+                                    gap: 'var(--space-s)', 
+                                    flexShrink: 0,
+                                    alignItems: 'flex-start'
+                                }}>
                                     <button
                                         onClick={() => handleApprove(action.id)}
                                         disabled={processing === action.id}
-                                        className={`flex items-center gap-1.5 py-2.5 px-4 bg-emerald-500 text-white border-none rounded-md text-sm font-semibold min-w-[100px] justify-center shadow-lg shadow-emerald-500/30 transition-all ${processing === action.id
-                                            ? 'cursor-not-allowed opacity-70'
-                                            : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-emerald-500/40'
-                                            }`}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            padding: '10px 16px',
+                                            backgroundColor: 'var(--color-success)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: 'var(--border-radius-small)',
+                                            fontSize: 'var(--font-size-s)',
+                                            fontWeight: 'var(--font-weight-semibold)',
+                                            cursor: processing === action.id ? 'not-allowed' : 'pointer',
+                                            opacity: processing === action.id ? 0.7 : 1,
+                                            transition: 'all 0.2s ease',
+                                            boxShadow: '0 2px 8px rgba(46, 204, 113, 0.3)',
+                                            minWidth: '100px',
+                                            justifyContent: 'center'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (processing !== action.id) {
+                                                e.currentTarget.style.transform = 'translateY(-1px)'
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(46, 204, 113, 0.4)'
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (processing !== action.id) {
+                                                e.currentTarget.style.transform = 'translateY(0)'
+                                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(46, 204, 113, 0.3)'
+                                            }
+                                        }}
                                     >
                                         {processing === action.id ? (
-                                            <div className="spinner w-3.5 h-3.5" />
+                                            <div className="spinner" style={{ width: '14px', height: '14px' }} />
                                         ) : (
                                             <Check size={16} />
                                         )}
@@ -250,10 +458,37 @@ export function ActionsCenter({ onActionCompleted }: ActionsCenterProps) {
                                     <button
                                         onClick={() => handleDismiss(action.id)}
                                         disabled={processing === action.id}
-                                        className={`flex items-center gap-1.5 py-2.5 px-4 bg-slate-700 text-slate-300 border border-slate-600 rounded-md text-sm font-semibold min-w-[100px] justify-center transition-all ${processing === action.id
-                                            ? 'cursor-not-allowed opacity-70'
-                                            : 'cursor-pointer hover:bg-slate-600 hover:border-indigo-500 hover:text-indigo-400'
-                                            }`}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            padding: '10px 16px',
+                                            backgroundColor: 'var(--bg-tertiary)',
+                                            color: 'var(--text-secondary)',
+                                            border: '1px solid var(--border-primary)',
+                                            borderRadius: 'var(--border-radius-small)',
+                                            fontSize: 'var(--font-size-s)',
+                                            fontWeight: 'var(--font-weight-semibold)',
+                                            cursor: processing === action.id ? 'not-allowed' : 'pointer',
+                                            opacity: processing === action.id ? 0.7 : 1,
+                                            transition: 'all 0.2s ease',
+                                            minWidth: '100px',
+                                            justifyContent: 'center'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (processing !== action.id) {
+                                                e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
+                                                e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                                e.currentTarget.style.color = 'var(--accent-primary)'
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (processing !== action.id) {
+                                                e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                                e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                                e.currentTarget.style.color = 'var(--text-secondary)'
+                                            }
+                                        }}
                                     >
                                         <X size={16} />
                                         Odłóż

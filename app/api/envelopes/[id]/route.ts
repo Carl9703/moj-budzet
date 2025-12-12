@@ -17,14 +17,12 @@ export async function PATCH(
 
     const { id: envelopeId } = await params
     const body = await request.json()
-    const { name, icon, plannedAmount, group, isArchived, isAccumulating, type } = body as {
+    const { name, icon, plannedAmount, group, isArchived } = body as {
       name?: string
       icon?: string | null
       plannedAmount?: number
       group?: string
       isArchived?: boolean
-      isAccumulating?: boolean
-      type?: 'monthly' | 'yearly'
     }
 
     // Sprawdź czy koperta należy do użytkownika
@@ -39,21 +37,6 @@ export async function PATCH(
       return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
     }
 
-    // Handle name change cascade separately before update if needed, or transactionally
-    // If name is changing, we need to update all categories that reference this envelope name
-    if (name && name !== envelope.name) {
-      // Find categories linked to old name
-      await prisma.category.updateMany({
-        where: {
-          userId: userId,
-          defaultEnvelope: envelope.name
-        },
-        data: {
-          defaultEnvelope: name
-        }
-      })
-    }
-
     // Aktualizuj kopertę
     const updated = await prisma.envelope.update({
       where: {
@@ -64,9 +47,7 @@ export async function PATCH(
         ...(icon !== undefined && { icon }),
         ...(plannedAmount !== undefined && { plannedAmount }),
         ...(group !== undefined && { group }),
-        ...(isArchived !== undefined && { isArchived }),
-        ...(isAccumulating !== undefined && { isAccumulating }),
-        ...(type !== undefined && { type })
+        ...(isArchived !== undefined && { isArchived })
       }
     })
 
@@ -122,8 +103,8 @@ export async function DELETE(
         }
       })
 
-      return NextResponse.json({
-        success: true,
+      return NextResponse.json({ 
+        success: true, 
         message: 'Koperta została zarchiwizowana (ma transakcje)',
         envelope: archived
       })

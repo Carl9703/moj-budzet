@@ -1,10 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { DonutChart, LineChart } from '@tremor/react'
+import { DonutChart, Card, Title, LineChart } from '@tremor/react'
 import { formatMoneyWithSeparators } from '@/lib/utils/money'
 import { ANALYTICS_COLORS } from '@/lib/constants/colors'
-import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, ArrowRight } from 'lucide-react'
 
 interface IncomeSource {
   source: string
@@ -45,209 +43,189 @@ interface IncomeAnalysisProps {
 export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
 
+  // Przygotowanie danych dla wykresu kołowego
   const chartData = data?.sources.map((source, index) => ({
     name: source.source,
     value: source.total,
     color: ANALYTICS_COLORS[index % ANALYTICS_COLORS.length]
   })) || []
 
-  // Simplify trends formatting
-  const trendFormatter = (number: number) =>
-    new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN', maximumFractionDigits: 0 }).format(number)
-
+  // Przygotowanie danych dla wykresu trendów
   const trendsData = data?.trends || []
 
   const handleSegmentClick = (segmentName: string) => {
-    setSelectedSource(prev => prev === segmentName ? null : segmentName)
+    if (selectedSource === segmentName) {
+      setSelectedSource(null)
+    } else {
+      setSelectedSource(segmentName)
+    }
   }
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-[400px] rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/30" />
-          <div className="h-[400px] rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/30" />
+          <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded mb-4"></div>
+              <div className="h-64 bg-gray-200 dark:bg-gray-600 rounded"></div>
+            </div>
+          </Card>
+          <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded mb-4"></div>
+              <div className="h-64 bg-gray-200 dark:bg-gray-600 rounded"></div>
+            </div>
+          </Card>
         </div>
+        <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded mb-4"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-600 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </Card>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div
-        className="text-center p-12 rounded-2xl border border-slate-700/30"
-        style={{
-          background: 'rgba(30, 41, 59, 0.4)',
-          backdropFilter: 'blur(12px)',
-        }}
-      >
-        <div className="text-5xl mb-4 opacity-50 grayscale">📊</div>
-        <h3 className="text-xl font-bold text-white mb-2">Brak danych przychodów</h3>
-        <p className="text-slate-400">Nie znaleziono transakcji przychodów w wybranym okresie.</p>
-      </div>
+      <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <div className="text-center text-gray-500 dark:text-gray-400">
+          <div className="text-4xl mb-4">📊</div>
+          <div className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Brak danych przychodów</div>
+          <div className="text-sm">Nie znaleziono transakcji przychodów w wybranym okresie</div>
+        </div>
+      </Card>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Charts Row */}
+      {/* Wykresy */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Source Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-8 rounded-2xl border border-slate-700/30 relative overflow-hidden flex flex-col"
-          style={{
-            background: 'rgba(30, 41, 59, 0.4)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-          <div className="mb-6 relative z-10">
-            <h3 className="text-xl font-bold text-white mb-1">Źródła Przychodów</h3>
-            <p className="text-sm text-slate-400">Skąd pochodzą Twoje pieniądze?</p>
-          </div>
-
-          <div className="flex-1 flex flex-col items-center justify-center relative z-10 min-h-[300px]">
+        {/* Wykres kołowy źródeł przychodów */}
+        <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Title className="mb-4 text-gray-900 dark:text-white">Źródła Przychodów</Title>
+          <div className="h-64">
             <DonutChart
-              className="h-64 w-64"
               data={chartData}
               category="value"
               index="name"
               colors={chartData.map(item => item.color)}
               valueFormatter={(number: number) => formatMoneyWithSeparators(number)}
               onValueChange={(value) => {
-                if (value) handleSegmentClick(value.name)
+                if (value) {
+                  handleSegmentClick(value.name)
+                }
               }}
-              showLabel={true}
-              variant="donut"
+              className="h-full"
             />
-            <div className="mt-6 text-center">
-              <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Całkowity Przychód</div>
-              <div className="text-3xl font-bold text-emerald-400">{formatMoneyWithSeparators(data.totalIncome)}</div>
-            </div>
           </div>
-        </motion.div>
-
-        {/* Trend Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-8 rounded-2xl border border-slate-700/30 relative overflow-hidden flex flex-col"
-          style={{
-            background: 'rgba(30, 41, 59, 0.4)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-white mb-1">Trend Przychodów</h3>
-            <p className="text-sm text-slate-400">Jak zmieniały się Twoje zarobki?</p>
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Całkowite przychody: {formatMoneyWithSeparators(data.totalIncome)}
           </div>
+        </Card>
 
-          <div className="flex-1 min-h-[300px] w-full">
+        {/* Wykres trendów przychodów */}
+        <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Title className="mb-4 text-gray-900 dark:text-white">Trend Przychodów</Title>
+          <div className="h-64" style={{ paddingLeft: '20px' }}>
             <LineChart
               data={trendsData}
               index="period"
               categories={['value']}
-              colors={['emerald']}
-              valueFormatter={trendFormatter}
-              className="h-full w-full"
-              yAxisWidth={60}
+              colors={['blue']}
+              valueFormatter={(number: number) => formatMoneyWithSeparators(number)}
+              className="h-full"
+              yAxisWidth={80}
               showLegend={false}
-              curveType="monotone"
-              showGridLines={false}
-              autoMinValue={true}
             />
           </div>
-        </motion.div>
+        </Card>
       </div>
 
-      {/* Details List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="p-8 rounded-2xl border border-slate-700/30"
-        style={{
-          background: 'rgba(30, 41, 59, 0.4)',
-          backdropFilter: 'blur(12px)',
-        }}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Szczegóły Źródeł</h3>
-          <div className="text-sm text-slate-400">
-            {data.summary.totalTransactions} transakcji | Średnio {formatMoneyWithSeparators(data.summary.avgTransactionAmount)}
-          </div>
-        </div>
-
+      {/* Lista źródeł przychodów */}
+      <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Title className="mb-4 text-gray-900 dark:text-white">Szczegółowa Analiza Źródeł</Title>
         <div className="space-y-4">
           {data.sources.map((source, index) => (
-            <div key={source.source} className="group">
-              <div
-                className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 ${selectedSource === source.source
-                    ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                    : 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-700/40 hover:border-slate-600/50'
-                  }`}
-                onClick={() => handleSegmentClick(source.source)}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-4 h-4 rounded-full ring-4 ring-white/5" style={{ backgroundColor: ANALYTICS_COLORS[index % ANALYTICS_COLORS.length] }}></div>
+            <div
+              key={source.source}
+              className={`p-4 rounded-lg border transition-all cursor-pointer bg-white dark:bg-gray-800 ${
+                selectedSource === source.source
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+              }`}
+              onClick={() => handleSegmentClick(source.source)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ANALYTICS_COLORS[index % ANALYTICS_COLORS.length] }}></div>
                   <div>
-                    <div className="font-bold text-white text-lg">{source.source}</div>
-                    <div className="text-sm text-slate-400">
-                      {source.count} wpłat • Średnio {formatMoneyWithSeparators(source.avgAmount)}
+                    <div className="font-medium text-gray-900 dark:text-white">{source.source}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {source.count} transakcji • Średnio {formatMoneyWithSeparators(source.avgAmount)}
                     </div>
                   </div>
                 </div>
-
-                <div className="flex items-end flex-col">
-                  <div className="font-bold text-emerald-400 text-xl">
-                    +{formatMoneyWithSeparators(source.total)}
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {formatMoneyWithSeparators(source.total)}
                   </div>
-                  <div className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {source.percentage}% całości
                   </div>
                 </div>
               </div>
 
-              <AnimatePresence>
-                {selectedSource === source.source && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="mt-2 ml-4 md:ml-12 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
-                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Historia Transakcji</h4>
-                      <div className="space-y-2">
-                        {source.transactions.map((t) => (
-                          <div key={t.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700/30">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400">
-                                <TrendingUp size={14} />
-                              </div>
-                              <div>
-                                <div className="font-medium text-slate-200">{t.description}</div>
-                                <div className="text-xs text-slate-500">{t.date}</div>
-                              </div>
-                            </div>
-                            <div className="font-bold text-emerald-400">
-                              +{formatMoneyWithSeparators(t.amount)}
-                            </div>
-                          </div>
-                        ))}
+              {/* Rozwijane szczegóły transakcji */}
+              {selectedSource === source.source && (
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Transakcje:</div>
+                  <div className="space-y-2">
+                    {source.transactions.map((transaction) => (
+                      <div key={transaction.id} className="flex justify-between items-center py-2 px-3 bg-white dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-500 shadow-sm">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{transaction.description}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{transaction.date}</div>
+                        </div>
+                        <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                          +{formatMoneyWithSeparators(transaction.amount)}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </motion.div>
+
+        {/* Podsumowanie */}
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{data.summary.totalSources}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Źródeł przychodów</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{data.summary.totalTransactions}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Transakcji</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatMoneyWithSeparators(data.summary.avgTransactionAmount)}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Średnia transakcja</div>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

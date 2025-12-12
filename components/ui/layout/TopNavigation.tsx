@@ -27,34 +27,113 @@ export function TopNavigation() {
     ]
 
     return (
-        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-[100] py-3 mb-6 shadow-lg transition-all duration-300">
-            <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
+        <header className="bg-theme-secondary border-theme shadow-md" style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+            borderBottom: '1px solid var(--border-primary)',
+            padding: '12px 0',
+            marginBottom: '24px',
+            transition: 'all 0.3s ease'
+        }}>
+            <div style={{
+                maxWidth: '1400px',
+                margin: '0 auto',
+                padding: '0 24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+            }}>
                 {/* Logo/Tytuł + Dark Mode */}
-                <div className="flex items-center gap-4">
-                    <div
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div 
                         onClick={() => router.push('/')}
-                        className="flex items-center gap-3 cursor-pointer p-2 px-3 rounded-lg hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.transform = 'translateY(-1px)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                        }}
                     >
-                        <h1 className="text-xl font-bold m-0 bg-gradient-to-br from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                        <h1 className="text-theme-primary" style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            margin: 0,
+                            transition: 'color 0.3s ease',
+                            background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text'
+                        }}>
                             Quantum Budget
                         </h1>
                     </div>
-
+                    
                     {/* Theme Toggle - obok logo */}
                     <ThemeToggle size="small" />
                 </div>
 
                 {/* Nawigacja */}
-                <nav className="flex gap-2 items-center flex-wrap">
+                <nav style={{
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
+                }}>
                     {/* Nawigacja - ukryj na małych ekranach */}
-                    <div className="hidden md:flex gap-2 items-center">
+                    <div className="hidden-mobile" style={{
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center'
+                    }}>
                         {navItems.map((item) => (
                             <button
                                 key={item.path}
                                 onClick={() => router.push(item.path)}
-                                className="flex items-center gap-1.5 py-2.5 px-4 bg-slate-800 border-2 border-slate-700 rounded-lg text-sm font-semibold text-slate-200 cursor-pointer transition-all duration-200 shadow-sm hover:bg-indigo-600 hover:border-indigo-600 hover:text-white hover:-translate-y-0.5 hover:shadow-md"
+                                className="nav-button smooth-all"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '10px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '2px solid var(--border-primary)',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textDecoration: 'none',
+                                    boxShadow: 'var(--shadow-sm)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                    e.currentTarget.style.transform = 'translateY(-2px)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                    e.currentTarget.style.transform = 'translateY(0)'
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                                }}
                             >
-                                <span className="text-base">{item.icon}</span>
+                                <span style={{ fontSize: '16px' }}>{item.icon}</span>
                                 <span>{item.label}</span>
                             </button>
                         ))}
@@ -63,9 +142,34 @@ export function TopNavigation() {
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="flex md:hidden items-center justify-center w-10 h-10 bg-slate-800 border-2 border-slate-700 rounded-lg cursor-pointer transition-all duration-200 shadow-sm hover:bg-indigo-600 hover:border-indigo-600 hover:-translate-y-0.5 hover:shadow-md"
+                        className="mobile-only"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '40px',
+                            height: '40px',
+                            backgroundColor: 'var(--bg-tertiary)',
+                            border: '2px solid var(--border-primary)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                            e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                            e.currentTarget.style.borderColor = 'var(--border-primary)'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
                     >
-                        <span className="text-lg">
+                        <span style={{ fontSize: '18px' }}>
                             {isMobileMenuOpen ? '✕' : '☰'}
                         </span>
                     </button>
@@ -73,10 +177,40 @@ export function TopNavigation() {
                     {/* Logout Button - tylko na PC */}
                     <button
                         onClick={handleLogout}
-                        className="hidden md:flex items-center gap-1.5 py-2.5 px-4 bg-rose-950 border-2 border-rose-900 rounded-lg text-sm font-semibold text-rose-300 cursor-pointer transition-all duration-200 ml-2 shadow-sm hover:bg-rose-600 hover:border-rose-600 hover:text-white hover:-translate-y-0.5 hover:shadow-md"
+                        className="nav-button smooth-all hidden-mobile"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '10px 16px',
+                            backgroundColor: '#fee',
+                            border: '2px solid #fcc',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#c33',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            marginLeft: '8px',
+                            boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#dc3545'
+                            e.currentTarget.style.borderColor = '#dc3545'
+                            e.currentTarget.style.color = '#ffffff'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fee'
+                            e.currentTarget.style.borderColor = '#fcc'
+                            e.currentTarget.style.color = '#c33'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                        }}
                         title="Wyloguj się"
                     >
-                        <span className="text-base">🚪</span>
+                        <span style={{ fontSize: '16px' }}>🚪</span>
                         <span>Wyloguj</span>
                     </button>
                 </nav>
@@ -84,28 +218,93 @@ export function TopNavigation() {
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-                <div className="absolute top-full left-0 right-0 bg-slate-900 border border-slate-800 border-t-0 rounded-b-lg shadow-2xl z-[1000] p-2">
-                    <div className="flex flex-col gap-1">
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border-primary)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 8px 8px',
+                    boxShadow: 'var(--shadow-lg)',
+                    zIndex: 1000,
+                    padding: '8px'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                    }}>
                         {navItems.map((item) => (
                             <button
                                 key={item.path}
                                 onClick={() => handleNavClick(item.path)}
-                                className="flex items-center gap-3 py-3 px-4 bg-slate-800 border border-slate-700 rounded-md text-sm font-medium text-slate-200 cursor-pointer transition-all duration-200 text-left hover:bg-indigo-600 hover:border-indigo-600 hover:text-white"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '12px 16px',
+                                    backgroundColor: 'var(--bg-tertiary)',
+                                    border: '1px solid var(--border-primary)',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    color: 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.borderColor = 'var(--accent-primary)'
+                                    e.currentTarget.style.color = '#ffffff'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+                                    e.currentTarget.style.borderColor = 'var(--border-primary)'
+                                    e.currentTarget.style.color = 'var(--text-primary)'
+                                }}
                             >
-                                <span className="text-lg">{item.icon}</span>
+                                <span style={{ fontSize: '18px' }}>{item.icon}</span>
                                 <span>{item.label}</span>
                             </button>
                         ))}
-
+                        
                         {/* Wyloguj w menu mobile */}
                         <button
                             onClick={() => {
                                 handleLogout()
                                 setIsMobileMenuOpen(false)
                             }}
-                            className="flex items-center gap-3 py-3 px-4 bg-rose-950 border border-rose-900 rounded-md text-sm font-medium text-rose-300 cursor-pointer transition-all duration-200 text-left mt-1 hover:bg-rose-600 hover:border-rose-600 hover:text-white"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px 16px',
+                                backgroundColor: '#fee',
+                                border: '1px solid #fcc',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#c33',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                textAlign: 'left',
+                                marginTop: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#dc3545'
+                                e.currentTarget.style.borderColor = '#dc3545'
+                                e.currentTarget.style.color = '#ffffff'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#fee'
+                                e.currentTarget.style.borderColor = '#fcc'
+                                e.currentTarget.style.color = '#c33'
+                            }}
                         >
-                            <span className="text-lg">🚪</span>
+                            <span style={{ fontSize: '18px' }}>🚪</span>
                             <span>Wyloguj</span>
                         </button>
                     </div>
@@ -114,4 +313,3 @@ export function TopNavigation() {
         </header>
     )
 }
-

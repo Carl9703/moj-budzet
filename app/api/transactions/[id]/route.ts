@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
-import { isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
@@ -109,9 +108,9 @@ export async function PATCH(
                     newCurrentAmount = envelope.currentAmount + amountDifference
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: expense zwiększa saldo, więc przy zmianie kwoty zmieniamy znak
                         newCurrentAmount = envelope.currentAmount - amountDifference
                     } else {
@@ -143,9 +142,9 @@ export async function PATCH(
                     newCurrentAmount = envelope.currentAmount - amountDifference
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zmniejsza saldo, więc przy zmianie kwoty zmieniamy znak
                         newCurrentAmount = envelope.currentAmount + amountDifference
                     } else {
@@ -203,63 +202,59 @@ export async function DELETE(
             )
         }
 
-        // Sprawdź czy to jest transfer (ma transferPairId)
-        if (transaction.transferPairId) {
-            // Znajdź wszystkie transakcje z tej pary transferów
-            const allTransferTransactions = await prisma.transaction.findMany({
-                where: {
-                    transferPairId: transaction.transferPairId
-                }
-            })
+                // Sprawdź czy to jest transfer (ma transferPairId)
+                if (transaction.transferPairId) {
+                    // Znajdź drugą transakcję z tej pary transferów
+                    const pairedTransaction = await prisma.transaction.findFirst({
+                        where: {
+                            transferPairId: transaction.transferPairId,
+                            id: { not: transaction.id }
+                        }
+                    })
 
-            if (allTransferTransactions.length > 0) {
-                // Iteruj po wszystkich transakcjach i odwróć ich skutki na kopertach
-                await Promise.all(allTransferTransactions.map(async (t) => {
-                    if (t.envelopeId) {
-                        const envelope = await prisma.envelope.findUnique({
-                            where: { id: t.envelopeId }
+                    if (pairedTransaction) {
+                        // Usuń obie transakcje z pary transferów
+                        await prisma.transaction.deleteMany({
+                            where: {
+                                transferPairId: transaction.transferPairId
+                            }
                         })
 
-                        if (envelope) {
-                            let newCurrentAmount = envelope.currentAmount
-                            if (t.type === 'income') {
-                                // Cofnięcie wpływu -> odejmij kwotę
-                                newCurrentAmount = envelope.currentAmount - t.amount
-                            } else if (t.type === 'expense') {
-                                // Cofnięcie wydatku -> dodaj kwotę
-                                newCurrentAmount = envelope.currentAmount + t.amount
-                            }
-
-                            // Zabezpieczenie przed ujemnym saldem (opcjonalne, ale warto dać max(0))
-                            // Chociaż przy cofaniu wydatku (add) nie trzeba. Przy cofaniu wpływu (sub) można.
-                            // Zachowajmy logikę prostą matematykę, ewentualnie max(0) dla income revert.
-                            /* 
-                               W oryginalnym kodzie było Math.max(0, ...). 
-                            */
-
-                            await prisma.envelope.update({
-                                where: { id: envelope.id },
-                                data: {
-                                    currentAmount: newCurrentAmount
-                                }
+                        // Przywróć salda kopert - odwróć operacje transferu
+                        if (transaction.type === 'income' && transaction.envelopeId) {
+                            const envelope = await prisma.envelope.findUnique({
+                                where: { id: transaction.envelopeId }
                             })
+                            if (envelope) {
+                                await prisma.envelope.update({
+                                    where: { id: transaction.envelopeId },
+                                    data: {
+                                        currentAmount: Math.max(0, envelope.currentAmount - transaction.amount)
+                                    }
+                                })
+                            }
                         }
-                    }
-                }))
 
-                // Usuń wszystkie transakcje z pary
-                await prisma.transaction.deleteMany({
-                    where: {
-                        transferPairId: transaction.transferPairId
-                    }
-                })
+                        if (pairedTransaction.type === 'expense' && pairedTransaction.envelopeId) {
+                            const envelope = await prisma.envelope.findUnique({
+                                where: { id: pairedTransaction.envelopeId }
+                            })
+                            if (envelope) {
+                                await prisma.envelope.update({
+                                    where: { id: pairedTransaction.envelopeId },
+                                    data: {
+                                        currentAmount: envelope.currentAmount + pairedTransaction.amount
+                                    }
+                                })
+                            }
+                        }
 
-                return NextResponse.json({
-                    success: true,
-                    message: 'Transfer został usunięty (cała operacja została cofnięta)'
-                })
-            }
-        }
+                        return NextResponse.json({
+                            success: true,
+                            message: 'Transfer został usunięty (oba transfery)'
+                        })
+                    }
+                }
 
         // Standardowa logika dla pojedynczych transakcji
         if (transaction.type === 'expense' && transaction.envelopeId) {
@@ -269,15 +264,15 @@ export async function DELETE(
 
             if (envelope) {
                 let newCurrentAmount: number
-
+                
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
                     newCurrentAmount = envelope.currentAmount + transaction.amount
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: expense zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
                         newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
                     } else {
@@ -304,16 +299,16 @@ export async function DELETE(
 
             if (envelope) {
                 let newCurrentAmount: number
-
+                
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
                     // Przy usuwaniu odwracamy: zmniejszamy saldo
                     newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
+                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
+                    
+                    if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
                         newCurrentAmount = envelope.currentAmount + transaction.amount
                     } else {

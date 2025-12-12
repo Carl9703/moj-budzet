@@ -4,7 +4,7 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
     try {
-
+        
         // Pobierz userId z JWT tokenu
         let userId: string
         try {
@@ -26,12 +26,18 @@ export async function GET(request: NextRequest) {
                 data: {
                     userId,
                     defaultSalary: 0,
+                    defaultToJoint: 0,
+                    defaultToSavings: 0,
+                    defaultToVacation: 0,
+                    defaultToInvestment: 0,
+                    defaultToWedding: 0,
+                    defaultToGroceries: 0,
                     bonusDistribution: null,
                 },
             })
         }
 
-
+        
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
         let monthlyEnvelopes: Array<{
             id: string
@@ -44,13 +50,13 @@ export async function GET(request: NextRequest) {
         }> = []
         try {
             monthlyEnvelopes = await prisma.envelope.findMany({
-                where: {
-                    userId,
+                where: { 
+                    userId, 
                     type: 'monthly',
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -58,7 +64,7 @@ export async function GET(request: NextRequest) {
                 monthlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'monthly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -83,13 +89,13 @@ export async function GET(request: NextRequest) {
         }> = []
         try {
             yearlyEnvelopes = await prisma.envelope.findMany({
-                where: {
-                    userId,
+                where: { 
+                    userId, 
                     type: 'yearly',
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -97,7 +103,7 @@ export async function GET(request: NextRequest) {
                 yearlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'yearly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -111,18 +117,17 @@ export async function GET(request: NextRequest) {
         }
 
         const response = NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
-
+        
         // Wyłącz cache dla świeżych danych
         response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
         response.headers.set('Pragma', 'no-cache')
         response.headers.set('Expires', '0')
-
+        
         return response
     } catch (error) {
         return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }
-
 
 export async function PUT(request: NextRequest) {
     try {
@@ -137,11 +142,23 @@ export async function PUT(request: NextRequest) {
         const body = await request.json()
         const {
             defaultSalary,
+            defaultToJoint,
+            defaultToSavings,
+            defaultToVacation,
+            defaultToWedding,
+            defaultToGroceries,
+            defaultToInvestment,
             bonusDistribution,
             monthlyEnvelopes,
             yearlyEnvelopes,
         } = body as {
             defaultSalary?: number
+            defaultToJoint?: number
+            defaultToSavings?: number
+            defaultToVacation?: number
+            defaultToWedding?: number
+            defaultToGroceries?: number
+            defaultToInvestment?: number
             bonusDistribution?: string
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
@@ -149,6 +166,12 @@ export async function PUT(request: NextRequest) {
 
         const updateData: any = {}
         if (defaultSalary !== undefined) updateData.defaultSalary = defaultSalary
+        if (defaultToJoint !== undefined) updateData.defaultToJoint = defaultToJoint
+        if (defaultToSavings !== undefined) updateData.defaultToSavings = defaultToSavings
+        if (defaultToVacation !== undefined) updateData.defaultToVacation = defaultToVacation
+        if (defaultToWedding !== undefined) updateData.defaultToWedding = defaultToWedding
+        if (defaultToGroceries !== undefined) updateData.defaultToGroceries = defaultToGroceries
+        if (defaultToInvestment !== undefined) updateData.defaultToInvestment = defaultToInvestment
         // bonusDistribution może być string (JSON) lub null
         if (bonusDistribution !== undefined) {
             updateData.bonusDistribution = bonusDistribution === null || bonusDistribution === '' ? null : bonusDistribution
@@ -160,6 +183,12 @@ export async function PUT(request: NextRequest) {
             create: {
                 userId,
                 defaultSalary: defaultSalary ?? 0,
+                defaultToJoint: defaultToJoint ?? 0,
+                defaultToSavings: defaultToSavings ?? 0,
+                defaultToVacation: defaultToVacation ?? 0,
+                defaultToWedding: defaultToWedding ?? 0,
+                defaultToGroceries: defaultToGroceries ?? 0,
+                defaultToInvestment: defaultToInvestment ?? 0,
                 bonusDistribution: bonusDistribution ?? null,
             },
         })

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import { TransactionFilters, FilterState } from '@/components/features/transactions/TransactionFilters'
 import { TransactionTable } from '@/components/features/transactions/TransactionTable'
-import { api, authorizedFetch } from '@/lib/api/client'
+import { authorizedFetch } from '@/lib/utils/api'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
 
@@ -41,6 +40,7 @@ export default function HistoryPage() {
     envelopes: []
   })
 
+  // Memoize filterOptions to prevent unnecessary re-renders
   const memoizedFilterOptions = useMemo(() => filterOptions, [filterOptions])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<FilterState>({
@@ -54,12 +54,13 @@ export default function HistoryPage() {
     sortBy: 'date',
     sortOrder: 'desc'
   })
-
+  
   const fetchTransactions = async (currentFilters?: FilterState) => {
     try {
       setLoading(true)
       const activeFilters = currentFilters || filters
-
+      
+      // Buduj URL z parametrami
       const params = new URLSearchParams()
       Object.entries(activeFilters).forEach(([key, value]) => {
         if (value && value !== 'date' && value !== 'desc') {
@@ -68,28 +69,30 @@ export default function HistoryPage() {
       })
       const response = await authorizedFetch(`/api/transactions?${params.toString()}`)
       const data = await response.json()
-
+      
       if (data.transactions) {
         setTransactions(data.transactions)
         if (data.filters) {
           setFilterOptions(data.filters)
         }
       } else {
+        // Fallback dla starego formatu API
         setTransactions(Array.isArray(data) ? data : [])
       }
     } catch (err) {
+      console.error('Error fetching transactions:', err)
       setTransactions([])
     } finally {
       setLoading(false)
     }
   }
-
+  
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters)
     fetchTransactions(newFilters)
   }, [])
-
-
+  
+  
   useEffect(() => {
     if (!isAuthenticated) return
     fetchTransactions()
@@ -97,7 +100,7 @@ export default function HistoryPage() {
 
   if (isCheckingAuth) {
     return (
-      <div className="flex justify-center items-center h-screen bg-slate-950">
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <LoadingSpinner size="large" text="Sprawdzanie autoryzacji..." />
       </div>
     )
@@ -109,26 +112,26 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center h-screen">
-        <div className="text-2xl text-slate-400 animate-pulse">📜 Ładowanie historii...</div>
+      <div className="min-h-screen" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: '#020617' // slate-950
+      }}>
+        <div style={{ fontSize: '24px', color: '#94a3b8' }}>📜 Ładowanie historii...</div> {/* slate-400 */}
       </div>
     )
   }
-
+  
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-[1400px] mx-auto p-4 md:p-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">Historia transakcji</span>
-          </h1>
-          <p className="text-slate-400">Przeglądaj i zarządzaj swoimi wydatkami i przychodami</p>
-        </motion.div>
-
+    <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
+      <div className="container-wide" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+        <h1 className="section-header" style={{ fontSize: '32px', fontWeight: 'bold', color: '#f1f5f9', marginBottom: '24px' }}> {/* slate-100 */}
+          📜 Historia transakcji
+        </h1>
+        
+        {/* Panel filtrów */}
         <TransactionFilters
           key="transaction-filters"
           onFiltersChange={handleFiltersChange}
@@ -136,13 +139,11 @@ export default function HistoryPage() {
           loading={loading}
           initialFilters={filters}
         />
-
+        
+        {/* Tabela transakcji */}
         <TransactionTable
           transactions={transactions}
-          onTransactionDeleted={() => {
-            fetchTransactions()
-            window.dispatchEvent(new CustomEvent('dashboardRefresh'))
-          }}
+          onTransactionDeleted={() => fetchTransactions()}
           loading={loading}
         />
       </div>

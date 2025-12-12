@@ -1,8 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { TrendingUp, TrendingDown, DollarSign, Calendar, ArrowRight } from 'lucide-react'
 import { formatMoney } from '@/lib/utils/money'
-import { motion } from 'framer-motion'
 
 interface MonthData {
   month: string
@@ -30,130 +30,255 @@ interface ArchivedMonthCardProps {
 }
 
 export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  
   const savingsRate = monthData.income > 0 ? Math.round((monthData.balance / monthData.income) * 100) : 0
   const isPositiveBalance = monthData.balance >= 0
   const isGoodSavings = savingsRate >= 20
   const isWarningSavings = savingsRate >= 10 && savingsRate < 20
-
+  
   const getStatusColor = () => {
-    if (isGoodSavings) return 'text-emerald-400'
-    if (isWarningSavings) return 'text-amber-400'
-    return 'text-rose-400'
+    if (isGoodSavings) return '#34d399' // emerald-400
+    if (isWarningSavings) return '#fbbf24' // amber-400
+    return '#fb7185' // rose-400
   }
-
-  const getStatusBgColor = () => {
-    if (isGoodSavings) return 'bg-emerald-500/10 border-emerald-500/20'
-    if (isWarningSavings) return 'bg-amber-500/10 border-amber-500/20'
-    return 'bg-rose-500/10 border-rose-500/20'
-  }
-
+  
   const getStatusIcon = () => {
     if (isGoodSavings) return '🎉'
     if (isWarningSavings) return '⚡'
     return '⚠️'
   }
-
+  
   const getStatusText = () => {
-    if (isGoodSavings) return 'Świetny miesiąc'
+    if (isGoodSavings) return 'Świetny miesiąc!'
     if (isWarningSavings) return 'Dobry miesiąc'
     return 'Wymaga uwagi'
   }
 
   return (
-    <motion.div
+    <div
       onClick={onClick}
-      whileHover={{ scale: 1.02, y: -5 }}
-      whileTap={{ scale: 0.98 }}
-      className="glass-card p-0 cursor-pointer overflow-hidden group relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: '#1e293b', // slate-800
+        borderRadius: '16px',
+        border: '1px solid #334155', // slate-700
+        boxShadow: isHovered ? '0 4px 12px rgba(0, 0, 0, 0.7)' : '0 2px 8px rgba(0, 0, 0, 0.5)',
+        padding: '24px',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
     >
-      {/* Background glow effect based on status */}
-      <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-[60px] opacity-20 -mr-10 -mt-10 ${isGoodSavings ? 'bg-emerald-500' : isWarningSavings ? 'bg-amber-500' : 'bg-rose-500'
-        }`} />
-
-      <div className="p-6 relative z-10">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-              <Calendar size={20} className="text-indigo-400" />
-              {monthData.month} <span className="text-slate-500">{monthData.year}</span>
-            </h3>
-            <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-full border ${getStatusBgColor()} ${getStatusColor()}`}>
-              <span>{getStatusIcon()}</span>
-              {getStatusText()}
-            </div>
+      {/* Gradient overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: `linear-gradient(90deg, ${getStatusColor()}, ${getStatusColor()}88)`,
+        borderRadius: '16px 16px 0 0'
+      }} />
+      
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: '20px'
+      }}>
+        <div>
+          <h3 style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: '#f1f5f9', // slate-100
+            margin: '0 0 4px 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Calendar size={20} />
+            {monthData.month} {monthData.year}
+          </h3>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            color: getStatusColor(),
+            fontWeight: '600'
+          }}>
+            <span>{getStatusIcon()}</span>
+            {getStatusText()}
           </div>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          color: '#94a3b8', // slate-400
+          fontSize: '14px',
+          opacity: isHovered ? 1 : 0.7,
+          transition: 'opacity 0.2s ease'
+        }}>
+          <span>Zobacz szczegóły</span>
+          <ArrowRight size={16} style={{
+            transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
+            transition: 'transform 0.2s ease'
+          }} />
+        </div>
+      </div>
 
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 transform group-hover:rotate-45">
-            <ArrowRight size={16} />
+      {/* Main metrics */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '16px',
+        marginBottom: '20px'
+      }}>
+        {/* Income */}
+        <div style={{
+          backgroundColor: '#0f172a', // slate-900
+          padding: '16px',
+          borderRadius: '12px',
+          border: '1px solid #334155', // slate-700
+          textAlign: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            marginBottom: '8px',
+            color: '#34d399' // emerald-400
+          }}>
+            <TrendingUp size={16} />
+            <span style={{ fontSize: '12px', fontWeight: '600' }}>Przychody</span>
+          </div>
+          <div style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#34d399' // emerald-400
+          }}>
+            +{formatMoney(monthData.income)}
           </div>
         </div>
 
-        {/* Main metrics */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {/* Income */}
-          <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 text-center group-hover:border-emerald-500/20 transition-colors">
-            <div className="flex items-center justify-center gap-1.5 mb-1 text-emerald-400">
-              <TrendingUp size={14} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Przychody</span>
-            </div>
-            <div className="text-base font-bold text-white">
-              +{formatMoney(monthData.income)}
-            </div>
+        {/* Expenses */}
+        <div style={{
+          backgroundColor: '#0f172a', // slate-900
+          padding: '16px',
+          borderRadius: '12px',
+          border: '1px solid #334155', // slate-700
+          textAlign: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            marginBottom: '8px',
+            color: '#fb7185' // rose-400
+          }}>
+            <TrendingDown size={16} />
+            <span style={{ fontSize: '12px', fontWeight: '600' }}>Wydatki</span>
           </div>
-
-          {/* Expenses */}
-          <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 text-center group-hover:border-rose-500/20 transition-colors">
-            <div className="flex items-center justify-center gap-1.5 mb-1 text-rose-400">
-              <TrendingDown size={14} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Wydatki</span>
-            </div>
-            <div className="text-base font-bold text-white">
-              -{formatMoney(monthData.expenses)}
-            </div>
-          </div>
-        </div>
-
-        {/* Balance */}
-        <div className="glass-card-static p-4 mb-4 border-white/5 bg-gradient-to-br from-slate-800/50 to-slate-900/50">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-              <DollarSign size={14} />
-              Bilans
-            </div>
-            <div className={`text-xl font-bold ${isPositiveBalance ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {isPositiveBalance ? '+' : ''}{formatMoney(monthData.balance)}
-            </div>
-          </div>
-
-          <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden flex">
-            {/* Simple savings bar visualization */}
-            <div
-              className={`h-full ${isGoodSavings ? 'bg-emerald-500' : isWarningSavings ? 'bg-amber-500' : 'bg-rose-500'}`}
-              style={{ width: `${Math.min(Math.max(savingsRate, 0), 100)}%` }}
-            />
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-[10px] text-slate-500 font-medium">Stopa oszczędności</span>
-            <div className="flex items-center gap-1">
-              <span className={`text-sm font-bold ${getStatusColor()}`}>{savingsRate}%</span>
-              {savingsRate >= 20 && <span className="text-xs">🚀</span>}
-            </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex justify-between text-xs text-slate-500 pt-3 border-t border-white/5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-base">📦</span>
-            <span className="font-medium text-slate-400">{monthData.envelopes.length}</span> kopert
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-base">🔄</span>
-            <span className="font-medium text-slate-400">{monthData.transfers.length}</span> transferów
+          <div style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#fb7185' // rose-400
+          }}>
+            -{formatMoney(monthData.expenses)}
           </div>
         </div>
       </div>
-    </motion.div>
+
+      {/* Balance and savings */}
+      <div style={{
+        backgroundColor: '#0f172a', // slate-900
+        padding: '16px',
+        borderRadius: '12px',
+        border: '1px solid #334155', // slate-700
+        marginBottom: '16px'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '8px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: '#94a3b8', // slate-400
+            fontSize: '13px',
+            fontWeight: '600'
+          }}>
+            <DollarSign size={14} />
+            Bilans
+          </div>
+          <div style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: isPositiveBalance ? '#34d399' : '#fb7185' // emerald-400 : rose-400
+          }}>
+            {isPositiveBalance ? '+' : ''}{formatMoney(monthData.balance)}
+          </div>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span style={{
+            fontSize: '12px',
+            color: '#94a3b8', // slate-400
+            fontWeight: '500'
+          }}>
+            Oszczędności
+          </span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: '700',
+              color: getStatusColor()
+            }}>
+              {savingsRate}%
+            </span>
+            {savingsRate >= 20 && <span style={{ fontSize: '12px' }}>🎯</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary stats */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '12px',
+        color: '#94a3b8', // slate-400
+        paddingTop: '12px',
+        borderTop: '1px solid #334155' // slate-700
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>📦</span>
+          <span>{monthData.envelopes.length} kopert</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>🔄</span>
+          <span>{monthData.transfers.length} transferów</span>
+        </div>
+      </div>
+    </div>
   )
 }

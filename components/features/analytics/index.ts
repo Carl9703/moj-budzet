@@ -1,3 +1,6 @@
+// Charts
+export * from './charts'
+
 // Metrics
 export * from './metrics'
 
@@ -5,19 +8,11 @@ export * from './metrics'
 export * from './filters'
 
 // Other components
+export { CategoryAnalysis } from './CategoryAnalysis'
+export { DetailedDataTable } from './DetailedDataTable'
 export { InteractiveExpenseExplorer } from './InteractiveExpenseExplorer'
+export { SpendingBreakdownVisualization } from './SpendingBreakdownVisualization'
 export { TrendsVisualization } from './TrendsVisualization'
 export { AnalyticsCharts } from './AnalyticsCharts'
 export { IncomeAnalysis } from './IncomeAnalysis'
 export { ViewModeToggle } from './ViewModeToggle'
-
-// Lazy-loaded versions (for code splitting)
-export {
-    LazyAnalyticsCharts,
-    LazyTrendsVisualization,
-    LazyInteractiveExpenseExplorer,
-    LazyIncomeAnalysis,
-    ChartsSkeleton,
-    TrendsSkeleton,
-    ExplorerSkeleton
-} from './LazyAnalytics'

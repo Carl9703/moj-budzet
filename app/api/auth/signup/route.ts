@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import bcrypt from 'bcryptjs'
 import { signupSchema } from '@/lib/validations/auth'
-import { ENVELOPE_TYPES } from '@/lib/constants/envelopeTypes'
-import { EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,19 +45,22 @@ export async function POST(req: NextRequest) {
     // Stwórz podstawowe koperty dla nowego użytkownika
     await createDefaultEnvelopes(user.id)
 
-    // Stwórz domyślne kategorie
-    await createDefaultCategories(user.id)
-
     // Stwórz konfigurację użytkownika
     await prisma.userConfig.create({
       data: {
         userId: user.id,
-        defaultSalary: 5000
+        defaultSalary: 5000,
+        defaultToJoint: 1500,
+        defaultToSavings: 1000,
+        defaultToVacation: 400,
+        defaultToWedding: 0,
+        defaultToGroceries: 0,
+        defaultToInvestment: 500
       }
     })
 
     return NextResponse.json(
-      {
+      { 
         message: 'Konto zostało utworzone pomyślnie',
         user: {
           id: user.id,
@@ -74,9 +75,9 @@ export async function POST(req: NextRequest) {
     console.error('❌ SIGNUP ERROR:', error)
     console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error')
     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
-
+    
     return NextResponse.json(
-      {
+      { 
         error: 'Wystąpił błąd podczas tworzenia konta',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -87,25 +88,24 @@ export async function POST(req: NextRequest) {
 
 async function createDefaultEnvelopes(userId: string) {
   const defaultEnvelopes = [
-    // Koperty miesięczne (budżetowe)
-    { name: 'Mieszkanie', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 1500, icon: '🏠', group: 'needs' },
-    { name: 'Żywność', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 1200, icon: '🍕', group: 'needs' },
-    { name: 'Transport', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 400, icon: '🚗', group: 'needs' },
-    { name: 'Zdrowie i Higiena', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 300, icon: '💊', group: 'needs' },
-    { name: 'Rachunki i Subskrypcje', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 200, icon: '📱', group: 'needs' },
-    { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 2000, icon: '🚗', group: 'needs', isAccumulating: true }, // Changed group to needs, added accumulation
-
-    { name: 'Wydatki Osobiste', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
-    { name: 'Gastronomia', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
-    { name: 'Ubrania i Akcesoria', type: 'monthly', envelopeType: ENVELOPE_TYPES.BUDGET, plannedAmount: 200, icon: '👕', group: 'lifestyle' },
-    { name: 'Prezenty i Okazje', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 1500, icon: '🎁', group: 'lifestyle', isAccumulating: true }, // Changed group to lifestyle
-    { name: 'Podróże', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 5000, icon: '✈️', group: 'lifestyle', isAccumulating: true }, // Changed group to lifestyle
-    { name: 'Wesele', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 15000, icon: '💍', group: 'lifestyle', isAccumulating: true }, // Changed group to lifestyle
-
-    // Majątek i Cele
-    { name: 'Fundusz Awaryjny', type: 'monthly', envelopeType: ENVELOPE_TYPES.EMERGENCY, plannedAmount: 1000, icon: '🚨', group: 'assets', isAccumulating: true },
-    { name: 'Budowanie Przyszłości', type: 'yearly', envelopeType: ENVELOPE_TYPES.SAVINGS, plannedAmount: 9600, icon: '📈', group: 'assets', isAccumulating: true },
-    { name: 'Wolne środki (roczne)', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 2000, icon: '🎉', group: 'assets', isAccumulating: true },
+    // Koperty miesięczne
+    { name: 'Mieszkanie', type: 'monthly', plannedAmount: 1500, icon: '🏠', group: 'needs' },
+    { name: 'Żywność', type: 'monthly', plannedAmount: 1200, icon: '🍕', group: 'needs' },
+    { name: 'Transport', type: 'monthly', plannedAmount: 400, icon: '🚗', group: 'needs' },
+    { name: 'Zdrowie i Higiena', type: 'monthly', plannedAmount: 300, icon: '💊', group: 'needs' },
+    { name: 'Rachunki i Subskrypcje', type: 'monthly', plannedAmount: 200, icon: '📱', group: 'needs' },
+    { name: 'Wydatki Osobiste', type: 'monthly', plannedAmount: 500, icon: '🎮', group: 'lifestyle' },
+    { name: 'Gastronomia', type: 'monthly', plannedAmount: 300, icon: '🍽️', group: 'lifestyle' },
+    { name: 'Ubrania i Akcesoria', type: 'monthly', plannedAmount: 200, icon: '👕', group: 'lifestyle' },
+    { name: 'Fundusz Awaryjny', type: 'monthly', plannedAmount: 1000, icon: '🚨', group: 'assets' },
+    
+    // Koperty roczne
+    { name: 'Auto: Serwis i Ubezpieczenie', type: 'yearly', plannedAmount: 2000, icon: '🚗', group: 'assets' },
+    { name: 'Prezenty i Okazje', type: 'yearly', plannedAmount: 1500, icon: '🎁', group: 'assets' },
+    { name: 'Podróże', type: 'yearly', plannedAmount: 5000, icon: '✈️', group: 'assets' },
+    { name: 'Wesele', type: 'yearly', plannedAmount: 15000, icon: '💍', group: 'assets' },
+    { name: 'Budowanie Przyszłości', type: 'yearly', plannedAmount: 9600, icon: '📈', group: 'assets' },
+    { name: 'Wolne środki (roczne)', type: 'yearly', plannedAmount: 2000, icon: '🎉', group: 'assets' },
   ]
 
   for (const envelope of defaultEnvelopes) {
@@ -114,25 +114,11 @@ async function createDefaultEnvelopes(userId: string) {
         userId,
         name: envelope.name,
         type: envelope.type,
-        envelopeType: envelope.envelopeType,
         plannedAmount: envelope.plannedAmount,
         currentAmount: 0,
         icon: envelope.icon,
-        group: envelope.group,
-        isAccumulating: envelope.isAccumulating || false // Add this line
+        group: envelope.group
       }
     })
   }
-}
-
-async function createDefaultCategories(userId: string) {
-  await prisma.category.createMany({
-    data: EXPENSE_CATEGORIES.map(c => ({
-      userId,
-      name: c.name,
-      icon: c.icon,
-      type: c.type,
-      defaultEnvelope: c.defaultEnvelope || null
-    }))
-  })
 }
