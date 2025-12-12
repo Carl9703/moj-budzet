@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArchivedMonthCard } from '@/components/shared/archive/ArchivedMonthCard'
-import { authorizedFetch } from '@/lib/utils/api'
+import { authorizedFetch } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Archive, AlertCircle, RefreshCw } from 'lucide-react'
 
 interface TransactionData {
     id: string
@@ -54,11 +56,11 @@ export default function ArchivePage() {
             fetchMonthsData()
         }
     }, [isAuthenticated])
-    
+
     if (isCheckingAuth) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <p>Sprawdzanie autoryzacji...</p>
+            <div className="flex justify-center items-center h-screen">
+                <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
             </div>
         )
     }
@@ -70,20 +72,16 @@ export default function ArchivePage() {
     const fetchMonthsData = async () => {
         try {
             setLoading(true)
-            const response = await authorizedFetch('/api/archive', {
-                cache: 'no-store'
-            })
+            const response = await authorizedFetch('/api/archive', { cache: 'no-store' })
 
             if (response.ok) {
                 const data = await response.json()
                 setMonthsData(data)
             } else {
                 const errorText = await response.text()
-                setError(`Błąd API: ${response.status} - ${errorText}`)
-                console.error('Archive API error:', response.status, errorText)
+                setError(`Błąd API: ${response.status}`)
             }
         } catch (error) {
-            console.error('Error fetching archive:', error)
             setError('Błąd połączenia z serwerem')
         } finally {
             setLoading(false)
@@ -97,21 +95,10 @@ export default function ArchivePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh'
-                }}>
-                    <div style={{
-                        fontSize: '24px',
-                        textAlign: 'center',
-                        color: '#94a3b8' // slate-400
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
-                        <div>Ładowanie archiwum...</div>
-                    </div>
+            <div className="min-h-screen flex justify-center items-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-800 rounded-xl animate-pulse" />
+                    <p className="text-slate-400 text-sm animate-pulse">Ładowanie archiwum...</p>
                 </div>
             </div>
         )
@@ -119,105 +106,92 @@ export default function ArchivePage() {
 
     if (error) {
         return (
-            <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh'
-                }}>
-                    <div className="bg-theme-secondary card" style={{
-                        padding: '32px',
-                        borderRadius: '8px',
-                        textAlign: 'center',
-                        color: '#fb7185', // rose-400
-                        border: '1px solid #fb7185', // rose-400
-                        maxWidth: '400px',
-                        backgroundColor: '#1e293b' // slate-800
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-                        <p style={{ fontSize: '18px', marginBottom: '8px', fontWeight: '600' }}>Błąd ładowania</p>
-                        <p style={{ fontSize: '14px', marginBottom: '16px' }}>{error}</p>
-                        <button
-                            onClick={fetchMonthsData}
-                            className="nav-button"
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#fb7185', // rose-400
-                                color: '#f1f5f9', // slate-100
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Spróbuj ponownie
-                        </button>
+            <div className="min-h-screen flex justify-center items-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-8 rounded-2xl text-center glass-card max-w-md border-rose-500/30"
+                >
+                    <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                        <AlertCircle size={32} />
                     </div>
-                </div>
+                    <p className="text-xl mb-2 font-bold text-white">Błąd ładowania</p>
+                    <p className="text-sm mb-6 text-slate-400">{error}</p>
+                    <button
+                        onClick={fetchMonthsData}
+                        className="btn-primary w-full flex items-center justify-center gap-2"
+                    >
+                        <RefreshCw size={16} /> Spróbuj ponownie
+                    </button>
+                </motion.div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#020617' }}> {/* slate-950 */}
-            <div className="container-wide" style={{ 
-                maxWidth: '1400px', 
-                margin: '0 auto', 
-                padding: '16px'
-            }}>
-                <h1 className="section-header" style={{ 
-                    fontSize: '32px', 
-                    fontWeight: 'bold', 
-                    color: '#f1f5f9', // slate-100
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
-                    🏆 Galeria Osiągnięć
-                </h1>
-                
-                <p style={{
-                    fontSize: '16px',
-                    color: '#94a3b8', // slate-400
-                    marginBottom: '32px',
-                    maxWidth: '600px'
-                }}>
-                    Przejrzyj swoje miesięczne osiągnięcia finansowe. Każda karta to podsumowanie 
-                    miesiąca z kluczowymi wskaźnikami i możliwością głębokiej analizy.
-                </p>
+        <div className="min-h-screen pb-20">
+            <div className="max-w-[1400px] mx-auto p-4 md:p-8">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                >
+                    <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+                        <span className="p-2 rounded-xl bg-orange-500/10 text-orange-400">
+                            <Archive size={32} />
+                        </span>
+                        <span className="gradient-text">Galeria Osiągnięć</span>
+                    </h1>
+                    <p className="text-slate-400 text-lg max-w-2xl">
+                        Przejrzyj swoje miesięczne osiągnięcia finansowe. Każda karta to podsumowanie
+                        miesiąca z kluczowymi wskaźnikami.
+                    </p>
+                </motion.div>
 
                 {monthsData.length === 0 ? (
-                    <div className="bg-theme-secondary card" style={{
-                        padding: '48px',
-                        borderRadius: '12px',
-                        textAlign: 'center',
-                        color: '#94a3b8', // slate-400
-                        border: '1px solid #334155', // slate-700
-                        backgroundColor: '#1e293b' // slate-800
-                    }}>
-                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>📂</div>
-                        <p style={{ fontSize: '20px', marginBottom: '8px', fontWeight: '600' }}>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="p-16 rounded-3xl text-center glass-card flex flex-col items-center"
+                    >
+                        <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mb-6 text-6xl shadow-inner">
+                            📂
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-2">
                             Brak danych archiwalnych
+                        </h2>
+                        <p className="text-slate-400 max-w-md">
+                            Twoje archiwum jest puste. Dane pojawią się tutaj automatycznie po zamknięciu pierwszego miesiąca.
                         </p>
-                        <p style={{ fontSize: '16px' }}>
-                            Archiwum będzie dostępne po zamknięciu pierwszego miesiąca
-                        </p>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="grid-responsive" style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '24px'
-                    }}>
+                    <motion.div
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        initial="hidden"
+                        animate="show"
+                        variants={{
+                            hidden: { opacity: 0 },
+                            show: {
+                                opacity: 1,
+                                transition: { staggerChildren: 0.1 }
+                            }
+                        }}
+                    >
                         {monthsData.map((monthData) => (
-                            <ArchivedMonthCard
+                            <motion.div
                                 key={`${monthData.year}-${monthData.month}`}
-                                monthData={monthData}
-                                onClick={() => handleMonthClick(monthData)}
-                            />
+                                variants={{
+                                    hidden: { opacity: 0, y: 20 },
+                                    show: { opacity: 1, y: 0 }
+                                }}
+                            >
+                                <ArchivedMonthCard
+                                    monthData={monthData}
+                                    onClick={() => handleMonthClick(monthData)}
+                                />
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 )}
             </div>
         </div>

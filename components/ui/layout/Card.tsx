@@ -5,34 +5,14 @@ import { ReactNode } from 'react'
 interface CardProps {
   children: ReactNode
   className?: string
-  style?: React.CSSProperties
   onClick?: () => void
   hover?: boolean
 }
 
-export function Card({ children, className = '', style = {}, onClick, hover = false }: CardProps) {
-  const baseStyle: React.CSSProperties = {
-    backgroundColor: 'var(--bg-secondary)',
-    borderRadius: 'var(--border-radius-main)',
-    padding: 'var(--space-l)',
-    border: 'none',
-    transition: 'var(--transition-normal)',
-    ...style
-  }
-
-  const hoverStyle = hover ? {
-    transform: 'translateY(-2px)',
-    boxShadow: 'var(--shadow-lg)'
-  } : {}
-
+export function Card({ children, className = '', onClick, hover = false }: CardProps) {
   return (
     <div
-      className={className}
-      style={{
-        ...baseStyle,
-        ...hoverStyle,
-        cursor: onClick ? 'pointer' : 'default'
-      }}
+      className={`bg-slate-800 rounded-xl p-4 border border-slate-700 transition-all ${hover ? 'hover:-translate-y-0.5 hover:shadow-lg' : ''} ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >
       {children}

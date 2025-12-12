@@ -1,4 +1,4 @@
-import { authorizedFetch } from '../utils/api'
+import { api } from '../api/client'
 
 // Funkcja do wywołania globalnego odświeżenia salda w sidebar
 const triggerDashboardRefresh = () => {
@@ -36,23 +36,14 @@ interface ExpenseData {
 export const createIncomeHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (incomeData: IncomeData) => {
         try {
-            const response = await authorizedFetch('/api/income', {
-                method: 'POST',
-                body: JSON.stringify({
-                    type: incomeData.type || 'salary',
-                    date: incomeData.date || new Date().toISOString().split('T')[0],
-                    ...incomeData
-                })
+            const result = await api.post<{ message?: string }>('/api/income', {
+                type: incomeData.type || 'salary',
+                date: incomeData.date || new Date().toISOString().split('T')[0],
+                ...incomeData
             })
-
-            if (response.ok) {
-                refetch()
-                triggerDashboardRefresh() // Trigger global refresh
-                const result = await response.json()
-                showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
-            } else {
-                showToast('Błąd podczas zapisywania przychodu', 'error')
-            }
+            refetch()
+            triggerDashboardRefresh()
+            showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
         } catch {
             showToast('Błąd podczas zapisywania przychodu', 'error')
         }
@@ -62,21 +53,10 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
 export const createBonusHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (bonusData: BonusData) => {
         try {
-            const response = await authorizedFetch('/api/income', {
-                method: 'POST',
-                body: JSON.stringify({
-                    type: 'bonus',
-                    ...bonusData
-                })
-            })
-
-            if (response.ok) {
-                refetch()
-                triggerDashboardRefresh() // Trigger global refresh
-                showToast('Premia została rozdzielona na koperty roczne!', 'success')
-            } else {
-                showToast('Błąd podczas zapisywania premii', 'error')
-            }
+            await api.post('/api/income', { type: 'bonus', ...bonusData })
+            refetch()
+            triggerDashboardRefresh()
+            showToast('Premia została rozdzielona na koperty roczne!', 'success')
         } catch {
             showToast('Błąd podczas zapisywania premii', 'error')
         }
@@ -86,28 +66,40 @@ export const createBonusHandler = (refetch: () => void, showToast: (message: str
 export const createExpenseHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (expenseData: ExpenseData) => {
         try {
-            const response = await authorizedFetch('/api/transactions', {
-                method: 'POST',
-                body: JSON.stringify({
-                    type: 'expense',
-                    amount: expenseData.amount,
-                    description: expenseData.description,
-                    envelopeId: expenseData.envelopeId,
-                    category: expenseData.category,
-                    date: expenseData.date,
-                    includeInStats: expenseData.includeInStats ?? true
-                })
+            await api.post('/api/transactions', {
+                type: 'expense',
+                amount: expenseData.amount,
+                description: expenseData.description,
+                envelopeId: expenseData.envelopeId,
+                category: expenseData.category,
+                date: expenseData.date,
+                includeInStats: expenseData.includeInStats ?? true
             })
-
-            if (response.ok) {
-                refetch()
-                triggerDashboardRefresh() // Trigger global refresh
-                showToast('Wydatek zapisany pomyślnie!', 'success')
-            } else {
-                showToast('Błąd podczas zapisywania wydatku', 'error')
-            }
+            refetch()
+            triggerDashboardRefresh()
+            showToast('Wydatek zapisany pomyślnie!', 'success')
         } catch {
             showToast('Błąd podczas zapisywania wydatku', 'error')
+        }
+    }
+}
+
+export const createTransferHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
+    return async (transferData: {
+        fromEnvelopeId: string
+        toEnvelopeId: string
+        amount: number
+        description: string
+        date: string
+        toCategory?: string
+    }) => {
+        try {
+            await api.post('/api/transfer', transferData)
+            refetch()
+            triggerDashboardRefresh()
+            showToast('Transfer wykonany pomyślnie!', 'success')
+        } catch {
+            showToast('Błąd podczas wykonywania transferu', 'error')
         }
     }
 }

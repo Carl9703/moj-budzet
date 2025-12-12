@@ -33,7 +33,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
     const showToast = (message: string, type: Toast['type'] = 'info', duration = 4000) => {
         const id = Math.random().toString(36).substr(2, 9)
         const newToast: Toast = { id, message, type, duration }
-        
+
         setToasts(prev => [...prev, newToast])
 
         // Auto remove toast
@@ -65,16 +65,7 @@ function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
     if (toasts.length === 0) return null
 
     return (
-        <div className="toast-container" style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            maxWidth: '400px'
-        }}>
+        <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm">
             {toasts.map(toast => (
                 <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
             ))}
@@ -101,52 +92,12 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         setTimeout(() => onRemove(toast.id), 300)
     }
 
-    const getToastStyles = () => {
-        const baseStyles = {
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid',
-            borderRadius: '8px',
-            padding: '16px',
-            boxShadow: 'var(--shadow-lg)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            minWidth: '300px',
-            transform: isVisible && !isExiting ? 'translateX(0)' : 'translateX(100%)',
-            opacity: isVisible && !isExiting ? 1 : 0,
-            transition: 'all 0.3s ease',
-            cursor: 'pointer'
-        }
-
+    const getBorderColor = () => {
         switch (toast.type) {
-            case 'success':
-                return { 
-                    ...baseStyles, 
-                    borderColor: 'var(--accent-success)', 
-                    backgroundColor: 'var(--bg-secondary)',
-                    className: 'toast-success'
-                }
-            case 'error':
-                return { 
-                    ...baseStyles, 
-                    borderColor: 'var(--accent-error)', 
-                    backgroundColor: 'var(--bg-secondary)',
-                    className: 'toast-error'
-                }
-            case 'warning':
-                return { 
-                    ...baseStyles, 
-                    borderColor: 'var(--accent-warning)', 
-                    backgroundColor: 'var(--bg-secondary)',
-                    className: 'toast-warning'
-                }
-            default:
-                return { 
-                    ...baseStyles, 
-                    borderColor: 'var(--accent-primary)', 
-                    backgroundColor: 'var(--bg-secondary)',
-                    className: 'toast-info'
-                }
+            case 'success': return 'border-emerald-500'
+            case 'error': return 'border-red-500'
+            case 'warning': return 'border-amber-500'
+            default: return 'border-indigo-500'
         }
     }
 
@@ -159,19 +110,15 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         }
     }
 
-    const getTextColor = () => {
-        return 'var(--text-primary)'
-    }
-
     return (
-        <div style={getToastStyles()} onClick={handleRemove}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '18px' }}>{getIcon()}</span>
-                <span style={{ 
-                    color: getTextColor(), 
-                    fontWeight: '500',
-                    fontSize: '14px'
-                }}>
+        <div
+            className={`bg-slate-800 border rounded-lg p-4 shadow-xl flex items-center justify-between min-w-[300px] cursor-pointer transition-all duration-300 ${getBorderColor()} ${isVisible && !isExiting ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+                }`}
+            onClick={handleRemove}
+        >
+            <div className="flex items-center gap-3">
+                <span className="text-lg">{getIcon()}</span>
+                <span className="text-slate-100 font-medium text-sm">
                     {toast.message}
                 </span>
             </div>
@@ -180,19 +127,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
                     e.stopPropagation()
                     handleRemove()
                 }}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    color: getTextColor(),
-                    cursor: 'pointer',
-                    fontSize: '18px',
-                    padding: '0',
-                    marginLeft: '12px',
-                    opacity: 0.7,
-                    transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                className="bg-transparent border-none text-slate-100 cursor-pointer text-lg p-0 ml-3 opacity-70 hover:opacity-100 transition-opacity"
             >
                 ×
             </button>

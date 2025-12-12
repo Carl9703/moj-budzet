@@ -10,117 +10,37 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
 }
 
-export function Button({ 
-  children, 
-  variant = 'primary', 
-  size = 'medium', 
+export function Button({
+  children,
+  variant = 'primary',
+  size = 'medium',
   fullWidth = false,
   loading = false,
   disabled,
   className = '',
-  style = {},
-  ...props 
+  ...props
 }: ButtonProps) {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'success':
-        return {
-          backgroundColor: 'var(--color-success)',
-          color: 'var(--text-primary)',
-          border: 'none'
-        }
-      case 'error':
-        return {
-          backgroundColor: 'var(--color-error)',
-          color: 'var(--text-primary)',
-          border: 'none'
-        }
-      case 'warning':
-        return {
-          backgroundColor: 'var(--color-warning)',
-          color: 'var(--text-primary)',
-          border: 'none'
-        }
-      case 'secondary':
-        return {
-          backgroundColor: 'var(--bg-tertiary)',
-          color: 'var(--text-primary)',
-          border: '1px solid var(--bg-primary)'
-        }
-      default:
-        return {
-          backgroundColor: 'var(--brand-primary)',
-          color: 'var(--text-primary)',
-          border: 'none'
-        }
-    }
+  const variantClasses = {
+    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
+    success: 'bg-emerald-500 text-white hover:bg-emerald-600',
+    error: 'bg-rose-500 text-white hover:bg-rose-600',
+    warning: 'bg-amber-500 text-white hover:bg-amber-600',
+    secondary: 'bg-slate-700 text-slate-100 border border-slate-600 hover:bg-slate-600'
   }
-  
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'small':
-        return {
-          padding: 'var(--space-s) var(--space-m)',
-          fontSize: 'var(--font-size-s)',
-          height: '32px'
-        }
-      case 'large':
-        return {
-          padding: 'var(--space-m) var(--space-xl)',
-          fontSize: 'var(--font-size-m)',
-          height: '48px'
-        }
-      default:
-        return {
-          padding: 'var(--space-s) var(--space-m)',
-          fontSize: 'var(--font-size-s)',
-          height: '40px'
-        }
-    }
+
+  const sizeClasses = {
+    small: 'h-8 px-3 text-sm',
+    medium: 'h-10 px-4 text-sm',
+    large: 'h-12 px-6 text-base'
   }
-  
-  const baseStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--space-s)',
-    borderRadius: 'var(--border-radius-small)',
-    fontWeight: 'var(--font-weight-medium)',
-    cursor: disabled || loading ? 'not-allowed' : 'pointer',
-    transition: 'var(--transition-fast)',
-    opacity: disabled || loading ? 0.6 : 1,
-    width: fullWidth ? '100%' : 'auto',
-    ...getVariantStyles(),
-    ...getSizeStyles(),
-    ...style
-  }
-  
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) {
-      e.preventDefault()
-      return
-    }
-    props.onClick?.(e)
-  }
-  
+
   return (
     <button
       {...props}
       disabled={disabled || loading}
-      className={className}
-      style={baseStyle}
-      onClick={handleClick}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${disabled || loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
-      {loading && (
-        <div style={{
-          width: '16px',
-          height: '16px',
-          border: '2px solid transparent',
-          borderTop: '2px solid currentColor',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-      )}
+      {loading && <div className="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin" />}
       {children}
     </button>
   )

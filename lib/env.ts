@@ -14,13 +14,8 @@ function isMainBranch() {
 
 // Wybieramy odpowiednią zmienną DATABASE_URL
 function getDatabaseUrl() {
-  const isMain = isMainBranch()
-  
-  if (isMain) {
-    return process.env.DATABASE_URL_MAIN
-  } else {
-    return process.env.DATABASE_URL_DEV
-  }
+  // TEMPORARY: Force MAIN database for local testing
+  return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL_DEV
 }
 
 // Funkcja do sprawdzenia czy jesteśmy w trybie buildowania
@@ -36,7 +31,7 @@ const envSchema = z.object({
 function validateEnv() {
   try {
     const validatedEnv = envSchema.parse(process.env)
-    
+
     // Podczas buildowania nie wymagamy DATABASE_URL
     if (isBuildTime()) {
       return {
@@ -44,7 +39,7 @@ function validateEnv() {
         DATABASE_URL: 'dummy-url-for-build'
       }
     }
-    
+
     // Sprawdzamy czy mamy odpowiednią zmienną DATABASE_URL
     const databaseUrl = getDatabaseUrl()
     if (!databaseUrl) {
@@ -58,7 +53,7 @@ function validateEnv() {
         `   ${requiredVar}=<your-database-url>\n`
       )
     }
-    
+
     return {
       ...validatedEnv,
       DATABASE_URL: databaseUrl
