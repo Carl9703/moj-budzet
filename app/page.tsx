@@ -175,10 +175,10 @@ export default function HomePage() {
                                     {(() => {
                                         const needsMonthly = data.monthlyEnvelopes
                                             .filter(e => e.group === 'needs')
-                                            .map(e => ({ ...e, envelopeType: 'monthly' as const }))
+                                            .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
                                         const needsYearly = (data.yearlyEnvelopes || [])
                                             .filter(e => e.group === 'needs')
-                                            .map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                            .map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
                                         const allNeeds = [...needsMonthly, ...needsYearly]
 
                                         return (
@@ -199,10 +199,10 @@ export default function HomePage() {
                                     {(() => {
                                         const wantsMonthly = data.monthlyEnvelopes
                                             .filter(e => e.group === 'wants' || e.group === 'lifestyle')
-                                            .map(e => ({ ...e, envelopeType: 'monthly' as const }))
+                                            .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
                                         const wantsYearly = (data.yearlyEnvelopes || [])
                                             .filter(e => e.group === 'wants' || e.group === 'lifestyle')
-                                            .map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                            .map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
                                         const allWants = [...wantsMonthly, ...wantsYearly]
 
                                         return (
@@ -223,11 +223,11 @@ export default function HomePage() {
                                     {(() => {
                                         const assetsMonthly = data.monthlyEnvelopes
                                             .filter(e => e.group === 'assets' && e.name !== 'Fundusz Awaryjny')
-                                            .map(e => ({ ...e, envelopeType: 'monthly' as const }))
+                                            .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
                                         const assetsYearly = (data.yearlyEnvelopes?.filter(e => {
                                             const nameLower = e.name.toLowerCase()
                                             return e.group === 'assets' && !nameLower.includes('wolne środki') && e.name !== 'Fundusz Awaryjny'
-                                        }) || []).map(e => ({ ...e, envelopeType: 'yearly' as const }))
+                                        }) || []).map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
                                         const allAssets = [...assetsMonthly, ...assetsYearly]
 
                                         return allAssets.length > 0 ? (
@@ -244,7 +244,9 @@ export default function HomePage() {
 
                                     {/* Goals */}
                                     {data.yearlyEnvelopes && (() => {
-                                        const goals = data.yearlyEnvelopes.filter(e => e.group === 'goals')
+                                        const goals = data.yearlyEnvelopes
+                                            .filter(e => e.group === 'goals')
+                                            .map(e => ({ ...e, envelopeKind: e.envelopeType }))
                                         return goals.length > 0 ? (
                                             <EnvelopeGroup
                                                 title="Cele Oszczędnościowe"
@@ -306,10 +308,13 @@ export default function HomePage() {
                         <CloseMonthModal
                             onClose={() => setShowCloseMonthModal(false)}
                             onConfirm={refetch}
+                            surplus={data.monthlySurplus}
+                            transfers={data.monthlyTransfersToEnvelopes || []}
                             monthSummary={{
                                 income: data.totalIncome || 0,
                                 expenses: data.totalExpenses || 0,
-                                savings: data.balance || 0 // passing balance as savings if that's the logic, or just let modal calc
+                                savings: data.monthlySurplus || 0,
+                                returns: data.monthlyReturns
                             }}
                         />
                     </div>

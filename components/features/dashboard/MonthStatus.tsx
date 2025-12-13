@@ -31,8 +31,10 @@ export const MonthStatus = memo(function MonthStatus({
     const monthProgress = (currentDay / totalDays) * 100
 
     const canCloseMonth = () => {
-        if (isMonthClosed || previousMonthStatus.isClosed) return false
-        return daysLeft <= 3 || currentDay <= 3
+        // TEMP: Always allow for testing
+        return true
+        // if (isMonthClosed || previousMonthStatus.isClosed) return false
+        // return daysLeft <= 3 || currentDay <= 3
     }
 
     const monthName = new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })

@@ -56,25 +56,25 @@ model User {
   loginAttempts     Int                @default(0)
   lockedUntil       DateTime?
   accounts          Account[]
+  categories        Category[]
   envelopes         Envelope[]
   recurringPayments RecurringPayment[]
   sessions          Session[]
   transactions      Transaction[]
   userConfig        UserConfig?
-  categories        Category[]
 }
 
 model Envelope {
   id                     String             @id @default(cuid())
   userId                 String
   name                   String
-  type                   String             // monthly | yearly
-  envelopeType           String             @default("budget") // savings | budget | emergency | goal
+  type                   String
   plannedAmount          Float
   currentAmount          Float
   icon                   String?
   group                  String?
   isArchived             Boolean            @default(false)
+  envelopeType           String             @default("budget")
   isAccumulating         Boolean            @default(false)
   user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   recurringPayments      RecurringPayment[]
@@ -82,7 +82,6 @@ model Envelope {
   recurringToTransfers   RecurringPayment[] @relation("RecurringPaymentTo")
   transactions           Transaction[]
 }
-
 
 model Transaction {
   id             String    @id @default(cuid())
@@ -102,13 +101,13 @@ model Transaction {
 }
 
 model UserConfig {
-  id                  String   @id @default(cuid())
-  userId              String   @unique
-  defaultSalary       Float    @default(0)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  bonusDistribution   String?
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  defaultSalary     Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  bonusDistribution String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RecurringPayment {
@@ -123,9 +122,9 @@ model RecurringPayment {
   dismissedUntil DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  type           String    @default("expense")
   fromEnvelopeId String?
   toEnvelopeId   String?
-  type           String    @default("expense")
   envelope       Envelope? @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
   fromEnvelope   Envelope? @relation("RecurringPaymentFrom", fields: [fromEnvelopeId], references: [id], onDelete: Cascade)
   toEnvelope     Envelope? @relation("RecurringPaymentTo", fields: [toEnvelopeId], references: [id], onDelete: Cascade)
@@ -136,12 +135,10 @@ model Category {
   id              String   @id @default(cuid())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
   name            String
   icon            String
-  type            String   // 'monthly' or 'yearly'
-  defaultEnvelope String?  // Name of the default envelope
-
+  type            String
+  defaultEnvelope String?
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -189,9 +189,9 @@ export function EnvelopeDetailModal({
                                             onChange={e => setFormData({ ...formData, group: e.target.value })}
                                             className="w-full appearance-none bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-indigo-500/50 transition-all"
                                         >
-                                            <option value="needs">Potrzeby (Needs)</option>
-                                            <option value="lifestyle">Styl Życia (Lifestyle)</option>
-                                            <option value="assets">Cele i Majątek (Assets)</option>
+                                            <option value="needs">Potrzeby</option>
+                                            <option value="lifestyle">Styl Życia</option>
+                                            <option value="assets">Cele i Majątek</option>
                                         </select>
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
                                             ▼

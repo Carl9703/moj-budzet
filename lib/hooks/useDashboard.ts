@@ -5,6 +5,11 @@ interface DashboardData {
     balance: number
     totalIncome: number
     totalExpenses: number
+    allocatedToEnvelopes?: number
+    emergencyFundAmount?: number
+    monthlySurplus?: number
+    monthlyReturns?: number
+    monthlyTransfersToEnvelopes?: Array<{ name: string; icon: string; amount: number }>
     isMonthClosed?: boolean
     monthlyEnvelopes: Array<{
         id: string
@@ -16,6 +21,7 @@ interface DashboardData {
         activityCount: number
         group?: string
         isAccumulating?: boolean
+        envelopeType?: string
     }>
     yearlyEnvelopes: Array<{
         id: string
@@ -26,6 +32,7 @@ interface DashboardData {
         current: number
         group?: string
         isAccumulating?: boolean
+        envelopeType?: string
     }>
     transactions: Array<{
         id: string

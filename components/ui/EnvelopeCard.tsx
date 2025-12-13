@@ -12,20 +12,26 @@ interface EnvelopeProps {
     id?: string
     onTransactionClick?: (envelopeId: string, envelopeName: string, envelopeIcon: string) => void
     variant?: 'card' | 'list'
+    isAccumulating?: boolean
+    envelopeType?: string  // 'savings', 'goal', 'emergency', 'budget'
 }
 
 export const EnvelopeCard = memo(function EnvelopeCard({
-    name, icon, spent, planned, current, type, id, onTransactionClick, variant = 'card'
+    name, icon, spent, planned, current, type, id, onTransactionClick, variant = 'card', isAccumulating = false, envelopeType
 }: EnvelopeProps) {
     const isFreedomFunds = name.toLowerCase().includes('wolne środki')
+    // Tylko koperty typu 'savings' (jak IKE) pokazują spent (wpłaty na oszczędności)
+    // Pozostałe yearly (goal, emergency) pokazują current (stan koperty)
+    const isSavingsType = envelopeType === 'savings'
+    const displayValue = type === 'monthly' ? spent : (isSavingsType ? spent : current)
     const percentage = isFreedomFunds
         ? 0
         : type === 'monthly'
             ? (planned > 0 ? Math.round((spent / planned) * 100) : 0)
-            : (planned > 0 ? Math.round((current / planned) * 100) : 0)
+            : (planned > 0 ? Math.round((displayValue / planned) * 100) : 0)
     const remaining = isFreedomFunds
         ? 0
-        : Math.round(((type === 'monthly' ? planned - spent : planned - current) * 100)) / 100
+        : Math.round(((planned - displayValue) * 100)) / 100
     const isOverBudget = type === 'monthly' && spent > planned && !isFreedomFunds
 
     const getProgressGradient = () => {
@@ -93,7 +99,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                 {/* Amounts (Central) */}
                 <div className="flex flex-col items-center justify-center w-[35%]">
                     <div className={`${isOverBudget ? 'text-rose-400' : 'text-white'} font-bold`}>
-                        {type === 'monthly' ? formatMoney(spent, false) : formatMoney(current, false)}
+                        {formatMoney(displayValue, false)}
                     </div>
                     {!isFreedomFunds && (
                         <div className="text-xs text-slate-500">
@@ -118,13 +124,13 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                     </div>
                     {!isFreedomFunds && (
                         <div className={`text-xs font-bold ${percentage > 100 ? 'text-rose-500' :
-                                percentage > 85 ? 'text-amber-500' : 'text-emerald-500'
+                            percentage > 85 ? 'text-amber-500' : 'text-emerald-500'
                             }`}>
                             {percentage}%
                         </div>
                     )}
                 </div>
-            </motion.div>
+            </motion.div >
         )
     }
 
@@ -186,12 +192,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                     <div className="text-right flex-shrink-0">
                         <div className={`text-base font-bold whitespace-nowrap ${isOverBudget ? 'text-rose-400' : 'text-white'
                             }`}>
-                            {type === 'monthly'
-                                ? formatMoney(spent, false)
-                                : isFreedomFunds
-                                    ? formatMoney(current)
-                                    : formatMoney(current, false)
-                            }
+                            {isFreedomFunds ? formatMoney(current) : formatMoney(displayValue, false)}
                         </div>
                         {!isFreedomFunds && (
                             <div className="text-xs text-slate-400">

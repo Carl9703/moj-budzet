@@ -112,7 +112,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
     return (
         <div
-            className={`bg-slate-800 border rounded-lg p-4 shadow-xl flex items-center justify-between min-w-[300px] cursor-pointer transition-all duration-300 ${getBorderColor()} ${isVisible && !isExiting ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+            className={`bg-slate-800 border rounded-xl p-4 shadow-xl flex items-center justify-between min-w-[300px] cursor-pointer transition-all duration-300 ${getBorderColor()} ${isVisible && !isExiting ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
                 }`}
             onClick={handleRemove}
         >

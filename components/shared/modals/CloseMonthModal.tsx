@@ -18,21 +18,24 @@ interface Props {
     onClose: () => void
     onConfirm: () => void | Promise<void>
     surplus?: number
+    transfers?: Array<{ name: string; icon: string; amount: number }>
     monthSummary: {
         income: number
         expenses: number
         savings: number
+        returns?: number
     }
     monthName?: string
 }
 
-export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, monthName }: Props) {
+export function CloseMonthModal({ onClose, onConfirm, surplus, transfers = [], monthSummary, monthName }: Props) {
     const [envelopeStatus, setEnvelopeStatus] = useState<EnvelopeStatus[]>([])
     const [loading, setLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const displayMonth = monthName || new Date().toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })
-    const balance = surplus !== undefined ? roundToCents(surplus) : roundToCents(monthSummary.income - monthSummary.expenses)
+    // Nadwyżka jest obliczana w API (przychody - wydatki - alokacje - fundusz awaryjny)
+    const balance = roundToCents(surplus ?? monthSummary.savings)
     const savingsRate = monthSummary.income > 0 ? Math.round((balance / monthSummary.income) * 100) : 0
 
     useEffect(() => {
@@ -91,8 +94,8 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
 
                 {/* MONTH SUMMARY CARD */}
                 <div className={`p-5 rounded-xl border relative overflow-hidden ${balance >= 0
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
-                        : 'bg-rose-950/20 border-rose-500/30'
+                    ? 'bg-emerald-950/20 border-emerald-500/30'
+                    : 'bg-rose-950/20 border-rose-500/30'
                     }`}>
                     {/* Background glow */}
                     <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${balance >= 0 ? 'bg-emerald-500' : 'bg-rose-500'
@@ -112,10 +115,34 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                             <span className="text-slate-400">Przychody</span>
                             <span className="font-bold text-emerald-400">+{formatMoney(monthSummary.income, false)} zł</span>
                         </div>
+
+                        {/* Wiersz dla zwrotów - wyświetlaj tylko gdy są > 0 */}
+                        {(monthSummary.returns || 0) > 0 && (
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-400">Zwroty i refundacje</span>
+                                <span className="font-bold text-blue-400">+{formatMoney(monthSummary.returns || 0, false)} zł</span>
+                            </div>
+                        )}
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-slate-400">Wydatki</span>
                             <span className="font-bold text-rose-400">-{formatMoney(monthSummary.expenses, false)} zł</span>
                         </div>
+
+                        {/* Transfery zmniejszające saldo */}
+                        {transfers.length > 0 && (
+                            <div className="pt-2 border-t border-slate-700/50 space-y-2">
+                                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Transfery do kopert</div>
+                                {transfers.map((transfer, index) => (
+                                    <div key={index} className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-400 flex items-center gap-2">
+                                            <span>{transfer.icon}</span>
+                                            <span>{transfer.name}</span>
+                                        </span>
+                                        <span className="font-bold text-amber-400">-{formatMoney(transfer.amount, false)} zł</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         <div className={`mt-2 pt-3 border-t flex justify-between items-center ${balance >= 0 ? 'border-emerald-500/20' : 'border-rose-500/20'
                             }`}>
@@ -145,7 +172,7 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                                         <span>{e.name}</span>
                                     </div>
                                     <span className={`font-mono font-medium ${e.current > 0 ? 'text-emerald-500' :
-                                            e.current < 0 ? 'text-rose-500' : 'text-slate-500'
+                                        e.current < 0 ? 'text-rose-500' : 'text-slate-500'
                                         }`}>
                                         {formatMoney(e.current, false)}
                                     </span>
@@ -168,15 +195,25 @@ export function CloseMonthModal({ onClose, onConfirm, surplus, monthSummary, mon
                         onClick={async () => {
                             setIsSubmitting(true)
                             try {
-                                await onConfirm()
+                                // Wywołaj API zamknięcia miesiąca - przekaż obliczony bilans jako surplus
+                                const response = await api.post('/api/close-month', {
+                                    surplus: balance
+                                })
+                                if (response) {
+                                    // API zwróciło sukces, teraz odśwież dashboard
+                                    await onConfirm()
+                                    onClose()
+                                }
+                            } catch (error) {
+                                console.error('Błąd zamknięcia miesiąca:', error)
                             } finally {
                                 setIsSubmitting(false)
                             }
                         }}
                         disabled={isSubmitting}
                         className={`flex-1 px-4 py-3 rounded-xl font-bold text-white transition-all shadow-lg ${isSubmitting
-                                ? 'bg-indigo-600/50 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'
+                            ? 'bg-indigo-600/50 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'
                             }`}
                     >
                         {isSubmitting ? '⏳ Przetwarzanie...' : '✓ Potwierdź i Zamknij'}

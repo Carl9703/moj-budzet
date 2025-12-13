@@ -13,6 +13,8 @@ interface Envelope {
     activityCount?: number
     group?: string
     envelopeType?: 'monthly' | 'yearly'
+    isAccumulating?: boolean
+    envelopeKind?: string  // 'savings', 'goal', 'emergency', 'budget'
 }
 
 interface Props {
@@ -30,9 +32,9 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
     const monthlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'monthly')
     const yearlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'yearly')
 
-    const totalAvailable = yearlyEnvelopes.reduce((sum, envelope) => sum + envelope.current, 0)
+    // Suma wydatków - Math.max(0, spent) ignoruje wpłaty (ujemne wartości jak -600 w kopertach oszczędnościowych)
+    const totalSpent = envelopes.reduce((sum, envelope) => sum + Math.max(0, envelope.spent), 0)
     const totalPlanned = envelopes.reduce((sum, envelope) => sum + envelope.planned, 0)
-    const totalSpent = monthlyEnvelopes.reduce((sum, envelope) => sum + envelope.spent, 0)
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('pl-PL', {
@@ -43,9 +45,8 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
         }).format(amount)
     }
 
-    const displayAmount = monthlyEnvelopes.length > 0 && yearlyEnvelopes.length > 0
-        ? formatMoney(totalSpent + totalAvailable)
-        : type === 'monthly' ? formatMoney(totalSpent) : formatMoney(totalAvailable)
+    // Suma wydatków ze wszystkich kopert w grupie (bez kopert oszczędnościowych)
+    const displayAmount = formatMoney(totalSpent)
 
     return (
         <motion.div
@@ -110,6 +111,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                         <EnvelopeCard
                             {...envelope}
                             type={envelope.envelopeType || type}
+                            envelopeType={envelope.envelopeKind}
                             onTransactionClick={onEnvelopeClick}
                         />
                     </motion.div>

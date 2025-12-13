@@ -69,16 +69,16 @@ export function ConfirmationModal({
 
     return (
         <Modal title="" onClose={onClose}>
-            <div className="p-4 md:p-6 text-center">
-                <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-6 ${style.iconBg}`}>
-                    <Icon size={32} className={style.iconColor} />
+            <div className="p-4 text-center">
+                <div className={`mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4 ${style.iconBg}`}>
+                    <Icon size={28} className={style.iconColor} />
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+                <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
                     {title}
                 </h3>
 
-                <p className="text-slate-400 mb-8 max-w-sm mx-auto leading-relaxed">
+                <p className="text-slate-400 mb-6 max-w-sm mx-auto leading-relaxed text-sm">
                     {description}
                 </p>
 

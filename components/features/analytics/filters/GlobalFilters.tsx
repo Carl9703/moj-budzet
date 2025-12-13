@@ -53,7 +53,7 @@ export function GlobalFilters({ dateRange, compareMode, onDateRangeChange, onCom
               const isSelected = selectedPeriod === period.key && !isCustomRange
               return (
                 <button key={period.key} onClick={() => handlePeriodSelect(period.key)} disabled={loading}
-                  className={`p-3 rounded-lg border-2 flex items-center gap-2 text-sm font-medium transition-all ${isSelected ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-600 bg-slate-700 text-slate-400 hover:border-slate-500'} ${loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+                  className={`p-3 rounded-xl border-2 flex items-center gap-2 text-sm font-medium transition-all ${isSelected ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-600 bg-slate-700 text-slate-400 hover:border-slate-500'} ${loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
                   <Icon size={16} /> {period.label}
                 </button>
               )
@@ -63,7 +63,7 @@ export function GlobalFilters({ dateRange, compareMode, onDateRangeChange, onCom
 
         <div>
           <button onClick={() => { setIsCustomRange(!isCustomRange); if (!isCustomRange) setSelectedPeriod('custom') }} disabled={loading}
-            className={`px-4 py-2 rounded-md border text-sm font-medium ${isCustomRange ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-600 text-slate-400'} ${loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+            className={`px-4 py-2 rounded-xl border text-sm font-medium ${isCustomRange ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-600 text-slate-400'} ${loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
             Niestandardowy zakres
           </button>
           {isCustomRange && (
@@ -71,18 +71,18 @@ export function GlobalFilters({ dateRange, compareMode, onDateRangeChange, onCom
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-slate-400">Od</label>
                 <input type="date" value={dateRange.from?.toISOString().split('T')[0] || ''} onChange={(e) => onDateRangeChange({ ...dateRange, from: e.target.value ? new Date(e.target.value) : undefined })} disabled={loading}
-                  className="px-3 py-2 rounded-md border border-slate-600 bg-slate-900 text-slate-100 text-sm disabled:opacity-60" />
+                  className="px-3 py-2 rounded-xl border border-slate-600 bg-slate-900 text-slate-100 text-sm disabled:opacity-60" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-slate-400">Do</label>
                 <input type="date" value={dateRange.to?.toISOString().split('T')[0] || ''} onChange={(e) => onDateRangeChange({ ...dateRange, to: e.target.value ? new Date(e.target.value) : undefined })} disabled={loading}
-                  className="px-3 py-2 rounded-md border border-slate-600 bg-slate-900 text-slate-100 text-sm disabled:opacity-60" />
+                  className="px-3 py-2 rounded-xl border border-slate-600 bg-slate-900 text-slate-100 text-sm disabled:opacity-60" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-3 bg-slate-700 rounded-lg border border-slate-600">
+        <div className="p-3 bg-slate-700 rounded-xl border border-slate-600">
           <div className="text-sm text-slate-400 mb-1">Wybrany okres:</div>
           <div className="text-base font-semibold text-slate-100">
             {formatDate(dateRange.from)} - {formatDate(dateRange.to)}
