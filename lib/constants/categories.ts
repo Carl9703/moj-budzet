@@ -10,7 +10,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
     // GRUPA 1: POTRZEBY - Mieszkanie
     { id: 'housing-bills', name: 'Wspólne opłaty', icon: '🏠', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
     { id: 'housing-equipment', name: 'Wyposażenie', icon: '🛋️', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
-    { id: 'housing-repairs', name: 'Naprawy', icon: '🔨', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
+    { id: 'housing-repairs', name: 'Naprawy domowe', icon: '🔨', defaultEnvelope: 'Mieszkanie', type: 'monthly' },
 
     // GRUPA 1: POTRZEBY - Żywność
     { id: 'shared-groceries', name: 'Wspólne zakupy', icon: '🛒', defaultEnvelope: 'Żywność', type: 'monthly' },
@@ -51,7 +51,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
 
     // FUNDUSZE CELOWE - Auto: Serwis i Ubezpieczenie
     { id: 'car-insurance', name: 'Ubezpieczenie', icon: '📋', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },
-    { id: 'car-repairs', name: 'Naprawy', icon: '🔧', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },
+    { id: 'car-repairs', name: 'Naprawy auta', icon: '🔧', defaultEnvelope: 'Auto: Serwis i Ubezpieczenie', type: 'yearly' },
 
     // FUNDUSZE CELOWE - Podróże
     { id: 'vacation', name: 'Wakacje', icon: '✈️', defaultEnvelope: 'Podróże', type: 'yearly' },
