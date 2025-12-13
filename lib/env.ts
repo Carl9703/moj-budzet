@@ -14,8 +14,12 @@ function isMainBranch() {
 
 // Wybieramy odpowiednią zmienną DATABASE_URL
 function getDatabaseUrl() {
-  // Try MAIN first, then DEV, then standard DATABASE_URL
-  return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL_DEV || process.env.DATABASE_URL
+  // Dla gałęzi main używamy DATABASE_URL_MAIN
+  if (isMainBranch()) {
+    return process.env.DATABASE_URL_MAIN || process.env.DATABASE_URL
+  }
+  // Lokalnie i na dev branch preferujemy DATABASE_URL_DEV
+  return process.env.DATABASE_URL_DEV || process.env.DATABASE_URL
 }
 
 // Funkcja do sprawdzenia czy jesteśmy w trybie buildowania
