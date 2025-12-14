@@ -20,6 +20,7 @@ export interface SpendingTreeNode {
     description?: string
     amount?: number
     categoryId?: string
+    icon?: string
 }
 
 export interface Transaction {

@@ -22,6 +22,7 @@ interface SpendingTreeNode {
   categoryId?: string
   budget?: number
   budgetPercentage?: number
+  icon?: string | null
 }
 
 interface InteractiveExpenseExplorerProps {
@@ -34,10 +35,12 @@ interface InteractiveExpenseExplorerProps {
   forceCollapseAll?: boolean
 }
 
-const getItemIcon = (type: string, name: string | undefined, categoryId: string | undefined, getCategoryIcon: (id: string) => string): string => {
+const getItemIcon = (type: string, name: string | undefined, categoryId: string | undefined, icon: string | null | undefined, getCategoryIcon: (id: string) => string): string => {
   if (type === 'CATEGORY' && categoryId) {
     return getCategoryIcon(categoryId)
   }
+
+  if (icon) return icon
 
   const iconMap: Record<string, Record<string, string>> = {
     GROUP: {
@@ -171,7 +174,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
 
       {/* Item icon */}
       <div className={`mr-3 flex items-center justify-center ${isTransaction ? 'text-lg' : 'text-xl'}`}>
-        {getItemIcon(node.type, node.name, node.categoryId, getCategoryIcon)}
+        {getItemIcon(node.type, node.name, node.categoryId, node.icon, getCategoryIcon)}
       </div>
 
       {/* Name */}

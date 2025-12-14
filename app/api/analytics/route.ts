@@ -41,6 +41,7 @@ interface SpendingTreeNode {
   // Dodatkowe pola dla progress bars
   budget?: number // Budżet dla kopert
   budgetPercentage?: number // Procent wykorzystania budżetu
+  icon?: string | null // Ikona dla wyświetlania
 }
 
 interface TrendData {
@@ -209,7 +210,8 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
   // Pobierz informacje o budżetach kopert
   const envelopes = await prisma.envelope.findMany({
     where: { userId: userId },
-    select: { id: true, name: true, plannedAmount: true }
+    select: { id: true, name: true, plannedAmount: true, icon: true }
+
   })
 
   const envelopeBudgets = new Map<string, number>()
@@ -303,7 +305,8 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         id: `cat_${category}`,
         name: getCatName(category),
         total: 0,
-        children: []
+        children: [],
+        icon: categoryMap.get(category)?.icon || '📦'
       })
     }
 
@@ -373,7 +376,9 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         total: envelope.total,
         children: [],
         budget: budget,
-        budgetPercentage: budgetPercentage
+        budgetPercentage: budgetPercentage,
+        icon: (envelope as any).icon // Casting because we added icon to select but types inference might need help or just works if envelope is typed correctly. Wait, envelope is from findMany outcome.
+
       }
 
       // Dodaj dane porównawcze dla koperty
@@ -400,7 +405,8 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
           name: category.name,
           total: category.total,
           children: category.children,
-          categoryId: categoryName // Przekazujemy categoryId dla kategorii
+          categoryId: categoryName, // Przekazujemy categoryId dla kategorii
+          icon: (category as any).icon
         }
 
         // Dodaj dane porównawcze dla kategorii
