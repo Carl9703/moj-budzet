@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { authorizedFetch } from '@/lib/api/client'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 
 export interface Category {
     id: string
@@ -53,11 +54,20 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
     }, [])
 
     const getCategoryName = (id: string) => {
-        return categories.find(c => c.id === id)?.name || 'Inne'
+        const category = categories.find(c => c.id === id)
+        if (category) return category.name
+
+        const systemCategory = EXPENSE_CATEGORIES.find(c => c.id === id)
+        return systemCategory?.name || 'Inne'
     }
 
+
     const getCategoryIcon = (id: string) => {
-        return categories.find(c => c.id === id)?.icon || '📦'
+        const category = categories.find(c => c.id === id)
+        if (category) return category.icon
+
+        const systemCategory = EXPENSE_CATEGORIES.find(c => c.id === id)
+        return systemCategory?.icon || '📦'
     }
 
     const getCategoryById = (id: string) => {
