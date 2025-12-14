@@ -14,9 +14,11 @@ try {
 console.log(`Current branch: ${currentBranch}`);
 
 // Pobierz wartości ze zmiennych środowiskowych
-const databaseUrl = currentBranch === 'dev'
-  ? process.env.DATABASE_URL_DEV
-  : process.env.DATABASE_URL;
+// Lokalnie preferujemy DATABASE_URL_DEV, na produkcji DATABASE_URL
+const isLocal = !process.env.CI && !process.env.VERCEL;
+const databaseUrl = isLocal
+  ? (process.env.DATABASE_URL_DEV || process.env.DATABASE_URL)
+  : (currentBranch === 'dev' ? process.env.DATABASE_URL_DEV : process.env.DATABASE_URL);
 
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 const nextAuthUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';

@@ -3,8 +3,8 @@ import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { createTransactionSchema } from '@/lib/validations/transaction'
 import { z } from 'zod'
-
-export const dynamic = 'force-dynamic'
+import type { Prisma } from '@prisma/client'
+import { isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
 
 export async function GET(request: NextRequest) {
     try {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         const sortBy = searchParams.get('sortBy') || 'date'
         const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-        const whereClause: any = { userId }
+        const whereClause: Prisma.TransactionWhereInput = { userId }
 
         // Filtry podstawowe
         if (transactionType) {
@@ -47,8 +47,7 @@ export async function GET(request: NextRequest) {
         // Wyszukiwanie tekstowe
         if (searchText) {
             whereClause.description = {
-                contains: searchText,
-                mode: 'insensitive'
+                contains: searchText
             }
         }
 
@@ -87,15 +86,16 @@ export async function GET(request: NextRequest) {
         }
 
         // Przygotuj sortowanie
-        const orderBy: any = {}
+        const order = sortOrder as Prisma.SortOrder
+        const orderBy: Prisma.TransactionOrderByWithRelationInput = {}
         if (sortBy === 'date') {
-            orderBy.date = sortOrder
+            orderBy.date = order
         } else if (sortBy === 'amount') {
-            orderBy.amount = sortOrder
+            orderBy.amount = order
         } else if (sortBy === 'description') {
-            orderBy.description = sortOrder
+            orderBy.description = order
         } else if (sortBy === 'type') {
-            orderBy.type = sortOrder
+            orderBy.type = order
         }
 
         const transactions = await prisma.transaction.findMany({
@@ -108,22 +108,27 @@ export async function GET(request: NextRequest) {
         })
 
         // Formatuj dane
-        const formatted = transactions.map(t => {
-            let category: string | undefined = t.category || undefined
+        // Pobierz wszystkie kategorie, aby móc wnioskować kategorię na podstawie koperty
+        const allCategories = await prisma.category.findMany({
+            where: { userId },
+            select: { id: true, defaultEnvelope: true }
+        })
 
-            // Jeśli nie ma zapisanej kategorii, spróbuj wyprowadzić z opisu
-            if (!category && t.description) {
-                const desc = t.description.toLowerCase()
-                if (desc.includes('transfer: konto wspólne')) {
-                    category = 'joint-account'
-                } else if (desc.includes('transfer: inwestycje')) {
-                    category = 'investments'
-                } else if (desc.includes('transfer:')) {
-                    category = 'transfers'
-                } else if (desc.includes('zamknięcie miesiąca')) {
-                    category = 'month-close'
+        // Formatuj dane
+        const formatted = transactions.map(t => {
+            let categoryId = t.category
+
+            // Jeśli nie ma zapisanej kategorii, spróbuj wywnioskować z koperty
+            if (!categoryId && t.envelope) {
+                const envelopeName = t.envelope.name
+                // Znajdź pierwszą kategorię, która ma tę kopertę jako domyślną
+                const inferredCategory = allCategories.find(c => c.defaultEnvelope === envelopeName)
+                if (inferredCategory) {
+                    categoryId = inferredCategory.id
                 }
             }
+
+            // Legacy description fallback removed. We rely on Envelope Inference now.
 
             return {
                 id: t.id,
@@ -131,7 +136,7 @@ export async function GET(request: NextRequest) {
                 amount: t.amount,
                 description: t.description,
                 date: t.date.toISOString(),
-                category, // Może być undefined
+                category: categoryId, // Zwracamy ID (lub null), frontend sobie poradzi z mapowaniem na nazwę/ikonę
                 envelope: t.envelope ? {
                     name: t.envelope.name,
                     icon: t.envelope.icon || '📦'
@@ -175,7 +180,63 @@ async function getAvailableCategories(userId: string) {
         select: { category: true },
         distinct: ['category']
     })
-    return categories.map(c => c.category).filter(Boolean)
+
+    const rawCategories = categories.map(c => c.category!).filter(Boolean)
+    const possibleIds = rawCategories.filter(c => !c.includes(' ')) // IDs usually don't have spaces
+    const names = rawCategories.filter(c => c.includes(' '))
+
+    if (possibleIds.length > 0) {
+        const resolved = await prisma.category.findMany({
+            where: {
+                id: { in: possibleIds },
+                userId
+            },
+            select: { name: true }
+        })
+        names.push(...resolved.map(c => c.name))
+
+        // Add raw values for those that were NOT found as IDs (maybe they were just single-word legacy names)
+        // This effectively keeps them if they weren't IDs.
+        // But checking existance is harder without a full map.
+        // Let's just create a set of found names to filter duplicates later.
+    }
+
+    // A simpler approach: Just filter out the resolved IDs from raw list if we found them? 
+    // No, because we want the NAME relative to that ID.
+    // So we return `names` + `resolvedNames`.
+    // But what about `possibleIds` that were NOT found in DB? They might be legacy single-word categories.
+    // We should keep them.
+
+    // Better approach:
+    // 1. Fetch names for all `possibleIds`.
+    // 2. Create Map<Id, Name>.
+    // 3. Map the original `rawCategories` using the map (or keep original if not found).
+
+    // We can't easily distinguish a legacy single-word category "Food" from a CUID "cl..." without regex or length check.
+    // CUIDs are 25 chars.
+
+    // Re-implementation with mapping:
+    const idCandidates = rawCategories.filter(c => !c.includes(' ') && c.length > 20)
+    const finalCategories = new Set<string>()
+    const idToName = new Map<string, string>()
+
+    if (idCandidates.length > 0) {
+        const resolved = await prisma.category.findMany({
+            where: { id: { in: idCandidates }, userId },
+            select: { id: true, name: true }
+        })
+        resolved.forEach(r => idToName.set(r.id, r.name))
+    }
+
+    rawCategories.forEach(c => {
+        if (idToName.has(c)) {
+            finalCategories.add(idToName.get(c)!)
+        } else {
+            finalCategories.add(c)
+        }
+    })
+
+    return Array.from(finalCategories).sort()
 }
 
 async function getAvailableGroups(userId: string) {
@@ -286,38 +347,12 @@ export async function POST(request: NextRequest) {
             })
 
             if (envelope) {
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
-                    await prisma.envelope.update({
-                        where: { id: data.envelopeId },
-                        data: {
-                            currentAmount: envelope.currentAmount - data.amount
-                        }
-                    })
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    // "Budowanie Przyszłości" - expense zwiększa saldo (oszczędzanie)
-                    // "Wesele", "Podróże" itp. - expense zmniejsza saldo (wydawanie z oszczędzonych środków)
-                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
-
-                    if (isSavingsEnvelope) {
-                        // Koperty oszczędnościowe: expense zwiększa saldo (oszczędzanie)
-                        await prisma.envelope.update({
-                            where: { id: data.envelopeId },
-                            data: {
-                                currentAmount: envelope.currentAmount + data.amount
-                            }
-                        })
-                    } else {
-                        // Koperty wydatkowe roczne: expense zmniejsza saldo (wydawanie z oszczędzonych środków)
-                        await prisma.envelope.update({
-                            where: { id: data.envelopeId },
-                            data: {
-                                currentAmount: envelope.currentAmount - data.amount
-                            }
-                        })
+                await prisma.envelope.update({
+                    where: { id: data.envelopeId },
+                    data: {
+                        currentAmount: envelope.currentAmount - data.amount
                     }
-                }
+                })
             }
         }
 
@@ -327,38 +362,12 @@ export async function POST(request: NextRequest) {
             })
 
             if (envelope) {
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
-                    await prisma.envelope.update({
-                        where: { id: data.envelopeId },
-                        data: {
-                            currentAmount: envelope.currentAmount + data.amount
-                        }
-                    })
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    // "Budowanie Przyszłości" - income zmniejsza saldo (wypłata z oszczędności)
-                    // "Wesele", "Podróże" itp. - income zwiększa saldo (zwrot/wpłata do koperty)
-                    const isSavingsEnvelope = envelope.name === 'Budowanie Przyszłości'
-
-                    if (isSavingsEnvelope) {
-                        // Koperty oszczędnościowe: income zmniejsza saldo (wypłata z oszczędności)
-                        await prisma.envelope.update({
-                            where: { id: data.envelopeId },
-                            data: {
-                                currentAmount: envelope.currentAmount - data.amount
-                            }
-                        })
-                    } else {
-                        // Koperty wydatkowe roczne: income zwiększa saldo (zwrot/wpłata do koperty)
-                        await prisma.envelope.update({
-                            where: { id: data.envelopeId },
-                            data: {
-                                currentAmount: envelope.currentAmount + data.amount
-                            }
-                        })
+                await prisma.envelope.update({
+                    where: { id: data.envelopeId },
+                    data: {
+                        currentAmount: envelope.currentAmount + data.amount
                     }
-                }
+                })
             }
         }
 

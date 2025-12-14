@@ -1,6 +1,7 @@
 'use client'
 
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
+import { motion } from 'framer-motion'
 
 interface Envelope {
     id: string
@@ -11,7 +12,9 @@ interface Envelope {
     current: number
     activityCount?: number
     group?: string
-    envelopeType?: 'monthly' | 'yearly' // Optional type per envelope
+    envelopeType?: 'monthly' | 'yearly'
+    isAccumulating?: boolean
+    envelopeKind?: string  // 'savings', 'goal', 'emergency', 'budget'
 }
 
 interface Props {
@@ -19,21 +22,19 @@ interface Props {
     icon: string
     color: string
     envelopes: Envelope[]
-    type: 'monthly' | 'yearly' // Default type for envelopes without envelopeType
+    type: 'monthly' | 'yearly'
     onEnvelopeClick?: (envelopeId: string, envelopeName: string, envelopeIcon: string) => void
 }
 
 export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeClick }: Props) {
     if (envelopes.length === 0) return null
 
-    // Oblicz środki do dyspozycji w grupie - uwzględnij mieszane typy
     const monthlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'monthly')
     const yearlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'yearly')
-    
-    const totalAvailable = yearlyEnvelopes.reduce((sum, envelope) => sum + envelope.current, 0)
+
+    // Suma wydatków - Math.max(0, spent) ignoruje wpłaty (ujemne wartości jak -600 w kopertach oszczędnościowych)
+    const totalSpent = envelopes.reduce((sum, envelope) => sum + Math.max(0, envelope.spent), 0)
     const totalPlanned = envelopes.reduce((sum, envelope) => sum + envelope.planned, 0)
-    const totalSpent = monthlyEnvelopes.reduce((sum, envelope) => sum + envelope.spent, 0)
-    const totalRemaining = totalPlanned - totalSpent
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('pl-PL', {
@@ -43,68 +44,79 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
             maximumFractionDigits: 2
         }).format(amount)
     }
-    
-    // Dla mieszanych typów pokazuj sumę dostępnych (yearly) i wydanych (monthly)
-    const displayAmount = monthlyEnvelopes.length > 0 && yearlyEnvelopes.length > 0
-        ? formatMoney(totalSpent + totalAvailable)
-        : type === 'monthly' ? formatMoney(totalSpent) : formatMoney(totalAvailable)
+
+    // Suma wydatków ze wszystkich kopert w grupie (bez kopert oszczędnościowych)
+    const displayAmount = formatMoney(totalSpent)
 
     return (
-        <div>
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'space-between',
-                marginBottom: '16px',
-                padding: '12px 16px',
-                backgroundColor: '#0f172a', // slate-900
-                borderRadius: '10px',
-                border: '1px solid #334155', // slate-700
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                        fontSize: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '36px',
-                        height: '36px',
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)', // indigo z przezroczystością
-                        borderRadius: '8px',
-                        border: '1px solid rgba(79, 70, 229, 0.3)'
-                    }}>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            className="group"
+        >
+            {/* Header */}
+            <div
+                className="flex items-center justify-between mb-4 px-5 py-3.5 rounded-2xl relative overflow-hidden transition-all duration-300 group-hover:translate-y-px"
+                style={{
+                    background: 'var(--glass-bg-light)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid var(--glass-border)',
+                    boxShadow: 'var(--shadow-sm)',
+                }}
+            >
+                {/* Header Hover Gradient */}
+                <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                        background: `linear-gradient(90deg, ${color} 0%, transparent 100%)`,
+                    }}
+                />
+
+                <div className="flex items-center gap-3 relative z-10">
+                    <div
+                        className="flex items-center justify-center w-10 h-10 rounded-xl text-xl backdrop-blur-md shadow-inner"
+                        style={{
+                            background: color,
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                    >
                         {icon}
                     </div>
-                    <h2 style={{ 
-                        fontSize: '16px', 
-                        fontWeight: '700', 
-                        margin: 0, 
-                        color: '#f1f5f9', // slate-100
-                        letterSpacing: '-0.01em'
-                    }}>
+                    <h2 className="text-lg font-bold text-white tracking-tight">
                         {title}
                     </h2>
                 </div>
-                
-                <div style={{
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: '#f1f5f9' // slate-100
-                }}>
-                    {displayAmount}
+
+                <div
+                    className="text-sm font-bold px-3 py-1.5 rounded-lg backdrop-blur-md border border-white/5 shadow-sm relative z-10"
+                    style={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                >
+                    <span className="text-slate-400 font-medium mr-2 text-xs uppercase tracking-wider">Suma</span>
+                    <span className="text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+                        {displayAmount}
+                    </span>
                 </div>
             </div>
-            <div style={{ display: 'grid', gap: '10px' }}>
-                {envelopes.map((envelope) => (
-                    <EnvelopeCard 
+
+            {/* Grid */}
+            <div className="grid gap-3">
+                {envelopes.map((envelope, index) => (
+                    <motion.div
                         key={envelope.id}
-                        {...envelope} 
-                        type={envelope.envelopeType || type} 
-                        onTransactionClick={onEnvelopeClick}
-                    />
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                    >
+                        <EnvelopeCard
+                            {...envelope}
+                            type={envelope.envelopeType || type}
+                            envelopeType={envelope.envelopeKind}
+                            onTransactionClick={onEnvelopeClick}
+                        />
+                    </motion.div>
                 ))}
             </div>
-        </div>
+        </motion.div>
     )
 }

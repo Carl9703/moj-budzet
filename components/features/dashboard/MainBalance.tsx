@@ -8,46 +8,17 @@ interface Props {
 
 export const MainBalance = memo(function MainBalance({ balance }: Props) {
     return (
-        <Card 
-            style={{
-                backgroundColor: '#1e293b', // slate-800
-                border: '1px solid #334155', // slate-700
-                padding: '20px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-            }}
-        >
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-            }}>
-                <div style={{
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    color: '#64748b', // slate-500
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em'
-                }}>
+        <Card className="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-lg">
+            <div className="flex flex-col gap-3">
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     Konto główne
                 </div>
-                
+
                 <div>
-                    <p style={{
-                        fontSize: '28px',
-                        fontWeight: '700',
-                        color: '#f1f5f9', // slate-100
-                        margin: 0,
-                        letterSpacing: '-0.02em',
-                        lineHeight: '1.2'
-                    }}>
+                    <p className="text-3xl font-bold text-slate-100 tracking-tight leading-tight">
                         {formatMoney(balance)}
                     </p>
-                    <div style={{
-                        fontSize: '12px',
-                        color: '#94a3b8',
-                        marginTop: '4px'
-                    }}>
+                    <div className="text-xs text-slate-400 mt-1">
                         Dostępne środki
                     </div>
                 </div>

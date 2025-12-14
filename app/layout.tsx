@@ -6,6 +6,8 @@ import { SideNavigation } from '@/components/ui/layout/SideNavigation'
 import { MainContent } from '@/components/ui/layout/MainContent'
 import { SidebarProvider } from '@/lib/contexts/SidebarContext'
 import { ConditionalLayout } from '@/components/ui/layout/ConditionalLayout'
+import { QueryProvider } from '@/lib/providers/QueryProvider'
+import { CategoryProvider } from '@/lib/contexts/CategoryContext'
 
 export const metadata = {
     title: 'Quantum Budget - Inteligentna Aplikacja Finansowa',
@@ -42,17 +44,21 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pl" suppressHydrationWarning>
-                <body style={{ backgroundColor: '#020617' }} suppressHydrationWarning> {/* slate-950 */}
+            <body style={{ backgroundColor: '#020617' }} suppressHydrationWarning> {/* slate-950 */}
                 <ErrorBoundary>
-                    <ThemeProvider>
-                        <ToastProvider>
-                            <SidebarProvider>
-                                <ConditionalLayout>
-                                    {children}
-                                </ConditionalLayout>
-                            </SidebarProvider>
-                        </ToastProvider>
-                    </ThemeProvider>
+                    <QueryProvider>
+                        <ThemeProvider>
+                            <ToastProvider>
+                                <CategoryProvider>
+                                    <SidebarProvider>
+                                        <ConditionalLayout>
+                                            {children}
+                                        </ConditionalLayout>
+                                    </SidebarProvider>
+                                </CategoryProvider>
+                            </ToastProvider>
+                        </ThemeProvider>
+                    </QueryProvider>
                 </ErrorBoundary>
             </body>
         </html>

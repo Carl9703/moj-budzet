@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
-
-export const dynamic = 'force-dynamic'
+import { isProtectedEnvelope } from '@/lib/constants/envelopeTypes'
 
 export async function POST(request: NextRequest) {
     try {
@@ -64,9 +63,10 @@ export async function POST(request: NextRequest) {
 
         // Osobno przychody w statystykach i poza nimi
         // Wyklucz transfery (transakcje z transferPairId) - to są tylko wewnętrzne przepływy między kopertami
+        // Wyklucz też transfery premii do kopert (mają envelopeId i opis zawiera →)
         const statsIncome = monthTransactions
-            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null }) =>
-                t.type === 'income' && t.includeInStats !== false && !t.transferPairId
+            .filter((t: { type: string; includeInStats?: boolean; transferPairId?: string | null; envelopeId?: string | null; description?: string | null }) =>
+                t.type === 'income' && t.includeInStats !== false && !t.transferPairId && !(t.envelopeId && t.description?.includes('→'))
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
@@ -84,11 +84,17 @@ export async function POST(request: NextRequest) {
             )
             .reduce((sum, t) => sum + t.amount, 0)
 
+        // Środki już zaalokowane do kopert (transfery premii typu "Premia → Koperta")
+        // Te środki NIE powinny być ponownie transferowane do wolnych środków
+        const allocatedToEnvelopes = monthTransactions
+            .filter((t: { type: string; envelopeId?: string | null; description?: string | null }) =>
+                t.type === 'income' && t.envelopeId && t.description?.includes('→')
+            )
+            .reduce((sum, t) => sum + t.amount, 0)
+
         // Oblicz składowe
         const monthBalance = statsIncome - totalExpenses  // oszczędności z realnych przychodów
         const returnsBalance = nonStatsIncome             // zwroty i refundacje
-        const totalToTransfer = monthBalance + returnsBalance // całkowite saldo do przeniesienia
-
 
         // Pobierz WSZYSTKIE koperty użytkownika
         const allEnvelopes = await prisma.envelope.findMany({
@@ -97,18 +103,38 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        // Lista chronionych nazw kopert rocznych (NIE mogą być zerowane)
-        const protectedEnvelopeNames = ['Budowanie Przyszłości', 'Fundusz Awaryjny', 'Wolne środki (roczne)', 'Cele finansowe']
-        const protectedNamesSet = new Set(protectedEnvelopeNames)
+        // Znajdź kopertę Fundusz Awaryjny
+        const emergencyFundEnvelope = allEnvelopes.find(e =>
+            e.envelopeType === 'emergency' || e.envelopeType === 'EMERGENCY'
+        )
+
+        // Oblicz wpłaty do Funduszu Awaryjnego w tym miesiącu
+        const monthlyEmergencyFundTransfers = emergencyFundEnvelope
+            ? monthTransactions
+                .filter((t: { envelopeId?: string | null; type: string }) =>
+                    t.envelopeId === emergencyFundEnvelope.id && t.type === 'income'
+                )
+                .reduce((sum, t) => sum + t.amount, 0)
+            : 0
+
+        // Transfery premii są już wykluczone ze statsIncome, więc odejmujemy tylko wpłaty do FA
+        let totalToTransfer = monthBalance + returnsBalance - monthlyEmergencyFundTransfers
+
+        // Jeśli frontend przekazał surplus (zaakceptowany przez użytkownika), użyj go jako nadrzędnej wartości
+        if (body?.surplus !== undefined) {
+            console.log(`[CloseMonth] Używanie przekazanej wartości surplus: ${body.surplus} (wyliczono: ${totalToTransfer})`)
+            totalToTransfer = body.surplus
+        }
 
         // Zbierz informacje o stanie kopert miesięcznych (tylko informacyjnie)
         const envelopeDetails = []
         let totalUnusedFunds = 0
 
         // Tylko koperty miesięczne (nie roczne i nie chronione) do informacji
+        // Chronione = savings, emergency, goal (sprawdzane przez envelopeType)
         const actualMonthlyEnvelopes = allEnvelopes.filter(e =>
             e.type === 'monthly' &&
-            !protectedNamesSet.has(e.name)
+            !isProtectedEnvelope(e.envelopeType)
         )
 
         for (const envelope of actualMonthlyEnvelopes) {
@@ -149,16 +175,26 @@ export async function POST(request: NextRequest) {
                 })
 
                 // Utwórz transakcję księgową z rozpisaniem
-                const roundedMonthBalance = roundToCents(monthBalance)
-                const roundedReturnsBalance = roundToCents(returnsBalance)
-
                 let description = '🔒 Zamknięcie miesiąca'
-                if (roundedMonthBalance > 0 && roundedReturnsBalance > 0) {
-                    description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł, zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
-                } else if (roundedMonthBalance > 0) {
-                    description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł`
-                } else if (roundedReturnsBalance > 0) {
-                    description += ` - zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
+
+                if (body?.surplus !== undefined) {
+                    // Jeśli używamy wartości z frontendu, wpisujemy po prostu "nadwyżka"
+                    const roundedSurplus = roundToCents(totalToTransfer)
+                    if (roundedSurplus > 0) {
+                        description += ` - nadwyżka: ${roundedSurplus.toFixed(2)} zł`
+                    }
+                } else {
+                    // Stara logia (tylko gdy brak body.surplus)
+                    const roundedMonthBalance = roundToCents(monthBalance)
+                    const roundedReturnsBalance = roundToCents(returnsBalance)
+
+                    if (roundedMonthBalance > 0 && roundedReturnsBalance > 0) {
+                        description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł, zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
+                    } else if (roundedMonthBalance > 0) {
+                        description += ` - oszczędności: ${roundedMonthBalance.toFixed(2)} zł`
+                    } else if (roundedReturnsBalance > 0) {
+                        description += ` - zwroty: ${roundedReturnsBalance.toFixed(2)} zł`
+                    }
                 }
 
                 await prisma.transaction.create({
@@ -176,17 +212,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Reset TYLKO kopert miesięcznych do 0
-        // WAŻNE: Wyklucz koperty roczne (type='yearly') i koperty z chronionymi nazwami
+        // WAŻNE: Wyklucz koperty roczne (type='yearly') i koperty chronione (envelopeType != budget)
         const monthlyEnvelopesToReset = await prisma.envelope.findMany({
             where: {
                 userId: userId,
                 type: 'monthly',
                 isArchived: false,
-                NOT: {
-                    name: {
-                        in: Array.from(protectedNamesSet)
-                    }
-                }
+                envelopeType: 'budget' // Only reset budget envelopes, not savings/emergency/goal
             }
         })
 

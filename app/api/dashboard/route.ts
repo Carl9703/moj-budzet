@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
-
-export const dynamic = 'force-dynamic'
+import { isEmergencyEnvelope, isProtectedEnvelope } from '@/lib/constants/envelopeTypes'
 
 interface Transaction {
     id: string
@@ -13,6 +13,8 @@ interface Transaction {
     description: string | null
     date: Date
     envelopeId: string | null
+    transferPairId: string | null
+    includeInStats: boolean
 }
 
 export async function GET(request: NextRequest) {
@@ -93,8 +95,8 @@ export async function GET(request: NextRequest) {
             })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
-        // Znajdź kopertę Fundusz Awaryjny
-        const emergencyFundEnvelope = envelopes.find(e => e.name === 'Fundusz Awaryjny')
+        // Znajdź kopertę Fundusz Awaryjny (emergency type)
+        const emergencyFundEnvelope = envelopes.find(e => isEmergencyEnvelope(e.envelopeType))
         const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
 
         // Oblicz saldo: przychody od września - wydatki od września - fundusz awaryjny
@@ -154,12 +156,90 @@ export async function GET(request: NextRequest) {
         }
 
         const totalIncome = Math.round(monthTransactions
-            .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .filter(t => {
+                // Wykluczamy transfery wewnętrzne (z transferPairId)
+                if (t.transferPairId) return false
+                // Wykluczamy transakcje oznaczone jako nie wliczane do statystyk
+                if (t.includeInStats === false) return false
+                // Tylko przychody
+                if (t.type !== 'income') return false
+                // Wykluczamy transfery premii do kopert (mają envelopeId i opis zawiera →)
+                if (t.envelopeId && t.description?.includes('→')) return false
+                return true
+            })
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
 
         const totalExpenses = Math.round(monthTransactions
-            .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
+            .filter(t => t.type === 'expense' && t.includeInStats !== false && !t.transferPairId)
             .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+
+        // Oblicz środki już zaalokowane do kopert (transfery premii typu "Premia → Koperta")
+        const allocatedToEnvelopes = Math.round(monthTransactions
+            .filter(t => t.type === 'income' && t.envelopeId && t.description?.includes('→'))
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+
+        // Oblicz wpłaty do Funduszu Awaryjnego w tym miesiącu
+        const emergencyFundEnvelopeId = emergencyFundEnvelope?.id
+        const monthlyEmergencyFundTransfers = emergencyFundEnvelopeId
+            ? Math.round(monthTransactions
+                .filter(t => t.envelopeId === emergencyFundEnvelopeId && t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+            : 0
+
+        // Oblicz zwroty (przychody niewliczane do statystyk, np. refundacje)
+        const totalReturns = Math.round(monthTransactions
+            .filter(t =>
+                t.type === 'income' &&
+                t.includeInStats === false &&
+                !t.transferPairId
+            )
+            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+
+        // Oblicz nadwyżkę miesiąca (do transferu do Wolnych Środków)
+        // = przychody (stats) + zwroty (non-stats) - wydatki - wpłaty do FA
+        let monthlySurplus = Math.round((totalIncome + totalReturns - totalExpenses - monthlyEmergencyFundTransfers) * 100) / 100
+
+        // Zbierz transfery do kopert (zmniejszające saldo główne)
+        const monthlyTransfersToEnvelopes: { name: string; icon: string; amount: number }[] = []
+
+        // Wpłaty do FA
+        if (monthlyEmergencyFundTransfers > 0 && emergencyFundEnvelope) {
+            monthlyTransfersToEnvelopes.push({
+                name: emergencyFundEnvelope.name,
+                icon: emergencyFundEnvelope.icon || '🚨',
+                amount: monthlyEmergencyFundTransfers
+            })
+        }
+
+        // Alokacje do innych kopert (transfery premii)
+        // Musimy rozróżnić:
+        // 1. Alokacje do kopert ROCZNYCH (np. Wolne środki, Wakacje) -> te środki tam zostają, więc pomniejszają nadwyżkę
+        // 2. Alokacje do kopert MIESIĘCZNYCH (np. Jedzenie) -> te koperty i tak są zerowane przy zamknięciu, więc środki wracają do nadwyżki
+        const bonusTransfers = monthTransactions.filter(t =>
+            t.type === 'income' && t.envelopeId && t.description?.includes('→')
+        )
+
+        let allocatedToYearlyEnvelopes = 0
+
+        for (const transfer of bonusTransfers) {
+            const envelope = envelopes.find(e => e.id === transfer.envelopeId)
+            if (envelope) {
+                monthlyTransfersToEnvelopes.push({
+                    name: envelope.name,
+                    icon: envelope.icon || '📦',
+                    amount: transfer.amount
+                })
+
+                // Jeśli koperta jest roczna (lub chroniona typem), odejmij od nadwyżki
+                // 'yearly' envelopes OR protected types (savings, etc, which are effectively persistent)
+                if (envelope.type === 'yearly' || isProtectedEnvelope(envelope.envelopeType)) {
+                    allocatedToYearlyEnvelopes += transfer.amount
+                }
+            }
+        }
+        // Recalculate surplus subtracting yearly allocations
+        // Note: monthlyAllocations are effectively ignored (treated as surplus)
+        monthlySurplus = Math.round((monthlySurplus - allocatedToYearlyEnvelopes) * 100) / 100
 
         const isMonthClosed = !!monthCloseTransaction
 
@@ -179,13 +259,13 @@ export async function GET(request: NextRequest) {
                     t.envelopeId === e.id
                 )
                 const spent = roundToCents(envelopeTransactions.reduce((sum, t) => {
-                    // Dla kopert wydatkowych: expense = wydatki, income = transfery do koperty (zmniejsza spent)
-                    // Dla kopert oszczędnościowych: expense = transfery z koperty, income = transfery do koperty (zwiększa spent)
-                    const isSavingsEnvelope = e.name === 'Fundusz Awaryjny'
+                    // Dla kopert akumulujących (savings, emergency, goal): expense to wpłata na oszczędności
+                    const isAccumulating = isProtectedEnvelope(e.envelopeType)
 
-                    if (isSavingsEnvelope) {
-                        // Koperty oszczędnościowe: income zwiększa spent (więcej oszczędności)
-                        return t.type === 'income' ? sum + t.amount : sum - t.amount
+                    if (isAccumulating) {
+                        // Koperty oszczędnościowe: expense = wpłata na oszczędności (dodaje do spent)
+                        // income = zwrot/wypłata (odejmuje od spent)
+                        return t.type === 'expense' ? sum + t.amount : sum - t.amount
                     } else {
                         // Koperty wydatkowe: expense zwiększa spent (więcej wydatków)
                         return t.type === 'expense' ? sum + t.amount : sum - t.amount
@@ -200,7 +280,9 @@ export async function GET(request: NextRequest) {
                     planned: e.plannedAmount,
                     current: e.currentAmount,
                     activityCount: envelopeActivity[e.id] || 0,
-                    group: e.group
+                    group: e.group,
+                    isAccumulating: e.isAccumulating,
+                    envelopeType: e.envelopeType
                 }
             })
             .sort((a, b) => {
@@ -216,14 +298,20 @@ export async function GET(request: NextRequest) {
                 const envelopeTransactions = monthTransactions.filter(t =>
                     t.envelopeId === e.id
                 )
+                // Oblicz faktyczne wydatki z tego miesiąca (dla sumy na pulpicie)
+                const monthlyExpenses = envelopeTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0)
                 return {
                     id: e.id,
                     name: e.name,
                     icon: e.icon,
-                    spent: e.currentAmount, // Dla kopert rocznych używamy currentAmount
+                    spent: monthlyExpenses, // Wydatki z tego miesiąca (dla sumy w grupie)
                     planned: e.plannedAmount,
                     current: e.currentAmount,
-                    group: e.group
+                    group: e.group,
+                    isAccumulating: e.isAccumulating,
+                    envelopeType: e.envelopeType
                 }
             })
             .sort((a, b) => a.name.localeCompare(b.name))
@@ -260,9 +348,14 @@ export async function GET(request: NextRequest) {
             balance,
             totalIncome,
             totalExpenses,
+            allocatedToEnvelopes,
+            emergencyFundAmount,
+            monthlySurplus,
+            monthlyTransfersToEnvelopes,
             monthlyEnvelopes,
             yearlyEnvelopes,
             transactions: transactionsFromSeptember.slice(0, 20),
+            monthlyReturns: totalReturns,
             isMonthClosed
         })
 

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryName, getCategoryIcon, EXPENSE_CATEGORIES } from '@/lib/constants/categories'
-import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
-export const dynamic = 'force-dynamic'
+import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 // === INTERFEJSY DLA NOWEJ STRUKTURY ===
 
@@ -43,6 +41,7 @@ interface SpendingTreeNode {
   // Dodatkowe pola dla progress bars
   budget?: number // Budżet dla kopert
   budgetPercentage?: number // Procent wykorzystania budżetu
+  icon?: string | null // Ikona dla wyświetlania
 }
 
 interface TrendData {
@@ -193,7 +192,7 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
   return trends
 }
 
-async function buildSpendingTree(userId: string, startDate: Date, endDate: Date, compare: boolean): Promise<SpendingTreeNode[]> {
+async function buildSpendingTree(userId: string, startDate: Date, endDate: Date, compare: boolean, categories: any[]): Promise<SpendingTreeNode[]> {
   // Pobierz wszystkie transakcje dla okresu
   const transactions = await prisma.transaction.findMany({
     where: {
@@ -211,13 +210,18 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
   // Pobierz informacje o budżetach kopert
   const envelopes = await prisma.envelope.findMany({
     where: { userId: userId },
-    select: { id: true, name: true, plannedAmount: true }
+    select: { id: true, name: true, plannedAmount: true, icon: true }
+
   })
 
   const envelopeBudgets = new Map<string, number>()
   for (const envelope of envelopes) {
     envelopeBudgets.set(envelope.name, envelope.plannedAmount)
   }
+
+  // Helper map for categories
+  const categoryMap = new Map(categories.map(c => [c.id, c]))
+  const getCatName = (id: string) => categoryMap.get(id)?.name || 'Inne'
 
   // Pobierz dane porównawcze jeśli włączony tryb porównawczy
   let previousTransactions: any[] = []
@@ -254,7 +258,17 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
     const envelope = transaction.envelope
     const groupName = envelope?.group || 'Inne'
     const envelopeName = envelope?.name || 'Inne'
-    const category = transaction.category || 'other'
+
+    // Infer category from envelope if not set on transaction
+    let category = transaction.category
+    if (!category && envelopeName && envelopeName !== 'Inne') {
+      // Find categories that belong to this envelope
+      const envelopeCategories = categories.filter(c => c.defaultEnvelope === envelopeName)
+      if (envelopeCategories.length > 0) {
+        category = envelopeCategories[0].id // Use first matching category
+      }
+    }
+    category = category || 'other'
 
     // Grupa
     if (!groupMap.has(groupName)) {
@@ -289,9 +303,10 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
       envelopeNode.children.set(category, {
         type: 'CATEGORY',
         id: `cat_${category}`,
-        name: getCategoryName(category),
+        name: getCatName(category),
         total: 0,
-        children: []
+        children: [],
+        icon: categoryMap.get(category)?.icon || '📦'
       })
     }
 
@@ -361,7 +376,9 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
         total: envelope.total,
         children: [],
         budget: budget,
-        budgetPercentage: budgetPercentage
+        budgetPercentage: budgetPercentage,
+        icon: (envelope as any).icon // Casting because we added icon to select but types inference might need help or just works if envelope is typed correctly. Wait, envelope is from findMany outcome.
+
       }
 
       // Dodaj dane porównawcze dla koperty
@@ -388,7 +405,8 @@ async function buildSpendingTree(userId: string, startDate: Date, endDate: Date,
           name: category.name,
           total: category.total,
           children: category.children,
-          categoryId: categoryName // Przekazujemy categoryId dla kategorii
+          categoryId: categoryName, // Przekazujemy categoryId dla kategorii
+          icon: (category as any).icon
         }
 
         // Dodaj dane porównawcze dla kategorii
@@ -442,6 +460,14 @@ export async function GET(request: NextRequest) {
       start = getStartDate(period)
       end = new Date()
     }
+
+    // === POBIERZ KATEGORIE ===
+    const categories = await prisma.category.findMany({
+      where: { userId }
+    })
+    const categoryMap = new Map(categories.map((c: { id: string, name: string, icon: string }) => [c.id, c]))
+    const getCatName = (id: string) => categoryMap.get(id)?.name || 'Inne'
+    const getCatIcon = (id: string) => categoryMap.get(id)?.icon || '📦'
 
     // === GŁÓWNE METRYKI DLA BIEŻĄCEGO OKRESU ===
     const currentPeriodTransactions = await prisma.transaction.findMany({
@@ -507,17 +533,20 @@ export async function GET(request: NextRequest) {
     }
 
     // === DRZEWO WYDATKÓW ===
-    const spendingTree = await buildSpendingTree(userId, start, end, compare)
+    const spendingTree = await buildSpendingTree(userId, start, end, compare, categories)
 
-    // === TRENDY CZASOWE ===
-    // Zawsze używaj danych z całego roku dla trendów, niezależnie od filtra
-    const yearStart = new Date(new Date().getFullYear(), 0, 1)
-    const yearEnd = new Date()
+    // === TREND_DATA_UPDATE === 
+    // Jeśli podano rok, zwróć trendy dla całego tego roku. W przeciwnym razie default (obecny rok).
+    const requestedYear = searchParams.get('year')
+    const trendYear = requestedYear ? parseInt(requestedYear) : new Date().getFullYear()
+    const yearStart = new Date(trendYear, 0, 1) // 1 stycznia
+    const yearEnd = new Date(trendYear, 11, 31, 23, 59, 59) // 31 grudnia
+
     const totalExpensesTrend = await getTrendsData(userId, yearStart, yearEnd)
 
     // Pobierz trendy dla każdej koperty
     const byEnvelope: { [envelopeId: string]: any[] } = {}
-    const byEnvelopeName: { [envelopeName: string]: any[] } = {} // Dodaj mapowanie po nazwie
+    const byEnvelopeName: { [envelopeName: string]: any[] } = {}
     const envelopes = await prisma.envelope.findMany({
       where: { userId: userId }
     })
@@ -525,7 +554,7 @@ export async function GET(request: NextRequest) {
     for (const envelope of envelopes) {
       const envelopeTrend = await getTrendsData(userId, yearStart, yearEnd, envelope.id)
       byEnvelope[envelope.id] = envelopeTrend
-      byEnvelopeName[envelope.name] = envelopeTrend // Dodaj mapowanie po nazwie
+      byEnvelopeName[envelope.name] = envelopeTrend
     }
 
     const trends: TrendsData = {
@@ -572,7 +601,7 @@ export async function GET(request: NextRequest) {
 
     expenseTransactions.forEach(transaction => {
       const categoryId = transaction.category || 'other'
-      const categoryName = getCategoryName(categoryId)
+      const categoryName = getCatName(categoryId)
       const envelopeName = transaction.envelope?.name || 'Inne'
 
       if (!categoryData[categoryId]) {
@@ -606,8 +635,8 @@ export async function GET(request: NextRequest) {
 
     // Stwórz analizę kategorii
     const categoryAnalysis: CategoryAnalysis[] = Object.entries(categoryData).map(([categoryId, data]) => {
-      const categoryName = getCategoryName(categoryId)
-      const categoryIcon = getCategoryIcon(categoryId)
+      const categoryName = getCatName(categoryId)
+      const categoryIcon = getCatIcon(categoryId)
 
       // Przygotuj dane o kopertach
       const envelopeBreakdown = Object.entries(data.envelopeBreakdown).map(([envelopeName, amount]) => {
@@ -670,8 +699,8 @@ export async function GET(request: NextRequest) {
 
     // Dodaj kategorie bez wydatków (dla kompletności)
     const usedCategories = new Set(categoryAnalysis.map(c => c.categoryId))
-    const unusedCategories = EXPENSE_CATEGORIES
-      .filter(c => !usedCategories.has(c.id) && c.defaultEnvelope !== '')
+    const unusedCategories = categories
+      .filter(c => !usedCategories.has(c.id) && c.defaultEnvelope !== null)
       .map(category => ({
         categoryId: category.id,
         categoryName: category.name,

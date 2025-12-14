@@ -8,103 +8,42 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ size = 'medium', showLabel = false }: ThemeToggleProps) {
-    const { theme, toggleTheme, isDark } = useTheme()
+    const { isDark, toggleTheme } = useTheme()
 
-    const getSizeStyles = () => {
+    const getSizeClasses = () => {
         switch (size) {
             case 'small':
-                return { width: '32px', height: '32px', fontSize: '14px' }
+                return 'w-8 h-8 text-sm'
             case 'large':
-                return { width: '48px', height: '48px', fontSize: '20px' }
+                return 'w-12 h-12 text-xl'
             default:
-                return { width: '40px', height: '40px', fontSize: '16px' }
+                return 'w-10 h-10 text-base'
         }
     }
 
-    const sizeStyles = getSizeStyles()
-
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="flex items-center gap-2">
             <button
                 onClick={toggleTheme}
-                className="btn-animate smooth-all"
-                style={{
-                    ...sizeStyles,
-                    backgroundColor: isDark ? '#4a9eff' : '#f59e0b',
-                    color: '#ffffff',
-                    border: `2px solid ${isDark ? '#4a9eff' : '#f59e0b'}`,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isDark 
-                        ? '0 2px 12px rgba(74, 158, 255, 0.4)' 
-                        : '0 2px 12px rgba(245, 158, 11, 0.4)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.1)'
-                    e.currentTarget.style.boxShadow = isDark 
-                        ? '0 4px 16px rgba(74, 158, 255, 0.6)' 
-                        : '0 4px 16px rgba(245, 158, 11, 0.6)'
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)'
-                    e.currentTarget.style.boxShadow = isDark 
-                        ? '0 2px 12px rgba(74, 158, 255, 0.4)' 
-                        : '0 2px 12px rgba(245, 158, 11, 0.4)'
-                }}
+                className={`${getSizeClasses()} rounded-full cursor-pointer flex items-center justify-center transition-all duration-300 relative overflow-hidden border-2 hover:scale-110 ${isDark
+                        ? 'bg-blue-400 border-blue-400 shadow-[0_2px_12px_rgba(74,158,255,0.4)] hover:shadow-[0_4px_16px_rgba(74,158,255,0.6)]'
+                        : 'bg-amber-500 border-amber-500 shadow-[0_2px_12px_rgba(245,158,11,0.4)] hover:shadow-[0_4px_16px_rgba(245,158,11,0.6)]'
+                    } text-white`}
                 title={isDark ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
                 aria-label={isDark ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
             >
-                <span 
-                    style={{
-                        transform: isDark ? 'rotate(0deg)' : 'rotate(180deg)',
-                        transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                        display: 'inline-block'
-                    }}
+                <span
+                    className={`inline-block transition-transform duration-500 ${isDark ? 'rotate-0' : 'rotate-180'}`}
                 >
                     {isDark ? '🌙' : '☀️'}
                 </span>
-                
-                {/* Ripple effect */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '50%',
-                        background: isDark 
-                            ? 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)'
-                            : 'radial-gradient(circle, rgba(0,0,0,0.05) 0%, transparent 70%)',
-                        transform: 'translate(-50%, -50%) scale(0)',
-                        transition: 'transform 0.3s ease',
-                        pointerEvents: 'none'
-                    }}
-                    className="ripple-effect"
-                />
             </button>
-            
+
             {showLabel && (
-                <span style={{
-                    fontSize: '14px',
-                    color: isDark ? '#d1d5db' : '#6b7280',
-                    fontWeight: '500'
-                }}>
+                <span className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
                     {isDark ? 'Tryb ciemny' : 'Tryb jasny'}
                 </span>
             )}
-            
-            <style jsx>{`
-                .btn-animate:active .ripple-effect {
-                    transform: translate(-50%, -50%) scale(1);
-                }
-            `}</style>
         </div>
     )
 }

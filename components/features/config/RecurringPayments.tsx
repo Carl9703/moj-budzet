@@ -1,9 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Calendar, CreditCard, AlertCircle } from 'lucide-react'
-import { authorizedFetch } from '@/lib/utils/api'
-import { getCategoryIcon, getCategoryName, getCategoriesForEnvelope, getExpenseCategories } from '@/lib/constants/categories'
+import { Plus, Edit, Trash2, Calendar, CreditCard } from 'lucide-react'
+import { RecurringPaymentFormData } from '@/lib/schemas'
+import { authorizedFetch } from '@/lib/api/client'
+import { useCategories } from '@/lib/contexts/CategoryContext'
+import { useToast } from '@/components/ui/feedback/Toast'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ConfirmationModal } from '@/components/shared/modals'
+import { RecurringPaymentModal } from './RecurringPaymentModal'
 
 interface RecurringPayment {
     id: string
@@ -16,21 +21,9 @@ interface RecurringPayment {
     fromEnvelopeId?: string
     toEnvelopeId?: string
     isActive: boolean
-    envelope: {
-        id: string
-        name: string
-        icon: string
-    }
-    fromEnvelope?: {
-        id: string
-        name: string
-        icon: string
-    }
-    toEnvelope?: {
-        id: string
-        name: string
-        icon: string
-    }
+    envelope: { id: string; name: string; icon: string }
+    fromEnvelope?: { id: string; name: string; icon: string }
+    toEnvelope?: { id: string; name: string; icon: string }
 }
 
 interface Envelope {
@@ -38,6 +31,7 @@ interface Envelope {
     name: string
     icon: string
     type: string
+    isAccumulating?: boolean
 }
 
 interface RecurringPaymentsProps {
@@ -47,814 +41,208 @@ interface RecurringPaymentsProps {
 export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
     const [payments, setPayments] = useState<RecurringPayment[]>([])
     const [loading, setLoading] = useState(true)
-    const [showForm, setShowForm] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingPayment, setEditingPayment] = useState<RecurringPayment | null>(null)
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-    const [formData, setFormData] = useState({
-        name: '',
-        amount: '',
-        dayOfMonth: 1,
-        envelopeId: '',
-        category: '',
-        type: 'expense' as 'expense' | 'transfer',
-        fromEnvelopeId: '',
-        toEnvelopeId: '',
-        isActive: true
-    })
+    const { showToast } = useToast()
+    const { getCategoryIcon, getCategoryName } = useCategories()
 
-    // Pobierz kategorie dla wybranej koperty
-    const selectedEnvelopeData = envelopes.find(e => e.id === formData.envelopeId)
-    const envelopeCategories = selectedEnvelopeData 
-        ? getCategoriesForEnvelope(selectedEnvelopeData.name)
-        : []
-    
-    // Wszystkie kategorie wydatków (dla opcji "Pokaż wszystkie")
-    const allExpenseCategories = getExpenseCategories()
-    
-    // Kategorie do wyświetlenia (domyślnie dla koperty, lub wszystkie)
-    const displayCategories = envelopeCategories.length > 0 ? envelopeCategories : allExpenseCategories
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean, id: string | null }>({ isOpen: false, id: null })
+    const [deleting, setDeleting] = useState(false)
 
     const fetchPayments = async () => {
         try {
             setLoading(true)
             const response = await authorizedFetch('/api/config/recurring-payments')
             const data = await response.json()
-            
-            if (data.recurringPayments) {
-                setPayments(data.recurringPayments)
-            }
+            if (data.recurringPayments) setPayments(data.recurringPayments)
         } catch (error) {
             console.error('Error fetching recurring payments:', error)
-            setMessage({ type: 'error', text: 'Błąd pobierania płatności cyklicznych' })
+            showToast('Błąd pobierania płatności cyklicznych', 'error')
         } finally {
             setLoading(false)
         }
     }
 
-    useEffect(() => {
-        fetchPayments()
-    }, [])
+    useEffect(() => { fetchPayments() }, [])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        
+    const handleSave = async (data: RecurringPaymentFormData) => {
         try {
-            // Przygotuj dane w zależności od typu
-            const submitData: any = {
-                name: formData.name,
-                amount: parseFloat(formData.amount),
-                dayOfMonth: formData.dayOfMonth,
-                type: formData.type,
-                isActive: formData.isActive
-            }
-
-            // Dla wydatków dodaj envelopeId i category
-            if (formData.type === 'expense') {
-                submitData.envelopeId = formData.envelopeId
-                submitData.category = formData.category
-            }
-
-            // Dla transferów dodaj toEnvelopeId
-            if (formData.type === 'transfer') {
-                submitData.toEnvelopeId = formData.toEnvelopeId
-            }
-
             const response = await authorizedFetch(
-                editingPayment 
-                    ? `/api/config/recurring-payments/${editingPayment.id}`
-                    : '/api/config/recurring-payments',
+                editingPayment ? `/api/config/recurring-payments/${editingPayment.id}` : '/api/config/recurring-payments',
                 {
                     method: editingPayment ? 'PUT' : 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submitData)
+                    body: JSON.stringify(data)
                 }
             )
+            const resData = await response.json()
 
-            const data = await response.json()
-
-            if (data.success) {
-                setMessage({ type: 'success', text: data.message })
-                setShowForm(false)
+            if (resData.success) {
+                showToast(resData.message, 'success')
+                setIsModalOpen(false)
                 setEditingPayment(null)
-                resetForm()
                 fetchPayments()
             } else {
-                console.error('API Error:', data)
-                setMessage({ type: 'error', text: data.error || 'Błąd zapisywania płatności' })
+                showToast(resData.error || 'Błąd zapisywania płatności', 'error')
             }
         } catch (error) {
             console.error('Error saving payment:', error)
-            setMessage({ type: 'error', text: 'Błąd zapisywania płatności' })
+            showToast('Błąd zapisywania płatności', 'error')
         }
-    }
-
-    const handleEnvelopeChange = (envelopeId: string) => {
-        setFormData(prev => ({
-            ...prev,
-            envelopeId,
-            category: '' // Reset kategorii przy zmianie koperty
-        }))
     }
 
     const handleEdit = (payment: RecurringPayment) => {
         setEditingPayment(payment)
-        setFormData({
-            name: payment.name,
-            amount: payment.amount.toString(),
-            dayOfMonth: payment.dayOfMonth,
-            envelopeId: payment.envelopeId,
-            category: payment.category,
-            type: payment.type,
-            fromEnvelopeId: payment.fromEnvelopeId || '',
-            toEnvelopeId: payment.toEnvelopeId || '',
-            isActive: payment.isActive
-        })
-        setShowForm(true)
+        setIsModalOpen(true)
     }
 
-    const handleDelete = async (paymentId: string) => {
-        if (!confirm('Czy na pewno chcesz usunąć tę płatność cykliczną?')) {
-            return
-        }
+    const handleAddNew = () => {
+        setEditingPayment(null)
+        setIsModalOpen(true)
+    }
 
+    const handleDelete = (paymentId: string) => {
+        setDeleteConfirmation({ isOpen: true, id: paymentId })
+    }
+
+    const confirmDelete = async (idOverride?: string) => {
+        const idToDelete = idOverride || deleteConfirmation.id
+        if (!idToDelete) return
+
+        setDeleting(true)
         try {
-            const response = await authorizedFetch(`/api/config/recurring-payments/${paymentId}`, {
-                method: 'DELETE'
-            })
-
+            const response = await authorizedFetch(`/api/config/recurring-payments/${idToDelete}`, { method: 'DELETE' })
             const data = await response.json()
-
             if (data.success) {
-                setMessage({ type: 'success', text: data.message })
+                showToast(data.message, 'success')
                 fetchPayments()
+                if (idOverride) {
+                    setIsModalOpen(false) // Close modal if deleted from within
+                }
             } else {
-                setMessage({ type: 'error', text: data.error || 'Błąd usuwania płatności' })
+                showToast(data.error || 'Błąd usuwania płatności', 'error')
             }
         } catch (error) {
             console.error('Error deleting payment:', error)
-            setMessage({ type: 'error', text: 'Błąd usuwania płatności' })
+            showToast('Błąd usuwania płatności', 'error')
+        } finally {
+            setDeleting(false)
+            setDeleteConfirmation({ isOpen: false, id: null })
         }
     }
-
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            amount: '',
-            dayOfMonth: 1,
-            envelopeId: '',
-            category: '',
-            type: 'expense',
-            fromEnvelopeId: '',
-            toEnvelopeId: '',
-            isActive: true
-        })
-    }
-
-    const handleCancel = () => {
-        setShowForm(false)
-        setEditingPayment(null)
-        resetForm()
-    }
-
-    // Ukryj wiadomość po 3 sekundach
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000)
-            return () => clearTimeout(timer)
-        }
-    }, [message])
-
-    // Dodaj informację o tym, które kategorie są dostępne
-    const categoryInfo = selectedEnvelopeData 
-        ? `Kategorie dla koperty "${selectedEnvelopeData.name}"`
-        : 'Wszystkie kategorie'
 
     if (loading) {
         return (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-                <div style={{
-                    width: '40px',
-                    height: '40px',
-                    border: '3px solid var(--border-primary)',
-                    borderTop: '3px solid var(--text-primary)',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    margin: '0 auto 16px'
-                }} />
-                <p style={{ color: 'var(--text-secondary)' }}>Ładowanie płatności cyklicznych...</p>
+            <div className="flex flex-col items-center justify-center p-12 gap-4">
+                <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                <p className="text-slate-400 text-sm animate-pulse">Ładowanie płatności cyklicznych...</p>
             </div>
         )
     }
 
     return (
-        <div>
+        <div className="p-1">
             {/* Header */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '24px',
-                paddingBottom: '16px',
-                borderBottom: '1px solid var(--border-primary)'
-            }}>
-                <div>
-                    <h2 style={{
-                        fontSize: '24px',
-                        fontWeight: '600',
-                        color: 'var(--text-primary)',
-                        margin: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }}>
-                        <Calendar size={24} />
-                        Płatności Cykliczne
-                    </h2>
-                    <p style={{
-                        fontSize: '14px',
-                        color: 'var(--text-secondary)',
-                        margin: '4px 0 0 0'
-                    }}>
-                        Zarządzaj automatycznymi przypomnieniami o płatnościach
-                    </p>
+            <div className="flex justify-between items-center mb-6 p-4 glass-card bg-indigo-900/10 border-indigo-500/20">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-500 rounded-lg shadow-lg shadow-indigo-500/20 text-white">
+                        <Calendar size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-white leading-tight">
+                            Płatności Cykliczne
+                        </h2>
+                        <p className="text-xs text-indigo-200/70">Zarządzaj automatycznymi przypomnieniami</p>
+                    </div>
                 </div>
                 <button
-                    onClick={() => setShowForm(true)}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '10px 16px',
-                        backgroundColor: 'var(--accent-primary)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                    }}
+                    onClick={handleAddNew}
+                    className="btn-primary py-2 px-4 shadow-lg shadow-indigo-500/20 text-xs flex items-center gap-2"
                 >
-                    <Plus size={16} />
-                    Dodaj płatność
+                    <Plus size={16} /> Dodaj płatność
                 </button>
             </div>
 
-            {/* Formularz */}
-            {showForm && (
-                <div style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '12px',
-                    padding: '24px',
-                    marginBottom: '24px'
-                }}>
-                    <h3 style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: 'var(--text-primary)',
-                        margin: '0 0 20px 0'
-                    }}>
-                        {editingPayment ? 'Edytuj płatność' : 'Nowa płatność cykliczna'}
-                    </h3>
-
-                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
-                        {/* Typ płatności */}
-                        <div>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: 'var(--text-primary)',
-                                marginBottom: '8px'
-                            }}>
-                                Typ automatyzacji *
-                            </label>
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, type: 'expense' })}
-                                    style={{
-                                        padding: '12px 20px',
-                                        backgroundColor: formData.type === 'expense' ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                                        color: formData.type === 'expense' ? '#ffffff' : 'var(--text-primary)',
-                                        border: '2px solid var(--border-primary)',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    💳 Płatność
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, type: 'transfer' })}
-                                    style={{
-                                        padding: '12px 20px',
-                                        backgroundColor: formData.type === 'transfer' ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                                        color: formData.type === 'transfer' ? '#ffffff' : 'var(--text-primary)',
-                                        border: '2px solid var(--border-primary)',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    🔄 Transfer
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    color: 'var(--text-primary)',
-                                    marginBottom: '6px'
-                                }}>
-                                    Nazwa płatności *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="np. Rachunek za telefon"
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid var(--border-primary)',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'var(--bg-primary)',
-                                        color: 'var(--text-primary)',
-                                        fontSize: '14px'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{
-                                    display: 'block',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    color: 'var(--text-primary)',
-                                    marginBottom: '6px'
-                                }}>
-                                    Kwota (zł) *
-                                </label>
-                                <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    value={formData.amount}
-                                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                    placeholder="0.00"
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid var(--border-primary)',
-                                        borderRadius: '6px',
-                                        backgroundColor: 'var(--bg-primary)',
-                                        color: 'var(--text-primary)',
-                                        fontSize: '14px'
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Pola dla wydatków */}
-                        {formData.type === 'expense' && (
-                            <>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                    <div>
-                                        <label style={{
-                                            display: 'block',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            color: 'var(--text-primary)',
-                                            marginBottom: '6px'
-                                        }}>
-                                            Dzień miesiąca *
-                                        </label>
-                                        <select
-                                            value={formData.dayOfMonth}
-                                            onChange={(e) => setFormData({ ...formData, dayOfMonth: parseInt(e.target.value) })}
-                                            required
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px',
-                                                border: '1px solid var(--border-primary)',
-                                                borderRadius: '6px',
-                                                backgroundColor: 'var(--bg-primary)',
-                                                color: 'var(--text-primary)',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                                                <option key={day} value={day}>{day}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label style={{
-                                            display: 'block',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            color: 'var(--text-primary)',
-                                            marginBottom: '6px'
-                                        }}>
-                                            Koperta *
-                                        </label>
-                                        <select
-                                            value={formData.envelopeId}
-                                            onChange={(e) => handleEnvelopeChange(e.target.value)}
-                                            required
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px',
-                                                border: '1px solid var(--border-primary)',
-                                                borderRadius: '6px',
-                                                backgroundColor: 'var(--bg-primary)',
-                                                color: 'var(--text-primary)',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            <option value="">Wybierz kopertę</option>
-                                            {envelopes.map(envelope => (
-                                                <option key={envelope.id} value={envelope.id}>
-                                                    {envelope.icon} {envelope.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label style={{
-                                        display: 'block',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        color: 'var(--text-primary)',
-                                        marginBottom: '6px'
-                                    }}>
-                                        Kategoria *
-                                        {selectedEnvelopeData && (
-                                            <span style={{
-                                                fontSize: '12px',
-                                                color: 'var(--text-secondary)',
-                                                marginLeft: '8px',
-                                                fontStyle: 'italic'
-                                            }}>
-                                                ({categoryInfo})
-                                            </span>
-                                        )}
-                                    </label>
-                                    {displayCategories.length > 0 ? (
-                                        <select
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                            required
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px',
-                                                border: '1px solid var(--border-primary)',
-                                                borderRadius: '6px',
-                                                backgroundColor: 'var(--bg-primary)',
-                                                color: 'var(--text-primary)',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            <option value="">Wybierz kategorię</option>
-                                            {displayCategories.map(category => (
-                                                <option key={category.id} value={category.id}>
-                                                    {category.icon} {category.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        <div style={{
-                                            padding: '10px 12px',
-                                            border: '1px solid var(--border-primary)',
-                                            borderRadius: '6px',
-                                            backgroundColor: 'var(--bg-tertiary)',
-                                            color: 'var(--text-secondary)',
-                                            fontSize: '14px',
-                                            textAlign: 'center'
-                                        }}>
-                                            Wybierz kopertę, aby zobaczyć dostępne kategorie
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-
-                        {/* Pola dla transferów */}
-                        {formData.type === 'transfer' && (
-                            <>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                    <div>
-                                        <label style={{
-                                            display: 'block',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            color: 'var(--text-primary)',
-                                            marginBottom: '6px'
-                                        }}>
-                                            Dzień miesiąca *
-                                        </label>
-                                        <select
-                                            value={formData.dayOfMonth}
-                                            onChange={(e) => setFormData({ ...formData, dayOfMonth: parseInt(e.target.value) })}
-                                            required
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px',
-                                                border: '1px solid var(--border-primary)',
-                                                borderRadius: '6px',
-                                                backgroundColor: 'var(--bg-primary)',
-                                                color: 'var(--text-primary)',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                                                <option key={day} value={day}>{day}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label style={{
-                                            display: 'block',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            color: 'var(--text-primary)',
-                                            marginBottom: '6px'
-                                        }}>
-                                            Koperta docelowa *
-                                        </label>
-                                        <select
-                                            value={formData.toEnvelopeId}
-                                            onChange={(e) => {
-                                                const selectedEnvelope = envelopes.find(env => env.id === e.target.value)
-                                                let category = 'transfer' // domyślna kategoria
-                                                
-                                                // Automatycznie ustaw kategorię na podstawie koperty
-                                                if (selectedEnvelope) {
-                                                    if (selectedEnvelope.name === 'Wesele') category = 'wedding'
-                                                    else if (selectedEnvelope.name === 'Fundusz Awaryjny') category = 'emergency'
-                                                    else if (selectedEnvelope.name === 'Podróże') category = 'vacation'
-                                                }
-                                                
-                                                setFormData({ 
-                                                    ...formData, 
-                                                    toEnvelopeId: e.target.value,
-                                                    category: category
-                                                })
-                                            }}
-                                            required={formData.type === 'transfer'}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 12px',
-                                                border: '1px solid var(--border-primary)',
-                                                borderRadius: '6px',
-                                                backgroundColor: 'var(--bg-primary)',
-                                                color: 'var(--text-primary)',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            <option value="">Wybierz kopertę docelową</option>
-                                            {envelopes
-                                                .filter(envelope => 
-                                                    envelope.name === 'Wesele' || 
-                                                    envelope.name === 'Fundusz Awaryjny' || 
-                                                    envelope.name === 'Podróże'
-                                                )
-                                                .map(envelope => (
-                                                    <option key={envelope.id} value={envelope.id}>
-                                                        {envelope.icon} {envelope.name}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style={{
-                                    fontSize: '12px',
-                                    color: 'var(--text-secondary)',
-                                    marginTop: '8px',
-                                    fontStyle: 'italic',
-                                    padding: '8px 12px',
-                                    backgroundColor: 'var(--bg-tertiary)',
-                                    borderRadius: '6px'
-                                }}>
-                                    💡 Transfer będzie pobierał środki z głównego salda konta
-                                </div>
-                            </>
-                        )}
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <input
-                                type="checkbox"
-                                id="isActive"
-                                checked={formData.isActive}
-                                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                style={{ margin: 0 }}
-                            />
-                            <label htmlFor="isActive" style={{
-                                fontSize: '14px',
-                                color: 'var(--text-primary)',
-                                cursor: 'pointer'
-                            }}>
-                                Aktywna (będzie pokazywana w Centrum Akcji)
-                            </label>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-tertiary)',
-                                    color: 'var(--text-secondary)',
-                                    border: '1px solid var(--border-primary)',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Anuluj
-                            </button>
-                            <button
-                                type="submit"
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--accent-primary)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {editingPayment ? 'Zapisz zmiany' : 'Dodaj płatność'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Lista płatności */}
+            {/* List */}
             {payments.length === 0 ? (
-                <div style={{
-                    textAlign: 'center',
-                    padding: '40px',
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '12px'
-                }}>
-                    <CreditCard size={48} style={{ color: 'var(--text-secondary)', marginBottom: '16px' }} />
-                    <h3 style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: 'var(--text-primary)',
-                        margin: '0 0 8px 0'
-                    }}>
-                        Brak płatności cyklicznych
-                    </h3>
-                    <p style={{
-                        fontSize: '14px',
-                        color: 'var(--text-secondary)',
-                        margin: 0
-                    }}>
-                        Dodaj pierwszą płatność cykliczną, aby otrzymywać przypomnienia
-                    </p>
+                <div className="text-center p-12 glass-card-static flex flex-col items-center">
+                    <div className="p-4 bg-slate-800/50 rounded-full mb-4">
+                        <CreditCard size={32} className="text-slate-500" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1">Brak płatności cyklicznych</h3>
+                    <p className="text-slate-400 text-sm">Dodaj pierwszą płatność, aby system pamiętał o Twoich rachunkach.</p>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gap: '12px' }}>
-                    {payments.map(payment => (
-                        <div
-                            key={payment.id}
-                            style={{
-                                backgroundColor: 'var(--bg-secondary)',
-                                border: '1px solid var(--border-primary)',
-                                borderRadius: '8px',
-                                padding: '16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '16px'
-                            }}
-                        >
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                    <span style={{
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        color: 'var(--text-primary)'
-                                    }}>
-                                        {payment.name}
-                                    </span>
-                                    {!payment.isActive && (
-                                        <span style={{
-                                            fontSize: '12px',
-                                            padding: '2px 6px',
-                                            backgroundColor: 'var(--bg-tertiary)',
-                                            color: 'var(--text-secondary)',
-                                            borderRadius: '4px'
-                                        }}>
-                                            Nieaktywna
-                                        </span>
-                                    )}
+                <div className="grid gap-3">
+                    <AnimatePresence>
+                        {payments.map((payment, index) => (
+                            <motion.div
+                                key={payment.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="glass-card-static p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-white/5 hover:border-indigo-500/30 transition-all group"
+                            >
+                                <div className="flex items-start gap-4 flex-1">
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${payment.isActive ? (payment.type === 'transfer' ? 'bg-purple-500/10 text-purple-400' : 'bg-indigo-500/10 text-indigo-400') : 'bg-slate-800 text-slate-600'}`}>
+                                        {payment.type === 'transfer' ? '🔄' : '💳'}
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className={`font-bold text-white ${!payment.isActive && 'line-through opacity-50'}`}>{payment.name}</span>
+                                            {!payment.isActive && <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">NIEAKTYWNA</span>}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                                            <span className="font-bold text-indigo-300 text-sm bg-indigo-500/10 px-1.5 rounded">{payment.amount.toFixed(2)} zł</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                            <span className="flex items-center gap-1"><Calendar size={10} /> Dzień: {payment.dayOfMonth}</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                            {payment.type === 'transfer' ? (
+                                                <span>Transfer do: {payment.toEnvelope?.icon} {payment.toEnvelope?.name}</span>
+                                            ) : (
+                                                <>
+                                                    <span>{payment.envelope?.icon} {payment.envelope?.name}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                                    <span>{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                    <span style={{ fontWeight: '600', color: 'var(--accent-primary)' }}>
-                                        {payment.amount.toFixed(2)} zł
-                                    </span>
-                                    <span>•</span>
-                                    <span>Dzień: {payment.dayOfMonth}</span>
-                                    <span>•</span>
-                                    {payment.type === 'transfer' ? (
-                                        <>
-                                            <span>🔄 Transfer: Główne saldo → {payment.toEnvelope?.icon} {payment.toEnvelope?.name}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>{payment.envelope.icon} {payment.envelope.name}</span>
-                                            <span>•</span>
-                                            <span>{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
-                                        </>
-                                    )}
+                                <div className="flex gap-2 w-full md:w-auto justify-end opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleEdit(payment)} className="p-2 bg-slate-800 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors text-slate-400">
+                                        <Edit size={14} />
+                                    </button>
+                                    <button onClick={() => handleDelete(payment.id)} className="p-2 bg-slate-800 hover:bg-rose-600 hover:text-white rounded-lg transition-colors text-slate-400">
+                                        <Trash2 size={14} />
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                                <button
-                                    onClick={() => handleEdit(payment)}
-                                    style={{
-                                        padding: '6px 10px',
-                                        backgroundColor: 'var(--bg-tertiary)',
-                                        color: 'var(--text-secondary)',
-                                        border: '1px solid var(--border-primary)',
-                                        borderRadius: '6px',
-                                        fontSize: '12px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                    }}
-                                >
-                                    <Edit size={12} />
-                                    Edytuj
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(payment.id)}
-                                    style={{
-                                        padding: '6px 10px',
-                                        backgroundColor: 'var(--error-primary)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        fontSize: '12px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                    }}
-                                >
-                                    <Trash2 size={12} />
-                                    Usuń
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
             )}
 
-            {/* Toast message */}
-            {message && (
-                <div style={{
-                    position: 'fixed',
-                    top: '20px',
-                    right: '20px',
-                    backgroundColor: message.type === 'success' ? 'var(--success-primary)' : 'var(--error-primary)',
-                    color: 'white',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    boxShadow: 'var(--shadow-lg)',
-                    zIndex: 1000,
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    maxWidth: '300px'
-                }}>
-                    {message.text}
-                </div>
-            )}
+            <RecurringPaymentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+                onDelete={editingPayment ? () => confirmDelete(editingPayment.id) : undefined}
+                initialData={editingPayment}
+                envelopes={envelopes}
+            />
+
+            <ConfirmationModal
+                isOpen={deleteConfirmation.isOpen}
+                onClose={() => setDeleteConfirmation({ isOpen: false, id: null })}
+                onConfirm={() => confirmDelete()}
+                title="Usuń płatność cykliczną"
+                description="Czy na pewno chcesz usunąć tę płatność cykliczną? Tej operacji nie można cofnąć."
+                confirmText="Usuń"
+                variant="danger"
+                isLoading={deleting}
+            />
         </div>
     )
 }

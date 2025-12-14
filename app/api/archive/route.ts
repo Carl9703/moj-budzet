@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
-import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
 export const dynamic = 'force-dynamic'
@@ -69,6 +68,14 @@ export async function GET(request: NextRequest) {
             where: { userId }
         })
 
+        // Pobierz kategorie
+        const categories = await prisma.category.findMany({
+            where: { userId }
+        })
+        const categoryMap = new Map(categories.map((c: { id: string, name: string, icon: string }) => [c.id, c]))
+        const getCatName = (id: string) => categoryMap.get(id)?.name || 'Inne'
+        const getCatIcon = (id: string) => categoryMap.get(id)?.icon || '📦'
+
         // Grupuj transakcje po miesiącach
         const monthlyData: { [key: string]: MonthData } = {}
 
@@ -104,7 +111,7 @@ export async function GET(request: NextRequest) {
                 categoryName = transaction.envelope.name
                 isTransfer = true
             } else if (transaction.category) {
-                categoryName = getCategoryName(transaction.category)
+                categoryName = getCatName(transaction.category)
                 // Sprawdź czy to transfer do koperty rocznej
                 isTransfer = ['Wesele', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie', 'Fundusz Awaryjny'].includes(categoryName)
             } else if (transaction.description) {
@@ -241,8 +248,8 @@ export async function GET(request: NextRequest) {
                     envelopeData.totalSpent += transaction.amount
 
                     const realCategoryId = originalTransaction?.category
-                    const realCategoryName = realCategoryId ? getCategoryName(realCategoryId) : transaction.category
-                    const realCategoryIcon = realCategoryId ? getCategoryIcon(realCategoryId) : '📦'
+                    const realCategoryName = realCategoryId ? getCatName(realCategoryId) : transaction.category
+                    const realCategoryIcon = realCategoryId ? getCatIcon(realCategoryId) : '📦'
 
                     let categoryInEnvelope = envelopeData.categories.find(c => c.name === realCategoryName)
                     if (!categoryInEnvelope) {

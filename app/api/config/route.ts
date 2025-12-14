@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(request: NextRequest) {
     try {
 
@@ -52,7 +50,7 @@ export async function GET(request: NextRequest) {
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -60,7 +58,7 @@ export async function GET(request: NextRequest) {
                 monthlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'monthly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -91,7 +89,7 @@ export async function GET(request: NextRequest) {
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -99,7 +97,7 @@ export async function GET(request: NextRequest) {
                 yearlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'yearly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -125,6 +123,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
+
 export async function PUT(request: NextRequest) {
     try {
         // Pobierz userId z JWT tokenu
@@ -138,13 +137,11 @@ export async function PUT(request: NextRequest) {
         const body = await request.json()
         const {
             defaultSalary,
-
             bonusDistribution,
             monthlyEnvelopes,
             yearlyEnvelopes,
         } = body as {
             defaultSalary?: number
-
             bonusDistribution?: string
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
@@ -152,7 +149,6 @@ export async function PUT(request: NextRequest) {
 
         const updateData: any = {}
         if (defaultSalary !== undefined) updateData.defaultSalary = defaultSalary
-
         // bonusDistribution może być string (JSON) lub null
         if (bonusDistribution !== undefined) {
             updateData.bonusDistribution = bonusDistribution === null || bonusDistribution === '' ? null : bonusDistribution
@@ -164,7 +160,6 @@ export async function PUT(request: NextRequest) {
             create: {
                 userId,
                 defaultSalary: defaultSalary ?? 0,
-
                 bonusDistribution: bonusDistribution ?? null,
             },
         })
