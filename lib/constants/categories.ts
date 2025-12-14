@@ -146,18 +146,19 @@ export function findEnvelopeForCategory(
 
 export function getCategoryById(categoryId: string): Category | undefined {
     const allCategories = getAllCategories()
-    return allCategories.find(c => c.id === categoryId)
+    const found = allCategories.find(c => c.id === categoryId)
+    if (found) return found
+    
+    return EXPENSE_CATEGORIES.find(c => c.id === categoryId)
 }
 
 export function getCategoryIcon(categoryId: string): string {
-    const allCategories = getAllCategories()
-    const category = allCategories.find(c => c.id === categoryId)
+    const category = getCategoryById(categoryId)
     return category?.icon || '📦'
 }
 
 export function getCategoryName(categoryId: string): string {
-    const allCategories = getAllCategories()
-    const category = allCategories.find(c => c.id === categoryId)
+    const category = getCategoryById(categoryId)
     return category?.name || 'Inne'
 }
 
