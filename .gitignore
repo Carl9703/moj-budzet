@@ -42,3 +42,31 @@ next-env.d.ts
 
 # PM2
 .pm2
+
+# Visual Studio
+.vs/
+
+# Logs and reports
+*.log
+*.txt
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!vercel.json
+!.prettierrc.json
+eslint-errors.json
+eslint-report.json
+lint_report.json
+build-errors.txt
+build.log
+errors.txt
+errors_filtered.txt
+errors_found.txt
+errors_utf8.txt
+eslint-report.txt
+lint_output.txt
+lint_results.txt
+lint_verification.txt
+ts_errors.txt
+.gemini_lint_out.txt
