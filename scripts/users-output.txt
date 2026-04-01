@@ -1,0 +1,15 @@
+--- USERS FOUND ---
+User: newsletteryy@o2.pl (ID: cmgm8hqws00006gcj13vo7jqn)
+  Name: Karol
+  Envelopes: 15
+  Transactions: 344
+  Sessions: 0
+-------------------
+User: demo1@demo.pl (ID: cmjponkl00000osnxdxyhfk4a)
+  Name: demo
+  Envelopes: 15
+  Transactions: 0
+  Sessions: 0
+-------------------
+JWT_SECRET FOUND: yes
+JWT_SECRET VALUE: 7f8a9b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1
