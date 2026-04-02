@@ -9,8 +9,6 @@ export { InteractiveExpenseExplorer } from './InteractiveExpenseExplorer'
 export { TrendsVisualization } from './TrendsVisualization'
 export { AnalyticsCharts } from './AnalyticsCharts'
 export { IncomeAnalysis } from './IncomeAnalysis'
-export { ViewModeToggle } from './ViewModeToggle'
-export { CurrentAnalysisView } from './CurrentAnalysisView'
 
 // Lazy-loaded versions (for code splitting)
 export {

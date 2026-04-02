@@ -79,6 +79,7 @@ function HomePage() {
 
     const freeFunds = data?.yearlyEnvelopes?.find(e => e.name.toLowerCase().includes('wolne środki'))?.current || 0
     const emergencyFund = data?.emergencyFundAmount || 0
+    const totalNetWorth = (data?.balance || 0) + (data?.emergencyFundAmount || 0) + (data?.goalFundsAmount || 0)
 
     const getGoalEnvelopes = () => {
         if (!data?.yearlyEnvelopes) return []
@@ -99,12 +100,12 @@ function HomePage() {
 
     if (loading || configLoading) {
         return (
-            <div className="min-h-screen bg-slate-950 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+            <div className="min-h-screen bg-zinc-950 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
                 <div className="max-w-[1600px] mx-auto space-y-8 relative z-10">
-                    <div className="animate-pulse h-32 bg-slate-800/50 rounded-2xl" />
+                    <div className="animate-pulse h-32 bg-zinc-800/50 rounded-2xl" />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="h-64 bg-slate-800/30 rounded-2xl animate-pulse" />
+                            <div key={i} className="h-64 bg-zinc-800/30 rounded-2xl animate-pulse" />
                         ))}
                     </div>
                 </div>
@@ -114,7 +115,7 @@ function HomePage() {
 
     if (error || !data) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-950 p-8">
+            <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-8">
                 <div className="w-full max-w-md">
                     <EmptyState
                         icon="⚠️"
@@ -130,17 +131,17 @@ function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-zinc-950 flex flex-col selection:bg-amber-500/20">
             {/* Background Gradients */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-amber-500/5 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 pb-28 md:pb-4 pt-0 flex flex-col relative z-10 max-w-[2560px] mx-auto">
                 {/* Header Section */}
                 <div className="shrink-0">
-                    <DashboardHeader>
+                    <DashboardHeader totalNetWorth={totalNetWorth}>
                         <QuickActions
                             onAddIncome={() => setShowIncomeModal(true)}
                             onAddExpense={() => setShowExpenseModal(true)}
@@ -184,10 +185,10 @@ function HomePage() {
                                     {/* Income Bar */}
                                     <div className="flex flex-col gap-1.5">
                                         <div className="flex justify-between items-center w-full px-0.5">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0">Wpływy</span>
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest shrink-0">Wpływy</span>
                                             <span className="text-[13px] font-black text-emerald-400 leading-none tabular-nums text-right">{data.totalIncome?.toLocaleString('pl-PL')} zł</span>
                                         </div>
-                                        <div className="w-full h-1.5 bg-slate-800/50 rounded-full overflow-hidden">
+                                        <div className="w-full h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
                                             <div className="h-full bg-emerald-500 rounded-full" style={{ width: '100%' }} />
                                         </div>
                                     </div>
@@ -195,14 +196,14 @@ function HomePage() {
                                     {/* Expenses Bar */}
                                     <div className="flex flex-col gap-1.5">
                                         <div className="flex justify-between items-center w-full px-0.5">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0">Wydatki</span>
-                                            <span className={`text-[13px] font-black leading-none tabular-nums text-right ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'text-[#f87171]' : 'text-slate-200'}`}>
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest shrink-0">Wydatki</span>
+                                            <span className={`text-[13px] font-black leading-none tabular-nums text-right ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'text-[#f87171]' : 'text-zinc-200'}`}>
                                                 {data.totalExpenses?.toLocaleString('pl-PL')} zł
                                             </span>
                                         </div>
-                                        <div className="w-full h-1.5 bg-slate-800/50 rounded-full overflow-hidden">
+                                        <div className="w-full h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'bg-[#f87171]' : 'bg-indigo-500'}`}
+                                                className={`h-full rounded-full ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'bg-[#f87171]' : 'bg-amber-500'}`}
                                                 style={{ width: `${Math.min(((data.totalExpenses || 0) / (data.totalIncome || 1)) * 100, 100)}%` }}
                                             />
                                         </div>

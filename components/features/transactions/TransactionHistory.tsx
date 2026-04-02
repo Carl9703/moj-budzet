@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { authorizedFetch } from '@/lib/utils/api'
+import { authorizedFetch } from '@/lib/api/client'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
 
 interface Transaction {

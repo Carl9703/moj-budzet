@@ -1,5 +1,2 @@
 export { Text } from './Text'
-export { Stack } from './Stack'
-export { Badge } from './Badge'
 export { Input } from './Input'
-export { Select } from './Select'

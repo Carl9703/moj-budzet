@@ -42,21 +42,6 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
     }
 }
 
-export const createBonusHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
-    return async (bonusData: { amount: number; bonusDistribution: { envelopeId: string; amount: number }[] }): Promise<boolean> => {
-        try {
-            await api.post('/api/income', { type: 'bonus', ...bonusData })
-            refetch()
-            triggerDashboardRefresh()
-            showToast('Premia została rozdzielona na koperty roczne!', 'success')
-            return true
-        } catch {
-            showToast('Błąd podczas zapisywania premii', 'error')
-            return false
-        }
-    }
-}
-
 export const createExpenseHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
     return async (expenseData: ExpenseData): Promise<boolean> => {
         try {

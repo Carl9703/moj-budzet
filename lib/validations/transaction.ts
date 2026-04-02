@@ -17,14 +17,6 @@ export const createTransactionSchema = z.object({
   includeInStats: z.boolean().optional().default(true)
 })
 
-export const updateTransactionSchema = z.object({
-  amount: z.number().positive().optional(),
-  description: z.string().max(500).optional(),
-  date: dateStringSchema.optional(),
-  envelopeId: z.string().optional(),
-  category: z.string().max(100).optional()
-})
-
 export const incomeSchema = z.object({
   type: z.enum(['salary', 'other', 'bonus']),
   amount: z.number().positive('Kwota musi być większa od 0'),
@@ -60,7 +52,6 @@ export const expenseSchema = z.object({
 })
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
-export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>
 export type IncomeInput = z.infer<typeof incomeSchema>
 export type ExpenseInput = z.infer<typeof expenseSchema>
 
