@@ -390,5 +390,5 @@ function CustomSelect({
             </AnimatePresence>
             {error && <p className="text-rose-400 text-[10px] mt-1">{error}</p>}
         </div>
-    , document.body)
+    )
 }
