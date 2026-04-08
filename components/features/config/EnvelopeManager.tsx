@@ -17,6 +17,8 @@ interface Envelope {
     group?: string
     type: 'monthly' | 'yearly'
     isArchived?: boolean
+    currencyCode?: string
+    parentEnvelopeId?: string | null
 }
 
 interface ArchivedCategory {
@@ -120,11 +122,14 @@ export function EnvelopeManager({
         }
     }
 
+    const KNOWN_GROUPS = ['needs', 'lifestyle', 'assets']
+
     // Group envelopes
     const groupedEnvelopes = {
         needs: envelopes.filter(e => e.group === 'needs' && !!e.isArchived === showArchived),
         lifestyle: envelopes.filter(e => e.group === 'lifestyle' && !!e.isArchived === showArchived),
-        assets: envelopes.filter(e => e.group === 'assets' && !!e.isArchived === showArchived)
+        assets: envelopes.filter(e => e.group === 'assets' && !!e.isArchived === showArchived),
+        other: envelopes.filter(e => !KNOWN_GROUPS.includes(e.group ?? '') && !!e.isArchived === showArchived),
     }
 
     const getGroupTitle = (key: string) => {
@@ -132,6 +137,7 @@ export function EnvelopeManager({
             case 'needs': return 'Potrzeby'
             case 'lifestyle': return 'Styl Życia'
             case 'assets': return 'Cele i Majątek'
+            case 'other': return 'Inne'
             default: return 'Inne'
         }
     }
@@ -141,6 +147,7 @@ export function EnvelopeManager({
             case 'needs': return '🏡'
             case 'lifestyle': return '🎉'
             case 'assets': return '💰'
+            case 'other': return '📦'
             default: return '📦'
         }
     }
@@ -153,15 +160,15 @@ export function EnvelopeManager({
     return (
         <div className="space-y-8">
             {/* Unified Header Card */}
-            <div className="p-4 rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-3xl shadow-xl relative overflow-hidden group">
+            <div className="p-4 rounded-[2rem] border border-white/10 bg-zinc-900/50 backdrop-blur-3xl shadow-xl relative overflow-hidden group">
                 {/* Ambient Glows */}
-                <div className="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -top-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
                     {/* Left: Title and Info */}
                     <div className="flex items-center gap-4">
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-inner transition-all duration-500 ${showArchived ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20' : 'bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20'}`}>
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-inner transition-all duration-500 ${showArchived ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20' : 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20'}`}>
                             {showArchived ? <Archive size={22} /> : <Package size={22} />}
                         </div>
                         <div>
@@ -171,7 +178,7 @@ export function EnvelopeManager({
                             </h3>
                             <button
                                 onClick={() => setShowArchived(!showArchived)}
-                                className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5 hover:text-indigo-400 transition-colors flex items-center gap-1.5"
+                                className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 hover:text-amber-400 transition-colors flex items-center gap-1.5"
                             >
                                 {showArchived ? <><RotateCcw size={10} /> Wróć do edycji</> : <><Archive size={10} /> Zobacz zarchiwizowane</>}
                             </button>
@@ -189,12 +196,12 @@ export function EnvelopeManager({
                                             .filter(e => e.type === 'monthly' && !e.isArchived)
                                             .reduce((sum, e) => sum + (e.plannedAmount || 0), 0)
                                             .toLocaleString('pl-PL', { minimumFractionDigits: 0 })}
-                                        <span className="text-[10px] font-bold text-slate-600 ml-1.5 uppercase tracking-widest">Zaplanowano</span>
+                                        <span className="text-[10px] font-bold text-zinc-600 ml-1.5 uppercase tracking-widest">Zaplanowano</span>
                                     </p>
                                     <div className="w-px h-6 bg-white/5" />
                                     <div className="text-right">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Limit Mies.</p>
-                                        <p className="text-[11px] font-black text-slate-300 mt-0.5">
+                                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">Limit Mies.</p>
+                                        <p className="text-[11px] font-black text-zinc-300 mt-0.5">
                                             {defaultSalary.toLocaleString('pl-PL')} zł
                                         </p>
                                     </div>
@@ -209,7 +216,7 @@ export function EnvelopeManager({
                                         }`}>
                                         {((envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0) / defaultSalary) * 100).toFixed(0)}%
                                     </span>
-                                    <div className="w-24 h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+                                    <div className="w-24 h-1.5 bg-zinc-950 rounded-full overflow-hidden border border-white/5">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${Math.min(100, Math.max(0, (envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0) / defaultSalary) * 100))}%` }}
@@ -219,7 +226,7 @@ export function EnvelopeManager({
                                         />
                                     </div>
                                 </div>
-                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
                                     Wolne: {(defaultSalary - envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0)).toLocaleString('pl-PL')} zł
                                 </p>
                             </div>
@@ -236,30 +243,31 @@ export function EnvelopeManager({
 
             {/* Grid */}
             {Object.entries(groupedEnvelopes).map(([groupKey, groupEnvelopes]) => (
+                (groupKey === 'other' && groupEnvelopes.length === 0) ? null :
                 <div key={groupKey} className="flex flex-col gap-4">
                     {/* Horizontal Section Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
                         <div className="flex items-center gap-3">
-                            <div className="px-3 py-1.5 rounded-full bg-slate-900/50 border border-white/5 flex items-center gap-3">
+                            <div className="px-3 py-1.5 rounded-full bg-zinc-900/50 border border-white/5 flex items-center gap-3">
                                 <div className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px]"
                                     style={{
                                         backgroundColor: groupKey === 'needs' ? '#22c55e' : groupKey === 'lifestyle' ? '#f59e0b' : '#6366f1',
                                         boxShadow: `0 0 10px ${groupKey === 'needs' ? '#22c55e' : groupKey === 'lifestyle' ? '#f59e0b' : '#6366f1'}`
                                     }}
                                 />
-                                <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
                                     <span>{getGroupIcon(groupKey)}</span>
                                     {getGroupTitle(groupKey)}
                                 </h2>
                             </div>
-                            <span className="text-[10px] font-black bg-slate-900 text-slate-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
+                            <span className="text-[10px] font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
                                 {groupEnvelopes.length}
                             </span>
                         </div>
                         {!showArchived && (
                             <button
                                 onClick={() => handleAddClick(groupKey)}
-                                className="px-4 py-2 rounded-xl bg-slate-900/50 text-indigo-400 border border-indigo-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95"
+                                className="px-4 py-2 rounded-xl bg-zinc-900/50 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all flex items-center gap-2 active:scale-95"
                             >
                                 <Plus size={14} /> Dodaj kopertę
                             </button>
@@ -268,8 +276,8 @@ export function EnvelopeManager({
 
                     <div className="w-full">
                         {groupEnvelopes.length === 0 ? (
-                            <div className="text-center py-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-slate-900/10 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 italic">Brak {showArchived ? 'zarchiwizowanych' : ''} kopert w tej grupie.</p>
+                            <div className="text-center py-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-zinc-900/10 backdrop-blur-sm">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak {showArchived ? 'zarchiwizowanych' : ''} kopert w tej grupie.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -291,43 +299,43 @@ export function EnvelopeManager({
             {showArchived && (
                 <div className="flex flex-col gap-4 mt-12 pb-20">
                     <div className="flex items-center gap-3 px-1">
-                        <div className="px-3 py-1.5 rounded-full bg-slate-900/50 border border-white/5 flex items-center gap-3">
+                        <div className="px-3 py-1.5 rounded-full bg-zinc-900/50 border border-white/5 flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px] bg-amber-500 shadow-amber-500" />
-                            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Tag size={14} />
                                 Zarchiwizowane Kategorie
                             </h2>
                         </div>
-                        <span className="text-[10px] font-black bg-slate-900 text-slate-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
+                        <span className="text-[10px] font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
                             {loadingArchived ? '...' : archivedCategories.length}
                         </span>
                     </div>
 
                     <div className="w-full">
                         {loadingArchived ? (
-                            <div className="text-center py-20 text-slate-500 flex flex-col items-center gap-4">
-                                <RefreshCw className="animate-spin text-indigo-500" size={32} />
+                            <div className="text-center py-20 text-zinc-500 flex flex-col items-center gap-4">
+                                <RefreshCw className="animate-spin text-amber-500" size={32} />
                                 <p className="text-[10px] font-black uppercase tracking-widest animate-pulse">Synchronizacja archiwum...</p>
                             </div>
                         ) : archivedCategories.length === 0 ? (
-                            <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-white/5 bg-slate-900/10 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 italic">Brak zarchiwizowanych kategorii.</p>
+                            <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-white/5 bg-zinc-900/10 backdrop-blur-sm">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak zarchiwizowanych kategorii.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {archivedCategories.map(cat => (
                                     <div
                                         key={cat.id}
-                                        className="flex items-center justify-between p-4 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-amber-500/30 transition-all group shadow-lg"
+                                        className="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/40 border border-white/5 hover:border-amber-500/30 transition-all group shadow-lg"
                                     >
                                         <div className="flex items-center gap-4 min-w-0">
-                                            <div className="w-12 h-12 rounded-xl bg-slate-800/50 flex items-center justify-center text-xl shrink-0 shadow-inner border border-white/5 group-hover:scale-110 transition-transform duration-500">
+                                            <div className="w-12 h-12 rounded-xl bg-zinc-800/50 flex items-center justify-center text-xl shrink-0 shadow-inner border border-white/5 group-hover:scale-110 transition-transform duration-500">
                                                 {cat.icon || '🏷️'}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-black text-slate-200 truncate tracking-tight text-sm">{cat.name}</p>
+                                                <p className="font-black text-zinc-200 truncate tracking-tight text-sm">{cat.name}</p>
                                                 {cat.defaultEnvelope && (
-                                                    <p className="text-[9px] font-black text-slate-500 truncate uppercase tracking-widest mt-0.5">
+                                                    <p className="text-[9px] font-black text-zinc-500 truncate uppercase tracking-widest mt-0.5">
                                                         Koperta: {cat.defaultEnvelope}
                                                     </p>
                                                 )}
@@ -373,6 +381,10 @@ export function EnvelopeManager({
                 onClose={() => setIsAddModalOpen(false)}
                 onAdd={onAddEnvelope}
                 initialGroup={initialGroupForAdd}
+                parentEnvelopes={envelopes
+                    .filter(e => !e.currencyCode || e.currencyCode === 'PLN')
+                    .filter(e => !e.isArchived)
+                    .map(e => ({ id: e.id, name: e.name, icon: e.icon }))}
             />
         </div>
     )

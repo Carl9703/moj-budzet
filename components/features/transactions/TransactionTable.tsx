@@ -256,11 +256,11 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
   }
 
   return (
-    <div className="rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl transition-all duration-500 overflow-hidden relative min-h-[200px]">
+    <div className="rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl transition-all duration-500 overflow-hidden relative min-h-[200px]">
       {loading ? (
         <div className="flex flex-col items-center justify-center p-20 gap-4">
-          <div className="w-12 h-12 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest animate-pulse">Ładowanie transakcji...</p>
+          <div className="w-12 h-12 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest animate-pulse">Ładowanie transakcji...</p>
         </div>
       ) : transactions.length === 0 ? (
         <motion.div
@@ -270,7 +270,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
         >
           <div className="text-6xl mb-4 opacity-50">📝</div>
           <h3 className="text-xl font-black text-white mb-2 tracking-tight">Brak transakcji</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Nie znaleziono transakcji spełniających kryteria wyszukiwania.</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Nie znaleziono transakcji spełniających kryteria wyszukiwania.</p>
         </motion.div>
       ) : (
         <motion.div
@@ -285,9 +285,9 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                 {/* Sticky Date Header */}
                 <motion.div
                   variants={itemVariants}
-                  className="sticky top-0 z-10 px-5 py-3 bg-slate-950/90 backdrop-blur-md border-b border-white/5"
+                  className="sticky top-0 z-10 px-5 py-3 bg-zinc-950/90 backdrop-blur-md border-b border-white/5"
                 >
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">
                     {formatDateHeader(dateKey)}
                   </span>
                 </motion.div>
@@ -316,7 +316,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                             type="text"
                             value={editDescription}
                             onChange={(e) => setEditDescription(e.target.value)}
-                            className="w-full py-2 px-3 border border-indigo-500/50 rounded-xl bg-slate-900 text-white text-sm outline-none shadow-[0_0_15px_rgba(99,102,241,0.2)] focus:border-indigo-500 transition-all font-bold"
+                            className="w-full py-2 px-3 border border-amber-500/50 rounded-xl bg-zinc-900 text-white text-sm outline-none shadow-[0_0_15px_rgba(99,102,241,0.2)] focus:border-amber-500 transition-all font-bold"
                             placeholder="Opis transakcji..."
                             autoFocus
                           />
@@ -326,12 +326,12 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               {getSmartTitle(transaction)}
                             </div>
                             {getSubtitle(transaction) && (
-                              <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                              <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
                                 {getSubtitle(transaction)} • {formatTime(transaction.date)}
                               </div>
                             )}
                             {!getSubtitle(transaction) && (
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[11px] text-zinc-500 mt-0.5">
                                 {formatTime(transaction.date)}
                               </div>
                             )}
@@ -348,12 +348,12 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                 type="text"
                                 value={editAmount}
                                 onChange={(e) => setEditAmount(e.target.value)}
-                                className="w-24 py-1.5 px-3 border border-indigo-500/50 rounded-xl bg-slate-900 text-white text-xs text-right outline-none shadow-[0_0_15px_rgba(99,102,241,0.2)] focus:border-indigo-500 transition-all font-black"
+                                className="w-24 py-1.5 px-3 border border-amber-500/50 rounded-xl bg-zinc-900 text-white text-xs text-right outline-none shadow-[0_0_15px_rgba(99,102,241,0.2)] focus:border-amber-500 transition-all font-black"
                                 autoFocus
                               />
-                              <Calculator size={10} className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-500" />
+                              <Calculator size={10} className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500" />
                             </div>
-                            <span className="text-xs text-slate-400 font-medium">zł</span>
+                            <span className="text-xs text-zinc-400 font-medium">zł</span>
                           </div>
                         ) : (
                           <div className="text-right">
@@ -363,7 +363,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               {transaction.type === 'income' ? '+' : '-'}
                               {transaction.amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
-                            <span className="text-[11px] text-slate-500 ml-1">zł</span>
+                            <span className="text-[11px] text-zinc-500 ml-1">zł</span>
                           </div>
                         )}
                       </div>
@@ -381,7 +381,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="p-1.5 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 hover:text-white active:scale-95 transition-all"
+                              className="p-1.5 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 hover:text-white active:scale-95 transition-all"
                               title="Anuluj"
                             >
                               <X size={14} />
@@ -391,7 +391,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                           <>
                             <button
                               onClick={() => handleEdit(transaction)}
-                              className="p-1.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 hover:bg-slate-700 transition-all"
+                              className="p-1.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-400 hover:text-amber-400 hover:border-amber-500/50 hover:bg-zinc-700 transition-all"
                               title="Edytuj transakcję"
                             >
                               <Edit size={14} />
@@ -426,14 +426,14 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                 type="text"
                                 value={editDescription}
                                 onChange={(e) => setEditDescription(e.target.value)}
-                                className="w-full py-1 px-2 border border-indigo-500 rounded bg-slate-900 text-white text-xs outline-none"
+                                className="w-full py-1 px-2 border border-amber-500 rounded bg-zinc-900 text-white text-xs outline-none"
                               />
                             ) : (
                               <div className="font-bold text-white text-[14px] truncate">
                                 {getSmartTitle(transaction)}
                               </div>
                             )}
-                            <div className="text-[10px] text-slate-500 mt-0.5 truncate">
+                            <div className="text-[10px] text-zinc-500 mt-0.5 truncate">
                               {getSubtitle(transaction) ? `${getSubtitle(transaction)} • ` : ''}{formatTime(transaction.date)}
                             </div>
                           </div>
@@ -445,7 +445,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                 type="text"
                                 value={editAmount}
                                 onChange={(e) => setEditAmount(e.target.value)}
-                                className="w-20 py-1 px-1 border border-indigo-500 rounded bg-slate-900 text-white text-xs text-right outline-none"
+                                className="w-20 py-1 px-1 border border-amber-500 rounded bg-zinc-900 text-white text-xs text-right outline-none"
                                 autoFocus
                               />
                             ) : (
@@ -456,7 +456,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                   {transaction.type === 'income' ? '+' : '-'}
                                   {transaction.amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
-                                <span className="text-[10px] text-slate-500 ml-0.5">zł</span>
+                                <span className="text-[10px] text-zinc-500 ml-0.5">zł</span>
                               </>
                             )}
                           </div>
@@ -467,12 +467,12 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                           {editingId === transaction.id ? (
                             <>
                               <button onClick={() => handleEdit(transaction)} className="text-emerald-400 p-1"><Check size={18} /></button>
-                              <button onClick={() => setEditingId(null)} className="text-slate-400 p-1"><X size={18} /></button>
+                              <button onClick={() => setEditingId(null)} className="text-zinc-400 p-1"><X size={18} /></button>
                             </>
                           ) : (
                             <>
-                              <button onClick={() => handleEdit(transaction)} className="text-slate-500 hover:text-indigo-400 transition-colors p-1"><Edit size={16} /></button>
-                              <button onClick={() => handleDeleteClick(transaction.id, getSmartTitle(transaction))} className="text-slate-500 hover:text-rose-400 transition-colors p-1"><Trash2 size={16} /></button>
+                              <button onClick={() => handleEdit(transaction)} className="text-zinc-500 hover:text-amber-400 transition-colors p-1"><Edit size={16} /></button>
+                              <button onClick={() => handleDeleteClick(transaction.id, getSmartTitle(transaction))} className="text-zinc-500 hover:text-rose-400 transition-colors p-1"><Trash2 size={16} /></button>
                             </>
                           )}
                         </div>

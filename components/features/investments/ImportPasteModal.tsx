@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, Clipboard as ClipboardIcon, AlertCircle, CheckCircle2, Info } from 'lucide-react'
 import { api } from '@/lib/api/client'
@@ -162,21 +163,21 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
 
     if (!isOpen) return null
 
-    return (
+    return createPortal(
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                    className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
                 >
-                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0">
+                    <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900 shrink-0">
                         <div className="flex items-center gap-2">
                             <span className="text-2xl">📋</span>
                             <h2 className="text-xl font-bold text-white">Importuj Inwestycje</h2>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 transition-colors">
                             <X size={20} />
                         </button>
                     </div>
@@ -195,7 +196,7 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
 
                         {/* Textarea */}
                         <div className="mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Wklej tekst transakcji</label>
+                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Wklej tekst transakcji</label>
                             <textarea
                                 value={pasteContent}
                                 onChange={(e) => {
@@ -205,21 +206,21 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                                     if (parsed.length > 0) setError(null);
                                 }}
                                 placeholder="Wklej tutaj listę transakcji z banku lub giełdy..."
-                                className="w-full h-64 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white text-sm font-mono placeholder-slate-700 focus:outline-none focus:border-indigo-500 transition-all resize-none"
+                                className="w-full h-64 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 text-white text-sm font-mono placeholder-zinc-700 focus:outline-none focus:border-amber-500 transition-all resize-none"
                             />
                             {preview.length > 0 && (
                                 <div className="space-y-3">
-                                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Podgląd importu</h4>
+                                    <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Podgląd importu</h4>
                                     <div className="max-h-48 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                                         {preview.map((p, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
+                                            <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800/30 border border-zinc-700/30 rounded-xl">
                                                 <div className="flex items-center gap-3">
                                                     <span className="font-bold text-white">{p.symbol}</span>
-                                                    <span className="text-xs text-slate-500">{p.quantity} j.</span>
+                                                    <span className="text-xs text-zinc-500">{p.quantity} j.</span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-xs text-slate-400">Śr. cena: </span>
-                                                    <span className="text-sm font-bold text-slate-200">{p.averagePurchasePrice.toFixed(2)} PLN</span>
+                                                    <span className="text-xs text-zinc-400">Śr. cena: </span>
+                                                    <span className="text-sm font-bold text-zinc-200">{p.averagePurchasePrice.toFixed(2)} PLN</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -227,10 +228,10 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                                 </div>
                             )}
 
-                            <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4 flex gap-3 text-indigo-300/80 text-xs">
-                                <Info size={16} className="shrink-0 text-indigo-400" />
+                            <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-3 text-amber-300/80 text-xs">
+                                <Info size={16} className="shrink-0 text-amber-400" />
                                 <div>
-                                    <p className="font-bold text-indigo-400 mb-1">Instrukcja:</p>
+                                    <p className="font-bold text-amber-400 mb-1">Instrukcja:</p>
                                     <ol className="list-decimal list-inside space-y-1 ml-1">
                                         <li>Zaloguj się na CoinStats (Web)</li>
                                         <li>Przejdź do zakładki Portfolio i wybierz tabelę aktywów</li>
@@ -244,14 +245,14 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                         <div className="flex gap-3">
                             <button
                                 onClick={onClose}
-                                className="flex-1 px-6 py-4 bg-slate-800 hover:bg-slate-750 text-slate-300 rounded-2xl font-bold transition-all active:scale-95"
+                                className="flex-1 px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-2xl font-bold transition-all active:scale-95"
                             >
                                 Anuluj
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading || preview.length === 0}
-                                className="flex-[2] px-6 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center justify-center gap-2"
+                                className="flex-[2] px-6 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-amber-600/20 active:scale-95 flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <Loader2 className="animate-spin" size={20} />
@@ -264,5 +265,5 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                 </motion.div>
             </div>
         </AnimatePresence>
-    )
+    , document.body)
 }

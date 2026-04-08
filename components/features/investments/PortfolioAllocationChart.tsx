@@ -14,13 +14,13 @@ interface PortfolioAllocationChartProps {
 }
 
 const COLORS = {
-    'Akcje/ETF': '#818cf8', // Indigo-400 (brighter)
+    'Akcje/ETF': '#f59e0b', // Indigo-400 (brighter)
     'Krypto': '#fbbf24',    // Amber-400
     'PPK': '#34d399'        // Emerald-400
 }
 
 const GRADIENTS = {
-    'Akcje/ETF': ['#6366f1', '#a78bfa'],
+    'Akcje/ETF': ['#d97706', '#fcd34d'],
     'Krypto': ['#f59e0b', '#fcd34d'],
     'PPK': ['#10b981', '#6ee7b7']
 }
@@ -48,12 +48,12 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
     const activeEntry = activeIndex !== undefined ? chartDataWithPercentage[activeIndex] : undefined
 
     return (
-        <div className="h-full relative overflow-hidden rounded-3xl p-6 border border-white/5 bg-slate-900/60 shadow-2xl backdrop-blur-3xl flex flex-col group">
+        <div className="h-full relative overflow-hidden rounded-3xl p-6 border border-white/5 bg-zinc-900/60 shadow-2xl backdrop-blur-3xl flex flex-col group">
 
             {/* Header */}
             <div className="w-full flex justify-between items-center mb-2 relative z-10 shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-white/5 border border-white/5 text-slate-200 shadow-inner">
+                    <div className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-200 shadow-inner">
                         <PieChartIcon size={20} />
                     </div>
                     <h3 className="text-lg font-bold text-white tracking-tight">Alokacja Aktywów</h3>
@@ -119,19 +119,19 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         {activeEntry ? (
                             <>
-                                <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
+                                <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">
                                     {activeEntry.name}
                                 </span>
                                 <span className="text-2xl font-black text-white tabular-nums">
                                     {activeEntry.percentage.toFixed(1)}%
                                 </span>
-                                <span className="text-xs text-slate-500 font-medium tabular-nums mt-0.5">
+                                <span className="text-xs text-zinc-500 font-medium tabular-nums mt-0.5">
                                     {activeEntry.value.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} zł
                                 </span>
                             </>
                         ) : (
                             <>
-                                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
                                     Razem
                                 </span>
                                 <span className="text-xl font-black text-white tabular-nums">
@@ -140,7 +140,7 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
                                         : totalValue.toLocaleString('pl-PL', { maximumFractionDigits: 0 })
                                     }
                                 </span>
-                                <span className="text-[10px] text-slate-500 font-medium">PLN</span>
+                                <span className="text-[10px] text-zinc-500 font-medium">PLN</span>
                             </>
                         )}
                     </div>
@@ -169,14 +169,14 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
                                     boxShadow: isActive ? `0 0 12px ${entry.color}` : `0 0 6px ${entry.color}40`
                                 }}
                             />
-                            <span className="text-slate-300 text-xs font-semibold">{entry.name}</span>
-                            <span className="text-slate-500 text-[11px] font-bold tabular-nums">{entry.percentage.toFixed(1)}%</span>
+                            <span className="text-zinc-300 text-xs font-semibold">{entry.name}</span>
+                            <span className="text-zinc-500 text-[11px] font-bold tabular-nums">{entry.percentage.toFixed(1)}%</span>
                         </div>
                     )
                 })}
 
                 {chartData.length === 0 && (
-                    <div className="text-slate-500 text-sm italic">
+                    <div className="text-zinc-500 text-sm italic">
                         Brak danych
                     </div>
                 )}

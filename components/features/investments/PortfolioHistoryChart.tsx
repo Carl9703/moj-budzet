@@ -76,7 +76,7 @@ export function PortfolioHistoryChart({ positions }: { positions: any[] }) {
     // Colors
     const colors = {
         crypto: '#f59e0b', // Amber 500
-        stocks: '#6366f1', // Indigo 500
+        stocks: '#f59e0b', // Indigo 500
         ppk: '#10b981'     // Emerald 500
     }
 
@@ -87,20 +87,20 @@ export function PortfolioHistoryChart({ positions }: { positions: any[] }) {
     }
 
     return (
-        <div className="h-full w-full bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
+        <div className="h-full w-full bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
             <div className="flex justify-between items-center mb-6 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
                         <TrendingUp size={20} />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-white tracking-tight">Wartość Portfela</h3>
-                        <p className="text-xs text-slate-500 font-medium">Ostatnie 30 dni</p>
+                        <p className="text-xs text-zinc-500 font-medium">Ostatnie 30 dni</p>
                     </div>
                 </div>
-                <div className="px-3 py-1 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-2">
-                    <Calendar size={12} className="text-slate-500" />
-                    <span className="text-xs font-bold text-slate-300">1M</span>
+                <div className="px-3 py-1 bg-zinc-800/50 rounded-xl border border-zinc-700/50 flex items-center gap-2">
+                    <Calendar size={12} className="text-zinc-500" />
+                    <span className="text-xs font-bold text-zinc-300">1M</span>
                 </div>
             </div>
 
@@ -182,16 +182,16 @@ export function PortfolioHistoryChart({ positions }: { positions: any[] }) {
             {/* Custom Legend */}
             <div className="flex justify-center gap-4 mt-2">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                    <span className="text-[10px] text-slate-400">Akcje</span>
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                    <span className="text-[10px] text-zinc-400">Akcje</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="text-[10px] text-slate-400">Krypto</span>
+                    <span className="text-[10px] text-zinc-400">Krypto</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-[10px] text-slate-400">PPK</span>
+                    <span className="text-[10px] text-zinc-400">PPK</span>
                 </div>
             </div>
         </div>

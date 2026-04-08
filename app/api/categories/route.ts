@@ -4,6 +4,7 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { z } from 'zod'
 import { EXPENSE_CATEGORIES } from '@/lib/constants/categories'
+import { jsonResponse } from '@/lib/utils/api'
 
 const createCategorySchema = z.object({
     name: z.string().min(1, 'Nazwa jest wymagana'),
@@ -69,11 +70,11 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        return NextResponse.json(categories)
+        return jsonResponse(categories)
 
     } catch (error) {
         console.error('Error fetching/seeding categories:', error)
-        return NextResponse.json(
+        return jsonResponse(
             {
                 error: 'Błąd pobierania/seedingowania kategorii',
                 details: error instanceof Error ? error.message : 'Unknown error'
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
         const validation = createCategorySchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
@@ -112,11 +113,11 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json(category)
+        return jsonResponse(category)
 
     } catch (error) {
         console.error('Error creating category:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd tworzenia kategorii' },
             { status: 500 }
         )

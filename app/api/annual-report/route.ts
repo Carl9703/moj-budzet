@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 import { SYSTEM_DESCRIPTIONS, GROUP_NAME_MAP } from '@/lib/constants/system'
+import { toNum } from '@/lib/utils/decimal'
 import {
     AnnualReportData,
     GroupBreakdown,
@@ -87,11 +89,11 @@ export async function GET(request: NextRequest) {
         // Calculate year totals
         const yearIncome = validYearTransactions
             .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + toNum(t.amount), 0)
 
         const yearExpenses = validYearTransactions
             .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + toNum(t.amount), 0)
 
         const yearSavings = yearIncome - yearExpenses
         const yearSavingsRate = yearIncome > 0 ? (yearSavings / yearIncome) * 100 : 0
@@ -111,11 +113,11 @@ export async function GET(request: NextRequest) {
         // Calculate previous year totals
         const prevYearIncome = validPrevYearTransactions
             .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + toNum(t.amount), 0)
 
         const prevYearExpenses = validPrevYearTransactions
             .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0)
+            .reduce((sum, t) => sum + toNum(t.amount), 0)
 
         const prevYearSavings = prevYearIncome - prevYearExpenses
         const prevYearSavingsRate = prevYearIncome > 0 ? (prevYearSavings / prevYearIncome) * 100 : 0
@@ -145,11 +147,11 @@ export async function GET(request: NextRequest) {
 
             const monthIncome = monthTransactions
                 .filter(t => t.type === 'income')
-                .reduce((sum, t) => sum + t.amount, 0)
+                .reduce((sum, t) => sum + toNum(t.amount), 0)
 
             const monthExpenses = monthTransactions
                 .filter(t => t.type === 'expense')
-                .reduce((sum, t) => sum + t.amount, 0)
+                .reduce((sum, t) => sum + toNum(t.amount), 0)
 
             const monthSavings = monthIncome - monthExpenses
             const monthSavingsRate = monthIncome > 0 ? (monthSavings / monthIncome) * 100 : 0
@@ -209,9 +211,9 @@ export async function GET(request: NextRequest) {
                 const gData = unifiedGroups.get(groupName)!
 
                 if (isCurrentYear) {
-                    gData.totalCurrent += t.amount
+                    gData.totalCurrent += toNum(t.amount)
                 } else {
-                    gData.totalPrev += t.amount
+                    gData.totalPrev += toNum(t.amount)
                 }
 
                 const envelopeName = t.envelope?.name || 'Inne'
@@ -238,10 +240,10 @@ export async function GET(request: NextRequest) {
                 if (isCurrentYear) {
                     eData.id = envelopeId
                     eData.icon = envelopeIcon
-                    eData.currentAmount += t.amount
+                    eData.currentAmount += toNum(t.amount)
                     eData.currentTransactions.push(t)
                 } else {
-                    eData.prevAmount += t.amount
+                    eData.prevAmount += toNum(t.amount)
                 }
 
                 // --- Category Processing ---
@@ -268,10 +270,10 @@ export async function GET(request: NextRequest) {
                 const cData = eData.categories.get(catId)!
 
                 if (isCurrentYear) {
-                    cData.currentAmount += t.amount
+                    cData.currentAmount += toNum(t.amount)
                     cData.currentTransactions.push(t)
                 } else {
-                    cData.prevAmount += t.amount
+                    cData.prevAmount += toNum(t.amount)
                 }
             })
         }
@@ -300,7 +302,7 @@ export async function GET(request: NextRequest) {
                             const monthEnd = new Date(requestedYear, m + 1, 0, 23, 59, 59, 999)
                             const monthAmount = eData.currentTransactions
                                 .filter(t => t.date >= monthStart && t.date <= monthEnd)
-                                .reduce((sum, t) => sum + t.amount, 0)
+                                .reduce((sum, t) => sum + toNum(t.amount), 0)
 
                             monthlyTrend.push({
                                 month: MONTH_NAMES[m],
@@ -317,7 +319,7 @@ export async function GET(request: NextRequest) {
                                     const monthEnd = new Date(requestedYear, m + 1, 0, 23, 59, 59, 999)
                                     const monthAmount = cData.currentTransactions
                                         .filter(t => t.date >= monthStart && t.date <= monthEnd)
-                                        .reduce((sum, t) => sum + t.amount, 0)
+                                        .reduce((sum, t) => sum + toNum(t.amount), 0)
 
                                     catMonthlyTrend.push({
                                         month: MONTH_NAMES[m],
@@ -425,7 +427,7 @@ export async function GET(request: NextRequest) {
 
             const data = categoryData.get(categoryId)!
             data.transactions.push(transaction)
-            data.totalAmount += transaction.amount
+            data.totalAmount += toNum(transaction.amount)
 
             // Track envelope breakdown
             const envelopeName = transaction.envelope?.name || 'Inne'
@@ -434,7 +436,7 @@ export async function GET(request: NextRequest) {
             if (!data.envelopeBreakdown.has(envelopeName)) {
                 data.envelopeBreakdown.set(envelopeName, { amount: 0, icon: envelopeIcon })
             }
-            data.envelopeBreakdown.get(envelopeName)!.amount += transaction.amount
+            data.envelopeBreakdown.get(envelopeName)!.amount += toNum(transaction.amount)
         })
 
         // Build category breakdown with year-over-year comparison
@@ -460,7 +462,7 @@ export async function GET(request: NextRequest) {
                     }
                     return (catId || 'other') === categoryId
                 })
-                .reduce((sum, t) => sum + t.amount, 0)
+                .reduce((sum, t) => sum + toNum(t.amount), 0)
 
             const change = totalAmount - prevYearAmount
             const changePercent = prevYearAmount > 0 ? (change / prevYearAmount) * 100 : 0
@@ -473,7 +475,7 @@ export async function GET(request: NextRequest) {
 
                 const monthAmount = data.transactions
                     .filter(t => t.date >= monthStart && t.date <= monthEnd)
-                    .reduce((sum, t) => sum + t.amount, 0)
+                    .reduce((sum, t) => sum + toNum(t.amount), 0)
 
                 monthlyTrend.push({
                     month: MONTH_NAMES[m],
@@ -575,7 +577,7 @@ export async function GET(request: NextRequest) {
                     incomeData.set(normalizedSource, { amount: 0, transactions: [] })
                 }
                 const data = incomeData.get(normalizedSource)!
-                data.amount += t.amount
+                data.amount += toNum(t.amount)
                 data.transactions.push(t)
             })
 
@@ -602,11 +604,11 @@ export async function GET(request: NextRequest) {
             totalTransactions: validYearTransactions.length
         }
 
-        return NextResponse.json(response)
+        return jsonResponse(response)
 
     } catch (error) {
         console.error('Error in annual report API:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Internal server error' },
             { status: 500 }
         )

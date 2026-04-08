@@ -127,18 +127,18 @@ export function GeneralSettings({
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5">
+            <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
                 <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shadow-inner">
                     <Settings size={28} />
                 </div>
                 <div className="flex-1 text-center sm:text-left">
                     <h2 className="text-xl font-bold text-white tracking-tight">Ustawienia Ogólne</h2>
-                    <p className="text-xs text-slate-500 font-medium">Konfiguracja przychodów i domyślnego podziału środków</p>
+                    <p className="text-xs text-zinc-500 font-medium">Konfiguracja przychodów i domyślnego podziału środków</p>
                 </div>
                 <div className="flex-shrink-0">
                     <button
                         onClick={handleLogout}
-                        className="px-5 py-3 rounded-2xl bg-slate-800 text-slate-400 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 active:scale-95 flex items-center gap-3"
+                        className="px-5 py-3 rounded-2xl bg-zinc-800 text-zinc-400 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 active:scale-95 flex items-center gap-3"
                     >
                         <LogOut size={16} /> Wyloguj
                     </button>
@@ -146,8 +146,8 @@ export function GeneralSettings({
             </div>
 
             {/* Default Salary */}
-            <div className="p-8 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl max-w-xl shadow-xl">
-                <label className="block text-[10px] font-black text-slate-500 mb-4 uppercase tracking-[0.2em] ml-1">
+            <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl max-w-xl shadow-xl">
+                <label className="block text-[10px] font-black text-zinc-500 mb-4 uppercase tracking-[0.2em] ml-1">
                     Domyślny Przychód Miesięczny
                 </label>
                 <div className="relative group">
@@ -155,21 +155,21 @@ export function GeneralSettings({
                         type="number"
                         value={draftSalary}
                         onChange={(e) => setDraftSalary(Number(e.target.value))}
-                        className="w-full text-4xl font-black text-emerald-400 bg-slate-950/50 border border-white/5 rounded-2xl py-6 px-6 focus:border-emerald-500/50 transition-all outline-none tabular-nums shadow-inner"
+                        className="w-full text-4xl font-black text-emerald-400 bg-zinc-950/50 border border-white/5 rounded-2xl py-6 px-6 focus:border-emerald-500/50 transition-all outline-none tabular-nums shadow-inner"
                         placeholder="0.00"
                     />
-                    <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 font-black text-sm tracking-widest pointer-events-none group-focus-within:text-emerald-500/50 transition-colors">PLN</span>
+                    <span className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-600 font-black text-sm tracking-widest pointer-events-none group-focus-within:text-emerald-500/50 transition-colors">PLN</span>
                 </div>
-                <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                    <span className="text-indigo-400 text-sm">ℹ️</span>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300/60 leading-relaxed">
+                <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                    <span className="text-amber-400 text-sm">ℹ️</span>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-300/60 leading-relaxed">
                         Ta kwota będzie używana jako domyślna podstawa przy planowaniu nowego miesiąca.
                     </p>
                 </div>
             </div>
 
             {/* Bonus Distribution */}
-            <div className="p-8 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl shadow-xl space-y-8">
+            <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl shadow-xl space-y-8">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
                         <span className="text-2xl">🎁</span>
@@ -179,7 +179,7 @@ export function GeneralSettings({
                     </div>
                     <button
                         onClick={addDistributionRule}
-                        className="px-4 py-2.5 rounded-xl bg-slate-800 text-indigo-400 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center gap-2 active:scale-95"
+                        className="px-4 py-2.5 rounded-xl bg-zinc-800 text-amber-400 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-700 transition-all flex items-center gap-2 active:scale-95"
                     >
                         <Plus size={14} /> Dodaj regułę
                     </button>
@@ -207,12 +207,12 @@ export function GeneralSettings({
                                     placeholder="0"
                                     className="input-glass text-right font-bold py-2 !pr-10 w-full"
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">%</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm pointer-events-none">%</span>
                             </div>
 
                             <button
                                 onClick={() => removeDistributionRule(index)}
-                                className="p-2 text-slate-500 hover:text-rose-400 transition-colors"
+                                className="p-2 text-zinc-500 hover:text-rose-400 transition-colors"
                             >
                                 <Trash2 size={18} />
                             </button>
@@ -220,20 +220,20 @@ export function GeneralSettings({
                     ))}
 
                     {draftDistribution.length === 0 && (
-                        <div className="text-center py-8 text-slate-500 border border-dashed border-slate-700/50 rounded-xl">
+                        <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-700/50 rounded-xl">
                             Brak reguł podziału premii
                         </div>
                     )}
                 </div>
 
-                <div className="px-6 py-5 rounded-3xl bg-slate-950/50 border border-white/5 shadow-inner">
+                <div className="px-6 py-5 rounded-3xl bg-zinc-950/50 border border-white/5 shadow-inner">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Suma przydziału:</span>
+                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Suma przydziału:</span>
                         <span className={`text-sm font-black tabular-nums transition-colors ${totalPercentage > 100 ? 'text-rose-500' : 'text-emerald-500'}`}>
                             {totalPercentage}%
                         </span>
                     </div>
-                    <div className="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-white/5">
+                    <div className="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden border border-white/5">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(totalPercentage, 100)}%` }}
@@ -262,7 +262,7 @@ export function GeneralSettings({
                     <div className="flex items-center gap-4 w-full sm:w-auto">
                         <button
                             onClick={handleDiscard}
-                            className="flex-1 sm:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                            className="flex-1 sm:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
                         >
                             Odrzuć zmiany
                         </button>
@@ -279,10 +279,10 @@ export function GeneralSettings({
             )}
 
             {/* Debug / Fix Actions */}
-            <div className="pt-8 border-t border-slate-800/50">
+            <div className="pt-8 border-t border-zinc-800/50">
                 <button
                     onClick={handleFixCategories}
-                    className="text-xs text-slate-500 hover:text-indigo-400 transition-colors flex items-center gap-2"
+                    className="text-xs text-zinc-500 hover:text-amber-400 transition-colors flex items-center gap-2"
                 >
                     <Settings size={12} /> Napraw brakujące kategorie (Reseed)
                 </button>

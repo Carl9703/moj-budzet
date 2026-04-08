@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import bcrypt from 'bcryptjs'
+import { jsonResponse } from '@/lib/utils/api'
 import { signupSchema } from '@/lib/validations/auth'
 import { ENVELOPE_TYPES } from '@/lib/constants/envelopeTypes'
 import { EXPENSE_CATEGORIES } from '@/lib/constants/categories'
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     const limitResult = rateLimit(ip, { limit: 5, windowMs: 15 * 60 * 1000 }) // 5 requests per 15 min
 
     if (!limitResult.success) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Zbyt wiele prób rejestracji. Spróbuj ponownie później.' },
         { status: 429, headers: { 'Retry-After': String(Math.ceil((limitResult.reset! - Date.now()) / 1000)) } }
       )
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Walidacja z Zod
     const validation = signupSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: validation.error.issues[0].message },
         { status: 400 }
       )
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (existingUser) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Użytkownik z tym emailem już istnieje' },
         { status: 400 }
       )
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    return NextResponse.json(
+    return jsonResponse(
       {
         message: 'Konto zostało utworzone pomyślnie',
         user: {
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('Signup error', error)
 
-    return NextResponse.json(
+    return jsonResponse(
       {
         error: 'Wystąpił błąd podczas tworzenia konta',
         details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined

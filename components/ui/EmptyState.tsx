@@ -40,10 +40,10 @@ export function EmptyState({
                 }
             default:
                 return {
-                    container: 'bg-slate-900/50 border-white/5 backdrop-blur-xl',
+                    container: 'bg-zinc-900/50 border-white/5 backdrop-blur-xl',
                     title: 'text-white',
-                    description: 'text-slate-500',
-                    button: 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/20'
+                    description: 'text-zinc-500',
+                    button: 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20'
                 }
         }
     }

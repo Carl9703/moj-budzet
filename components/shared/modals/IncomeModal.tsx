@@ -192,7 +192,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
                 {/* HERO AMOUNT */}
                 <div className="relative flex flex-col items-center justify-center py-6">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">
                         {incomeType === 'bonus' ? 'Kwota premii' : 'Kwota przychodu'}
                     </label>
                     <div className="relative flex items-baseline justify-center w-full px-4">
@@ -203,15 +203,15 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-slate-800/50 focus:outline-none transition-all tracking-tighter"
+                            className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-zinc-800/50 focus:outline-none transition-all tracking-tighter"
                             autoFocus
                         />
-                        <span className="absolute right-12 bottom-2 text-xl font-black text-slate-700 pointer-events-none">PLN</span>
+                        <span className="absolute right-12 bottom-2 text-xl font-black text-zinc-700 pointer-events-none">PLN</span>
                     </div>
                 </div>
 
                 {/* INCOME TYPE SEGMENTED CONTROL */}
-                <div className="bg-slate-950/50 p-1.5 rounded-2xl border border-white/5 flex relative shadow-inner">
+                <div className="bg-zinc-950/50 p-1.5 rounded-2xl border border-white/5 flex relative shadow-inner">
                     {[
                         { id: 'salary', label: 'Wypłata', icon: '💼' },
                         { id: 'other', label: 'Inne', icon: '💵' },
@@ -223,14 +223,14 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 relative z-10 
                             ${incomeType === type.id
                                     ? 'text-white'
-                                    : 'text-slate-500 hover:text-slate-300'}`}
+                                    : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
                             <span className="text-base">{type.icon}</span>
                             <span>{type.label}</span>
                             {incomeType === type.id && (
                                 <motion.div
                                     layoutId="incomeTypeIndicator"
-                                    className="absolute inset-0 bg-slate-800 border border-white/5 rounded-xl -z-10 shadow-lg"
+                                    className="absolute inset-0 bg-zinc-800 border border-white/5 rounded-xl -z-10 shadow-lg"
                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                 />
                             )}
@@ -246,10 +246,10 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="bg-slate-800/20 rounded-xl p-4 border border-slate-700/30"
+                            className="bg-zinc-800/20 rounded-xl p-4 border border-zinc-700/30"
                         >
                             <div className="flex justify-between items-center mb-3">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Plan podziału</span>
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Plan podziału</span>
                                 <span className={`text-xs font-bold px-2 py-0.5 rounded ${totalBonusPercentage === 100
                                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                     : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
@@ -259,18 +259,18 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             </div>
 
                             {bonusDistribution.length === 0 ? (
-                                <div className="text-center py-4 text-slate-500 text-sm">
+                                <div className="text-center py-4 text-zinc-500 text-sm">
                                     Brak reguł podziału w ustawieniach.
                                 </div>
                             ) : (
                                 <div className="space-y-2">
                                     {bonusDistribution.map((dist, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-2 rounded-xl bg-slate-900/30 border border-slate-800">
-                                            <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-lg shadow-inner">
+                                        <div key={index} className="flex items-center gap-3 p-2 rounded-xl bg-zinc-900/30 border border-zinc-800">
+                                            <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-lg shadow-inner">
                                                 {getEnvelopeIcon(dist.envelopeId)}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-xs font-bold text-slate-300 break-words">{getEnvelopeName(dist.envelopeId)}</div>
+                                                <div className="text-xs font-bold text-zinc-300 break-words">{getEnvelopeName(dist.envelopeId)}</div>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <input
@@ -281,9 +281,9 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                                         newDist[index].percentage = parseInt(e.target.value) || 0
                                                         setBonusDistribution(newDist)
                                                     }}
-                                                    className="w-12 bg-transparent text-right font-bold text-slate-400 focus:text-white outline-none border-b border-transparent focus:border-indigo-500 text-sm"
+                                                    className="w-12 bg-transparent text-right font-bold text-zinc-400 focus:text-white outline-none border-b border-transparent focus:border-amber-500 text-sm"
                                                 />
-                                                <span className="text-slate-600 text-xs font-bold">%</span>
+                                                <span className="text-zinc-600 text-xs font-bold">%</span>
                                             </div>
                                             <div className="w-20 text-right font-mono font-bold text-emerald-400 text-sm">
                                                 {calculateAmount(dist.percentage)}
@@ -304,19 +304,19 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         >
                             <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${includeInStats
                                 ? 'bg-emerald-500/5 border-emerald-500/30'
-                                : 'bg-slate-800/30 border-slate-700'
+                                : 'bg-zinc-800/30 border-zinc-700'
                                 }`}>
                                 <div className="flex-1">
-                                    <div className={`font-bold text-sm ${includeInStats ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                    <div className={`font-bold text-sm ${includeInStats ? 'text-emerald-400' : 'text-zinc-400'}`}>
                                         Wliczaj do statystyk
                                     </div>
-                                    <div className="text-[10px] text-slate-500 mt-0.5">
+                                    <div className="text-[10px] text-zinc-500 mt-0.5">
                                         {includeInStats
                                             ? 'Wpłynie na bilans przychodów/wydatków'
                                             : 'Tylko zwiększy saldo konta (np. zwrot)'}
                                     </div>
                                 </div>
-                                <div className={`w-10 h-6 rounded-full relative transition-colors ${includeInStats ? 'bg-emerald-500' : 'bg-slate-600'
+                                <div className={`w-10 h-6 rounded-full relative transition-colors ${includeInStats ? 'bg-emerald-500' : 'bg-zinc-600'
                                     }`}>
                                     <input
                                         type="checkbox"
@@ -343,7 +343,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         >
                             <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar snap-x no-scrollbar">
                                 {isLoadingSuggestions ? (
-                                    <div className="flex-shrink-0 px-3 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-full text-[10px] font-bold text-slate-500 animate-pulse">
+                                    <div className="flex-shrink-0 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-[10px] font-bold text-zinc-500 animate-pulse">
                                         ⏳ Analizuję historię...
                                     </div>
                                 ) : (
@@ -363,13 +363,13 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 </AnimatePresence>
 
                 {/* DETAILS SECTION (Date & Desc) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-800/50">
-                    <div className="bg-slate-800/30 p-1 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-zinc-800/50">
+                    <div className="bg-zinc-800/30 p-1 rounded-xl border border-zinc-700/50 flex flex-col justify-center">
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="bg-transparent text-slate-300 text-sm font-medium focus:outline-none w-full px-3 py-2 text-center date-input-icon-fix"
+                            className="bg-transparent text-zinc-300 text-sm font-medium focus:outline-none w-full px-3 py-2 text-center date-input-icon-fix"
                         />
                     </div>
                     <input
@@ -377,7 +377,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         placeholder="Opis"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
+                        className="w-full bg-zinc-800/30 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500/50 transition-all font-medium"
                     />
                 </div>
 
@@ -385,7 +385,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                 <div className="flex gap-4 pt-4">
                     <button
                         onClick={onClose}
-                        className="px-6 py-4 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 font-bold transition-all w-1/3 active:scale-95"
+                        className="px-6 py-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 font-bold transition-all w-1/3 active:scale-95"
                     >
                         Anuluj
                     </button>
@@ -394,7 +394,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         disabled={!canSubmit}
                         className={`flex-1 py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all shadow-xl active:scale-[0.98] ${canSubmit
                             ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:scale-[1.02] shadow-emerald-500/20'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700/50 opacity-50'
+                            : 'bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700/50 opacity-50'
                             }`}
                     >
                         {incomeType === 'bonus' ? 'Rozdziel Premię' : isSubmitting ? 'Zapisuję...' : `Dodaj ${amount || '0'} PLN`}

@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, History, Settings, BarChart3, Archive, Calendar, Gem } from 'lucide-react'
+import { LayoutDashboard, History, Settings, BarChart3, Archive, Gem } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function BottomNavigation() {
@@ -21,7 +21,7 @@ export function BottomNavigation() {
 
     return (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] md:hidden w-[calc(100%-2.5rem)] max-w-xl">
-            <nav className="relative flex justify-around items-center h-16 bg-slate-900/70 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl px-1.5 focus-within:shadow-indigo-500/10">
+            <nav className="relative flex justify-around items-center h-16 bg-zinc-900/70 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl px-1.5 focus-within:shadow-amber-500/10">
                 {navItems.map((item) => {
                     const active = isActive(item.path)
                     const Icon = item.icon
@@ -37,7 +37,7 @@ export function BottomNavigation() {
                                 {active && (
                                     <motion.div
                                         layoutId="bottomNavGlow"
-                                        className="absolute inset-1.5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 shadow-lg shadow-indigo-500/5"
+                                        className="absolute inset-1.5 bg-amber-500/10 rounded-2xl border border-amber-500/20 shadow-lg shadow-amber-500/5"
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.8 }}
@@ -46,7 +46,7 @@ export function BottomNavigation() {
                                 )}
                             </AnimatePresence>
 
-                            <div className={`relative z-10 flex flex-col items-center gap-1 transition-all duration-300 ${active ? 'text-indigo-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+                            <div className={`relative z-10 flex flex-col items-center gap-1 transition-all duration-300 ${active ? 'text-amber-400 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}>
                                 <Icon
                                     size={20}
                                     strokeWidth={active ? 2.5 : 2}

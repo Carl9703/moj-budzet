@@ -13,13 +13,13 @@ interface IncomeExpenseChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-slate-900/90 border border-slate-700/50 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-                <p className="text-slate-400 text-xs font-semibold uppercase mb-2 tracking-wider">{label}</p>
+            <div className="bg-zinc-900/90 border border-zinc-700/50 p-4 rounded-xl shadow-2xl backdrop-blur-md">
+                <p className="text-zinc-400 text-xs font-semibold uppercase mb-2 tracking-wider">{label}</p>
                 <div className="space-y-2">
                     {payload.map((entry: any) => (
                         <div key={entry.name} className="flex items-center gap-3 min-w-[140px]">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-slate-300 text-sm flex-1">{entry.name}</span>
+                            <span className="text-zinc-300 text-sm flex-1">{entry.name}</span>
                             <span className="text-white font-bold font-mono">
                                 {entry.name === 'Stopa Oszczędności'
                                     ? `${entry.value.toFixed(1)}%`
@@ -51,14 +51,14 @@ export function IncomeExpenseChart({ data, year }: IncomeExpenseChartProps) {
         >
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
                         Przepływy Finansowe
                     </h2>
-                    <p className="text-slate-500 text-sm mt-1">
+                    <p className="text-zinc-500 text-sm mt-1">
                         Zestawienie dochodów i wydatków w roku {year}
                     </p>
                 </div>
-                <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-slate-400">
+                <div className="p-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400">
                     <ArrowUpRight size={24} />
                 </div>
             </div>
@@ -101,7 +101,7 @@ export function IncomeExpenseChart({ data, year }: IncomeExpenseChartProps) {
                         <Legend
                             wrapperStyle={{ paddingTop: '20px' }}
                             iconType="circle"
-                            formatter={(value) => <span className="text-slate-300 font-medium ml-2">{value}</span>}
+                            formatter={(value) => <span className="text-zinc-300 font-medium ml-2">{value}</span>}
                         />
 
                         <Bar

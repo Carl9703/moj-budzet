@@ -105,7 +105,7 @@ export default function HistoryPage() {
 
   if (isCheckingAuth) {
     return (
-      <div className="flex justify-center items-center h-screen bg-slate-950">
+      <div className="flex justify-center items-center h-screen bg-zinc-950">
         <LoadingSpinner size="large" text="Sprawdzanie autoryzacji..." />
       </div>
     )
@@ -116,7 +116,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
       <div className="w-full px-4 sm:px-6 lg:px-8 pb-28 md:pb-4 pt-0 flex flex-col relative z-10 max-w-[2560px] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -125,10 +125,10 @@ export default function HistoryPage() {
         >
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight">
                 📜 Historia transakcji
               </h1>
-              <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">
+              <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
                 Pełny rejestr operacji finansowych i zarządzanie wpisami
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function HistoryPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-2 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5"
+            className="p-2 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5"
           >
             <TransactionFilters
               key="transaction-filters"

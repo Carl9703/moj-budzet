@@ -106,7 +106,7 @@ export default function ArchivePage() {
     if (isCheckingAuth) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
             </div>
         )
     }
@@ -193,8 +193,8 @@ export default function ArchivePage() {
         return (
             <div className="min-h-screen flex justify-center items-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl animate-pulse" />
-                    <p className="text-slate-400 text-sm animate-pulse">Ładowanie archiwum...</p>
+                    <div className="w-12 h-12 bg-zinc-800 rounded-xl animate-pulse" />
+                    <p className="text-zinc-400 text-sm animate-pulse">Ładowanie archiwum...</p>
                 </div>
             </div>
         )
@@ -212,7 +212,7 @@ export default function ArchivePage() {
                         <AlertCircle size={32} />
                     </div>
                     <p className="text-xl mb-2 font-bold text-white">Błąd ładowania</p>
-                    <p className="text-sm mb-6 text-slate-400">{error}</p>
+                    <p className="text-sm mb-6 text-zinc-400">{error}</p>
                     <button
                         onClick={fetchMonthsData}
                         className="btn-primary w-full flex items-center justify-center gap-2"
@@ -225,7 +225,7 @@ export default function ArchivePage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col">
+        <div className="min-h-screen bg-zinc-950 flex flex-col">
             <div className="w-full px-4 sm:px-6 lg:px-8 pb-28 md:pb-4 pt-0 flex flex-col relative z-10 max-w-[1800px] mx-auto">
                 {/* Header */}
                 <motion.div
@@ -235,10 +235,10 @@ export default function ArchivePage() {
                 >
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight">
                                 📂 Archiwum Budżetu
                             </h1>
-                            <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">
+                            <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
                                 Kompaktowy przegląd historycznych danych finansowych
                             </p>
                         </div>
@@ -249,15 +249,15 @@ export default function ArchivePage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="p-16 rounded-2xl text-center bg-slate-900/50 border border-slate-700/50 flex flex-col items-center"
+                        className="p-16 rounded-2xl text-center bg-zinc-900/50 border border-zinc-700/50 flex flex-col items-center"
                     >
-                        <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mb-4 text-5xl">
+                        <div className="w-20 h-20 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4 text-5xl">
                             📂
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">
                             Brak danych archiwalnych
                         </h2>
-                        <p className="text-slate-400 text-sm max-w-md">
+                        <p className="text-zinc-400 text-sm max-w-md">
                             Twoje archiwum jest puste. Dane pojawią się tutaj automatycznie po zamknięciu pierwszego miesiąca.
                         </p>
                     </motion.div>
@@ -273,17 +273,17 @@ export default function ArchivePage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: yearIndex * 0.05 }}
-                                    className="rounded-xl border border-slate-700/50 bg-slate-900/30 overflow-hidden"
+                                    className="rounded-xl border border-zinc-700/50 bg-zinc-900/30 overflow-hidden"
                                 >
                                     {/* Year Header - Compact */}
                                     <button
                                         onClick={() => toggleYear(yearGroup.year)}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-zinc-800/30 transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <Calendar size={18} className="text-indigo-400" />
+                                            <Calendar size={18} className="text-amber-400" />
                                             <span className="text-xl font-bold text-white">{yearGroup.year}</span>
-                                            <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-0.5 rounded-full">
                                                 {yearGroup.months.length} mies.
                                             </span>
                                         </div>
@@ -295,7 +295,7 @@ export default function ArchivePage() {
                                                     <span className="text-emerald-400">{formatMoney(yearGroup.totalIncome)} zł</span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-slate-400">{formatMoney(yearGroup.totalExpenses)} zł</span>
+                                                    <span className="text-zinc-400">{formatMoney(yearGroup.totalExpenses)} zł</span>
                                                 </div>
                                                 <div className="text-right min-w-[100px]">
                                                     <span className={`font-bold ${yearGroup.totalBalance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -305,13 +305,13 @@ export default function ArchivePage() {
                                                 <div className="w-20 flex items-center gap-2">
                                                     {yearSavingsRate >= 0 ? (
                                                         <>
-                                                            <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                            <div className="flex-1 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
                                                                 <div
                                                                     className={`h-full rounded-full ${yearSavingsRate >= 30 ? 'bg-emerald-400' : 'bg-emerald-500/60'}`}
                                                                     style={{ width: `${Math.min(yearSavingsRate, 100)}%` }}
                                                                 />
                                                             </div>
-                                                            <span className="text-xs text-slate-400 w-8">{yearSavingsRate}%</span>
+                                                            <span className="text-xs text-zinc-400 w-8">{yearSavingsRate}%</span>
                                                         </>
                                                     ) : (
                                                         <span className="text-xs text-rose-400 font-medium">{yearSavingsRate}%</span>
@@ -319,7 +319,7 @@ export default function ArchivePage() {
                                                 </div>
                                             </div>
 
-                                            <div className={`p-1.5 rounded transition-colors ${isExpanded ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500'}`}>
+                                            <div className={`p-1.5 rounded transition-colors ${isExpanded ? 'bg-amber-500/15 text-amber-400' : 'text-zinc-500'}`}>
                                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                             </div>
                                         </div>
@@ -335,9 +335,9 @@ export default function ArchivePage() {
                                                 transition={{ duration: 0.2 }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="border-t border-slate-700/50">
+                                                <div className="border-t border-zinc-700/50">
                                                     {/* Table Header */}
-                                                    <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] text-slate-500 uppercase tracking-wider font-bold border-b border-slate-800/50 bg-slate-900/50">
+                                                    <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] text-zinc-500 uppercase tracking-wider font-bold border-b border-zinc-800/50 bg-zinc-900/50">
                                                         <div className="col-span-3">Miesiąc</div>
                                                         <div className="col-span-2 text-right">Przychody</div>
                                                         <div className="col-span-2 text-right">Wydatki</div>
@@ -359,8 +359,8 @@ export default function ArchivePage() {
                                                                 className={`
                                                                     grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer
                                                                     transition-colors duration-150 group
-                                                                    ${idx % 2 === 0 ? 'bg-slate-900/20' : 'bg-transparent'}
-                                                                    hover:bg-slate-800/40
+                                                                    ${idx % 2 === 0 ? 'bg-zinc-900/20' : 'bg-transparent'}
+                                                                    hover:bg-zinc-800/40
                                                                     ${!hasData ? 'opacity-40' : ''}
                                                                 `}
                                                             >
@@ -369,9 +369,9 @@ export default function ArchivePage() {
                                                                     <div className={`w-1.5 h-1.5 rounded-full ${isDeficit ? 'bg-rose-400' :
                                                                         savingsRate >= 20 ? 'bg-emerald-400' :
                                                                             savingsRate >= 10 ? 'bg-amber-400' :
-                                                                                'bg-slate-500'
+                                                                                'bg-zinc-500'
                                                                         }`} />
-                                                                    <span className="text-sm font-medium text-slate-200 capitalize">
+                                                                    <span className="text-sm font-medium text-zinc-200 capitalize">
                                                                         {monthData.month}
                                                                     </span>
                                                                 </div>
@@ -383,7 +383,7 @@ export default function ArchivePage() {
                                                                             {formatMoney(monthData.income)}
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-slate-600">—</span>
+                                                                        <span className="text-zinc-600">—</span>
                                                                     )}
                                                                 </div>
 
@@ -394,7 +394,7 @@ export default function ArchivePage() {
                                                                             {formatMoney(monthData.expenses)}
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-slate-600">—</span>
+                                                                        <span className="text-zinc-600">—</span>
                                                                     )}
                                                                 </div>
 
@@ -405,7 +405,7 @@ export default function ArchivePage() {
                                                                             {formatMoney(monthData.balance, true)}
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-slate-600">—</span>
+                                                                        <span className="text-zinc-600">—</span>
                                                                     )}
                                                                 </div>
 
@@ -413,13 +413,13 @@ export default function ArchivePage() {
                                                                 <div className="col-span-2 flex items-center gap-2">
                                                                     {hasData ? (
                                                                         <>
-                                                                            <div className="flex-1 max-w-[80px] h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                                                                            <div className="flex-1 max-w-[80px] h-1.5 bg-zinc-700/50 rounded-full overflow-hidden">
                                                                                 {!isDeficit && savingsRate > 0 && (
                                                                                     <div
                                                                                         className={`h-full rounded-full transition-all ${savingsRate >= 30 ? 'bg-emerald-400' :
                                                                                             savingsRate >= 20 ? 'bg-emerald-500/70' :
                                                                                                 savingsRate >= 10 ? 'bg-amber-400/70' :
-                                                                                                    'bg-slate-500'
+                                                                                                    'bg-zinc-500'
                                                                                             }`}
                                                                                         style={{ width: `${Math.min(savingsRate, 100)}%` }}
                                                                                     />
@@ -428,13 +428,13 @@ export default function ArchivePage() {
                                                                             <span className={`text-xs font-mono tabular-nums w-10 text-right ${isDeficit ? 'text-rose-400 font-bold' :
                                                                                 savingsRate >= 20 ? 'text-emerald-400' :
                                                                                     savingsRate >= 10 ? 'text-amber-400' :
-                                                                                        'text-slate-500'
+                                                                                        'text-zinc-500'
                                                                                 }`}>
                                                                                 {savingsRate}%
                                                                             </span>
                                                                         </>
                                                                     ) : (
-                                                                        <span className="text-slate-600">—</span>
+                                                                        <span className="text-zinc-600">—</span>
                                                                     )}
                                                                 </div>
 
@@ -442,7 +442,7 @@ export default function ArchivePage() {
                                                                 <div className="col-span-1 flex justify-end">
                                                                     <ChevronRight
                                                                         size={16}
-                                                                        className="text-slate-600 group-hover:text-indigo-400 transition-colors"
+                                                                        className="text-zinc-600 group-hover:text-amber-400 transition-colors"
                                                                     />
                                                                 </div>
                                                             </div>

@@ -33,22 +33,22 @@ export function YearlyAnalysisTab({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4"
+            className="p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
             <div>
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <span className="text-2xl">📅</span> Raport Roczny {selectedYear}
                 </h2>
-                <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">
+                <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
                     Kompleksowa analiza finansów za rok {selectedYear}
                 </p>
             </div>
             <div className="flex items-center gap-3">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Wybierz rok</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Wybierz rok</span>
                 <select
                     value={selectedYear}
                     onChange={(e) => onYearChange(Number(e.target.value))}
-                    className="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-slate-700/50 transition-all"
+                    className="px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer hover:bg-zinc-700/50 transition-all"
                 >
                     {availableYears.map(year => (
                         <option key={year} value={year}>{year}</option>
@@ -113,7 +113,7 @@ export function YearlyAnalysisTab({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="xl:col-span-8 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 h-full"
+                    className="xl:col-span-8 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 h-full"
                 >
                     <IncomeExpenseChart
                         data={data.monthlyData}
@@ -126,7 +126,7 @@ export function YearlyAnalysisTab({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.25 }}
-                    className="xl:col-span-4 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 h-full"
+                    className="xl:col-span-4 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 h-full"
                 >
                     <IncomeStructureChart
                         data={data.incomeBreakdown}
@@ -141,7 +141,7 @@ export function YearlyAnalysisTab({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="xl:col-span-6 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5"
+                            className="xl:col-span-6 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5"
                         >
                             <IncomeComparisonChart
                                 currentYearData={data.monthlyData}
@@ -154,7 +154,7 @@ export function YearlyAnalysisTab({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.35 }}
-                            className="xl:col-span-6 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5"
+                            className="xl:col-span-6 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5"
                         >
                             <YearComparisonChart
                                 currentYearData={data.monthlyData}
@@ -185,15 +185,15 @@ export function YearlyAnalysisTab({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 flex justify-between items-center"
+                className="p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 flex justify-between items-center"
             >
                 <div className="flex gap-4 items-center">
                     <span className="text-2xl">📊</span>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-zinc-400">
                         Raport wygenerowany na podstawie <span className="text-white font-bold">{data.summary?.totalTransactions || 0}</span> transakcji
                     </p>
                 </div>
-                <div className="text-[10px] text-slate-600 font-mono tracking-tighter uppercase italic">
+                <div className="text-[10px] text-zinc-600 font-mono tracking-tighter uppercase italic">
                     Final Annual Report {selectedYear} {'//'} Verified
                 </div>
             </motion.div>

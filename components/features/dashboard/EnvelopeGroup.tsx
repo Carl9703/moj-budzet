@@ -3,6 +3,12 @@
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
 import { motion } from 'framer-motion'
 
+interface FxPocket {
+    currency: string
+    available: number
+    rateAvg?: number
+}
+
 interface Envelope {
     id: string
     name: string
@@ -15,6 +21,8 @@ interface Envelope {
     envelopeType?: 'monthly' | 'yearly'
     isAccumulating?: boolean
     envelopeKind?: string  // 'savings', 'goal', 'emergency', 'budget'
+    fxPocket?: FxPocket[] | null
+    currencyCode?: string
 }
 
 interface Props {
@@ -24,9 +32,10 @@ interface Props {
     envelopes: Envelope[]
     type: 'monthly' | 'yearly'
     onEnvelopeClick?: (envelopeId: string, envelopeName: string, envelopeIcon: string) => void
+    onExchangeClick?: (envelopeId: string, envelopeName: string, balance: number) => void
 }
 
-export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeClick }: Props) {
+export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeClick, onExchangeClick }: Props) {
     if (envelopes.length === 0) return null
 
     const monthlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'monthly')
@@ -58,21 +67,21 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
                 <div className="flex items-center gap-3">
-                    <div className="px-3 py-1 rounded-full bg-slate-900/50 border border-white/5 flex items-center gap-2">
+                    <div className="px-3 py-1 rounded-full bg-zinc-900/50 border border-white/5 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full animate-pulse"
                             style={{
                                 backgroundColor: color ? color.replace('rgba(', 'rgb(').replace(/,[^,]+\)$/, ')') : '#64748b',
                                 boxShadow: `0 0 10px ${color || 'rgba(100, 116, 139, 0.4)'}`
                             }}
                         />
-                        <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                        <h2 className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em]">
                             {title}
                         </h2>
                     </div>
                 </div>
 
-                <div className="flex items-baseline gap-2 bg-slate-900/30 px-3 py-1 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Wydano Łącznie:</span>
+                <div className="flex items-baseline gap-2 bg-zinc-900/30 px-3 py-1 rounded-xl border border-white/5">
+                    <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Wydano Łącznie:</span>
                     <span className="text-sm font-black text-white tracking-tight">
                         {displayAmount}
                     </span>
@@ -80,7 +89,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
             </div>
 
             {/* Grid of Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {envelopes
                     .sort((a, b) => {
                         // Custom sort: Paid monthly envelopes go to the end
@@ -103,7 +112,10 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                                 type={envelope.envelopeType || type}
                                 envelopeType={envelope.envelopeKind}
                                 onTransactionClick={onEnvelopeClick}
+                                onExchangeClick={onExchangeClick}
                                 group={envelope.group}
+                                fxPocket={envelope.fxPocket}
+                                currencyCode={envelope.currencyCode}
                             />
                         </motion.div>
                     ))}

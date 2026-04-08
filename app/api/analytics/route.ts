@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 import { SYSTEM_DESCRIPTIONS, GROUP_NAME_MAP, GROUP_ICON_MAP, SYSTEM_GROUPS } from '@/lib/constants/system'
 
 // === INTERFEJSY DLA NOWEJ STRUKTURY ===
@@ -106,6 +107,31 @@ interface AnalyticsResponse {
 
 // === FUNKCJE POMOCNICZE ===
 
+/**
+ * Konwertuje Prisma.Decimal lub number do number.
+ * Potrzebne po migracji pól Float → Decimal w schemacie.
+ */
+function toNum(v: unknown): number {
+  if (v === null || v === undefined) return 0
+  if (typeof v === 'number') return v
+  if (typeof v === 'string') return parseFloat(v) || 0
+  // Prisma.Decimal — ma metodę toNumber()
+  if (typeof (v as any).toNumber === 'function') return (v as any).toNumber()
+  return Number(v)
+}
+
+/**
+ * Zwraca efektywną wartość transakcji w PLN.
+ * Dla wydatków walutowych (plnEquivalent ustawiony przez FIFO) używa kosztu historycznego.
+ * Dla transakcji PLN zwraca zwykłe amount.
+ */
+function effectivePlnAmount(transaction: { amount: unknown; plnEquivalent?: unknown }): number {
+  if (transaction.plnEquivalent !== null && transaction.plnEquivalent !== undefined) {
+    return toNum(transaction.plnEquivalent)
+  }
+  return toNum(transaction.amount)
+}
+
 function getStartDate(period: string): Date {
   const now = new Date()
 
@@ -183,7 +209,7 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
 
     const totalExpenses = monthTransactions
       .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + toNum(t.amount), 0)
 
     trends.push({
       period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
@@ -231,7 +257,7 @@ async function buildSpendingTree(
 
   const envelopeBudgets = new Map<string, number>()
   for (const envelope of envelopes) {
-    envelopeBudgets.set(envelope.name, envelope.plannedAmount)
+    envelopeBudgets.set(envelope.name, toNum(envelope.plannedAmount))
   }
 
   // Helper map for categories
@@ -283,6 +309,9 @@ async function buildSpendingTree(
     }
     category = category || 'other'
 
+    // Dla wydatków walutowych używamy kosztu historycznego PLN (FIFO), nie surowej kwoty w obcej walucie
+    const plnValue = effectivePlnAmount(transaction)
+
     // Grupa
     if (!groupMap.has(groupName)) {
       groupMap.set(groupName, {
@@ -295,7 +324,7 @@ async function buildSpendingTree(
     }
 
     const group = groupMap.get(groupName)
-    group.total += transaction.amount
+    group.total += plnValue
 
     // Koperta
     if (!group.children.has(envelopeName)) {
@@ -310,7 +339,7 @@ async function buildSpendingTree(
     }
 
     const envelopeNode = group.children.get(envelopeName)
-    envelopeNode.total += transaction.amount
+    envelopeNode.total += plnValue
 
     // Kategoria
     if (!envelopeNode.children.has(category)) {
@@ -325,17 +354,17 @@ async function buildSpendingTree(
     }
 
     const categoryNode = envelopeNode.children.get(category)
-    categoryNode.total += transaction.amount
+    categoryNode.total += plnValue
 
-    // Transakcja
+    // Transakcja — wyświetlamy oryginalną kwotę walutową + ekwiwalent PLN w opisie
     categoryNode.children.push({
       type: 'TRANSACTION',
       id: `trx_${transaction.id}`,
       name: transaction.description || 'Brak opisu',
-      total: transaction.amount,
+      total: plnValue,
       date: transaction.date.toISOString().split('T')[0],
       description: transaction.description || 'Brak opisu',
-      amount: transaction.amount
+      amount: plnValue
     })
   }
 
@@ -503,11 +532,11 @@ export async function GET(request: NextRequest) {
 
     const currentIncome = currentPeriodTransactions
       .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + toNum(t.amount), 0)
 
     const currentExpenses = currentPeriodTransactions
       .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + effectivePlnAmount(t), 0)
 
     const currentBalance = currentIncome - currentExpenses
     const currentSavingsRate = currentIncome > 0 ? currentBalance / currentIncome : 0
@@ -537,11 +566,11 @@ export async function GET(request: NextRequest) {
 
       const previousIncome = previousPeriodTransactions
         .filter(t => t.type === 'income' && (t as { includeInStats?: boolean }).includeInStats !== false)
-        .reduce((sum, t) => sum + t.amount, 0)
+        .reduce((sum, t) => sum + toNum(t.amount), 0)
 
       const previousExpenses = previousPeriodTransactions
         .filter(t => t.type === 'expense' && (t as { includeInStats?: boolean }).includeInStats !== false)
-        .reduce((sum, t) => sum + t.amount, 0)
+        .reduce((sum, t) => sum + effectivePlnAmount(t), 0)
 
       const previousBalance = previousIncome - previousExpenses
       const previousSavingsRate = previousIncome > 0 ? previousBalance / previousIncome : 0
@@ -611,7 +640,7 @@ export async function GET(request: NextRequest) {
 
       const month = t.date.getMonth() + 1
       const period = `${t.date.getFullYear()}-${String(month).padStart(2, '0')}`
-      const amount = t.amount
+      const amount = effectivePlnAmount(t)
 
       // Ogólne
       tempTrends.total[period] = (tempTrends.total[period] || 0) + amount
@@ -673,21 +702,22 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      const txPlnValue = effectivePlnAmount(transaction)
       categoryData[categoryId].transactions.push(transaction)
-      categoryData[categoryId].totalAmount += transaction.amount
+      categoryData[categoryId].totalAmount += txPlnValue
 
       // Grupuj według kopert
       if (!categoryData[categoryId].envelopeBreakdown[envelopeName]) {
         categoryData[categoryId].envelopeBreakdown[envelopeName] = 0
       }
-      categoryData[categoryId].envelopeBreakdown[envelopeName] += transaction.amount
+      categoryData[categoryId].envelopeBreakdown[envelopeName] += txPlnValue
 
       // Grupuj według miesięcy
       const monthKey = `${transaction.date.getFullYear()}-${String(transaction.date.getMonth() + 1).padStart(2, '0')}`
       if (!categoryData[categoryId].monthlyData[monthKey]) {
         categoryData[categoryId].monthlyData[monthKey] = 0
       }
-      categoryData[categoryId].monthlyData[monthKey] += transaction.amount
+      categoryData[categoryId].monthlyData[monthKey] += txPlnValue
     })
 
     // Oblicz całkowitą kwotę wydatków
@@ -734,7 +764,7 @@ export async function GET(request: NextRequest) {
         .map(transaction => {
           return {
             id: transaction.id,
-            amount: transaction.amount,
+            amount: effectivePlnAmount(transaction),
             description: transaction.description || 'Brak opisu',
             date: transaction.date.toISOString().split('T')[0], // YYYY-MM-DD format
             envelopeName: transaction.envelope?.name || 'Inne',
@@ -797,7 +827,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const nextResponse = NextResponse.json(response)
+    const nextResponse = jsonResponse(response)
 
     // Wyłącz cache dla świeżych danych
     nextResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -808,7 +838,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Analytics API error:', error)
-    return NextResponse.json(
+    return jsonResponse(
       { error: 'Błąd pobierania analiz' },
       { status: 500 }
     )

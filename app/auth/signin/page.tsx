@@ -48,16 +48,16 @@ export default function SignInPage() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(135deg, #020617 0%, #0f172a 25%, #1e1b4b 50%, #0f172a 75%, #020617 100%)',
+          background: 'linear-gradient(135deg, #09090b 0%, #18181b 25%, #1c1007 50%, #18181b 75%, #09090b 100%)',
           backgroundSize: '400% 400%',
           animation: 'gradientShift 15s ease infinite',
         }}
       />
 
       {/* Floating orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-amber-700/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-600/5 rounded-full blur-3xl" />
 
       {/* Login card */}
       <motion.div
@@ -93,7 +93,7 @@ export default function SignInPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-slate-400"
+              className="text-zinc-400"
             >
               Inteligentne zarządzanie finansami
             </motion.p>
@@ -122,7 +122,7 @@ export default function SignInPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-300 mb-2">
                 Email
               </label>
               <input
@@ -141,7 +141,7 @@ export default function SignInPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-300 mb-2">
                 Hasło
               </label>
               <input
@@ -205,17 +205,17 @@ export default function SignInPage() {
                     setIsLoading(false)
                   }
                 }}
-                className="w-full py-3 rounded-xl border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 font-bold transition-all text-sm uppercase tracking-wider mb-4"
+                className="w-full py-3 rounded-xl border border-amber-500/30 text-amber-300 hover:bg-amber-500/10 font-bold transition-all text-sm uppercase tracking-wider mb-4"
               >
                 🚀 Zaloguj jako Demo
               </button>
             </div>
 
-            <p className="text-center text-sm text-slate-400 mt-6">
+            <p className="text-center text-sm text-zinc-400 mt-6">
               Nie masz konta?{' '}
               <Link
                 href="/auth/signup"
-                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors hover:underline underline-offset-2"
+                className="text-amber-400 hover:text-amber-300 font-medium transition-colors hover:underline underline-offset-2"
               >
                 Zarejestruj się
               </Link>

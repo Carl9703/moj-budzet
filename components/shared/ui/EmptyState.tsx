@@ -22,19 +22,19 @@ export function EmptyState({
       className={`
         flex flex-col items-center justify-center 
         p-8 md:p-12 
-        bg-slate-900/40 backdrop-blur-md 
-        border border-slate-700/30 rounded-2xl 
+        bg-zinc-900/40 backdrop-blur-md 
+        border border-zinc-700/30 rounded-2xl 
         text-center
         ${className}
       `}
     >
-      <div className="w-16 h-16 mb-4 rounded-full bg-slate-800/50 flex items-center justify-center border border-slate-700/50 shadow-inner">
-        <Icon className="w-8 h-8 text-slate-500" />
+      <div className="w-16 h-16 mb-4 rounded-full bg-zinc-800/50 flex items-center justify-center border border-zinc-700/50 shadow-inner">
+        <Icon className="w-8 h-8 text-zinc-500" />
       </div>
-      <h3 className="text-lg font-semibold text-slate-200 mb-2">
+      <h3 className="text-lg font-semibold text-zinc-200 mb-2">
         {title}
       </h3>
-      <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
+      <p className="text-zinc-400 text-sm max-w-xs leading-relaxed">
         {description}
       </p>
     </motion.div>

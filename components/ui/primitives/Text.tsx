@@ -20,9 +20,9 @@ const variantClasses: Record<TextVariant, string> = {
 }
 
 const colorClasses = {
-    primary: 'text-slate-100',
-    secondary: 'text-slate-400',
-    muted: 'text-slate-500',
+    primary: 'text-zinc-100',
+    secondary: 'text-zinc-400',
+    muted: 'text-zinc-500',
     success: 'text-emerald-400',
     error: 'text-rose-400',
     warning: 'text-amber-400',

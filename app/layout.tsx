@@ -39,7 +39,7 @@ export const viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false, // App-like feel, prevents accidental zooming
-    themeColor: '#09090b', // Matches manifest background
+    themeColor: '#09090b',
 }
 
 import { CommandPalette } from '@/components/ui/CommandPalette'
@@ -51,7 +51,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pl" suppressHydrationWarning>
-            <body style={{ backgroundColor: '#020617' }} suppressHydrationWarning> {/* slate-950 */}
+            <body style={{ backgroundColor: '#09090b' }} suppressHydrationWarning> {/* zinc-950 */}
                 <ErrorBoundary>
                     <QueryProvider>
                         <ToastProvider>

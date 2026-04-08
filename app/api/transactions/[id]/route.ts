@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
+import { jsonResponse } from '@/lib/utils/api'
+import { toNum } from '@/lib/utils/decimal'
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
@@ -29,16 +31,16 @@ export async function GET(
         })
 
         if (!transaction) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Transakcja nie znaleziona' },
                 { status: 404 }
             )
         }
 
-        return NextResponse.json(transaction)
+        return jsonResponse(transaction)
     } catch (error) {
         console.error('GET transaction error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania transakcji' },
             { status: 500 }
         )
@@ -71,14 +73,14 @@ export async function PATCH(
         })
 
         if (!originalTransaction) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Transakcja nie znaleziona' },
                 { status: 404 }
             )
         }
 
         // POPRAWIONA KALKULACJA różnicy kwoty
-        const oldAmount = originalTransaction.amount
+        const oldAmount = toNum(originalTransaction.amount)
         const newAmount = data.amount
         const amountDifference = oldAmount - newAmount
 
@@ -102,21 +104,22 @@ export async function PATCH(
             })
 
             if (envelope) {
-                let newCurrentAmount = envelope.currentAmount
+                const currentAmt = toNum(envelope.currentAmount)
+                let newCurrentAmount: number = currentAmt
 
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
-                    newCurrentAmount = envelope.currentAmount + amountDifference
+                    newCurrentAmount = currentAmt + amountDifference
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
                     const isSavings = isSavingsEnvelope(envelope.envelopeType)
 
                     if (isSavings) {
                         // Koperty oszczędnościowe: expense zwiększa saldo, więc przy zmianie kwoty zmieniamy znak
-                        newCurrentAmount = envelope.currentAmount - amountDifference
+                        newCurrentAmount = currentAmt - amountDifference
                     } else {
                         // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
-                        newCurrentAmount = envelope.currentAmount + amountDifference
+                        newCurrentAmount = currentAmt + amountDifference
                     }
                 }
 
@@ -136,21 +139,22 @@ export async function PATCH(
             })
 
             if (envelope) {
-                let newCurrentAmount = envelope.currentAmount
+                const currentAmt = toNum(envelope.currentAmount)
+                let newCurrentAmount: number = currentAmt
 
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
-                    newCurrentAmount = envelope.currentAmount - amountDifference
+                    newCurrentAmount = currentAmt - amountDifference
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
                     const isSavings = isSavingsEnvelope(envelope.envelopeType)
 
                     if (isSavings) {
                         // Koperty oszczędnościowe: income zmniejsza saldo, więc przy zmianie kwoty zmieniamy znak
-                        newCurrentAmount = envelope.currentAmount + amountDifference
+                        newCurrentAmount = currentAmt + amountDifference
                     } else {
                         // Koperty wydatkowe roczne: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
-                        newCurrentAmount = envelope.currentAmount - amountDifference
+                        newCurrentAmount = currentAmt - amountDifference
                     }
                 }
 
@@ -163,11 +167,11 @@ export async function PATCH(
             }
         }
 
-        return NextResponse.json(updatedTransaction)
+        return jsonResponse(updatedTransaction)
 
     } catch (error) {
         console.error('Transaction update error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd aktualizacji transakcji' },
             { status: 500 }
         )
@@ -197,7 +201,7 @@ export async function DELETE(
         })
 
         if (!transaction) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Transakcja nie znaleziona' },
                 { status: 404 }
             )
@@ -221,13 +225,14 @@ export async function DELETE(
                         })
 
                         if (envelope) {
-                            let newCurrentAmount = envelope.currentAmount
+                            const envAmt = toNum(envelope.currentAmount)
+                            let newCurrentAmount: number = envAmt
                             if (t.type === 'income') {
                                 // Cofnięcie wpływu -> odejmij kwotę
-                                newCurrentAmount = envelope.currentAmount - t.amount
+                                newCurrentAmount = envAmt - toNum(t.amount)
                             } else if (t.type === 'expense') {
                                 // Cofnięcie wydatku -> dodaj kwotę
-                                newCurrentAmount = envelope.currentAmount + t.amount
+                                newCurrentAmount = envAmt + toNum(t.amount)
                             }
 
                             // Zabezpieczenie przed ujemnym saldem (opcjonalne, ale warto dać max(0))
@@ -254,7 +259,7 @@ export async function DELETE(
                     }
                 })
 
-                return NextResponse.json({
+                return jsonResponse({
                     success: true,
                     message: 'Transfer został usunięty (cała operacja została cofnięta)'
                 })
@@ -268,24 +273,26 @@ export async function DELETE(
             })
 
             if (envelope) {
+                const envAmt = toNum(envelope.currentAmount)
+                const txAmt = toNum(transaction.amount)
                 let newCurrentAmount: number
 
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
-                    newCurrentAmount = envelope.currentAmount + transaction.amount
+                    newCurrentAmount = envAmt + txAmt
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
                     const isSavings = isSavingsEnvelope(envelope.envelopeType)
 
                     if (isSavings) {
                         // Koperty oszczędnościowe: expense zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
-                        newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                        newCurrentAmount = Math.max(0, envAmt - txAmt)
                     } else {
                         // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
-                        newCurrentAmount = envelope.currentAmount + transaction.amount
+                        newCurrentAmount = envAmt + txAmt
                     }
                 } else {
-                    newCurrentAmount = envelope.currentAmount
+                    newCurrentAmount = envAmt
                 }
 
                 await prisma.envelope.update({
@@ -303,25 +310,27 @@ export async function DELETE(
             })
 
             if (envelope) {
+                const envAmt = toNum(envelope.currentAmount)
+                const txAmt = toNum(transaction.amount)
                 let newCurrentAmount: number
 
                 if (envelope.type === 'monthly') {
                     // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
                     // Przy usuwaniu odwracamy: zmniejszamy saldo
-                    newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                    newCurrentAmount = Math.max(0, envAmt - txAmt)
                 } else if (envelope.type === 'yearly') {
                     // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
                     const isSavings = isSavingsEnvelope(envelope.envelopeType)
 
                     if (isSavings) {
                         // Koperty oszczędnościowe: income zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
-                        newCurrentAmount = envelope.currentAmount + transaction.amount
+                        newCurrentAmount = envAmt + txAmt
                     } else {
                         // Koperty wydatkowe roczne: income zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
-                        newCurrentAmount = Math.max(0, envelope.currentAmount - transaction.amount)
+                        newCurrentAmount = Math.max(0, envAmt - txAmt)
                     }
                 } else {
-                    newCurrentAmount = envelope.currentAmount
+                    newCurrentAmount = envAmt
                 }
 
                 await prisma.envelope.update({
@@ -338,14 +347,14 @@ export async function DELETE(
             where: { id: params.id }
         })
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             message: 'Transakcja została usunięta'
         })
 
     } catch (error) {
         console.error('Transaction delete error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd usuwania transakcji' },
             { status: 500 }
         )

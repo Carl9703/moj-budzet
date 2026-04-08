@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function POST(
     request: NextRequest,
@@ -27,7 +28,7 @@ export async function POST(
         })
 
         if (!recurringPayment) {
-            return NextResponse.json({ error: 'Płatność nie znaleziona' }, { status: 404 })
+            return jsonResponse({ error: 'Płatność nie znaleziona' }, { status: 404 })
         }
 
         // Ustaw dismissedUntil na początek następnego miesiąca
@@ -43,7 +44,7 @@ export async function POST(
             }
         })
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             message: `Płatność "${recurringPayment.name}" została odrzucona`,
             nextAppearance: nextMonth.toISOString().split('T')[0]
@@ -51,7 +52,7 @@ export async function POST(
 
     } catch (error) {
         console.error('Error rejecting payment:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd odrzucania płatności', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )

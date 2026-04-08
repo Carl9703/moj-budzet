@@ -50,9 +50,9 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
     const CardWrapper = isClickable ? 'button' : 'div'
 
     // For active state, use neutral accent (indigo) instead of semantic colors
-    const activeAccent = 'border-indigo-500 shadow-indigo-500/20 bg-slate-800/80'
-    const inactiveClickable = 'border-white/5 opacity-70 hover:opacity-100 hover:bg-slate-900/80'
-    const inactiveNonClickable = 'border-white/5 hover:bg-slate-900/80'
+    const activeAccent = 'border-amber-500 shadow-amber-500/20 bg-zinc-800/80'
+    const inactiveClickable = 'border-white/5 opacity-70 hover:opacity-100 hover:bg-zinc-900/80'
+    const inactiveNonClickable = 'border-white/5 hover:bg-zinc-900/80'
 
     return (
         <motion.div
@@ -62,7 +62,7 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
         >
             <CardWrapper
                 onClick={onClick}
-                className={`group relative overflow-hidden p-5 rounded-3xl border bg-slate-900/50 backdrop-blur-xl transition-all duration-300 w-full h-full text-left flex flex-col ${isClickable ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''
+                className={`group relative overflow-hidden p-5 rounded-3xl border bg-zinc-900/50 backdrop-blur-xl transition-all duration-300 w-full h-full text-left flex flex-col ${isClickable ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''
                     } ${isActive
                         ? `border-2 ${activeAccent} shadow-lg`
                         : isClickable ? inactiveClickable : inactiveNonClickable
@@ -73,21 +73,21 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
 
                 {/* Active indicator - subtle dot, not aggressive badge */}
                 {isActive && (
-                    <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                 )}
 
                 <div className="flex items-start justify-between mb-4 relative z-10">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-white' : 'text-slate-400'}`}>{title}</h3>
+                            <h3 className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-white' : 'text-zinc-400'}`}>{title}</h3>
                             {/* Removed aggressive colored badge - just show clickable hint on hover */}
                         </div>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-300">
                                 {showSign && value > 0 ? '+' : ''}
                                 {formatNumber(displayValue)}
                             </span>
-                            <span className="text-base text-slate-500 font-medium">{suffix}</span>
+                            <span className="text-base text-zinc-500 font-medium">{suffix}</span>
                         </div>
                     </div>
                     <div className={`p-2.5 rounded-xl ${color.replace('bg-', 'bg-').replace('500', '500/10')} border border-white/5`}>
@@ -97,9 +97,9 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
 
                 <div className="relative z-10 space-y-2">
                     {monthlyAverage !== undefined && (
-                        <div className="flex items-center justify-between text-xs py-1.5 border-t border-slate-700/30">
-                            <span className="text-slate-500">Śr. mies.</span>
-                            <span className="text-slate-300 font-medium tabular-nums">
+                        <div className="flex items-center justify-between text-xs py-1.5 border-t border-zinc-700/30">
+                            <span className="text-zinc-500">Śr. mies.</span>
+                            <span className="text-zinc-300 font-medium tabular-nums">
                                 {showSign && monthlyAverage > 0 ? '+' : ''}
                                 {monthlyAverage.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {suffix}
                             </span>
@@ -180,7 +180,7 @@ export function KeyMetricsCards({ summary, previousYearSummary, activeTab, onTab
                 monthlyAverage={summary.monthlyAverage.savings}
                 previousValue={previousYearSummary?.savings}
                 icon={PiggyBank}
-                color="bg-indigo-500"
+                color="bg-amber-500"
                 showSign={true}
             />
 

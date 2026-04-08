@@ -54,7 +54,7 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative overflow-hidden p-4 sm:p-8 rounded-2xl border border-slate-700/30 group hover:border-slate-600/50 transition-colors bg-slate-900/40 backdrop-blur-xl"
+      className="relative overflow-hidden p-4 sm:p-8 rounded-2xl border border-zinc-700/30 group hover:border-zinc-600/50 transition-colors bg-zinc-900/40 backdrop-blur-xl"
     >
       {/* Decorative ambient gradient */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -66,14 +66,14 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-1">
               📊 {currentTitle}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-zinc-400">
               {isDrilledDown ? 'Podgląd szczegółów wybranego elementu' : 'Kliknij na segment, aby sprawdzić szczegóły'}
             </p>
           </div>
 
           <div className="text-right">
-            <div className="text-xs text-slate-400 uppercase tracking-wider mb-1 font-medium">Suma w sekcji</div>
-            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-sm tabular-nums tracking-tight">
+            <div className="text-xs text-zinc-400 uppercase tracking-wider mb-1 font-medium">Suma w sekcji</div>
+            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 drop-shadow-sm tabular-nums tracking-tight">
               {formatMoneyWithSeparators(chartTotal)}
             </div>
           </div>
@@ -86,7 +86,7 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex items-center gap-2 text-xs text-slate-500 bg-slate-800/50 p-2 rounded-lg border border-slate-700/30 w-fit"
+              className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30 w-fit"
             >
               <button
                 onClick={() => onPathClick?.(null)}
@@ -96,10 +96,10 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
               </button>
               {drillDownPath.map((node, i) => (
                 <React.Fragment key={node.id}>
-                  <ChevronRight size={12} className="text-slate-600" />
+                  <ChevronRight size={12} className="text-zinc-600" />
                   <button
                     onClick={() => i < drillDownPath.length - 1 ? onPathClick?.(node) : null}
-                    className={`transition-colors ${i < drillDownPath.length - 1 ? 'hover:text-blue-400 hover-lift' : 'text-slate-300 font-medium cursor-default'}`}
+                    className={`transition-colors ${i < drillDownPath.length - 1 ? 'hover:text-blue-400 hover-lift' : 'text-zinc-300 font-medium cursor-default'}`}
                   >
                     {node.name}
                   </button>
@@ -197,8 +197,8 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
                 className={`flex flex-wrap items-center justify-between gap-y-1 gap-x-3 p-3 rounded-xl border transition-all ${activeIndex === index
-                  ? 'bg-slate-800/60 border-indigo-500/30 shadow-lg scale-[1.02]'
-                  : 'bg-slate-900/20 border-slate-700/30 hover:bg-slate-800/40'
+                  ? 'bg-zinc-800/60 border-amber-500/30 shadow-lg scale-[1.02]'
+                  : 'bg-zinc-900/20 border-zinc-700/30 hover:bg-zinc-800/40'
                   }`}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -206,15 +206,15 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
                     className="w-3 h-3 rounded-full shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.5)]"
                     style={{ backgroundColor: entry.color }}
                   />
-                  <div className="text-sm font-medium text-slate-200 truncate">
+                  <div className="text-sm font-medium text-zinc-200 truncate">
                     {entry.name}
                   </div>
                 </div>
                 <div className="text-right shrink-0 ml-auto">
-                  <div className="text-sm font-bold text-slate-100">
+                  <div className="text-sm font-bold text-zinc-100">
                     {percentage}%
                   </div>
-                  <div className="text-[10px] text-slate-500 tabular-nums">
+                  <div className="text-[10px] text-zinc-500 tabular-nums">
                     {formatMoneyWithSeparators(entry.value)}
                   </div>
                 </div>

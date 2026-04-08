@@ -60,10 +60,10 @@ export function TrendsVisualization({
   if (loading) {
     return (
       <div
-        className="flex items-center justify-center min-h-[400px] rounded-2xl border border-slate-700/30"
+        className="flex items-center justify-center min-h-[400px] rounded-2xl border border-zinc-700/30"
         style={{ background: 'rgba(30, 41, 59, 0.4)' }}
       >
-        <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-zinc-700 border-t-emerald-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -71,12 +71,12 @@ export function TrendsVisualization({
   if (!data || data.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 rounded-2xl border border-slate-700/30"
+        className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 rounded-2xl border border-zinc-700/30"
         style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(12px)' }}
       >
         <div className="text-5xl mb-4 opacity-50 grayscale transition-all hover:grayscale-0">📈</div>
         <h3 className="text-xl font-bold text-white mb-2">Brak danych trendów</h3>
-        <p className="text-slate-400 max-w-sm mx-auto">
+        <p className="text-zinc-400 max-w-sm mx-auto">
           Dodaj transakcje z różnych okresów, aby zobaczyć wizualizację trendów w czasie.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function TrendsVisualization({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className="relative overflow-hidden p-4 sm:p-8 rounded-2xl border border-slate-700/30 group hover:border-slate-600/50 transition-colors"
+      className="relative overflow-hidden p-4 sm:p-8 rounded-2xl border border-zinc-700/30 group hover:border-zinc-600/50 transition-colors"
       style={{
         background: 'rgba(30, 41, 59, 0.4)',
         backdropFilter: 'blur(12px)',
@@ -103,7 +103,7 @@ export function TrendsVisualization({
           <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-1">
             📊 Trend Wydatków
           </h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-zinc-400">
             {selectedItem
               ? <span className="text-emerald-300">Trend dla: {selectedItem}</span>
               : 'Całkowite wydatki w czasie'
@@ -113,8 +113,8 @@ export function TrendsVisualization({
 
         {chartData.length > 0 && (
           <div className="text-right">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
-            <p className="text-lg font-bold text-indigo-400">
+            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
+            <p className="text-lg font-bold text-amber-400">
               {valueFormatter(chartData.reduce((acc, curr) => acc + curr.wydatki, 0) / chartData.length)}
             </p>
           </div>
@@ -130,7 +130,7 @@ export function TrendsVisualization({
               data={chartData}
               index="period"
               categories={['wydatki']}
-              colors={[selectedItem ? 'indigo' : 'emerald']}
+              colors={[selectedItem ? 'amber' : 'emerald']}
               valueFormatter={valueFormatter}
               className="h-full w-full"
               showAnimation={true}
@@ -151,13 +151,13 @@ export function TrendsVisualization({
         {/* Custom Average Line Overlay - Heuristic position with label */}
         {chartData.length > 0 && (
           <div
-            className="absolute left-[60px] right-0 border-t-2 border-indigo-400/40 z-20 pointer-events-none transition-all duration-500"
+            className="absolute left-[60px] right-0 border-t-2 border-amber-500/40 z-20 pointer-events-none transition-all duration-500"
             style={{
               bottom: `${Math.min(280, Math.max(40, ((chartData.reduce((acc, curr) => acc + curr.wydatki, 0) / chartData.length) / Math.max(...chartData.map(d => d.wydatki), 1) * 250) + 40))}px`
             }}
           >
             <div className="flex justify-start items-center -mt-3.5">
-              <span className="text-[9px] font-bold text-indigo-400 bg-slate-900 border border-indigo-400/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
+              <span className="text-[9px] font-bold text-amber-400 bg-zinc-900 border border-amber-500/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
                 ŚREDNIA: {valueFormatter(chartData.reduce((acc, curr) => acc + curr.wydatki, 0) / chartData.length)}
               </span>
             </div>

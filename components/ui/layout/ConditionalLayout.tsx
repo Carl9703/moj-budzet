@@ -15,11 +15,11 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
     const shouldHideSidebar = hideSidebarPaths.includes(pathname)
 
     if (shouldHideSidebar) {
-        return <div className="bg-slate-950 text-slate-100 min-h-screen">{children}</div>
+        return <div className="bg-zinc-950 text-zinc-100 min-h-screen">{children}</div>
     }
 
     return (
-        <div className="flex bg-slate-950 text-slate-100 min-h-screen">
+        <div className="flex bg-zinc-950 text-zinc-100 min-h-screen">
             <SideNavigation />
             <MainContent>{children}</MainContent>
             <BottomNavigation />

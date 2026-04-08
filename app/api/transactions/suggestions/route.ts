@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function GET(request: NextRequest) {
     try {
@@ -84,11 +85,11 @@ export async function GET(request: NextRequest) {
             })
             .slice(0, 10) // Ostateczne Top 10
 
-        return NextResponse.json({ suggestions })
+        return jsonResponse({ suggestions })
 
     } catch (error) {
         console.error('Error fetching description suggestions:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania sugestii', suggestions: [] },
             { status: 500 }
         )

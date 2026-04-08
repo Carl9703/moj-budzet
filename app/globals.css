@@ -1,5 +1,5 @@
-/* Google Font - Inter */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Google Fonts - DM Sans + DM Mono */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,54 +12,54 @@
 
 :root {
     /* ========== COLOR PALETTE ========== */
-    /* Backgrounds */
-    --bg-primary: #020617;
-    --bg-secondary: #0f172a;
-    --bg-tertiary: #1e293b;
-    --bg-quaternary: #334155;
+    /* Backgrounds — zinc (cieplejsze niż slate) */
+    --bg-primary: #09090b;
+    --bg-secondary: #18181b;
+    --bg-tertiary: #27272a;
+    --bg-quaternary: #3f3f46;
 
     /* Text */
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-tertiary: #64748b;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
 
     /* Borders */
-    --border-primary: rgba(148, 163, 184, 0.1);
-    --border-secondary: rgba(148, 163, 184, 0.05);
-    --border-glow: rgba(99, 102, 241, 0.3);
+    --border-primary: rgba(161, 161, 170, 0.1);
+    --border-secondary: rgba(161, 161, 170, 0.05);
+    --border-glow: rgba(245, 158, 11, 0.3);
 
-    /* ========== ACCENT GRADIENTS ========== */
-    --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    /* ========== ACCENT GRADIENTS — amber/copper zamiast indigo/violet ========== */
+    --gradient-primary: linear-gradient(135deg, #92400e 0%, #d97706 50%, #f59e0b 100%);
     --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
     --gradient-error: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
     --gradient-info: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
 
     /* Solid accents */
-    --accent-primary: #6366f1;
+    --accent-primary: #f59e0b;
     --accent-success: #10b981;
-    --accent-warning: #f59e0b;
+    --accent-warning: #f97316;
     --accent-error: #ef4444;
     --accent-info: #3b82f6;
 
     /* ========== GLASSMORPHISM ========== */
-    --glass-bg: rgba(15, 23, 42, 0.7);
-    --glass-bg-light: rgba(30, 41, 59, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-border-hover: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(9, 9, 11, 0.75);
+    --glass-bg-light: rgba(24, 24, 27, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-border-hover: rgba(255, 255, 255, 0.13);
     --glass-blur: 16px;
 
     /* ========== GLOW EFFECTS ========== */
-    --glow-primary: 0 0 30px rgba(99, 102, 241, 0.3);
+    --glow-primary: 0 0 30px rgba(245, 158, 11, 0.25);
     --glow-success: 0 0 30px rgba(16, 185, 129, 0.3);
     --glow-error: 0 0 30px rgba(239, 68, 68, 0.3);
 
     /* ========== SHADOWS ========== */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
-    --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+    --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.12);
 
     /* ========== TRANSITIONS ========== */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -169,7 +169,7 @@
     }
 
     50% {
-        box-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 50px rgba(245, 158, 11, 0.4);
     }
 }
 
@@ -199,13 +199,21 @@ html {
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'ss01', 'ss02';
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Klasa dla wartości pieniężnych — monospace + tabular nums */
+.money {
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.02em;
 }
 
 /* ========== UTILITIES ========== */
@@ -293,7 +301,7 @@ body {
     border: none;
     cursor: pointer;
     transition: all var(--transition-base);
-    box-shadow: var(--shadow-sm), 0 0 20px rgba(99, 102, 241, 0.2);
+    box-shadow: var(--shadow-sm), 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
 .btn-primary:hover {
@@ -340,7 +348,7 @@ body {
 .input-glass:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
 .input-glass::placeholder {
@@ -449,7 +457,7 @@ select option:checked {
     background: var(--gradient-primary);
     border-radius: 4px;
     transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 
 .progress-bar-success .progress-bar-fill {
@@ -486,6 +494,8 @@ select option:checked {
 .metric-value {
     font-size: 2.5rem;
     font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    font-variant-numeric: tabular-nums;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

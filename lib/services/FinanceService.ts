@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/utils/prisma'
 import { SYSTEM_DESCRIPTIONS, DEFAULT_APP_START_DATE } from '@/lib/constants/system'
 import { isEmergencyEnvelope, isGoalEnvelope } from '@/lib/constants/envelopeTypes'
+import { toNum } from '@/lib/utils/decimal'
 
 export class FinanceService {
     /**
@@ -28,14 +29,14 @@ export class FinanceService {
                 const hasTransferPairId = !!(t as any).transferPairId
                 return t.type === 'income' && !hasTransferPairId
             })
-            .reduce((sum: number, t: any) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum: number, t: any) => sum + toNum(t.amount), 0) * 100) / 100
 
         const expenses = Math.round(allTransactions
             .filter((t: any) => {
                 const hasTransferPairId = !!(t as any).transferPairId
                 return t.type === 'expense' && !hasTransferPairId
             })
-            .reduce((sum: number, t: any) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum: number, t: any) => sum + toNum(t.amount), 0) * 100) / 100
 
         return { income, expenses, net: Math.round((income - expenses) * 100) / 100 }
     }
@@ -52,7 +53,7 @@ export class FinanceService {
         const emergencyFundEnvelope = await client.envelope.findFirst({
             where: { userId, envelopeType: 'emergency', isArchived: false }
         })
-        const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
+        const emergencyFundAmount = emergencyFundEnvelope ? toNum(emergencyFundEnvelope.currentAmount) : 0
 
         // Goal Funds — filtrowanie po envelopeType zamiast nazw
         const envelopes = await this.getActiveEnvelopes(userId, client)
@@ -61,7 +62,7 @@ export class FinanceService {
                 isGoalEnvelope(e.envelopeType, e.name) &&
                 !isEmergencyEnvelope(e.envelopeType, e.name)
             )
-            .reduce((sum: number, e: any) => sum + e.currentAmount, 0)
+            .reduce((sum: number, e: any) => sum + toNum(e.currentAmount), 0)
 
         return Math.round((net - emergencyFundAmount - goalFundsAmount) * 100) / 100
     }

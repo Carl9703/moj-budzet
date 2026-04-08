@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import jwt from 'jsonwebtoken'
+import { jsonResponse } from '@/lib/utils/api'
 import { env } from '@/lib/env'
 import { EXPENSE_CATEGORIES } from '@/lib/constants/categories'
 import { rateLimit } from '@/lib/middleware/rateLimit'
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
         const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
         const limitResult = rateLimit(ip, { limit: 5, windowMs: 60 * 60 * 1000 }) // 5 requests per hour
         if (!limitResult.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Zbyt wiele prób. Spróbuj ponownie później.' },
                 { status: 429 }
             )
@@ -278,7 +279,7 @@ export async function POST(req: NextRequest) {
             { expiresIn: '7d' }
         )
 
-        return NextResponse.json({
+        return jsonResponse({
             token,
             user: {
                 id: user.id,
@@ -289,7 +290,7 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('Demo auth error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd podczas tworzenia konta demo' },
             { status: 500 }
         )

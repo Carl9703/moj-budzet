@@ -41,10 +41,10 @@ export default function InvestmentsPage() {
 
     if (isLoading && !data) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-950">
+            <div className="min-h-screen flex items-center justify-center bg-zinc-950">
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-indigo-500 mx-auto mb-4" />
-                    <p className="text-slate-400">Pobieranie aktualnych cen...</p>
+                    <Loader2 className="w-12 h-12 animate-spin text-amber-500 mx-auto mb-4" />
+                    <p className="text-zinc-400">Pobieranie aktualnych cen...</p>
                 </div>
             </div>
         )
@@ -60,7 +60,7 @@ export default function InvestmentsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col">
+        <div className="min-h-screen bg-zinc-950 flex flex-col">
             <div className="w-full px-4 sm:px-6 lg:px-8 pb-4 pt-0 flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-2 shrink-0">
@@ -68,7 +68,7 @@ export default function InvestmentsPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                     >
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 mb-1">
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 mb-1">
                             💎 Portfel Inwestycyjny
                         </h1>
 
@@ -78,20 +78,20 @@ export default function InvestmentsPage() {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setIsImportModalOpen(true)}
-                                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all border border-slate-700 active:scale-95 text-xs"
+                                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl font-bold transition-all border border-zinc-700 active:scale-95 text-xs"
                             >
                                 <ClipboardIcon size={14} />
                                 Import
                             </button>
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 text-xs"
+                                className="flex items-center gap-2 px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-amber-600/20 active:scale-95 text-xs"
                             >
                                 <Plus size={16} />
                                 Dodaj
                             </button>
                         </div>
-                        <span className="text-[10px] text-slate-600 font-mono">
+                        <span className="text-[10px] text-zinc-600 font-mono">
                             Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
@@ -103,24 +103,24 @@ export default function InvestmentsPage() {
                     {/* 1. Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                         {/* Total Value */}
-                        <div className="p-5 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5">
-                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Wartość portfela</span>
+                        <div className="p-5 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Wartość portfela</span>
                             <span className="text-2xl font-black text-white tracking-tight">
                                 {summary.totalMarketValue?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                             </span>
                         </div>
 
                         {/* Invested */}
-                        <div className="p-5 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5">
-                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zainwestowano</span>
-                            <span className="text-2xl font-black text-slate-300 tracking-tight">
+                        <div className="p-5 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zainwestowano</span>
+                            <span className="text-2xl font-black text-zinc-300 tracking-tight">
                                 {summary.totalCostBasis?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                             </span>
                         </div>
 
                         {/* Profit */}
-                        <div className="p-5 bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-3xl shrink-0">
-                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zysk/Strata</span>
+                        <div className="p-5 bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-3xl shrink-0">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zysk/Strata</span>
                             <div className="flex items-baseline gap-3">
                                 <span className={`text-2xl font-black tracking-tight ${summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {summary.totalProfit > 0 ? '+' : ''}{summary.totalProfit?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł

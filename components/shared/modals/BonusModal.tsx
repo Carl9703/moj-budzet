@@ -73,7 +73,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                 {onSwitchToIncome && (
                     <button
                         onClick={onSwitchToIncome}
-                        className="mb-4 py-2 px-3 border border-slate-700 rounded-xl bg-slate-800 text-slate-300 cursor-pointer text-sm hover:bg-slate-700 transition-colors"
+                        className="mb-4 py-2 px-3 border border-zinc-700 rounded-xl bg-zinc-800 text-zinc-300 cursor-pointer text-sm hover:bg-zinc-700 transition-colors"
                     >
                         ← Powrót do wyboru typu przychodu
                     </button>
@@ -88,30 +88,30 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                         inputMode="numeric"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full p-3 text-2xl font-bold border-2 border-emerald-600 rounded-xl text-center bg-slate-900 text-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                        className="w-full p-3 text-2xl font-bold border-2 border-emerald-600 rounded-xl text-center bg-zinc-900 text-zinc-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                     />
                 </div>
 
                 <div className="mb-5">
-                    <h3 className="font-semibold mb-4 text-slate-200">PODZIAŁ PROCENTOWY:</h3>
+                    <h3 className="font-semibold mb-4 text-zinc-200">PODZIAŁ PROCENTOWY:</h3>
 
                     <div className="grid grid-cols-1 gap-2">
                         {categories.map(cat => (
                             <div
                                 key={cat.key}
-                                className="flex items-center gap-2 p-2 px-3 bg-slate-800 rounded-xl text-sm"
+                                className="flex items-center gap-2 p-2 px-3 bg-zinc-800 rounded-xl text-sm"
                             >
                                 <span className="text-base">{cat.icon}</span>
-                                <span className="font-medium flex-1 text-slate-300">{cat.label}</span>
+                                <span className="font-medium flex-1 text-zinc-300">{cat.label}</span>
                                 <div className="flex items-center gap-1">
                                     <input
                                         type="number"
                                         inputMode="numeric"
                                         value={percentages[cat.key as keyof typeof percentages]}
                                         onChange={(e) => handlePercentageChange(cat.key, e.target.value)}
-                                        className="w-10 p-1 text-center text-xs border border-slate-600 rounded bg-slate-900 text-slate-200"
+                                        className="w-10 p-1 text-center text-xs border border-zinc-600 rounded bg-zinc-900 text-zinc-200"
                                     />
-                                    <span className="text-[11px] text-slate-500">%</span>
+                                    <span className="text-[11px] text-zinc-500">%</span>
                                 </div>
                                 <span className="text-right font-semibold text-emerald-500 text-xs min-w-[50px]">
                                     {calculateAmount(percentages[cat.key as keyof typeof percentages])} zł
@@ -131,10 +131,10 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
             </div>
 
             {/* PRZYCISKI - sticky na dole */}
-            <div className="sticky bottom-0 bg-slate-900 pt-4 mt-6 border-t border-slate-800 flex gap-2 justify-end">
+            <div className="sticky bottom-0 bg-zinc-900 pt-4 mt-6 border-t border-zinc-800 flex gap-2 justify-end">
                 <button
                     onClick={onClose}
-                    className="py-3 px-6 border border-slate-700 rounded-xl bg-slate-800 text-slate-300 cursor-pointer text-sm font-semibold hover:bg-slate-700 transition-colors"
+                    className="py-3 px-6 border border-zinc-700 rounded-xl bg-zinc-800 text-zinc-300 cursor-pointer text-sm font-semibold hover:bg-zinc-700 transition-colors"
                 >
                     Anuluj
                 </button>
@@ -143,7 +143,7 @@ export function BonusModal({ onClose, onSave, onSwitchToIncome }: Props) {
                     disabled={!isValid}
                     className={`py-3 px-6 rounded-xl font-semibold text-sm transition-all ${isValid
                         ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'
-                        : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                        : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
                         }`}
                 >
                     ✓ ZATWIERDŹ PODZIAŁ

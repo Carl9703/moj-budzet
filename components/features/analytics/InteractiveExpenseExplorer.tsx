@@ -141,10 +141,10 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
   }
 
   const getBudgetTextColor = (percentage?: number) => {
-    if (!percentage) return 'text-slate-400'
+    if (!percentage) return 'text-zinc-400'
     if (percentage > 100) return 'text-rose-400'
     if (percentage > 80) return 'text-amber-400'
-    return 'text-slate-400'
+    return 'text-zinc-400'
   }
 
   return (
@@ -154,18 +154,18 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
       className={`group relative flex items-center rounded-xl cursor-pointer transition-all mb-1.5 backdrop-blur-sm border 
         ${isTransaction ? 'py-2.5 px-4 text-sm' : 'py-3.5 px-4 text-base'} 
         ${isSelected || isHighlighted
-          ? 'bg-indigo-500/10 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)] z-10'
-          : 'bg-slate-800/20 border-transparent hover:bg-slate-700/30 hover:border-slate-700/50'
+          ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)] z-10'
+          : 'bg-zinc-800/20 border-transparent hover:bg-zinc-700/30 hover:border-zinc-700/50'
         }`}
       style={{ marginLeft: `${level * 20}px` }}
     >
       {/* Connection line for nested items */}
-      {level > 0 && <div className="absolute left-[-10px] top-1/2 w-[10px] h-[1px] bg-slate-700/30" />}
-      {level > 0 && <div className="absolute left-[-10px] top-[-20px] bottom-1/2 w-[1px] bg-slate-700/30" />}
+      {level > 0 && <div className="absolute left-[-10px] top-1/2 w-[10px] h-[1px] bg-zinc-700/30" />}
+      {level > 0 && <div className="absolute left-[-10px] top-[-20px] bottom-1/2 w-[1px] bg-zinc-700/30" />}
 
       {/* Expand icon */}
       {hasChildren && !isTransaction ? (
-        <div className={`mr-2.5 w-5 h-5 flex items-center justify-center rounded-md transition-colors ${isSelected || isHighlighted ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-500 group-hover:text-slate-300'
+        <div className={`mr-2.5 w-5 h-5 flex items-center justify-center rounded-md transition-colors ${isSelected || isHighlighted ? 'text-amber-400 bg-amber-500/10' : 'text-zinc-500 group-hover:text-zinc-300'
           }`}>
           {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </div>
@@ -179,7 +179,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
       </div>
 
       {/* Name */}
-      <div className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap pr-4 ${isTransaction ? 'text-slate-300 font-normal' : 'text-slate-100 font-medium'
+      <div className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap pr-4 ${isTransaction ? 'text-zinc-300 font-normal' : 'text-zinc-100 font-medium'
         }`}>
         {node.type === 'CATEGORY' && node.categoryId ? getCategoryName(node.categoryId) : node.name}
       </div>
@@ -190,7 +190,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
         {/* Budget progress (only on desktop mostly) */}
         {(node.type === 'GROUP' || node.type === 'ENVELOPE') && node.budget && node.budget > 0 && (
           <div className="hidden md:flex flex-col items-end min-w-[100px]">
-            <div className="w-24 h-1.5 bg-slate-700/50 rounded-full overflow-hidden mb-1">
+            <div className="w-24 h-1.5 bg-zinc-700/50 rounded-full overflow-hidden mb-1">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${getBudgetColor(node.budgetPercentage)}`}
                 style={{ width: `${Math.min(node.budgetPercentage || 0, 100)}%` }}
@@ -203,7 +203,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
         )}
 
         {/* Current Total */}
-        <div className={`font-bold tabular-nums tracking-tight ${isTransaction ? 'text-sm text-slate-400' : 'text-base text-white'
+        <div className={`font-bold tabular-nums tracking-tight ${isTransaction ? 'text-sm text-zinc-400' : 'text-base text-white'
           }`}>
           {formatMoney(node.total)}
         </div>
@@ -211,7 +211,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
         {/* Comparison */}
         {compareMode && node.comparison && !isTransaction && (
           <div className="flex flex-col items-end gap-0.5 min-w-[70px]">
-            <div className={`flex items-center gap-1 font-semibold text-xs ${node.comparison.change > 0 ? 'text-rose-400' : node.comparison.change < 0 ? 'text-emerald-400' : 'text-slate-500'
+            <div className={`flex items-center gap-1 font-semibold text-xs ${node.comparison.change > 0 ? 'text-rose-400' : node.comparison.change < 0 ? 'text-emerald-400' : 'text-zinc-500'
               }`}>
               {node.comparison.change > 0 ? <TrendingUp size={12} /> : node.comparison.change < 0 ? <TrendingDown size={12} /> : <Minus size={12} />}
               {Math.abs(node.comparison.changePercent) > 999 ? (
@@ -220,7 +220,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
                 formatPercentage(node.comparison.changePercent)
               )}
             </div>
-            <div className="text-[10px] text-slate-600">
+            <div className="text-[10px] text-zinc-600">
               vs {formatMoney(node.comparison.previousTotal)}
             </div>
           </div>
@@ -228,7 +228,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
 
         {/* Date for transactions */}
         {isTransaction && node.date && (
-          <div className="hidden sm:block text-xs text-slate-600 font-medium">{formatDate(node.date)}</div>
+          <div className="hidden sm:block text-xs text-zinc-600 font-medium">{formatDate(node.date)}</div>
         )}
       </div>
     </motion.div>
@@ -254,20 +254,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder }) =
   return (
     <div className="relative mb-6">
       <div className="relative flex items-center group">
-        <Search size={20} className="absolute left-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors pointer-events-none" />
+        <Search size={20} className="absolute left-4 text-zinc-500 group-focus-within:text-amber-400 transition-colors pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
           placeholder={placeholder || "Wyszukaj wydatki..."}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full py-3.5 pl-12 pr-12 rounded-xl border border-slate-700/50 bg-slate-900/50 text-slate-100 text-sm placeholder:text-slate-600 outline-none transition-all 
-            focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 hover:border-slate-600/50"
+          className="w-full py-3.5 pl-12 pr-12 rounded-xl border border-zinc-700/50 bg-zinc-900/50 text-zinc-100 text-sm placeholder:text-zinc-600 outline-none transition-all 
+            focus:bg-zinc-900 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 hover:border-zinc-600/50"
         />
         {value && (
           <button
             onClick={handleClear}
-            className="absolute right-3 p-1.5 rounded-lg text-slate-500 hover:bg-slate-800 hover:text-white transition-all"
+            className="absolute right-3 p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-800 hover:text-white transition-all"
           >
             <X size={16} />
           </button>
@@ -436,11 +436,11 @@ export function InteractiveExpenseExplorer({
   if (loading) {
     return (
       <div
-        className="p-8 rounded-2xl border border-slate-700/30 mb-6 flex flex-col items-center justify-center min-h-[400px]"
+        className="p-8 rounded-2xl border border-zinc-700/30 mb-6 flex flex-col items-center justify-center min-h-[400px]"
         style={{ background: 'rgba(30, 41, 59, 0.4)' }}
       >
-        <div className="w-12 h-12 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin" />
-        <div className="mt-4 text-base text-slate-400 font-medium animate-pulse">Ładowanie danych...</div>
+        <div className="w-12 h-12 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
+        <div className="mt-4 text-base text-zinc-400 font-medium animate-pulse">Ładowanie danych...</div>
       </div>
     )
   }
@@ -448,33 +448,33 @@ export function InteractiveExpenseExplorer({
   if (!data || data.length === 0) {
     return (
       <div
-        className="p-12 rounded-2xl border border-slate-700/30 mb-6 text-center"
+        className="p-12 rounded-2xl border border-zinc-700/30 mb-6 text-center"
         style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(12px)' }}
       >
         <div className="text-6xl mb-4 opacity-50 grayscale">📊</div>
         <div className="text-xl font-bold text-white mb-2">Brak danych</div>
-        <p className="text-slate-400">Dodaj transakcje, aby zbudować drzewo wydatków.</p>
+        <p className="text-zinc-400">Dodaj transakcje, aby zbudować drzewo wydatków.</p>
       </div>
     )
   }
 
   return (
     <div
-      className="p-6 md:p-8 rounded-2xl border border-slate-700/30 shadow-xl mb-6 relative overflow-hidden"
+      className="p-6 md:p-8 rounded-2xl border border-zinc-700/30 shadow-xl mb-6 relative overflow-hidden"
       style={{
         background: 'rgba(30, 41, 59, 0.4)',
         backdropFilter: 'blur(12px)',
       }}
     >
       {/* Background glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
       {/* Header */}
       <div className="mb-8 relative z-10">
         <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
           🔍 Eksplorator Wydatków
         </h3>
-        <p className="text-slate-400">
+        <p className="text-zinc-400">
           Szczegółowa hierarchia Twoich wydatków. Kliknij element, aby zobaczyć detale.
         </p>
       </div>
@@ -487,11 +487,11 @@ export function InteractiveExpenseExplorer({
       />
 
       {/* Tree */}
-      <div className="max-h-[800px] min-h-[400px] overflow-y-auto custom-scrollbar border border-slate-700/50 rounded-xl bg-slate-900/30 relative backdrop-blur-sm">
+      <div className="max-h-[800px] min-h-[400px] overflow-y-auto custom-scrollbar border border-zinc-700/50 rounded-xl bg-zinc-900/30 relative backdrop-blur-sm">
         {filteredData.length === 0 ? (
-          <div className="py-20 px-5 text-center text-slate-400 flex flex-col items-center">
+          <div className="py-20 px-5 text-center text-zinc-400 flex flex-col items-center">
             <Search size={48} className="mb-4 opacity-30" />
-            <div className="text-lg font-semibold mb-1 text-slate-200">Brak wyników</div>
+            <div className="text-lg font-semibold mb-1 text-zinc-200">Brak wyników</div>
             <div className="text-sm">Nie znaleziono pozycji pasujących do &quot;{searchTerm}&quot;</div>
           </div>
         ) : (
@@ -512,7 +512,7 @@ export function InteractiveExpenseExplorer({
 
       {/* Search summary */}
       {searchTerm && filteredData.length > 0 && (
-        <div className="mt-4 text-xs text-slate-500 text-center">
+        <div className="mt-4 text-xs text-zinc-500 text-center">
           Znaleziono {filteredData.length} głównych kategorii pasujących do wyszukiwania
         </div>
       )}

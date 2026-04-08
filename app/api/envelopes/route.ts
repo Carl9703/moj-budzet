@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: NextRequest) {
+  try {
+    let userId: string
+    try {
+      userId = await getUserIdFromToken(request)
+    } catch (error) {
+      return unauthorizedResponse(error instanceof Error ? error.message : 'Brak autoryzacji')
+    }
+
+    const envelopes = await prisma.envelope.findMany({
+      where: { userId, isArchived: false },
+      select: { id: true, name: true, icon: true, type: true, currentAmount: true, plannedAmount: true, currencyCode: true, parentEnvelopeId: true, isAccumulating: true },
+      orderBy: { name: 'asc' }
+    })
+
+    return jsonResponse({ envelopes })
+  } catch (error) {
+    return jsonResponse({ error: 'Błąd pobierania kopert' }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,17 +37,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, icon, plannedAmount, type, group, isAccumulating } = body as {
+    const { name, icon, plannedAmount, type, group, isAccumulating, currencyCode, parentEnvelopeId } = body as {
       name: string
       icon?: string | null
       plannedAmount?: number
       type: 'monthly' | 'yearly'
       group?: string
       isAccumulating?: boolean
+      currencyCode?: string
+      parentEnvelopeId?: string | null
     }
 
     if (!name || !type) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Nazwa i typ koperty są wymagane' },
         { status: 400 }
       )
@@ -40,7 +66,9 @@ export async function POST(request: NextRequest) {
         type,
         group: group || null,
         isArchived: false, // Jawnie ustawiamy, że nowa koperta nie jest zarchiwizowana
-        isAccumulating: isAccumulating || false
+        isAccumulating: isAccumulating || false,
+        currencyCode: currencyCode || 'PLN',
+        parentEnvelopeId: parentEnvelopeId || null,
       },
       select: {
         id: true,
@@ -75,13 +103,13 @@ export async function POST(request: NextRequest) {
           isAccumulating: true
         }
       })
-      return NextResponse.json({ success: true, envelope: updated }, { status: 201 })
+      return jsonResponse({ success: true, envelope: updated }, { status: 201 })
     }
 
-    return NextResponse.json({ success: true, envelope }, { status: 201 })
+    return jsonResponse({ success: true, envelope }, { status: 201 })
   } catch (error) {
     console.error('Error creating envelope:', error)
-    return NextResponse.json({ error: 'Błąd tworzenia koperty' }, { status: 500 })
+    return jsonResponse({ error: 'Błąd tworzenia koperty' }, { status: 500 })
   }
 }
 

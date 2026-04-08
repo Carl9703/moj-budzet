@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { prisma } from '@/lib/utils/prisma'
 import { AssetType } from '@prisma/client'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function PATCH(
     request: NextRequest,
@@ -21,7 +22,7 @@ export async function PATCH(
         })
 
         if (!position || position.userId !== userId) {
-            return NextResponse.json({ error: 'Position not found' }, { status: 404 })
+            return jsonResponse({ error: 'Position not found' }, { status: 404 })
         }
 
         const updatedPosition = await prisma.investmentAsset.update({
@@ -38,13 +39,13 @@ export async function PATCH(
             }
         })
 
-        return NextResponse.json(updatedPosition)
+        return jsonResponse(updatedPosition)
     } catch (error) {
         console.error('Error updating investment:', error)
         if (error instanceof Error && error.message.includes('Brak autoryzacji')) {
             return unauthorizedResponse('Brak autoryzacji')
         }
-        return NextResponse.json({ error: 'Failed to update investment' }, { status: 500 })
+        return jsonResponse({ error: 'Failed to update investment' }, { status: 500 })
     }
 }
 
@@ -61,24 +62,24 @@ export async function DELETE(
         })
 
         if (!position) {
-            return NextResponse.json({ error: 'Position not found' }, { status: 404 })
+            return jsonResponse({ error: 'Position not found' }, { status: 404 })
         }
 
         if (position.userId !== userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+            return jsonResponse({ error: 'Unauthorized' }, { status: 403 })
         }
 
         await prisma.investmentAsset.delete({
             where: { id }
         })
 
-        return NextResponse.json({ success: true })
+        return jsonResponse({ success: true })
     } catch (error) {
         console.error('Error deleting investment:', error)
         if (error instanceof Error && error.message.includes('Brak autoryzacji')) {
             return unauthorizedResponse(error.message)
         }
-        return NextResponse.json({
+        return jsonResponse({
             error: 'Failed to delete investment',
         }, { status: 500 })
     }

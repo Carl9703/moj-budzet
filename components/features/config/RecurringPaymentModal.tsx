@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Trash2, Calendar, CreditCard, ChevronDown, Check } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -126,32 +127,32 @@ export function RecurringPaymentModal({
                 className="glass-card w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border-white/10"
             >
                 {/* Header */}
-                <div className="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+                <div className="p-5 border-b border-white/10 flex justify-between items-center bg-zinc-900/50">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-xl">
                             <Calendar size={20} />
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-white">
                                 {initialData ? 'Edytuj Płatność' : 'Nowa Płatność'}
                             </h2>
-                            <p className="text-xs text-slate-400">Automatyczne płatności cykliczne</p>
+                            <p className="text-xs text-zinc-400">Automatyczne płatności cykliczne</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white">
+                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-zinc-400 hover:text-white">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <form onSubmit={handleSubmit(onSubmitForm)} className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-slate-900/20">
+                <form onSubmit={handleSubmit(onSubmitForm)} className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-zinc-900/20">
                     <div className="space-y-4">
 
                         {/* HERO AMOUNT */}
                         <div className={`py-3 px-4 rounded-xl border transition-all ${Number(watchedAmount) > 0
                             ? 'bg-emerald-500/5 border-emerald-500/20'
-                            : 'bg-slate-800/30 border-slate-700/50'}`}>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 text-center">
+                            : 'bg-zinc-800/30 border-zinc-700/50'}`}>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 text-center">
                                 Kwota Płatności
                             </label>
                             <div className="relative flex items-baseline justify-center">
@@ -159,34 +160,34 @@ export function RecurringPaymentModal({
                                     type="number"
                                     step="0.01"
                                     {...register('amount', { valueAsNumber: true })}
-                                    className="w-full bg-transparent text-3xl font-black text-center text-white placeholder:text-slate-700 focus:outline-none"
+                                    className="w-full bg-transparent text-3xl font-black text-center text-white placeholder:text-zinc-700 focus:outline-none"
                                     placeholder="0.00"
                                 />
-                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-600">PLN</span>
+                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-600">PLN</span>
                             </div>
                             {errors.amount && <p className="text-rose-400 text-[10px] text-center mt-1">{errors.amount.message}</p>}
                         </div>
 
                         {/* TYPE SEGMENTED CONTROL */}
                         <div>
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider text-center">Rodzaj</label>
-                            <div className="flex bg-slate-800/50 p-1 rounded-xl border border-slate-700/50 relative">
+                            <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider text-center">Rodzaj</label>
+                            <div className="flex bg-zinc-800/50 p-1 rounded-xl border border-zinc-700/50 relative">
                                 <button
                                     type="button"
                                     onClick={() => setValue('type', 'expense')}
-                                    className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all relative z-10 flex items-center justify-center gap-2 ${watchedType === 'expense' ? 'text-white' : 'text-slate-400'}`}
+                                    className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all relative z-10 flex items-center justify-center gap-2 ${watchedType === 'expense' ? 'text-white' : 'text-zinc-400'}`}
                                 >
                                     <CreditCard size={14} /> Wydatek
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setValue('type', 'transfer')}
-                                    className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all relative z-10 flex items-center justify-center gap-2 ${watchedType === 'transfer' ? 'text-white' : 'text-slate-400'}`}
+                                    className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all relative z-10 flex items-center justify-center gap-2 ${watchedType === 'transfer' ? 'text-white' : 'text-zinc-400'}`}
                                 >
                                     <span>🔄</span> Transfer
                                 </button>
                                 <div className={`absolute top-1 bottom-1 rounded-xl transition-all duration-300 ${watchedType === 'expense'
-                                    ? 'bg-indigo-600 left-1 right-[50%]'
+                                    ? 'bg-amber-600 left-1 right-[50%]'
                                     : 'bg-purple-600 left-[50%] right-1'}`}
                                 />
                             </div>
@@ -195,10 +196,10 @@ export function RecurringPaymentModal({
                         {/* NAME & DAY GRID */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="md:col-span-2">
-                                <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Nazwa</label>
+                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Nazwa</label>
                                 <input
                                     {...register('name')}
-                                    className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl px-3 py-3 text-sm font-bold text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all"
+                                    className="w-full bg-zinc-800/30 border border-zinc-700/50 rounded-xl px-3 py-3 text-sm font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all"
                                 />
                                 {errors.name && <p className="text-rose-400 text-[10px] mt-1">{errors.name.message}</p>}
                             </div>
@@ -252,17 +253,17 @@ export function RecurringPaymentModal({
 
                         {/* ACTIVE SWITCH */}
                         <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${watchedIsActive
-                            ? 'bg-indigo-500/10 border-indigo-500/30'
-                            : 'bg-slate-800/30 border-slate-700/50'}`}>
+                            ? 'bg-amber-500/10 border-amber-500/30'
+                            : 'bg-zinc-800/30 border-zinc-700/50'}`}>
                             <div className="flex-1 pr-3">
-                                <div className={`font-bold text-sm ${watchedIsActive ? 'text-indigo-400' : 'text-slate-300'}`}>
+                                <div className={`font-bold text-sm ${watchedIsActive ? 'text-amber-400' : 'text-zinc-300'}`}>
                                     Płatność Aktywna
                                 </div>
-                                <div className="text-[10px] text-slate-500">
+                                <div className="text-[10px] text-zinc-500">
                                     Odznacz, aby zawiesić płatność bez usuwania
                                 </div>
                             </div>
-                            <div className={`w-10 h-6 rounded-full relative transition-colors ${watchedIsActive ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                            <div className={`w-10 h-6 rounded-full relative transition-colors ${watchedIsActive ? 'bg-amber-500' : 'bg-zinc-700'}`}>
                                 <input type="checkbox" {...register('isActive')} className="sr-only" />
                                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${watchedIsActive ? 'left-5' : 'left-1'}`} />
                             </div>
@@ -281,14 +282,14 @@ export function RecurringPaymentModal({
                                 </button>
                             )}
 
-                            <button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 text-sm font-semibold transition-colors">
+                            <button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 text-sm font-semibold transition-colors">
                                 Anuluj
                             </button>
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold shadow-lg shadow-indigo-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold shadow-lg shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                             >
                                 {loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
                                 {initialData ? 'Zapisz' : 'Dodaj'}
@@ -334,11 +335,11 @@ function CustomSelect({
 
     return (
         <div className="relative" ref={containerRef}>
-            <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">{label}</label>
+            <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between bg-slate-800/30 border border-slate-700/50 rounded-xl px-3 py-3 text-xs font-bold text-white transition-all hover:bg-slate-800/50 ${isOpen ? 'ring-2 ring-indigo-500/30 border-indigo-500/50' : ''}`}
+                className={`w-full flex items-center justify-between bg-zinc-800/30 border border-zinc-700/50 rounded-xl px-3 py-3 text-xs font-bold text-white transition-all hover:bg-zinc-800/50 ${isOpen ? 'ring-2 ring-amber-500/30 border-amber-500/50' : ''}`}
             >
                 <span className="truncate flex items-center gap-2">
                     {selectedOption ? (
@@ -347,10 +348,10 @@ function CustomSelect({
                             <span>{selectedOption.label}</span>
                         </>
                     ) : (
-                        <span className="text-slate-600 font-medium">{placeholder}</span>
+                        <span className="text-zinc-600 font-medium">{placeholder}</span>
                     )}
                 </span>
-                <ChevronDown size={14} className={`text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
@@ -359,10 +360,10 @@ function CustomSelect({
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 4, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="absolute z-[100] left-0 right-0 max-h-60 overflow-y-auto rounded-2xl border border-white/10 bg-slate-900 shadow-2xl backdrop-blur-3xl p-1.5 custom-scrollbar"
+                        className="absolute z-[100] left-0 right-0 max-h-60 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl backdrop-blur-3xl p-1.5 custom-scrollbar"
                     >
                         {options.length === 0 ? (
-                            <div className="px-3 py-4 text-center text-[10px] font-black uppercase text-slate-600 tracking-widest italic">
+                            <div className="px-3 py-4 text-center text-[10px] font-black uppercase text-zinc-600 tracking-widest italic">
                                 Brak opcji
                             </div>
                         ) : (
@@ -374,7 +375,7 @@ function CustomSelect({
                                         onChange(opt.value)
                                         setIsOpen(false)
                                     }}
-                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-[11px] font-bold transition-all hover:bg-white/5 group ${value === opt.value ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'}`}
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-[11px] font-bold transition-all hover:bg-white/5 group ${value === opt.value ? 'bg-amber-600/20 text-amber-400' : 'text-zinc-300'}`}
                                 >
                                     <span className="flex items-center gap-3">
                                         {opt.icon && <span className="text-lg group-hover:scale-125 transition-transform duration-300">{opt.icon}</span>}
@@ -389,5 +390,5 @@ function CustomSelect({
             </AnimatePresence>
             {error && <p className="text-rose-400 text-[10px] mt-1">{error}</p>}
         </div>
-    )
+    , document.body)
 }

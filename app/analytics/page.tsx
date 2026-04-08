@@ -73,16 +73,16 @@ function AnalyticsContent() {
 
   if (yearlyError && activeTab === 'yearly') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-slate-100 mb-2">Błąd ładowania danych</h2>
-          <p className="text-slate-400 mb-4">
+          <h2 className="text-2xl font-bold text-zinc-100 mb-2">Błąd ładowania danych</h2>
+          <p className="text-zinc-400 mb-4">
             Nie udało się załadować danych. Spróbuj ponownie później.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
+            className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition-colors"
           >
             Odśwież stronę
           </button>
@@ -92,7 +92,7 @@ function AnalyticsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-24 md:pb-8">
+    <div className="min-h-screen bg-zinc-950 pb-24 md:pb-8">
       <div className="max-w-[2560px] mx-auto px-4 sm:px-6 lg:px-8 pt-0">
         {/* Header */}
         <motion.div
@@ -100,10 +100,10 @@ function AnalyticsContent() {
           animate={{ opacity: 1, x: 0 }}
           className="mb-6 flex flex-col pt-4"
         >
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 mb-1">
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 mb-1">
             📊 Analizy Finansowe
           </h1>
-          <p className="text-xs text-slate-500 font-medium tracking-wide">
+          <p className="text-xs text-zinc-500 font-medium tracking-wide">
             Kompleksowy przegląd Twoich finansów
           </p>
         </motion.div>
@@ -113,13 +113,13 @@ function AnalyticsContent() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col sm:flex-row gap-2 mb-8 p-1 bg-slate-800/50 rounded-2xl border border-slate-700/50 w-full sm:w-fit"
+          className="flex flex-col sm:flex-row gap-2 mb-8 p-1 bg-zinc-800/50 rounded-2xl border border-zinc-700/50 w-full sm:w-fit"
         >
           <button
             onClick={() => handleTabChange('current')}
             className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${activeTab === 'current'
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'bg-amber-600 text-white shadow-lg'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
               }`}
           >
             <TrendingUp size={18} />
@@ -128,8 +128,8 @@ function AnalyticsContent() {
           <button
             onClick={() => handleTabChange('yearly')}
             className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${activeTab === 'yearly'
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'bg-amber-600 text-white shadow-lg'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
               }`}
           >
             <Calendar size={18} />
@@ -169,8 +169,8 @@ function AnalyticsContent() {
 export default function AnalyticsPage() {
   return (
     <Suspense fallback={
-      <div className="flex justify-center items-center h-screen bg-slate-950">
-        <Loader2 className="w-12 h-12 animate-spin text-indigo-500" />
+      <div className="flex justify-center items-center h-screen bg-zinc-950">
+        <Loader2 className="w-12 h-12 animate-spin text-amber-500" />
       </div>
     }>
       <AnalyticsContent />

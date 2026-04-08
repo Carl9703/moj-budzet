@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { z } from 'zod'
+import { jsonResponse } from '@/lib/utils/api'
 
 const recurringPaymentSchema = z.object({
     name: z.string().min(1, 'Nazwa jest wymagana'),
@@ -49,11 +50,11 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        return NextResponse.json({ recurringPayments })
+        return jsonResponse({ recurringPayments })
 
     } catch (error) {
         console.error('Error fetching recurring payments:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania płatności cyklicznych', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
 
         const validation = recurringPaymentSchema.safeParse(body)
         if (!validation.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
@@ -91,14 +92,14 @@ export async function POST(request: NextRequest) {
             })
 
             if (!envelope) {
-                return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+                return jsonResponse({ error: 'Koperta nie znaleziona' }, { status: 404 })
             }
         }
 
         // Dla transferów, sprawdź kopertę docelową
         if (data.type === 'transfer') {
             if (!data.toEnvelopeId) {
-                return NextResponse.json({ error: 'Dla transferów wymagana jest koperta docelowa' }, { status: 400 })
+                return jsonResponse({ error: 'Dla transferów wymagana jest koperta docelowa' }, { status: 400 })
             }
 
             const toEnvelope = await prisma.envelope.findFirst({
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
             })
 
             if (!toEnvelope) {
-                return NextResponse.json({ error: 'Koperta docelowa nie znaleziona' }, { status: 404 })
+                return jsonResponse({ error: 'Koperta docelowa nie znaleziona' }, { status: 404 })
             }
         }
 
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             recurringPayment,
             message: 'Płatność cykliczna została utworzona'
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Error creating recurring payment:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd tworzenia płatności cyklicznej', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )

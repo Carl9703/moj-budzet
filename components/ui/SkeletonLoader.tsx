@@ -5,12 +5,12 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ width = '100%', height = '20px', className = '' }: SkeletonProps) {
-    return <div className={`bg-slate-800/50 animate-pulse rounded-md ${className}`} style={{ width, height }} />
+    return <div className={`bg-zinc-800/50 animate-pulse rounded-md ${className}`} style={{ width, height }} />
 }
 
 export function EnvelopeCardSkeleton() {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-4 shadow-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-4 shadow-xl">
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
                     <Skeleton width="32px" height="32px" className="rounded-xl" />
@@ -29,7 +29,7 @@ export function EnvelopeCardSkeleton() {
 
 export function MainBalanceSkeleton() {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 text-center shadow-xl backdrop-blur-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 text-center shadow-xl backdrop-blur-xl">
             <Skeleton width="140px" height="14px" className="mx-auto mb-4 opacity-50" />
             <Skeleton width="180px" height="40px" className="mx-auto" />
         </div>
@@ -38,7 +38,7 @@ export function MainBalanceSkeleton() {
 
 export function MonthStatusSkeleton() {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
             <div className="mb-6">
                 <Skeleton width="120px" height="14px" className="mb-2 opacity-50" />
                 <Skeleton width="160px" height="28px" />
@@ -54,7 +54,7 @@ export function MonthStatusSkeleton() {
 
 export function QuickActionsSkeleton() {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
             <Skeleton width="140px" height="14px" className="mb-6 opacity-50" />
             <div className="flex flex-col gap-4">
                 <Skeleton width="100%" height="48px" className="rounded-2xl" />
@@ -84,7 +84,7 @@ export function TransactionRowSkeleton() {
 
 export function ListSkeleton({ count = 5 }: { count?: number }) {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl">
             <Skeleton width="160px" height="24px" className="mb-6" />
             <div className="flex flex-col">
                 {Array.from({ length: count }).map((_, i) => (
@@ -97,7 +97,7 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
 
 export function ChartSkeleton() {
     return (
-        <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 shadow-xl h-full min-h-[350px] flex flex-col backdrop-blur-xl">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 shadow-xl h-full min-h-[350px] flex flex-col backdrop-blur-xl">
             <div className="flex justify-between items-center mb-8">
                 <Skeleton width="180px" height="24px" />
                 <Skeleton width="120px" height="36px" className="rounded-xl" />

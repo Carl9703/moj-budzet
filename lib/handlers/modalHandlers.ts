@@ -21,6 +21,8 @@ interface ExpenseData {
     category: string
     date: string
     includeInStats?: boolean
+    foreignAmount?: number
+    foreignCurrency?: string
 }
 
 export const createIncomeHandler = (refetch: () => void, showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void) => {
@@ -52,7 +54,9 @@ export const createExpenseHandler = (refetch: () => void, showToast: (message: s
                 envelopeId: expenseData.envelopeId,
                 category: expenseData.category,
                 date: expenseData.date,
-                includeInStats: expenseData.includeInStats ?? true
+                includeInStats: expenseData.includeInStats ?? true,
+                ...(expenseData.foreignAmount !== undefined && { foreignAmount: expenseData.foreignAmount }),
+                ...(expenseData.foreignCurrency !== undefined && { foreignCurrency: expenseData.foreignCurrency }),
             })
             refetch()
             triggerDashboardRefresh()

@@ -21,11 +21,11 @@ export function Button({
   ...props
 }: ButtonProps) {
   const variantClasses = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
+    primary: 'bg-amber-600 text-white hover:bg-amber-700',
     success: 'bg-emerald-500 text-white hover:bg-emerald-600',
     error: 'bg-rose-500 text-white hover:bg-rose-600',
     warning: 'bg-amber-500 text-white hover:bg-amber-600',
-    secondary: 'bg-slate-700 text-slate-100 border border-slate-600 hover:bg-slate-600'
+    secondary: 'bg-zinc-700 text-zinc-100 border border-zinc-600 hover:bg-zinc-600'
   }
 
   const sizeClasses = {

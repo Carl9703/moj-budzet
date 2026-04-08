@@ -24,6 +24,7 @@ import { ExpenseModal } from '@/components/shared/modals/ExpenseModal'
 import { TransferModal } from '@/components/shared/modals/TransferModal'
 import { EnvelopeTransactionsModal } from '@/components/shared/modals/EnvelopeTransactionsModal'
 import { SavingsBreakdownModal } from '@/components/features/dashboard/modals/SavingsBreakdownModal'
+import { ExchangeModal } from '@/components/shared/modals/ExchangeModal'
 
 
 function HomePage() {
@@ -40,10 +41,12 @@ function HomePage() {
     const [showTransferModal, setShowTransferModal] = useState(false)
     const [showEnvelopeTransactionsModal, setShowEnvelopeTransactionsModal] = useState(false)
     const [showSavingsModal, setShowSavingsModal] = useState(false)
+    const [showExchangeModal, setShowExchangeModal] = useState(false)
+    const [exchangeEnvelope, setExchangeEnvelope] = useState<{ id: string; name: string; balance: number } | null>(null)
     const [selectedEnvelope, setSelectedEnvelope] = useState<{ id: string, name: string, icon: string } | null>(null)
 
     // Keyboard shortcuts: N=expense, I=income, T=transfer
-    const anyModalOpen = showIncomeModal || showExpenseModal || showTransferModal || showEnvelopeTransactionsModal || showSavingsModal
+    const anyModalOpen = showIncomeModal || showExpenseModal || showTransferModal || showEnvelopeTransactionsModal || showSavingsModal || showExchangeModal
     const handleKeyboardShortcut = useCallback((e: KeyboardEvent) => {
         // Skip if user is typing in an input or a modal is open
         const tag = (e.target as HTMLElement).tagName
@@ -65,6 +68,11 @@ function HomePage() {
     const handleEnvelopeClick = (envelopeId: string, envelopeName: string, envelopeIcon: string) => {
         setSelectedEnvelope({ id: envelopeId, name: envelopeName, icon: envelopeIcon })
         setShowEnvelopeTransactionsModal(true)
+    }
+
+    const handleExchangeClick = (envelopeId: string, envelopeName: string, balance: number) => {
+        setExchangeEnvelope({ id: envelopeId, name: envelopeName, balance })
+        setShowExchangeModal(true)
     }
 
     const handleIncomeSave = createIncomeHandler(refetch, showToast)
@@ -254,6 +262,7 @@ function HomePage() {
                                         envelopes={allNeeds}
                                         type="monthly"
                                         onEnvelopeClick={handleEnvelopeClick}
+                                        onExchangeClick={handleExchangeClick}
                                     />
                                 )
                             })()}
@@ -283,6 +292,7 @@ function HomePage() {
                                         envelopes={allWants}
                                         type="monthly"
                                         onEnvelopeClick={handleEnvelopeClick}
+                                        onExchangeClick={handleExchangeClick}
                                     />
                                 )
                             })()}
@@ -317,6 +327,7 @@ function HomePage() {
                                             envelopes={allAssets}
                                             type="monthly"
                                             onEnvelopeClick={handleEnvelopeClick}
+                                            onExchangeClick={handleExchangeClick}
                                         />
                                     )
                                 })()}
@@ -336,6 +347,7 @@ function HomePage() {
                                             envelopes={goals}
                                             type="yearly"
                                             onEnvelopeClick={handleEnvelopeClick}
+                                            onExchangeClick={handleExchangeClick}
                                         />
                                     )
                                 })()}
@@ -364,8 +376,8 @@ function HomePage() {
                             onClose={() => setShowExpenseModal(false)}
                             onSave={handleExpenseSave}
                             envelopes={[
-                                ...(data.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly' })),
-                                ...(data.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly' }))
+                                ...(data.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly', currentAmount: e.current })),
+                                ...(data.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly', currentAmount: e.current }))
                             ]}
                         />
                     </div>
@@ -419,6 +431,20 @@ function HomePage() {
                     goalsAmount={data.goalFundsAmount || 0}
                     goalEnvelopes={getGoalEnvelopes()}
                 />
+            )}
+
+            {showExchangeModal && exchangeEnvelope && (
+                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="modal-content w-full max-w-lg">
+                        <ExchangeModal
+                            envelopeId={exchangeEnvelope.id}
+                            envelopeName={exchangeEnvelope.name}
+                            envelopeBalance={exchangeEnvelope.balance}
+                            onClose={() => setShowExchangeModal(false)}
+                            onSave={refetch}
+                        />
+                    </div>
+                </div>
             )}
 
         </div>

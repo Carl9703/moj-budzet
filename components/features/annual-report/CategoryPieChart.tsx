@@ -13,14 +13,14 @@ interface CategoryPieChartProps {
 
 // Vibrant but premium color palette
 const COLORS = [
-    '#6366f1', // Indigo
+    '#f59e0b', // Amber (primary)
     '#ec4899', // Pink
     '#10b981', // Emerald
-    '#f59e0b', // Amber
-    '#8b5cf6', // Violet
+    '#d97706', // Amber dark
     '#06b6d4', // Cyan
     '#f43f5e', // Rose
     '#3b82f6', // Blue
+    '#fbbf24', // Amber light
     '#d946ef', // Fuchsia
     '#84cc16', // Lime
 ]
@@ -89,18 +89,18 @@ export function CategoryPieChart({ data, totalExpenses }: CategoryPieChartProps)
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl mb-12 shadow-xl"
+            className="p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl mb-12 shadow-xl"
         >
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shadow-inner border border-white/5">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center shadow-inner border border-white/5">
                         <PieChartIcon size={24} />
                     </div>
                     <div>
                         <h2 className="text-xl font-black text-white uppercase tracking-widest">
                             Podział Kategorii
                         </h2>
-                        <p className="text-xs text-slate-500 font-medium">Procentowa dystrybucja wg wydatków</p>
+                        <p className="text-xs text-zinc-500 font-medium">Procentowa dystrybucja wg wydatków</p>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 import { SYSTEM_DESCRIPTIONS, POLISH_MONTHS } from '@/lib/constants/system'
+import { toNum } from '@/lib/utils/decimal'
 
 // === INTERFEJSY DLA ANALIZY PRZYCHODÓW ===
 
@@ -61,7 +63,7 @@ async function getIncomeTrendsData(userId: string, startDate: Date, endDate: Dat
 
     const totalIncome = monthTransactions
       .filter(t => (t as { includeInStats?: boolean }).includeInStats !== false)
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + toNum(t.amount), 0)
 
     trends.push({
       period: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`,
@@ -186,7 +188,7 @@ export async function GET(request: NextRequest) {
       }
 
       sourceData[normalizedSource].transactions.push(transaction)
-      sourceData[normalizedSource].totalAmount += transaction.amount
+      sourceData[normalizedSource].totalAmount += toNum(transaction.amount)
     })
 
     // Oblicz całkowitą kwotę przychodów
@@ -232,7 +234,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const nextResponse = NextResponse.json(response)
+    const nextResponse = jsonResponse(response)
 
     // Wyłącz cache dla świeżych danych
     nextResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -243,7 +245,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Income Analytics API error:', error)
-    return NextResponse.json(
+    return jsonResponse(
       { error: 'Błąd pobierania analiz przychodów' },
       { status: 500 }
     )

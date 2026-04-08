@@ -49,9 +49,9 @@ export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickAct
                 whileTap={{ scale: 0.98 }}
                 onClick={onTransfer}
                 title="Transfer (T)"
-                className="relative px-6 py-2.5 rounded-2xl text-sm font-bold text-white overflow-hidden group shadow-lg shadow-indigo-500/20"
+                className="relative px-6 py-2.5 rounded-2xl text-sm font-bold text-white overflow-hidden group shadow-lg shadow-amber-500/20"
                 style={{
-                    background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
+                    background: 'linear-gradient(135deg, #92400e 0%, #d97706 100%)',
                 }}
             >
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

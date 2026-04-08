@@ -32,21 +32,21 @@ export function RouteError({
             </div>
 
             <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
-            <p className="text-slate-400 max-w-md mb-8">
+            <p className="text-zinc-400 max-w-md mb-8">
                 Przepraszamy, ale coś poszło nie tak podczas ładowania tej części aplikacji. Zespół techniczny został powiadomiony (w teorii!).
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
                 <button
                     onClick={() => reset()}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/20 group"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-amber-500/20 group"
                 >
                     <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
                     Spróbuj ponownie
                 </button>
                 <button
                     onClick={() => router.push('/')}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium transition-all"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl font-medium transition-all"
                 >
                     <Home className="w-4 h-4" />
                     Wróć na Pulpit
@@ -56,7 +56,7 @@ export function RouteError({
             {process.env.NODE_ENV === 'development' && (
                 <div className="mt-12 p-4 bg-black/50 border border-rose-500/20 rounded-xl text-left max-w-2xl w-full overflow-auto">
                     <p className="text-xs font-mono text-rose-400 mb-2">Szczegóły dla developera:</p>
-                    <pre className="text-[10px] text-slate-500 font-mono whitespace-pre-wrap">
+                    <pre className="text-[10px] text-zinc-500 font-mono whitespace-pre-wrap">
                         {error.message}
                         {'\n'}{error.stack}
                     </pre>

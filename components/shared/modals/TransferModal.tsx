@@ -4,10 +4,9 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
 import { useToast } from '@/components/ui/feedback/Toast'
 import { useCategories } from '@/lib/contexts/CategoryContext'
-import { Input } from '@/components/ui/primitives/Input'
 import { CustomSelect } from '@/components/ui/primitives/CustomSelect'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ArrowRightCircle } from 'lucide-react'
+import { ArrowRightCircle } from 'lucide-react'
 
 interface Envelope {
     id: string
@@ -16,6 +15,7 @@ interface Envelope {
     type: 'monthly' | 'yearly'
     currentAmount: number
     isAccumulating?: boolean
+    currencyCode?: string
 }
 
 interface Props {
@@ -25,13 +25,14 @@ interface Props {
     mainBalance?: number
 }
 
-interface TransferData {
+export interface TransferData {
     fromEnvelopeId: string
     toEnvelopeId: string
     amount: number
     description: string
     date: string
     toCategory?: string
+    destinationAmount?: number
 }
 
 export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: Props) {
@@ -40,6 +41,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
     const [fromEnvelopeId, setFromEnvelopeId] = useState('')
     const [toEnvelopeId, setToEnvelopeId] = useState('')
     const [amount, setAmount] = useState('')
+    const [destinationAmount, setDestinationAmount] = useState('')
     const [description, setDescription] = useState('')
     const [toCategory, setToCategory] = useState('')
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -48,18 +50,28 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
     const amountInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            amountInputRef.current?.focus()
-        }, 100)
+        const timer = setTimeout(() => amountInputRef.current?.focus(), 100)
         return () => clearTimeout(timer)
     }, [])
+
+    const fromEnvelope = fromEnvelopeId === 'MAIN_ACCOUNT'
+        ? null
+        : envelopes.find(e => e.id === fromEnvelopeId)
+    const toEnvelope = envelopes.find(e => e.id === toEnvelopeId)
+
+    const toCurrency = toEnvelope?.currencyCode ?? 'PLN'
+    const isCrossCurrency = toCurrency !== 'PLN'
+
+    // Kurs wymiany (informacyjny) — wyliczany z obu pól kwot
+    const impliedRate = isCrossCurrency && Number(amount) > 0 && Number(destinationAmount) > 0
+        ? (Number(amount) / Number(destinationAmount)).toFixed(4)
+        : null
 
     const handleSubmit = useCallback(async () => {
         if (!fromEnvelopeId || !toEnvelopeId) {
             showToast('Wybierz koperty źródłową i docelową!', 'warning')
             return
         }
-
         if (fromEnvelopeId === toEnvelopeId) {
             showToast('Nie można transferować do tej samej koperty!', 'warning')
             return
@@ -71,9 +83,14 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
             return
         }
 
-        const fromEnvelope = envelopes.find(e => e.id === fromEnvelopeId)
-        if (fromEnvelope && fromEnvelopeId !== 'MAIN_ACCOUNT' && amountNum > fromEnvelope.currentAmount) {
-            showToast(`Brak środków! Dostępne: ${fromEnvelope.currentAmount.toFixed(2)} zł`, 'error')
+        if (isCrossCurrency && (!destinationAmount || Number(destinationAmount) <= 0)) {
+            showToast(`Podaj kwotę docelową w ${toCurrency}!`, 'warning')
+            return
+        }
+
+        const fromBal = fromEnvelopeId === 'MAIN_ACCOUNT' ? mainBalance : (fromEnvelope?.currentAmount ?? 0)
+        if (fromEnvelopeId !== 'MAIN_ACCOUNT' && amountNum > fromBal) {
+            showToast(`Brak środków! Dostępne: ${fromBal.toFixed(2)} PLN`, 'error')
             return
         }
 
@@ -83,39 +100,35 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                 fromEnvelopeId,
                 toEnvelopeId,
                 amount: amountNum,
-                description: description.trim() || 'Transfer między kopertami',
+                description: description.trim() || (isCrossCurrency ? `Wymiana PLN → ${toCurrency}` : 'Transfer między kopertami'),
                 date,
-                toCategory: toCategory || undefined
+                toCategory: toCategory || undefined,
+                destinationAmount: isCrossCurrency ? Number(destinationAmount) : undefined,
             })
             if (success) onClose()
         } finally {
             setIsSubmitting(false)
         }
-    }, [fromEnvelopeId, toEnvelopeId, amount, description, date, toCategory, envelopes, onSave, onClose, showToast])
+    }, [fromEnvelopeId, toEnvelopeId, amount, destinationAmount, description, date, toCategory,
+        envelopes, mainBalance, fromEnvelope, isCrossCurrency, toCurrency, onSave, onClose, showToast])
 
-    const fromEnvelope = envelopes.find(e => e.id === fromEnvelopeId)
-    const toEnvelope = envelopes.find(e => e.id === toEnvelopeId)
+    // Koperty akumulujące + wszystkie koperty walutowe (sub-koperty) mogą być celem transferu
+    const accumulatingOrCurrency = envelopes.filter(e => e.isAccumulating || (e.currencyCode && e.currencyCode !== 'PLN'))
 
-    // Tylko koperty akumulujące mogą być w transferach (wg prośby użytkownika)
-    // "chciałbym aby np w transferach były tylko koperty akumulujące"
-    const accumulatingEnvelopes = envelopes.filter(e => e.isAccumulating)
-
-    const sourceEnvelopes = accumulatingEnvelopes
-    const targetEnvelopes = accumulatingEnvelopes.filter(e => e.id !== fromEnvelopeId)
+    const sourceEnvelopes = envelopes.filter(e => e.isAccumulating)
+    const targetEnvelopes = accumulatingOrCurrency.filter(e => e.id !== fromEnvelopeId)
 
     const availableCategories = toEnvelopeId ? getCategoriesForEnvelope(toEnvelope?.name || '') : []
 
     const fromOptions = [
         { label: 'Konto Główne', value: 'MAIN_ACCOUNT', icon: '🏦' },
-        ...sourceEnvelopes.map(env => ({
-            label: env.name,
-            value: env.id,
-            icon: env.icon
-        }))
+        ...sourceEnvelopes.map(env => ({ label: env.name, value: env.id, icon: env.icon }))
     ]
 
     const toOptions = targetEnvelopes.map(env => ({
-        label: env.name,
+        label: env.currencyCode && env.currencyCode !== 'PLN'
+            ? `${env.name} (${env.currencyCode})`
+            : env.name,
         value: env.id,
         icon: env.icon
     }))
@@ -126,16 +139,21 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
         icon: cat.icon
     }))
 
-    const canSubmit = fromEnvelopeId && toEnvelopeId && Number(amount) > 0 && !isSubmitting
+    const canSubmit = !!(
+        fromEnvelopeId && toEnvelopeId &&
+        Number(amount) > 0 &&
+        (!isCrossCurrency || Number(destinationAmount) > 0) &&
+        !isSubmitting
+    )
 
     return (
         <Modal title="💸 Transfer Środków" onClose={onClose}>
             <div className="flex flex-col gap-3 p-3 md:p-4">
 
                 {/* HERO AMOUNT */}
-                <div className="bg-slate-950/50 py-6 rounded-3xl border border-white/5 transition-all focus-within:border-indigo-500/30">
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">
-                        Kwota transferu
+                <div className="bg-zinc-950/50 py-6 rounded-3xl border border-white/5 transition-all focus-within:border-amber-500/30">
+                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 text-center">
+                        Kwota transferu (PLN)
                     </label>
                     <div className="relative flex items-baseline justify-center w-full px-4">
                         <input
@@ -145,20 +163,53 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-slate-800/50 focus:outline-none transition-all tracking-tighter"
+                            className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-zinc-800/50 focus:outline-none transition-all tracking-tighter"
                             autoFocus
                         />
-                        <span className="absolute right-12 bottom-2 text-xl font-black text-slate-700 pointer-events-none">PLN</span>
+                        <span className="absolute right-12 bottom-2 text-xl font-black text-zinc-700 pointer-events-none">PLN</span>
                     </div>
                 </div>
 
-                {/* VISUAL FLOW: FROM → TO (Vertical Layout) */}
-                <div className="flex flex-col gap-2">
+                {/* CROSS-CURRENCY: kwota docelowa */}
+                <AnimatePresence>
+                    {isCrossCurrency && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl py-5 px-4">
+                                <label className="block text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3 text-center">
+                                    Kwota otrzymana ({toCurrency})
+                                </label>
+                                <div className="relative flex items-baseline justify-center">
+                                    <input
+                                        type="number"
+                                        inputMode="decimal"
+                                        value={destinationAmount}
+                                        onChange={(e) => setDestinationAmount(e.target.value)}
+                                        placeholder="0"
+                                        className="w-full bg-transparent text-4xl font-black text-center text-amber-300 placeholder:text-zinc-800/50 focus:outline-none tracking-tighter"
+                                    />
+                                    <span className="absolute right-8 bottom-1 text-lg font-black text-amber-700 pointer-events-none">{toCurrency}</span>
+                                </div>
+                                {impliedRate && (
+                                    <p className="text-[10px] text-center text-zinc-500 mt-2 font-mono">
+                                        kurs: <span className="text-zinc-300 font-black">{impliedRate} PLN/{toCurrency}</span>
+                                    </p>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
+                {/* VISUAL FLOW: FROM → TO */}
+                <div className="flex flex-col gap-2">
                     {/* FROM */}
-                    <div className="bg-slate-900/40 p-4 rounded-3xl border border-white/5">
+                    <div className="bg-zinc-900/40 p-4 rounded-3xl border border-white/5">
                         <div className="flex items-center justify-between mb-2 px-1">
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Z konta / koperty</span>
+                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Z konta / koperty</span>
                             {(fromEnvelope || fromEnvelopeId === 'MAIN_ACCOUNT') && (
                                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tight">
                                     Dostępne: {fromEnvelopeId === 'MAIN_ACCOUNT'
@@ -181,18 +232,18 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
 
                     {/* CONNECTOR */}
                     <div className="flex justify-center -my-4 relative z-10">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center text-indigo-400 shadow-xl shadow-black/50">
+                        <div className="w-10 h-10 rounded-2xl bg-zinc-950 border border-white/10 flex items-center justify-center text-amber-400 shadow-xl shadow-black/50">
                             <ArrowRightCircle size={20} className="rotate-90" />
                         </div>
                     </div>
 
                     {/* TO */}
-                    <div className="bg-slate-900/40 p-4 rounded-3xl border border-white/5">
+                    <div className="bg-zinc-900/40 p-4 rounded-3xl border border-white/5">
                         <div className="flex items-center justify-between mb-2 px-1">
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Do koperty</span>
+                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Do koperty</span>
                             {toEnvelope && (
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight">
-                                    Obecnie: {toEnvelope.currentAmount.toFixed(2)} zł
+                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tight">
+                                    Obecnie: {toEnvelope.currentAmount.toFixed(2)} {toCurrency}
                                 </span>
                             )}
                         </div>
@@ -200,28 +251,31 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             placeholder="Wybierz cel"
                             options={toOptions}
                             value={toEnvelopeId}
-                            onChange={setToEnvelopeId}
+                            onChange={(val) => {
+                                setToEnvelopeId(val)
+                                setDestinationAmount('')
+                            }}
                         />
                     </div>
                 </div>
 
-                {/* DETAILS (Date & Desc) */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/50">
-                    <div className="bg-slate-800/30 rounded-xl border border-slate-700/50">
+                {/* DETAILS */}
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800/50">
+                    <div className="bg-zinc-800/30 rounded-xl border border-zinc-700/50">
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="bg-transparent text-slate-300 text-xs font-medium focus:outline-none w-full px-2 py-2 text-center date-input-icon-fix"
+                            className="bg-transparent text-zinc-300 text-xs font-medium focus:outline-none w-full px-2 py-2 text-center date-input-icon-fix"
                         />
                     </div>
-                    <div className="bg-slate-800/30 rounded-xl border border-slate-700/50">
+                    <div className="bg-zinc-800/30 rounded-xl border border-zinc-700/50">
                         <input
                             type="text"
                             placeholder="Opis (opcjonalny)"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full h-full bg-transparent px-2 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none text-center"
+                            className="w-full h-full bg-transparent px-2 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none text-center"
                         />
                     </div>
                 </div>
@@ -233,11 +287,16 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="bg-indigo-500/10 rounded-xl border border-indigo-500/20 px-3 py-2 flex justify-between items-center"
+                            className="bg-amber-500/10 rounded-xl border border-amber-500/20 px-3 py-2 flex justify-between items-center"
                         >
-                            <div className="text-[10px] text-indigo-300 font-medium">Po operacji w celu:</div>
+                            <div className="text-[10px] text-amber-300 font-medium">Po operacji w celu:</div>
                             <div className="text-sm font-bold text-white font-mono">
-                                {toEnvelope ? (toEnvelope.currentAmount + Number(amount)).toFixed(2) : '-'} PLN
+                                {toEnvelope
+                                    ? isCrossCurrency
+                                        ? `${(toEnvelope.currentAmount + Number(destinationAmount)).toFixed(2)} ${toCurrency}`
+                                        : `${(toEnvelope.currentAmount + Number(amount)).toFixed(2)} PLN`
+                                    : '-'
+                                }
                             </div>
                         </motion.div>
                     )}
@@ -247,7 +306,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                 <div className="flex gap-4 pt-4">
                     <button
                         onClick={onClose}
-                        className="px-6 py-4 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 font-bold transition-all w-1/3 active:scale-95"
+                        className="px-6 py-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 font-bold transition-all w-1/3 active:scale-95"
                     >
                         Anuluj
                     </button>
@@ -255,11 +314,11 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                         onClick={handleSubmit}
                         disabled={!canSubmit}
                         className={`flex-1 py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] ${canSubmit
-                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:scale-[1.02] shadow-indigo-500/20'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700/50 opacity-50'
-                            }`}
+                            ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:scale-[1.02] shadow-amber-500/20'
+                            : 'bg-zinc-800 text-zinc-600 cursor-not-allowed border border-zinc-700/50 opacity-50'
+                        }`}
                     >
-                        {isSubmitting ? 'Transferuję...' : 'Transferuj'}
+                        {isSubmitting ? 'Transferuję...' : isCrossCurrency ? `Wymień ${toCurrency}` : 'Transferuj'}
                     </button>
                 </div>
             </div>

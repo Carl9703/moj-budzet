@@ -233,7 +233,7 @@ export default function ConfigPage() {
   if (isCheckingAuth) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -242,8 +242,8 @@ export default function ConfigPage() {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 bg-slate-800 rounded-xl" />
-          <div className="h-4 w-32 bg-slate-800 rounded" />
+          <div className="w-12 h-12 bg-zinc-800 rounded-xl" />
+          <div className="h-4 w-32 bg-zinc-800 rounded" />
         </div>
       </div>
     )
@@ -252,7 +252,7 @@ export default function ConfigPage() {
   if (!isAuthenticated) return null
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
       <div className="w-full px-4 sm:px-6 lg:px-8 pb-32 pt-0 flex flex-col relative z-10 max-w-[2560px] mx-auto">
 
         {/* Header */}
@@ -263,10 +263,10 @@ export default function ConfigPage() {
         >
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight">
                 ⚙️ Konfiguracja Systemu
               </h1>
-              <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">
+              <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
                 Dostosuj parametry swojego budżetu i kopert
               </p>
             </div>
@@ -276,8 +276,8 @@ export default function ConfigPage() {
                 onClick={handleSaveGeneral}
                 disabled={saving}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg ${saving
-                  ? 'bg-slate-800 text-slate-500 cursor-wait'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20 active:scale-95'
+                  ? 'bg-zinc-800 text-zinc-500 cursor-wait'
+                  : 'bg-amber-600 text-white hover:bg-amber-500 shadow-amber-500/20 active:scale-95'
                   }`}
               >
                 {saving ? <RefreshCw className="animate-spin" size={18} /> : <Save size={18} />}
@@ -288,12 +288,12 @@ export default function ConfigPage() {
         </motion.div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 p-1 bg-slate-900/50 rounded-2xl border border-white/5">
+        <div className="flex gap-2 mb-8 p-1 bg-zinc-900/50 rounded-2xl border border-white/5">
           <button
             onClick={() => setActiveTab('envelopes')}
             className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all ${activeTab === 'envelopes'
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-500 hover:text-white hover:bg-slate-800/50'
+              ? 'bg-amber-600 text-white shadow-lg'
+              : 'text-zinc-500 hover:text-white hover:bg-zinc-800/50'
               }`}
           >
             Koperty
@@ -301,8 +301,8 @@ export default function ConfigPage() {
           <button
             onClick={() => setActiveTab('recurring')}
             className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all ${activeTab === 'recurring'
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-500 hover:text-white hover:bg-slate-800/50'
+              ? 'bg-amber-600 text-white shadow-lg'
+              : 'text-zinc-500 hover:text-white hover:bg-zinc-800/50'
               }`}
           >
             Płatności Cykliczne
@@ -310,8 +310,8 @@ export default function ConfigPage() {
           <button
             onClick={() => setActiveTab('general')}
             className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all ${activeTab === 'general'
-              ? 'bg-indigo-600 text-white shadow-lg'
-              : 'text-slate-500 hover:text-white hover:bg-slate-800/50'
+              ? 'bg-amber-600 text-white shadow-lg'
+              : 'text-zinc-500 hover:text-white hover:bg-zinc-800/50'
               }`}
           >
             Ogólne

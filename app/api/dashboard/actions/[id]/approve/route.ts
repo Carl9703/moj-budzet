@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { SYSTEM_DESCRIPTIONS, DEFAULT_APP_START_DATE } from '@/lib/constants/system'
+import { jsonResponse } from '@/lib/utils/api'
 import { isEmergencyEnvelope } from '@/lib/constants/envelopeTypes'
+import { toNum } from '@/lib/utils/decimal'
 
 export async function POST(
     request: NextRequest,
@@ -34,7 +36,7 @@ export async function POST(
         })
 
         if (!recurringPayment) {
-            return NextResponse.json({ error: 'Płatność nie znaleziona' }, { status: 404 })
+            return jsonResponse({ error: 'Płatność nie znaleziona' }, { status: 404 })
         }
 
         // Wykonaj transakcję w bazie danych
@@ -48,7 +50,7 @@ export async function POST(
                 const { FinanceService } = await import('@/lib/services/FinanceService')
                 const currentBalance = await FinanceService.getMainBalanceSurplus(userId, tx)
 
-                if (currentBalance < recurringPayment.amount) {
+                if (currentBalance < toNum(recurringPayment.amount)) {
                     throw new Error('Niewystarczające środki w głównym saldzie')
                 }
 
@@ -141,7 +143,7 @@ export async function POST(
             ? `Transfer "${recurringPayment.name}" został zatwierdzony`
             : `Płatność "${recurringPayment.name}" została zatwierdzona`
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             message,
             amount: recurringPayment.amount,
@@ -153,7 +155,7 @@ export async function POST(
 
     } catch (error) {
         console.error('Error approving payment:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd zatwierdzania płatności', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )

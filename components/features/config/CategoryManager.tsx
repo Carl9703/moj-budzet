@@ -177,14 +177,14 @@ export const CategoryManager = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-400 flex items-center justify-center shadow-inner">
                         <Tag size={24} />
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">Kategorie Wydatków</h2>
-                        <p className="text-xs text-slate-500 font-medium">Zarządzaj klasyfikacją swoich wydatków</p>
+                        <p className="text-xs text-zinc-500 font-medium">Zarządzaj klasyfikacją swoich wydatków</p>
                     </div>
                 </div>
 
@@ -197,7 +197,7 @@ export const CategoryManager = () => {
                         }}
                         className={`px-6 py-3 rounded-2xl transition-all text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 active:scale-95 shadow-xl ${isAdding
                             ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20'}`}
+                            : 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/20'}`}
                     >
                         {isAdding ? <X size={18} /> : <Plus size={18} />}
                         {isAdding ? 'Anuluj' : 'Dodaj kategorię'}
@@ -213,11 +213,11 @@ export const CategoryManager = () => {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                     >
-                        <form onSubmit={handleSubmit} className="p-6 rounded-3xl border border-indigo-500/20 bg-slate-900/40 backdrop-blur-xl mb-6 shadow-2xl relative overflow-hidden group/form">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500/50" />
+                        <form onSubmit={handleSubmit} className="p-6 rounded-3xl border border-amber-500/20 bg-zinc-900/40 backdrop-blur-xl mb-6 shadow-2xl relative overflow-hidden group/form">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/50" />
 
                             <h3 className="text-xs font-black text-white mb-6 flex items-center gap-3 uppercase tracking-[0.2em]">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
                                     {editingId ? <Edit2 size={14} /> : <Plus size={14} />}
                                 </div>
                                 {editingId ? 'Edytuj kategorię' : 'Nowa kategoria'}
@@ -225,13 +225,13 @@ export const CategoryManager = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Ikona</label>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Ikona</label>
                                     <div className="relative group">
                                         <input
                                             type="text"
                                             value={formData.icon}
                                             onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                                            className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-indigo-500/50 transition-all text-center text-2xl shadow-inner"
+                                            className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-amber-500/50 transition-all text-center text-2xl shadow-inner"
                                             placeholder="🏷️"
                                             maxLength={2}
                                         />
@@ -239,24 +239,24 @@ export const CategoryManager = () => {
                                 </div>
 
                                 <div className="space-y-2 lg:col-span-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Nazwa kategorii</label>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Nazwa kategorii</label>
                                     <input
                                         type="text"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-5 py-4 text-sm font-black text-white focus:outline-none focus:border-indigo-500/50 transition-all shadow-inner placeholder:text-slate-700"
+                                        className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl px-5 py-4 text-sm font-black text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner placeholder:text-zinc-700"
                                         placeholder="NP. ZAKUPY SPOŻYWCZE"
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Domyślna koperta</label>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Domyślna koperta</label>
                                     <input
                                         type="text"
                                         value={formData.defaultEnvelope || ''}
                                         onChange={(e) => setFormData({ ...formData, defaultEnvelope: e.target.value || undefined })}
-                                        className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-5 py-4 text-sm font-black text-white focus:outline-none focus:border-indigo-500/50 transition-all shadow-inner placeholder:text-slate-700"
+                                        className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl px-5 py-4 text-sm font-black text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner placeholder:text-zinc-700"
                                         placeholder="NP. JEDZENIE"
                                     />
                                 </div>
@@ -266,13 +266,13 @@ export const CategoryManager = () => {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="px-6 py-3 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
+                                    className="px-6 py-3 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
                                 >
                                     Anuluj
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-xl shadow-indigo-500/20 transition-all flex items-center gap-3 active:scale-95 text-[10px] font-black uppercase tracking-[0.2em]"
+                                    className="px-8 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center gap-3 active:scale-95 text-[10px] font-black uppercase tracking-[0.2em]"
                                 >
                                     <Save size={16} />
                                     Zapisz kategorię
@@ -291,7 +291,7 @@ export const CategoryManager = () => {
                         </div>
                         <div>
                             <h3 className="font-bold text-white">Znaleziono ustawienia lokalne</h3>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-zinc-400">
                                 Wykryto {legacyCategories.length} kategorii zapisanych w przeglądarce. Baza danych jest pusta.
                             </p>
                         </div>
@@ -311,9 +311,9 @@ export const CategoryManager = () => {
                     // Loading skeletons
                     Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="glass-card p-4 h-32 animate-pulse flex flex-col justify-between">
-                            <div className="h-8 w-8 bg-slate-700/50 rounded-full mb-2" />
-                            <div className="h-4 w-3/4 bg-slate-700/50 rounded mb-2" />
-                            <div className="h-3 w-1/2 bg-slate-700/30 rounded" />
+                            <div className="h-8 w-8 bg-zinc-700/50 rounded-full mb-2" />
+                            <div className="h-4 w-3/4 bg-zinc-700/50 rounded mb-2" />
+                            <div className="h-3 w-1/2 bg-zinc-700/30 rounded" />
                         </div>
                     ))
                 ) : filteredCategories.length > 0 ? (
@@ -323,23 +323,23 @@ export const CategoryManager = () => {
                             layout
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-5 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl group hover:bg-slate-800/80 transition-all shadow-xl"
+                            className="p-5 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl group hover:bg-zinc-800/80 transition-all shadow-xl"
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 rounded-2xl bg-slate-950/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner">
+                                <div className="w-12 h-12 rounded-2xl bg-zinc-950/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner">
                                     {category.icon}
                                 </div>
                                 <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
                                     <button
                                         onClick={() => handleStartEdit(category)}
-                                        className="w-9 h-9 flex items-center justify-center bg-slate-900 hover:bg-indigo-600 text-slate-500 hover:text-white rounded-xl border border-white/5 transition-all shadow-inner"
+                                        className="w-9 h-9 flex items-center justify-center bg-zinc-900 hover:bg-amber-600 text-zinc-500 hover:text-white rounded-xl border border-white/5 transition-all shadow-inner"
                                         title="Edytuj"
                                     >
                                         <Edit2 size={14} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(category.id, category.name)}
-                                        className="w-9 h-9 flex items-center justify-center bg-slate-900 hover:bg-rose-600 text-slate-500 hover:text-white rounded-xl border border-white/5 transition-all shadow-inner"
+                                        className="w-9 h-9 flex items-center justify-center bg-zinc-900 hover:bg-rose-600 text-zinc-500 hover:text-white rounded-xl border border-white/5 transition-all shadow-inner"
                                         title="Usuń"
                                     >
                                         <Trash2 size={14} />
@@ -356,14 +356,14 @@ export const CategoryManager = () => {
                                         <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">{category.defaultEnvelope}</span>
                                     </div>
                                 ) : (
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 px-2">Brak domyślnej koperty</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 px-2">Brak domyślnej koperty</span>
                                 )}
                             </div>
                         </motion.div>
                     ))
                 ) : (
-                    <div className="col-span-full py-12 text-center text-slate-400 flex flex-col items-center">
-                        <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                    <div className="col-span-full py-12 text-center text-zinc-400 flex flex-col items-center">
+                        <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4">
                             <Box size={24} className="opacity-50" />
                         </div>
                         <p>Brak kategorii spełniających kryteria.</p>

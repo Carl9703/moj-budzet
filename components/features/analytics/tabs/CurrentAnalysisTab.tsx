@@ -206,7 +206,7 @@ export function CurrentAnalysisTab({
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.98 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="p-6 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl"
+                                            className="p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl"
                                         >
                                             <IncomeStructureChart
                                                 data={(incomeData.sources || []).map((s: any) => ({
@@ -221,7 +221,7 @@ export function CurrentAnalysisTab({
                                         </motion.div>
 
                                         {/* Detailed Income Breakdown */}
-                                        <div className="p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5">
+                                        <div className="p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
                                             <DetailedIncomeBreakdown
                                                 sources={incomeSourcesMapped}
                                                 trends={incomeData.trends}
@@ -239,11 +239,11 @@ export function CurrentAnalysisTab({
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="mt-6 p-6 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 flex flex-col md:flex-row justify-between items-center gap-6"
+                        className="mt-6 p-6 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 flex flex-col md:flex-row justify-between items-center gap-6"
                     >
                         <div className="flex gap-12">
                             <div className="text-center md:text-left">
-                                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">
+                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">
                                     {activeSubTab === 'expenses' ? 'Kategorie' : 'Źródła Przychodów'}
                                 </div>
                                 <div className="text-2xl font-black text-white tracking-tight">
@@ -253,7 +253,7 @@ export function CurrentAnalysisTab({
                                 </div>
                             </div>
                             <div className="text-center md:text-left">
-                                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Liczba Operacji</div>
+                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Liczba Operacji</div>
                                 <div className="text-2xl font-black text-white tracking-tight">
                                     {activeSubTab === 'expenses'
                                         ? (data?.summary?.totalTransactions || 0)
@@ -261,7 +261,7 @@ export function CurrentAnalysisTab({
                                 </div>
                             </div>
                         </div>
-                        <div className="text-[10px] text-slate-600 font-mono italic">
+                        <div className="text-[10px] text-zinc-600 font-mono italic">
                             Analiza wygenerowana automatycznie na podstawie aktualnych danych
                         </div>
                     </motion.div>

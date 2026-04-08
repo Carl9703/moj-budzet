@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { SYSTEM_DESCRIPTIONS, YEARLY_ENVELOPE_NAMES, POLISH_MONTHS, LEGACY_NAME_MAPPINGS } from '@/lib/constants/system'
+import { jsonResponse } from '@/lib/utils/api'
+import { toNum } from '@/lib/utils/decimal'
 
 interface TransactionData {
     id: string
@@ -151,7 +153,7 @@ export async function GET(request: NextRequest) {
             const transactionData: TransactionData = {
                 id: transaction.id,
                 type: transaction.type,
-                amount: transaction.amount,
+                amount: toNum(transaction.amount),
                 description: transaction.description || 'Brak opisu',
                 date: transaction.date.toISOString(),
                 category: categoryName,
@@ -165,9 +167,9 @@ export async function GET(request: NextRequest) {
 
             if (includeInStats) {
                 if (transaction.type === 'income') {
-                    monthData.income += transaction.amount
+                    monthData.income += toNum(transaction.amount)
                 } else if (transaction.type === 'expense') {
-                    monthData.expenses += transaction.amount
+                    monthData.expenses += toNum(transaction.amount)
                 }
             }
         }
@@ -343,10 +345,10 @@ export async function GET(request: NextRequest) {
             return POLISH_MONTHS.indexOf(b.month) - POLISH_MONTHS.indexOf(a.month)
         })
 
-        return NextResponse.json(result)
+        return jsonResponse(result)
     } catch (error) {
         console.error('Archive API error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania archiwum' },
             { status: 500 }
         )

@@ -22,7 +22,7 @@ interface IncomeStructureChartProps {
 // Distinct palette for income (Greens/Blues/Teals) with Premium feel mapped to Tremor
 const TREMOR_COLORS = [
     'emerald', 'blue', 'cyan', 'violet',
-    'teal', 'indigo', 'green', 'sky'
+    'teal', 'amber', 'green', 'sky'
 ]
 
 const CSS_COLORS = [
@@ -60,14 +60,14 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                         <WalletCards size={18} />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                        <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
                             Źródła Dochodów
                         </h2>
-                        <p className="text-xs text-slate-500">Kliknij segment aby zobaczyć szczegóły</p>
+                        <p className="text-xs text-zinc-500">Kliknij segment aby zobaczyć szczegóły</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Suma z grupy</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Suma z grupy</div>
                     <div className="text-xl font-bold text-white">{formatMoneyWithSeparators(totalIncome)}</div>
                 </div>
             </div>
@@ -100,7 +100,7 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                                     key={entry.name}
                                     onClick={() => onSelectSource?.(entry.name)}
                                     disabled={!onSelectSource}
-                                    className={`group relative flex items-center justify-between p-3 rounded-xl border border-white/5 bg-slate-900/40 overflow-hidden text-left transition-all ${onSelectSource ? 'hover:bg-slate-800 hover:border-white/10 cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
+                                    className={`group relative flex items-center justify-between p-3 rounded-xl border border-white/5 bg-zinc-900/40 overflow-hidden text-left transition-all ${onSelectSource ? 'hover:bg-zinc-800 hover:border-white/10 cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
                                 >
                                     {/* Background Progress Bar */}
                                     <div
@@ -118,14 +118,14 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                                             style={{ backgroundColor: CSS_COLORS[index % CSS_COLORS.length] }}
                                         />
                                         <div className="flex justify-between w-full items-center gap-4">
-                                            <span className="text-sm font-medium text-slate-200 truncate pr-4">
+                                            <span className="text-sm font-medium text-zinc-200 truncate pr-4">
                                                 {entry.name}
                                             </span>
                                             <div className="flex gap-4 items-center shrink-0">
                                                 <span className="text-sm font-bold text-white tabular-nums tracking-tight">
                                                     {formatMoneyWithSeparators(entry.value)}
                                                 </span>
-                                                <span className="text-xs text-slate-400 font-medium tabular-nums min-w-[40px] text-right">
+                                                <span className="text-xs text-zinc-400 font-medium tabular-nums min-w-[40px] text-right">
                                                     {percentage.toFixed(1)}%
                                                 </span>
                                             </div>
@@ -137,7 +137,7 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                     </div>
                 </div>
             ) : (
-                <div className="text-center py-16 text-slate-400">
+                <div className="text-center py-16 text-zinc-400">
                     <WalletCards size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="font-medium">Brak danych do wyświetlenia dla wybranej grupy</p>
                 </div>

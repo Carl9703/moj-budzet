@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 import { createTransactionSchema } from '@/lib/validations/transaction'
+import { consumeFxLotsFifo, InsufficientFxLotsError } from '@/lib/services/costBasis'
 import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
 
 export async function GET(request: NextRequest) {
@@ -33,7 +35,11 @@ export async function GET(request: NextRequest) {
         const sortBy = searchParams.get('sortBy') || 'date'
         const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-        const whereClause: Prisma.TransactionWhereInput = { userId }
+        const whereClause: Prisma.TransactionWhereInput = {
+            userId,
+            // Ukryj transfery walutowe (PLN ↔ EUR) — widoczne w module Portfele Walut
+            NOT: { includeInStats: false },
+        }
 
         // Filtry podstawowe
         if (transactionType) {
@@ -144,7 +150,7 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        const response = NextResponse.json({
+        const response = jsonResponse({
             transactions: formatted,
             total: formatted.length,
             filters: {
@@ -163,7 +169,7 @@ export async function GET(request: NextRequest) {
 
     } catch (error) {
         console.error('Error fetching transactions:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania transakcji', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )
@@ -302,7 +308,7 @@ export async function POST(request: NextRequest) {
         // Walidacja danych wejściowych
         const validation = createTransactionSchema.safeParse(body)
         if (!validation.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
@@ -314,12 +320,54 @@ export async function POST(request: NextRequest) {
         // Atomowa transakcja: tworzenie transakcji + aktualizacja salda koperty
         const transaction = await prisma.$transaction(async (tx) => {
             // Walidacja własności koperty
+            let envelope = null
             if (data.envelopeId) {
-                const envelope = await tx.envelope.findFirst({
+                envelope = await tx.envelope.findFirst({
                     where: { id: data.envelopeId, userId }
                 })
                 if (!envelope) {
                     throw new Error('ENVELOPE_NOT_FOUND')
+                }
+            }
+
+            // Wykryj wydatek walutowy:
+            // 1. Stara ścieżka: koperta z currencyCode != PLN (sub-koperta walutowa)
+            // 2. Nowa ścieżka: PLN-koperta z FX pocket (foreignAmount + foreignCurrency w body)
+            const isFxExpenseViaEnvelope =
+                data.type === 'expense' &&
+                envelope !== null &&
+                envelope.currencyCode !== 'PLN'
+
+            const isFxExpenseViaPocket =
+                data.type === 'expense' &&
+                envelope !== null &&
+                envelope.currencyCode === 'PLN' &&
+                data.foreignAmount !== undefined &&
+                data.foreignCurrency !== undefined
+
+            const isFxExpense = isFxExpenseViaEnvelope || isFxExpenseViaPocket
+
+            let plnEquivalent: Prisma.Decimal | null = null
+            // Kwota do użycia w transakcji (PLN). Dla FX pocket będzie nadpisana przez FIFO.
+            let transactionAmount = data.amount
+
+            if (isFxExpense && envelope) {
+                // Kwota waluty obcej do skonsumowania z FIFO
+                const foreignAmountToConsume = isFxExpenseViaPocket
+                    ? new Prisma.Decimal(data.foreignAmount!)
+                    : new Prisma.Decimal(data.amount)
+
+                const fifoResult = await consumeFxLotsFifo(
+                    tx,
+                    envelope.id,
+                    foreignAmountToConsume,
+                    isFxExpenseViaPocket ? data.foreignCurrency : undefined
+                )
+                plnEquivalent = fifoResult.plnEquivalent
+
+                // Dla PLN-koperty z FX pocket: używamy kosztu FIFO jako kwoty transakcji PLN
+                if (isFxExpenseViaPocket) {
+                    transactionAmount = plnEquivalent.toNumber()
                 }
             }
 
@@ -328,17 +376,19 @@ export async function POST(request: NextRequest) {
                 data: {
                     userId,
                     type: data.type,
-                    amount: data.amount,
+                    amount: transactionAmount,
                     description: data.description || '',
                     date: transactionDate,
                     envelopeId: data.envelopeId || null,
-                    category: data.category || null
+                    category: data.category || null,
+                    plnEquivalent,
                 }
             })
 
-            // Atomowa aktualizacja salda koperty (bez race condition)
+            // Atomowa aktualizacja salda koperty
             if (data.envelopeId && (data.type === 'expense' || data.type === 'income')) {
-                const delta = data.type === 'expense' ? -data.amount : data.amount
+                // Dla FX pocket używamy wyliczonego kosztu PLN (nie foreignAmount)
+                const delta = data.type === 'expense' ? -transactionAmount : transactionAmount
                 await tx.envelope.update({
                     where: { id: data.envelopeId },
                     data: { currentAmount: { increment: delta } }
@@ -348,17 +398,23 @@ export async function POST(request: NextRequest) {
             return newTransaction
         })
 
-        return NextResponse.json(transaction)
+        return jsonResponse(transaction)
 
     } catch (error) {
         if (error instanceof Error && error.message === 'ENVELOPE_NOT_FOUND') {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Koperta nie znaleziona' },
                 { status: 404 }
             )
         }
+        if (error instanceof InsufficientFxLotsError) {
+            return jsonResponse(
+                { error: error.message },
+                { status: 422 }
+            )
+        }
         console.error('Error creating transaction:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd zapisywania transakcji' },
             { status: 500 }
         )

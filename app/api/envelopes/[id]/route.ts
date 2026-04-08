@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function PATCH(
   request: NextRequest,
@@ -17,7 +18,7 @@ export async function PATCH(
 
     const { id: envelopeId } = await params
     const body = await request.json()
-    const { name, icon, plannedAmount, group, isArchived, isAccumulating, type } = body as {
+    const { name, icon, plannedAmount, group, isArchived, isAccumulating, type, currencyCode, parentEnvelopeId } = body as {
       name?: string
       icon?: string | null
       plannedAmount?: number
@@ -25,6 +26,8 @@ export async function PATCH(
       isArchived?: boolean
       isAccumulating?: boolean
       type?: 'monthly' | 'yearly'
+      currencyCode?: string
+      parentEnvelopeId?: string | null
     }
 
     // Sprawdź czy koperta należy do użytkownika
@@ -36,7 +39,7 @@ export async function PATCH(
     })
 
     if (!envelope) {
-      return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+      return jsonResponse({ error: 'Koperta nie znaleziona' }, { status: 404 })
     }
 
     // Handle name change cascade separately before update if needed, or transactionally
@@ -66,14 +69,16 @@ export async function PATCH(
         ...(group !== undefined && { group }),
         ...(isArchived !== undefined && { isArchived }),
         ...(isAccumulating !== undefined && { isAccumulating }),
-        ...(type !== undefined && { type })
+        ...(type !== undefined && { type }),
+        ...(currencyCode !== undefined && { currencyCode }),
+        ...(parentEnvelopeId !== undefined && { parentEnvelopeId })
       }
     })
 
-    return NextResponse.json({ success: true, envelope: updated })
+    return jsonResponse({ success: true, envelope: updated })
   } catch (error) {
     console.error('Error updating envelope:', error)
-    return NextResponse.json({ error: 'Błąd aktualizacji koperty' }, { status: 500 })
+    return jsonResponse({ error: 'Błąd aktualizacji koperty' }, { status: 500 })
   }
 }
 
@@ -101,7 +106,7 @@ export async function DELETE(
     })
 
     if (!envelope) {
-      return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+      return jsonResponse({ error: 'Koperta nie znaleziona' }, { status: 404 })
     }
 
     // Sprawdź czy koperta ma transakcje
@@ -122,7 +127,7 @@ export async function DELETE(
         }
       })
 
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         message: 'Koperta została zarchiwizowana (ma transakcje)',
         envelope: archived
@@ -136,10 +141,10 @@ export async function DELETE(
       }
     })
 
-    return NextResponse.json({ success: true, message: 'Koperta została usunięta' })
+    return jsonResponse({ success: true, message: 'Koperta została usunięta' })
   } catch (error) {
     console.error('Error deleting envelope:', error)
-    return NextResponse.json({ error: 'Błąd usuwania koperty' }, { status: 500 })
+    return jsonResponse({ error: 'Błąd usuwania koperty' }, { status: 500 })
   }
 }
 
@@ -166,7 +171,7 @@ export async function GET(
     })
 
     if (!envelope) {
-      return NextResponse.json({ error: 'Koperta nie znaleziona' }, { status: 404 })
+      return jsonResponse({ error: 'Koperta nie znaleziona' }, { status: 404 })
     }
 
     // Count transactions
@@ -176,7 +181,7 @@ export async function GET(
       }
     })
 
-    return NextResponse.json({
+    return jsonResponse({
       envelope,
       transactionCount,
       canDelete: transactionCount === 0,
@@ -184,7 +189,7 @@ export async function GET(
     })
 
   } catch (error) {
-    return NextResponse.json(
+    return jsonResponse(
       { error: 'Błąd pobierania koperty' },
       { status: 500 }
     )

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { toNum } from '@/lib/utils/decimal'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function POST(request: NextRequest) {
     try {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (!envelope) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: `Koperta "${envelopeName}" nie znaleziona` },
                 { status: 404 }
             )
@@ -58,28 +60,28 @@ export async function POST(request: NextRequest) {
                 // Więc uwzględniamy efekt transferu
                 if (transaction.type === 'income') {
                     // Transfer do tej koperty - zwiększa saldo
-                    calculatedBalance += transaction.amount
+                    calculatedBalance += toNum(transaction.amount)
                 } else if (transaction.type === 'expense') {
                     // Transfer z tej koperty - zmniejsza saldo
-                    calculatedBalance -= transaction.amount
+                    calculatedBalance -= toNum(transaction.amount)
                 }
             } else {
                 // Zwykłe transakcje - przeliczamy używając nowej logiki
                 if (transaction.type === 'expense') {
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: expense zwiększa saldo
-                        calculatedBalance += transaction.amount
+                        calculatedBalance += toNum(transaction.amount)
                     } else {
                         // Koperty wydatkowe roczne: expense zmniejsza saldo
-                        calculatedBalance -= transaction.amount
+                        calculatedBalance -= toNum(transaction.amount)
                     }
                 } else if (transaction.type === 'income') {
                     if (isSavingsEnvelope) {
                         // Koperty oszczędnościowe: income zmniejsza saldo (wypłata z oszczędności)
-                        calculatedBalance -= transaction.amount
+                        calculatedBalance -= toNum(transaction.amount)
                     } else {
                         // Koperty wydatkowe roczne: income zwiększa saldo (zwrot/wpłata do koperty)
-                        calculatedBalance += transaction.amount
+                        calculatedBalance += toNum(transaction.amount)
                     }
                 }
             }
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             message: `Saldo koperty "${envelopeName}" zostało przeliczone`,
             oldBalance: envelope.currentAmount,
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Fix envelope balance error:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd przeliczania salda koperty' },
             { status: 500 }
         )

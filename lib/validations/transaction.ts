@@ -14,7 +14,11 @@ export const createTransactionSchema = z.object({
   date: dateStringSchema.optional(),
   envelopeId: z.string().optional(),
   category: z.string().max(100).optional(),
-  includeInStats: z.boolean().optional().default(true)
+  includeInStats: z.boolean().optional().default(true),
+  /** Kwota w walucie obcej (dla wydatku z portfela walutowego PLN-envelope) */
+  foreignAmount: z.number().positive().optional(),
+  /** Kod waluty obcej (np. EUR, USD) — wymagany gdy foreignAmount podane */
+  foreignCurrency: z.string().min(1).max(10).optional(),
 })
 
 export const incomeSchema = z.object({

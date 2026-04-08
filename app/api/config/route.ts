@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function GET(request: NextRequest) {
     try {
@@ -33,15 +34,8 @@ export async function GET(request: NextRequest) {
 
 
         // zwróć także listę kopert miesięcznych (do edycji planów w UI konfiguratora)
-        let monthlyEnvelopes: Array<{
-            id: string
-            name: string
-            icon: string | null
-            plannedAmount: number
-            currentAmount: number
-            group: string | null
-            isArchived: boolean
-        }> = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let monthlyEnvelopes: any[] = []
         try {
             monthlyEnvelopes = await prisma.envelope.findMany({
                 where: {
@@ -50,7 +44,7 @@ export async function GET(request: NextRequest) {
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true, currencyCode: true, parentEnvelopeId: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -58,7 +52,7 @@ export async function GET(request: NextRequest) {
                 monthlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'monthly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true, currencyCode: true, parentEnvelopeId: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -72,15 +66,8 @@ export async function GET(request: NextRequest) {
         }
 
         // zwróć także listę kopert rocznych (do edycji planów w UI konfiguratora)
-        let yearlyEnvelopes: Array<{
-            id: string
-            name: string
-            icon: string | null
-            plannedAmount: number
-            currentAmount: number
-            group: string | null
-            isArchived: boolean
-        }> = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let yearlyEnvelopes: any[] = []
         try {
             yearlyEnvelopes = await prisma.envelope.findMany({
                 where: {
@@ -89,7 +76,7 @@ export async function GET(request: NextRequest) {
                     isArchived: isArchived
                 },
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true, currencyCode: true, parentEnvelopeId: true },
             })
         } catch (dbError) {
             // Jeśli błąd związany z kolumną isArchived, spróbuj bez filtrowania
@@ -97,7 +84,7 @@ export async function GET(request: NextRequest) {
                 yearlyEnvelopes = await prisma.envelope.findMany({
                     where: { userId, type: 'yearly' },
                     orderBy: { name: 'asc' },
-                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true },
+                    select: { id: true, name: true, icon: true, plannedAmount: true, currentAmount: true, group: true, isArchived: true, isAccumulating: true, currencyCode: true, parentEnvelopeId: true },
                 })
                 // Filtruj ręcznie jeśli kolumna nie istnieje
                 if (!isArchived) {
@@ -110,7 +97,7 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        const response = NextResponse.json({ config, monthlyEnvelopes, yearlyEnvelopes })
+        const response = jsonResponse({ config, monthlyEnvelopes, yearlyEnvelopes })
 
         // Wyłącz cache dla świeżych danych
         response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -119,7 +106,7 @@ export async function GET(request: NextRequest) {
 
         return response
     } catch (error) {
-        return NextResponse.json({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
+        return jsonResponse({ error: 'Błąd pobierania konfiguracji' }, { status: 500 })
     }
 }
 
@@ -184,11 +171,11 @@ export async function PUT(request: NextRequest) {
             }
         }
 
-        return NextResponse.json({ success: true, config: updated })
+        return jsonResponse({ success: true, config: updated })
     } catch (error) {
         console.error('Error saving config:', error)
         const errorMessage = error instanceof Error ? error.message : 'Błąd zapisu konfiguracji'
-        return NextResponse.json({ error: errorMessage }, { status: 500 })
+        return jsonResponse({ error: errorMessage }, { status: 500 })
     }
 }
 

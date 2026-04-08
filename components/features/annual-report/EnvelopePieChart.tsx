@@ -68,15 +68,15 @@ export function EnvelopePieChart({ groups, totalExpenses }: EnvelopePieChartProp
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group p-8 rounded-3xl border border-slate-700/30 bg-gradient-to-br from-slate-900/40 to-slate-950/40 backdrop-blur-xl mb-12 relative overflow-hidden"
+            className="group p-8 rounded-3xl border border-zinc-700/30 bg-gradient-to-br from-zinc-900/40 to-zinc-950/40 backdrop-blur-xl mb-12 relative overflow-hidden"
         >
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
                         Podział Wydatków wg Kopert
                     </h2>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400">
+                <div className="p-2 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400">
                     <PieChartIcon size={20} />
                 </div>
             </div>

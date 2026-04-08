@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/utils/prisma'
+import { jsonResponse } from '@/lib/utils/api'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { roundToCents } from '@/lib/utils/money'
 import { isEmergencyEnvelope, isProtectedEnvelope, isBudgetEnvelope, isSavingsEnvelope, isGoalEnvelope } from '@/lib/constants/envelopeTypes'
+import { toNum } from '@/lib/utils/decimal'
 
 import { SYSTEM_DESCRIPTIONS, DEFAULT_APP_START_DATE } from '@/lib/constants/system'
 
@@ -11,7 +13,7 @@ interface Transaction {
     id: string
     userId: string
     type: string
-    amount: number
+    amount: any  // Prisma.Decimal po migracji; używamy toNum() przy arytmetyce
     description: string | null
     date: Date
     envelopeId: string | null
@@ -37,7 +39,7 @@ export async function GET(request: NextRequest) {
         })
 
         if (!user) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Użytkownik nie znaleziony' },
                 { status: 404 }
             )
@@ -78,7 +80,7 @@ export async function GET(request: NextRequest) {
 
         // Znajdź kopertę Fundusz Awaryjny (emergency type)
         const emergencyFundEnvelope = activeEnvelopes.find((e: any) => isEmergencyEnvelope(e.envelopeType))
-        const emergencyFundAmount = emergencyFundEnvelope ? emergencyFundEnvelope.currentAmount : 0
+        const emergencyFundAmount = emergencyFundEnvelope ? toNum(emergencyFundEnvelope.currentAmount) : 0
 
         // Oblicz sumę wszystkich funduszy celowych/rocznych
         const goalFundsAmount = activeEnvelopes
@@ -86,7 +88,7 @@ export async function GET(request: NextRequest) {
                 isGoalEnvelope(e.envelopeType, e.name) &&
                 !isEmergencyEnvelope(e.envelopeType, e.name)
             )
-            .reduce((sum: number, e: any) => sum + e.currentAmount, 0)
+            .reduce((sum: number, e: any) => sum + toNum(e.currentAmount), 0)
 
         // Oblicz saldo: przychody - wydatki - fundusz awaryjny - fundusze celowe
         const balance = roundToCents(net - emergencyFundAmount - goalFundsAmount)
@@ -146,16 +148,16 @@ export async function GET(request: NextRequest) {
                 if (t.envelopeId && t.description?.includes(SYSTEM_DESCRIPTIONS.BONUS_TRANSFER_INDICATOR)) return false
                 return true
             })
-            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum, t) => sum + toNum(t.amount), 0) * 100) / 100
 
         const totalExpenses = Math.round(monthTransactions
             .filter(t => t.type === 'expense' && t.includeInStats !== false && !t.transferPairId)
-            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum, t) => sum + toNum(t.amount), 0) * 100) / 100
 
         // Oblicz środki już zaalokowane do kopert (transfery premii typu "Premia → Koperta")
         const allocatedToEnvelopes = Math.round(monthTransactions
             .filter(t => t.type === 'income' && t.envelopeId && t.description?.includes('→'))
-            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum, t) => sum + toNum(t.amount), 0) * 100) / 100
 
         // Oblicz zwroty (przychody niewliczane do statystyk, np. refundacje)
         const totalReturns = Math.round(monthTransactions
@@ -164,7 +166,7 @@ export async function GET(request: NextRequest) {
                 t.includeInStats === false &&
                 !t.transferPairId
             )
-            .reduce((sum, t) => sum + t.amount, 0) * 100) / 100
+            .reduce((sum, t) => sum + toNum(t.amount), 0) * 100) / 100
 
         // Oblicz nadwyżkę miesiąca (do transferu do Wolnych Środków)
         // = przychody (stats) + zwroty (non-stats) - wydatki
@@ -191,13 +193,13 @@ export async function GET(request: NextRequest) {
                 monthlyTransfersToEnvelopes.push({
                     name: envelope.name,
                     icon: envelope.icon || '📦',
-                    amount: transfer.amount
+                    amount: toNum(transfer.amount)
                 })
 
                 // Jeśli koperta jest roczna (lub chroniona typem), odejmij od nadwyżki
                 // 'yearly' envelopes OR protected types (savings, etc, which are effectively persistent)
                 if (envelope.type === 'yearly' || isProtectedEnvelope(envelope.envelopeType)) {
-                    allocatedToYearlyEnvelopes += transfer.amount
+                    allocatedToYearlyEnvelopes += toNum(transfer.amount)
                 }
             }
         }
@@ -217,13 +219,13 @@ export async function GET(request: NextRequest) {
 
             // Jeśli to transfer na kopertę chronioną (Savings, Emergency, Goal)
             if (envelope && isProtectedEnvelope(envelope.envelopeType)) {
-                monthlySurplus -= transfer.amount
+                monthlySurplus -= toNum(transfer.amount)
 
                 // Dodaj do listy (żeby użytkownik widział w modalu)
                 monthlyTransfersToEnvelopes.push({
                     name: envelope.name,
                     icon: envelope.icon || '🐷',
-                    amount: transfer.amount
+                    amount: toNum(transfer.amount)
                 })
             }
         }
@@ -240,6 +242,36 @@ export async function GET(request: NextRequest) {
                 envelopeActivity[envelopeId] = (envelopeActivity[envelopeId] || 0) + 1
             })
 
+        // Pobierz wszystkie aktywne loty walutowe użytkownika (batch, bez N+1)
+        const allFxLots = await prisma.fxLot.findMany({
+            where: { userId, remainingAmount: { gt: 0 } },
+            orderBy: { date: 'asc' }
+        })
+        // Grupuj po envelopeId
+        const fxLotsByEnvelope: Record<string, typeof allFxLots> = {}
+        for (const lot of allFxLots) {
+            if (!fxLotsByEnvelope[lot.envelopeId]) fxLotsByEnvelope[lot.envelopeId] = []
+            fxLotsByEnvelope[lot.envelopeId].push(lot)
+        }
+
+        // Helper: zwraca tablicę kieszeni walutowych pogrupowanych po walucie
+        const buildFxPockets = (lots: typeof allFxLots) => {
+            if (lots.length === 0) return null
+            const byCurrency: Record<string, { available: number; totalPln: number }> = {}
+            for (const lot of lots) {
+                const cur = lot.foreignCurrency ?? 'EUR'
+                if (!byCurrency[cur]) byCurrency[cur] = { available: 0, totalPln: 0 }
+                const rem = toNum(lot.remainingAmount)
+                byCurrency[cur].available += rem
+                byCurrency[cur].totalPln += rem * toNum(lot.exchangeRate)
+            }
+            return Object.entries(byCurrency).map(([currency, { available, totalPln }]) => ({
+                currency,
+                available: Math.round(available * 10000) / 10000,
+                rateAvg: available > 0 ? Math.round((totalPln / available) * 10000) / 10000 : 0
+            }))
+        }
+
         const monthlyEnvelopes = envelopes
             .filter(e => e.type === 'monthly')
             .map(e => {
@@ -253,24 +285,29 @@ export async function GET(request: NextRequest) {
                     if (isAccumulating) {
                         // Koperty oszczędnościowe: expense = wpłata na oszczędności (dodaje do spent)
                         // income = zwrot/wypłata (odejmuje od spent)
-                        return t.type === 'expense' ? sum + t.amount : sum - t.amount
+                        return t.type === 'expense' ? sum + toNum(t.amount) : sum - toNum(t.amount)
                     } else {
                         // Koperty wydatkowe: expense zwiększa spent (więcej wydatków)
-                        return t.type === 'expense' ? sum + t.amount : sum - t.amount
+                        return t.type === 'expense' ? sum + toNum(t.amount) : sum - toNum(t.amount)
                     }
                 }, 0))
+
+                const lots = fxLotsByEnvelope[e.id] ?? []
+                const fxPocket = buildFxPockets(lots)
 
                 return {
                     id: e.id,
                     name: e.name,
                     icon: e.icon,
                     spent: spent,
-                    planned: e.plannedAmount,
-                    current: e.currentAmount,
+                    planned: toNum(e.plannedAmount),
+                    current: toNum(e.currentAmount),
                     activityCount: envelopeActivity[e.id] || 0,
                     group: e.group,
                     isAccumulating: e.isAccumulating,
-                    envelopeType: e.envelopeType
+                    envelopeType: e.envelopeType,
+                    currencyCode: e.currencyCode ?? 'PLN',
+                    fxPocket
                 }
             })
             .sort((a, b) => {
@@ -288,18 +325,23 @@ export async function GET(request: NextRequest) {
                 )
                 // Oblicz faktyczne wydatki z tego miesiąca (dla sumy na pulpicie)
                 const monthlyExpenses = roundToCents(envelopeTransactions.reduce((sum, t) => {
-                    return t.type === 'expense' ? sum + t.amount : sum - t.amount
+                    return t.type === 'expense' ? sum + toNum(t.amount) : sum - toNum(t.amount)
                 }, 0))
+                const lots = fxLotsByEnvelope[e.id] ?? []
+                const fxPocket = buildFxPockets(lots)
+
                 return {
                     id: e.id,
                     name: e.name,
                     icon: e.icon,
                     spent: Math.max(0, monthlyExpenses), // Wydatki z tego miesiąca (dla sumy w grupie)
-                    planned: e.plannedAmount,
-                    current: e.currentAmount,
+                    planned: toNum(e.plannedAmount),
+                    current: toNum(e.currentAmount),
                     group: e.group,
                     isAccumulating: e.isAccumulating,
-                    envelopeType: e.envelopeType
+                    envelopeType: e.envelopeType,
+                    currencyCode: e.currencyCode ?? 'PLN',
+                    fxPocket
                 }
             })
             .sort((a, b) => a.name.localeCompare(b.name))
@@ -330,7 +372,7 @@ export async function GET(request: NextRequest) {
         const totalDays = lastDay.getDate()
         const monthProgress = currentDay
 
-        const response = NextResponse.json({
+        const response = jsonResponse({
             success: true,
             mainBalance: balance,
             availableFunds,
@@ -364,7 +406,7 @@ export async function GET(request: NextRequest) {
         return response
 
     } catch (error) {
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania danych' },
             { status: 500 }
         )

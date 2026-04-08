@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { getAssetPrices } from '@/lib/investments/price-service'
+import { jsonResponse } from '@/lib/utils/api'
 import { AssetType } from '@prisma/client'
+import { toNum } from '@/lib/utils/decimal'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,14 +36,14 @@ export async function GET(request: NextRequest) {
                 // Manual Mode
                 // For PPK, "currentPrice" is effectively the manual value (or unit price if quantity=1)
                 // We use manualCurrentValue as the distinct field.
-                marketValue = asset.manualCurrentValue || 0
-                totalCost = asset.totalContributed || 0
+                marketValue = toNum(asset.manualCurrentValue) || 0
+                totalCost = toNum(asset.totalContributed) || 0
                 currentPrice = marketValue // Display purpose
             } else {
                 // Live Mode
                 currentPrice = priceMap[asset.symbol] || 0
-                marketValue = asset.quantity * currentPrice
-                totalCost = asset.quantity * asset.averagePurchasePrice
+                marketValue = toNum(asset.quantity) * currentPrice
+                totalCost = toNum(asset.quantity) * toNum(asset.averagePurchasePrice)
             }
 
             const totalProfit = marketValue - totalCost
@@ -132,14 +134,14 @@ export async function GET(request: NextRequest) {
             totalProfitPercentage
         }
 
-        return NextResponse.json({ summary, positions: aggregatedPositions })
+        return jsonResponse({ summary, positions: aggregatedPositions })
 
     } catch (error: any) {
         console.error('❌ Error in GET /api/investments:', error)
         if (error instanceof Error && error.message.includes('Brak autoryzacji')) {
             return unauthorizedResponse(error.message)
         }
-        return NextResponse.json({ error: 'Failed to fetch investments' }, { status: 500 })
+        return jsonResponse({ error: 'Failed to fetch investments' }, { status: 500 })
     }
 }
 
@@ -153,7 +155,7 @@ export async function POST(request: NextRequest) {
         } = body
 
         if (!symbol || !type) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+            return jsonResponse({ error: 'Missing required fields' }, { status: 400 })
         }
 
         const asset = await prisma.investmentAsset.create({
@@ -168,13 +170,13 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        return NextResponse.json(asset)
+        return jsonResponse(asset)
 
     } catch (error: any) {
         console.error('Error in POST /api/investments:', error)
         if (error instanceof Error && error.message.includes('Brak autoryzacji')) {
             return unauthorizedResponse(error.message)
         }
-        return NextResponse.json({ error: 'Failed to create investment' }, { status: 500 })
+        return jsonResponse({ error: 'Failed to create investment' }, { status: 500 })
     }
 }

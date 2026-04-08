@@ -29,11 +29,11 @@ export function YearComparisonChart({
             animate={{ opacity: 1 }}
             className="w-full relative"
         >
-            <h2 className="text-xl font-bold text-slate-100 mb-2 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-zinc-100 mb-2 flex items-center gap-2">
                 <span>📊</span>
                 <span>Porównanie Wydatków: {previousYear} vs {currentYear}</span>
             </h2>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-zinc-400 mb-6">
                 Miesięczne wydatki w porównaniu rok do roku
             </p>
 

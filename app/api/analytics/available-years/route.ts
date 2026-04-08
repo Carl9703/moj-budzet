@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function GET(request: NextRequest) {
     try {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
         const currentYear = new Date().getFullYear()
 
         if (!transactions.length) {
-            return NextResponse.json([currentYear])
+            return jsonResponse([currentYear])
         }
 
         // Extract distinct years and sort descending
@@ -34,11 +35,11 @@ export async function GET(request: NextRequest) {
             uniqueYears.sort((a, b) => b - a)
         }
 
-        return NextResponse.json(uniqueYears)
+        return jsonResponse(uniqueYears)
 
     } catch (error) {
         console.error('Error fetching available years:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Internal server error' },
             { status: 500 }
         )

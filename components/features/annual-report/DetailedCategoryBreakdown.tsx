@@ -116,15 +116,15 @@ export function DetailedCategoryBreakdown({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl"
+            className="p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl"
         >
             <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
                     <span>📊</span>
                     <span>Szczegółowa Analiza Wydatków</span>
                 </h2>
             </div>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-zinc-400 mb-6">
                 Wybierz grupę i kopertę, aby przeanalizować trendy i odchylenia od średniej.
             </p>
 
@@ -132,22 +132,22 @@ export function DetailedCategoryBreakdown({
                 {sortedGroups.map((group) => (
                     <div
                         key={group.groupName}
-                        className="border border-slate-700/50 rounded-xl overflow-hidden bg-slate-800/20"
+                        className="border border-zinc-700/50 rounded-xl overflow-hidden bg-zinc-800/20"
                     >
                         {/* Group Header */}
                         <button
                             onClick={() => toggleGroup(group.groupName)}
-                            className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors bg-gradient-to-r from-slate-800/50 to-transparent"
+                            className="w-full p-4 flex items-center justify-between text-left hover:bg-zinc-800/30 transition-colors bg-gradient-to-r from-zinc-800/50 to-transparent"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                                <div className="p-2 rounded-lg bg-amber-500/15 text-amber-400">
                                     <Layers size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-100">
+                                    <h3 className="text-lg font-bold text-zinc-100">
                                         {group.groupName}
                                     </h3>
-                                    <p className="text-sm text-slate-400">
+                                    <p className="text-sm text-zinc-400">
                                         {group.envelopes.length} kopert
                                     </p>
                                 </div>
@@ -155,7 +155,7 @@ export function DetailedCategoryBreakdown({
 
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                    <p className="text-lg font-bold text-slate-100">
+                                    <p className="text-lg font-bold text-zinc-100">
                                         {group.totalAmount.toFixed(2)} zł
                                     </p>
                                     <div className="flex items-center justify-end gap-2">
@@ -165,20 +165,20 @@ export function DetailedCategoryBreakdown({
                                                     {group.yearOverYear.change > 0 ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
                                                     {group.yearOverYear.changePercent > 0 ? '+' : ''}{group.yearOverYear.changePercent.toFixed(1)}%
                                                 </div>
-                                                <span className="text-[10px] text-slate-500">
+                                                <span className="text-[10px] text-zinc-500">
                                                     (Poprz: {group.yearOverYear.previousYearAmount.toFixed(0)} zł)
                                                 </span>
                                             </div>
                                         )}
-                                        <p className="text-sm text-indigo-400 font-medium">
+                                        <p className="text-sm text-amber-400 font-medium">
                                             {group.percentage.toFixed(1)}% całości
                                         </p>
                                     </div>
                                 </div>
                                 {expandedGroup === group.groupName ? (
-                                    <ChevronUp className="text-slate-400" size={20} />
+                                    <ChevronUp className="text-zinc-400" size={20} />
                                 ) : (
-                                    <ChevronDown className="text-slate-400" size={20} />
+                                    <ChevronDown className="text-zinc-400" size={20} />
                                 )}
                             </div>
                         </button>
@@ -216,22 +216,22 @@ export function DetailedCategoryBreakdown({
                                         const isChartExpanded = expandedGroupChart === group.groupName
 
                                         return (
-                                            <div className="border-b border-slate-700/30 bg-slate-900/20">
+                                            <div className="border-b border-zinc-700/30 bg-zinc-900/20">
                                                 {/* Collapsible Header */}
                                                 <button
                                                     onClick={() => setExpandedGroupChart(isChartExpanded ? null : group.groupName)}
-                                                    className="w-full p-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                                                    className="w-full p-3 flex items-center justify-between hover:bg-zinc-800/30 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <BarChart3 size={16} className="text-indigo-400" />
+                                                        <BarChart3 size={16} className="text-amber-400" />
                                                         <div className="text-left">
-                                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                                                                 Trend całej grupy
                                                             </p>
-                                                            <p className="text-sm text-slate-500">
-                                                                Łącznie: <span className="font-bold text-slate-300">{group.totalAmount.toFixed(0)} zł</span>
+                                                            <p className="text-sm text-zinc-500">
+                                                                Łącznie: <span className="font-bold text-zinc-300">{group.totalAmount.toFixed(0)} zł</span>
                                                                 {groupTrendData.length > 1 && (
-                                                                    <span className="ml-2">• Śr.: <span className="font-bold text-slate-300">{groupAverage.toFixed(0)} zł/m-c</span></span>
+                                                                    <span className="ml-2">• Śr.: <span className="font-bold text-zinc-300">{groupAverage.toFixed(0)} zł/m-c</span></span>
                                                                 )}
                                                             </p>
                                                         </div>
@@ -244,9 +244,9 @@ export function DetailedCategoryBreakdown({
                                                             </div>
                                                         )}
                                                         {isChartExpanded ? (
-                                                            <ChevronUp size={16} className="text-slate-500" />
+                                                            <ChevronUp size={16} className="text-zinc-500" />
                                                         ) : (
-                                                            <ChevronDown size={16} className="text-slate-500" />
+                                                            <ChevronDown size={16} className="text-zinc-500" />
                                                         )}
                                                     </div>
                                                 </button>
@@ -280,8 +280,8 @@ export function DetailedCategoryBreakdown({
                                                                                     if (active && payload && payload.length) {
                                                                                         const data = payload[0].payload;
                                                                                         return (
-                                                                                            <div className="bg-slate-900 border border-slate-700 rounded-lg p-2 shadow-xl">
-                                                                                                <p className="text-slate-400 text-xs mb-1 font-semibold">{data.month}</p>
+                                                                                            <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-2 shadow-xl">
+                                                                                                <p className="text-zinc-400 text-xs mb-1 font-semibold">{data.month}</p>
                                                                                                 <span className="text-lg font-bold text-white">{data.amount.toFixed(0)} zł</span>
                                                                                             </div>
                                                                                         );
@@ -313,7 +313,7 @@ export function DetailedCategoryBreakdown({
                                     })()}
 
                                     {/* Envelopes List */}
-                                    <div className="p-2 space-y-2 bg-slate-900/30">
+                                    <div className="p-2 space-y-2 bg-zinc-900/30">
                                         {group.envelopes.map((envelope) => {
                                             const isEnvelopeActive = selectedEnvelopeId === envelope.envelopeId
 
@@ -402,7 +402,7 @@ export function DetailedCategoryBreakdown({
                                             return (
                                                 <div
                                                     key={envelope.envelopeId}
-                                                    className={`rounded-lg border transition-all duration-300 overflow-hidden ${isEnvelopeActive ? 'border-indigo-500/30 bg-indigo-500/5 shadow-lg' : 'border-slate-700/30 bg-slate-800/40 hover:bg-slate-700/30'}`}
+                                                    className={`rounded-lg border transition-all duration-300 overflow-hidden ${isEnvelopeActive ? 'border-amber-500/30 bg-amber-500/5 shadow-lg' : 'border-zinc-700/30 bg-zinc-800/40 hover:bg-zinc-700/30'}`}
                                                 >
                                                     <button
                                                         onClick={(e) => toggleEnvelope(envelope.envelopeId, e)}
@@ -411,24 +411,24 @@ export function DetailedCategoryBreakdown({
                                                         <div className="flex items-center gap-3">
                                                             <span className="text-xl">{envelope.envelopeIcon}</span>
                                                             <div className="text-left">
-                                                                <p className={`font-semibold transition-colors ${isEnvelopeActive ? 'text-indigo-200' : 'text-slate-200'}`}>{envelope.envelopeName}</p>
-                                                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                                <p className={`font-semibold transition-colors ${isEnvelopeActive ? 'text-amber-200' : 'text-zinc-200'}`}>{envelope.envelopeName}</p>
+                                                                <div className="flex items-center gap-2 text-xs text-zinc-500">
                                                                     {showTransactions && (
                                                                         <>
                                                                             <span>{envelope.transactionCount} transakcji</span>
                                                                             <span>•</span>
                                                                         </>
                                                                     )}
-                                                                    <span className="text-slate-400">Śr. {envelope.monthlyAverage.toFixed(0)} zł/m-c</span>
+                                                                    <span className="text-zinc-400">Śr. {envelope.monthlyAverage.toFixed(0)} zł/m-c</span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             <div className="text-right">
-                                                                <p className="font-bold text-slate-200">{envelope.totalAmount.toFixed(2)} zł</p>
+                                                                <p className="font-bold text-zinc-200">{envelope.totalAmount.toFixed(2)} zł</p>
                                                                 {envelope.yearOverYear && (
                                                                     <div className="flex items-center justify-end gap-1.5">
-                                                                        <span className="text-[10px] text-slate-500">
+                                                                        <span className="text-[10px] text-zinc-500">
                                                                             {envelope.yearOverYear.previousYearAmount.toFixed(0)} zł
                                                                         </span>
                                                                         <span className={`text-xs font-mono ${envelope.yearOverYear.change > 0 ? 'text-amber-500/80' : 'text-emerald-500/80'}`}>
@@ -438,9 +438,9 @@ export function DetailedCategoryBreakdown({
                                                                 )}
                                                             </div>
                                                             {isEnvelopeActive ? (
-                                                                <ChevronUp className="text-slate-500" size={16} />
+                                                                <ChevronUp className="text-zinc-500" size={16} />
                                                             ) : (
-                                                                <ChevronDown className="text-slate-500" size={16} />
+                                                                <ChevronDown className="text-zinc-500" size={16} />
                                                             )}
                                                         </div>
                                                     </button>
@@ -454,17 +454,17 @@ export function DetailedCategoryBreakdown({
                                                                 exit={{ height: 0, opacity: 0 }}
                                                                 className="overflow-hidden"
                                                             >
-                                                                <div className="p-4 border-t border-indigo-500/20">
+                                                                <div className="p-4 border-t border-amber-500/20">
                                                                     {/* Category Chips - Horizontal */}
                                                                     <div className="mb-4">
                                                                         <div className="flex items-center justify-between mb-2">
-                                                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                                                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                                                                                 Filtruj wg kategorii
                                                                             </p>
                                                                             {selectedCategoryId && (
                                                                                 <button
                                                                                     onClick={() => setSelectedCategoryId(null)}
-                                                                                    className="text-xs flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                                                                                    className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors font-medium"
                                                                                 >
                                                                                     <RotateCcw size={12} />
                                                                                     Resetuj
@@ -476,8 +476,8 @@ export function DetailedCategoryBreakdown({
                                                                             <button
                                                                                 onClick={() => setSelectedCategoryId(null)}
                                                                                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${selectedCategoryId === null
-                                                                                    ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20'
-                                                                                    : 'bg-slate-800/60 text-slate-400 border border-slate-700/50 hover:bg-slate-700/60 hover:text-slate-200'
+                                                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                                                                    : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-200'
                                                                                     }`}
                                                                             >
                                                                                 Cała Koperta
@@ -490,7 +490,7 @@ export function DetailedCategoryBreakdown({
                                                                                     onClick={() => selectCategory(cat.categoryId)}
                                                                                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${selectedCategoryId === cat.categoryId
                                                                                         ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
-                                                                                        : 'bg-slate-800/60 text-slate-400 border border-slate-700/50 hover:bg-slate-700/60 hover:text-slate-200'
+                                                                                        : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-200'
                                                                                         }`}
                                                                                 >
                                                                                     <span>{cat.categoryIcon}</span>
@@ -502,12 +502,12 @@ export function DetailedCategoryBreakdown({
                                                                     </div>
 
                                                                     {/* Full-width Chart Area */}
-                                                                    <div className="bg-slate-900/40 rounded-xl p-5 border border-slate-700/50 flex flex-col">
+                                                                    <div className="bg-zinc-900/40 rounded-xl p-5 border border-zinc-700/50 flex flex-col">
                                                                         {/* Header with Title and Tabs */}
-                                                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-slate-700/50">
+                                                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-zinc-700/50">
                                                                             <div className="flex-1 min-w-0">
-                                                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Analizowany zakres</p>
-                                                                                <h4 className="text-xl font-bold text-slate-100 flex items-center gap-2 truncate">
+                                                                                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Analizowany zakres</p>
+                                                                                <h4 className="text-xl font-bold text-zinc-100 flex items-center gap-2 truncate">
                                                                                     {chartTitle}
                                                                                 </h4>
                                                                             </div>
@@ -515,17 +515,17 @@ export function DetailedCategoryBreakdown({
                                                                             <div className="flex flex-col sm:items-end gap-3 shrink-0">
                                                                                 {/* Tab Switcher */}
                                                                                 {showTransactions && (
-                                                                                    <div className="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700/50 self-start sm:self-auto">
+                                                                                    <div className="flex bg-zinc-800/80 p-1 rounded-lg border border-zinc-700/50 self-start sm:self-auto">
                                                                                         <button
                                                                                             onClick={() => setActiveTab('chart')}
-                                                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'chart' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                                                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'chart' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
                                                                                         >
                                                                                             <BarChart3 size={14} />
                                                                                             Trend
                                                                                         </button>
                                                                                         <button
                                                                                             onClick={() => setActiveTab('transactions')}
-                                                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'transactions' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                                                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'transactions' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
                                                                                         >
                                                                                             <List size={14} />
                                                                                             Transakcje
@@ -536,11 +536,11 @@ export function DetailedCategoryBreakdown({
                                                                                 <div className="flex gap-4 sm:gap-6">
                                                                                     {prevYearAverage && (
                                                                                         <div className="text-right hidden sm:block">
-                                                                                            <p className="text-[10px] text-slate-500 mb-0.5">Śr. poprzednio: {prevYearAverage.toFixed(0)} zł</p>
+                                                                                            <p className="text-[10px] text-zinc-500 mb-0.5">Śr. poprzednio: {prevYearAverage.toFixed(0)} zł</p>
                                                                                         </div>
                                                                                     )}
                                                                                     <div className="text-right">
-                                                                                        <p className="text-[10px] text-slate-500 mb-0.5">Śr. obecnie: {chartAverage.toFixed(0)} zł</p>
+                                                                                        <p className="text-[10px] text-zinc-500 mb-0.5">Śr. obecnie: {chartAverage.toFixed(0)} zł</p>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -583,12 +583,12 @@ export function DetailedCategoryBreakdown({
                                                                                                                 const showAvgComparison = monthsWithData.length > 1;
 
                                                                                                                 return (
-                                                                                                                    <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
-                                                                                                                        <p className="text-slate-400 text-xs mb-1 font-semibold uppercase">{data.month}</p>
+                                                                                                                    <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-xl">
+                                                                                                                        <p className="text-zinc-400 text-xs mb-1 font-semibold uppercase">{data.month}</p>
                                                                                                                         <div className="flex items-baseline gap-2 mb-2">
                                                                                                                             <span className="text-xl font-bold text-white">{data.amount.toFixed(2)} zł</span>
                                                                                                                             {compareMode && data.previousAmount > 0 && (
-                                                                                                                                <span className="text-xs text-slate-500">
+                                                                                                                                <span className="text-xs text-zinc-500">
                                                                                                                                     vs {data.previousAmount.toFixed(2)} zł
                                                                                                                                 </span>
                                                                                                                             )}
@@ -631,7 +631,7 @@ export function DetailedCategoryBreakdown({
                                                                                                 </ComposedChart>
                                                                                             </ResponsiveContainer>
                                                                                         </div>
-                                                                                        <div className="mt-4 flex items-center justify-center gap-4 text-[10px] text-slate-500">
+                                                                                        <div className="mt-4 flex items-center justify-center gap-4 text-[10px] text-zinc-500">
                                                                                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded bg-amber-500/80"></div><span>Skok (&gt;150%)</span></div>
                                                                                             <div className="flex items-center gap-1"><div className="w-2 h-0.5 border-t border-dashed border-amber-400"></div><span>Średnia roczna</span></div>
                                                                                         </div>
@@ -649,7 +649,7 @@ export function DetailedCategoryBreakdown({
                                                                                                 const trxs = selectedCategory ? selectedCategory.transactions : envelope.transactions;
                                                                                                 if (!trxs || trxs.length === 0) {
                                                                                                     return (
-                                                                                                        <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-60 py-10">
+                                                                                                        <div className="h-full flex flex-col items-center justify-center text-zinc-500 opacity-60 py-10">
                                                                                                             <List size={32} className="mb-2" />
                                                                                                             <p className="text-sm">Brak transakcji w tym okresie</p>
                                                                                                         </div>
@@ -658,17 +658,17 @@ export function DetailedCategoryBreakdown({
                                                                                                 return trxs.map((trx: any) => (
                                                                                                     <div
                                                                                                         key={trx.id}
-                                                                                                        className="group flex items-center justify-between p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50 transition-all duration-200"
+                                                                                                        className="group flex items-center justify-between p-3 rounded-xl bg-zinc-800/30 border border-zinc-700/30 hover:bg-zinc-800/50 hover:border-zinc-600/50 transition-all duration-200"
                                                                                                     >
                                                                                                         <div className="flex flex-col gap-0.5 min-w-0">
-                                                                                                            <div className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">
+                                                                                                            <div className="text-sm font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                                                                                                                 {trx.description}
                                                                                                             </div>
-                                                                                                            <div className="text-[10px] text-slate-500 font-mono">
+                                                                                                            <div className="text-[10px] text-zinc-500 font-mono">
                                                                                                                 {new Date(trx.date).toLocaleDateString('pl-PL')}
                                                                                                             </div>
                                                                                                         </div>
-                                                                                                        <div className="text-sm font-bold text-slate-100 font-mono ml-4">
+                                                                                                        <div className="text-sm font-bold text-zinc-100 font-mono ml-4">
                                                                                                             {(trx.amount || 0).toFixed(2)} zł
                                                                                                         </div>
                                                                                                     </div>

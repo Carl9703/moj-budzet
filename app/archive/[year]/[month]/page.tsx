@@ -287,7 +287,7 @@ export default function ArchiveMonthPage() {
   if (isCheckingAuth) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -298,8 +298,8 @@ export default function ArchiveMonthPage() {
     return (
       <div className="min-h-screen flex justify-center items-center h-[calc(100vh-80px)]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin" />
-          <div className="text-lg text-slate-400 animate-pulse">📊 Ładowanie analiz...</div>
+          <div className="w-16 h-16 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
+          <div className="text-lg text-zinc-400 animate-pulse">📊 Ładowanie analiz...</div>
         </div>
       </div>
     )
@@ -308,12 +308,12 @@ export default function ArchiveMonthPage() {
   if (!data) {
     return (
       <div className="min-h-screen py-20 px-4">
-        <div className="max-w-md mx-auto p-10 text-center rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl shadow-sm border-rose-500/30">
+        <div className="max-w-md mx-auto p-10 text-center rounded-2xl border border-zinc-700/50 bg-gradient-to-br from-zinc-800/40 to-zinc-900/40 backdrop-blur-xl shadow-sm border-rose-500/30">
           <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-500">
             <AlertCircle size={32} />
           </div>
           <div className="text-xl font-bold mb-2 text-white">Błąd ładowania danych</div>
-          <div className="text-sm mb-6 text-slate-400">{error || 'Nie znaleziono danych'}</div>
+          <div className="text-sm mb-6 text-zinc-400">{error || 'Nie znaleziono danych'}</div>
           <button
             onClick={goBack}
             className="btn-primary w-full flex items-center justify-center gap-2"
@@ -326,7 +326,7 @@ export default function ArchiveMonthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
       <div className="w-full px-4 sm:px-6 lg:px-8 pb-28 md:pb-4 pt-0 flex flex-col relative z-10 max-w-[2560px] mx-auto">
 
         {/* Header */}
@@ -339,17 +339,17 @@ export default function ArchiveMonthPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={goBack}
-                className="p-2.5 bg-slate-800/50 hover:bg-slate-700 border border-slate-700/50 rounded-xl cursor-pointer text-slate-400 hover:text-white transition-all active:scale-95"
+                className="p-2.5 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700/50 rounded-xl cursor-pointer text-zinc-400 hover:text-white transition-all active:scale-95"
                 title="Wróć do archiwum"
               >
                 <ArrowLeft size={18} />
               </button>
 
               <div>
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight">
                   📊 Analiza: <span className="capitalize">{getMonthDisplayName()} {year}</span>
                 </h1>
-                <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">
+                <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
                   Kompleksowe podsumowanie Twoich finansów za wybrany okres historyczny
                 </p>
               </div>
@@ -378,7 +378,7 @@ export default function ArchiveMonthPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl p-6"
+            className="rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl p-6"
           >
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
               <span className="text-xl">🥧</span> Rozkład Wydatków
@@ -397,14 +397,14 @@ export default function ArchiveMonthPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl p-6"
+            className="rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl p-6"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <span className="text-xl">📈</span> Trendy Wydatków
               </h3>
               {selectedItem && (
-                <span className="text-[10px] px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded-full border border-indigo-500/30 uppercase font-black tracking-widest">
+                <span className="text-[10px] px-2 py-1 bg-amber-500/15 text-amber-400 rounded-full border border-amber-500/30 uppercase font-black tracking-widest">
                   {selectedItem.name}
                 </span>
               )}
@@ -424,12 +424,12 @@ export default function ArchiveMonthPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl"
+          className="rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl"
         >
           <div className="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-white">🔍 Szczegółowa Analiza</h3>
-              <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">Przeglądaj wydatki według kategorii, kopert i poszczególnych transakcji</p>
+              <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">Przeglądaj wydatki według kategorii, kopert i poszczególnych transakcji</p>
             </div>
           </div>
           <div className="p-0">

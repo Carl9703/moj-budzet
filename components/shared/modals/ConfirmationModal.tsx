@@ -45,9 +45,9 @@ const variantStyles = {
     },
     default: {
         icon: HelpCircle,
-        iconColor: 'text-indigo-500',
-        iconBg: 'bg-indigo-500/10',
-        confirmBtn: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
+        iconColor: 'text-amber-500',
+        iconBg: 'bg-amber-500/10',
+        confirmBtn: 'bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-500/20'
     }
 }
 
@@ -78,7 +78,7 @@ export function ConfirmationModal({
                     {title}
                 </h3>
 
-                <p className="text-slate-400 mb-6 max-w-sm mx-auto leading-relaxed text-sm">
+                <p className="text-zinc-400 mb-6 max-w-sm mx-auto leading-relaxed text-sm">
                     {description}
                 </p>
 
@@ -86,7 +86,7 @@ export function ConfirmationModal({
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="px-5 py-2.5 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
+                        className="px-5 py-2.5 rounded-xl font-semibold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50"
                     >
                         {cancelText}
                     </button>

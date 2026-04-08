@@ -26,7 +26,7 @@ interface BreadcrumbItem {
 }
 
 const TREMOR_COLORS = [
-    'indigo', 'pink', 'emerald', 'amber', 'violet',
+    'amber', 'pink', 'emerald', 'amber', 'violet',
     'cyan', 'rose', 'blue', 'fuchsia', 'lime',
     'teal', 'orange', 'purple', 'green', 'yellow'
 ]
@@ -170,7 +170,7 @@ export function DrillDownExpenseChart({
         <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="group p-6 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl relative overflow-hidden"
+            className="group p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl relative overflow-hidden"
         >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
@@ -178,22 +178,22 @@ export function DrillDownExpenseChart({
                     {drillLevel !== 'groups' && (
                         <button
                             onClick={handleBack}
-                            className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                            className="p-2 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-700/50 transition-colors"
                         >
                             <ArrowLeft size={20} />
                         </button>
                     )}
                     <div>
-                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
                             {getLevelTitle()}
                         </h2>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-zinc-500">
                             {canDrillDown ? 'Kliknij element aby zobaczyć szczegóły' : 'Najniższy poziom szczegółowości'}
                         </p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Suma z grupy</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Suma z grupy</div>
                     <div className="text-xl font-bold text-white">{formatMoneyWithSeparators(currentTotal)}</div>
                 </div>
             </div>
@@ -205,16 +205,16 @@ export function DrillDownExpenseChart({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center gap-2 mb-6 text-xs bg-slate-800/30 p-2 rounded-lg border border-slate-700/30 w-fit"
+                        className="flex items-center gap-2 mb-6 text-xs bg-zinc-800/30 p-2 rounded-lg border border-zinc-700/30 w-fit"
                     >
                         {breadcrumbs.map((item, index) => (
                             <div key={index} className="flex items-center gap-2">
-                                {index > 0 && <ChevronRight size={12} className="text-slate-600" />}
+                                {index > 0 && <ChevronRight size={12} className="text-zinc-600" />}
                                 <button
                                     onClick={() => handleBreadcrumbClick(item)}
                                     className={`transition-colors px-2 py-1 rounded-md ${index === breadcrumbs.length - 1
-                                        ? 'bg-indigo-500/20 text-indigo-300 font-medium cursor-default pointer-events-none'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-amber-500/15 text-amber-300 font-medium cursor-default pointer-events-none'
+                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
                                         }`}
                                     disabled={index === breadcrumbs.length - 1}
                                 >
@@ -260,7 +260,7 @@ export function DrillDownExpenseChart({
                                         key={entry.name}
                                         onClick={() => canDrillDown && handleSegmentClick(entry)}
                                         disabled={!canDrillDown}
-                                        className={`group relative flex items-center justify-between p-3 rounded-xl border border-white/5 bg-slate-900/40 overflow-hidden text-left transition-all ${canDrillDown ? 'hover:bg-slate-800 hover:border-white/10 cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
+                                        className={`group relative flex items-center justify-between p-3 rounded-xl border border-white/5 bg-zinc-900/40 overflow-hidden text-left transition-all ${canDrillDown ? 'hover:bg-zinc-800 hover:border-white/10 cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
                                     >
                                         {/* Background Progress Bar */}
                                         <div
@@ -278,14 +278,14 @@ export function DrillDownExpenseChart({
                                                 style={{ backgroundColor: CSS_COLORS[index % CSS_COLORS.length] }}
                                             />
                                             <div className="flex justify-between w-full items-center gap-4">
-                                                <span className="text-sm font-medium text-slate-200 truncate pr-4">
+                                                <span className="text-sm font-medium text-zinc-200 truncate pr-4">
                                                     {entry.name}
                                                 </span>
                                                 <div className="flex gap-4 items-center shrink-0">
                                                     <span className="text-sm font-bold text-white tabular-nums tracking-tight">
                                                         {formatMoneyWithSeparators(entry.value)}
                                                     </span>
-                                                    <span className="text-xs text-slate-400 font-medium tabular-nums min-w-[40px] text-right">
+                                                    <span className="text-xs text-zinc-400 font-medium tabular-nums min-w-[40px] text-right">
                                                         {percentage.toFixed(1)}%
                                                     </span>
                                                 </div>
@@ -297,7 +297,7 @@ export function DrillDownExpenseChart({
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-16 text-slate-400">
+                    <div className="text-center py-16 text-zinc-400">
                         <PieChartIcon size={48} className="mx-auto mb-4 opacity-30" />
                         <p className="font-medium">Brak danych do wyświetlenia dla wybranej grupy</p>
                     </div>

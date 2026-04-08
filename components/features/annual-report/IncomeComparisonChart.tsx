@@ -27,13 +27,13 @@ export function IncomeComparisonChart({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glassmorphic-premium p-6 rounded-2xl border border-slate-700/50 mb-8"
+            className="glassmorphic-premium p-6 rounded-2xl border border-zinc-700/50 mb-8"
         >
-            <h2 className="text-xl font-bold text-slate-100 mb-2 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-zinc-100 mb-2 flex items-center gap-2">
                 <span>💰</span>
                 <span>Porównanie Dochodów: {previousYear} vs {currentYear}</span>
             </h2>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-zinc-400 mb-6">
                 Miesięczne dochody w porównaniu rok do roku
             </p>
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { z } from 'zod'
+import { jsonResponse } from '@/lib/utils/api'
 
 const updateCategorySchema = z.object({
     name: z.string().min(1).optional(),
@@ -29,7 +30,7 @@ export async function PUT(
         const validation = updateCategorySchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
@@ -41,7 +42,7 @@ export async function PUT(
         })
 
         if (!existing || existing.userId !== userId) {
-            return NextResponse.json({ error: 'Kategoria nie znaleziona' }, { status: 404 })
+            return jsonResponse({ error: 'Kategoria nie znaleziona' }, { status: 404 })
         }
 
         const updated = await prisma.category.update({
@@ -49,10 +50,10 @@ export async function PUT(
             data: validation.data
         })
 
-        return NextResponse.json(updated)
+        return jsonResponse(updated)
 
     } catch (error) {
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd aktualizacji kategorii' },
             { status: 500 }
         )
@@ -79,7 +80,7 @@ export async function DELETE(
         })
 
         if (!existing || existing.userId !== userId) {
-            return NextResponse.json({ error: 'Kategoria nie znaleziona' }, { status: 404 })
+            return jsonResponse({ error: 'Kategoria nie znaleziona' }, { status: 404 })
         }
 
         // Check if category has transactions (by ID or name - legacy support)
@@ -100,7 +101,7 @@ export async function DELETE(
                 data: { isArchived: true }
             })
 
-            return NextResponse.json({
+            return jsonResponse({
                 success: true,
                 archived: true,
                 message: `Kategoria została zarchiwizowana (${transactionCount} transakcji)`
@@ -112,11 +113,11 @@ export async function DELETE(
             where: { id: params.id }
         })
 
-        return NextResponse.json({ success: true, archived: false })
+        return jsonResponse({ success: true, archived: false })
 
     } catch (error) {
         console.error('Error deleting/archiving category:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd usuwania kategorii' },
             { status: 500 }
         )
@@ -143,7 +144,7 @@ export async function GET(
         })
 
         if (!category || category.userId !== userId) {
-            return NextResponse.json({ error: 'Kategoria nie znaleziona' }, { status: 404 })
+            return jsonResponse({ error: 'Kategoria nie znaleziona' }, { status: 404 })
         }
 
         // Count transactions (by ID or name - legacy support)
@@ -157,7 +158,7 @@ export async function GET(
             }
         })
 
-        return NextResponse.json({
+        return jsonResponse({
             category,
             transactionCount,
             canDelete: transactionCount === 0,
@@ -165,7 +166,7 @@ export async function GET(
         })
 
     } catch (error) {
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania kategorii' },
             { status: 500 }
         )

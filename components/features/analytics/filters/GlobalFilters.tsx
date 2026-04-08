@@ -61,8 +61,8 @@ export function GlobalFilters({ dateRange, compareMode, period, onDateRangeChang
                 onClick={() => handlePeriodSelect(p.key)}
                 disabled={loading}
                 className={`flex-1 min-w-[80px] px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 text-center ${isSelected
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                  : 'bg-slate-800/60 text-slate-400 border border-slate-700/50 hover:bg-slate-700/60 hover:text-slate-200'
+                  ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
+                  : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-200'
                   } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {p.shortLabel}
@@ -80,8 +80,8 @@ export function GlobalFilters({ dateRange, compareMode, period, onDateRangeChang
             }}
             disabled={loading}
             className={`flex-1 min-w-[80px] px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 ${isCustomRange
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-              : 'bg-slate-800/60 text-slate-400 border border-slate-700/50 hover:bg-slate-700/60 hover:text-slate-200'
+              ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
+              : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-200'
               } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <Calendar size={12} />
@@ -94,12 +94,12 @@ export function GlobalFilters({ dateRange, compareMode, period, onDateRangeChang
         <div className="flex items-center gap-3">
           {/* Date Range Display */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-medium">Okres:</span>
-            <span className="text-slate-200 font-bold font-mono">{formatDateRange()}</span>
+            <span className="text-zinc-500 font-medium">Okres:</span>
+            <span className="text-zinc-200 font-bold font-mono">{formatDateRange()}</span>
           </div>
 
           {/* Divider */}
-          <div className="h-5 w-px bg-slate-700/50 hidden sm:block" />
+          <div className="h-5 w-px bg-zinc-700/50 hidden sm:block" />
 
           {/* Compare Toggle */}
           <button
@@ -107,7 +107,7 @@ export function GlobalFilters({ dateRange, compareMode, period, onDateRangeChang
             disabled={loading}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${compareMode
               ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20'
-              : 'bg-slate-800/60 text-slate-400 border border-slate-700/50 hover:bg-slate-700/60 hover:text-slate-200'
+              : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-700/60 hover:text-zinc-200'
               } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <ArrowLeftRight size={12} />
@@ -119,25 +119,25 @@ export function GlobalFilters({ dateRange, compareMode, period, onDateRangeChang
 
       {/* Custom Range Inputs - Collapsible */}
       {showCustomRange && isCustomRange && (
-        <div className="mt-3 pt-3 border-t border-slate-800/50 flex flex-wrap items-center gap-3">
+        <div className="mt-3 pt-3 border-t border-zinc-800/50 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <label className="text-[10px] uppercase font-bold text-slate-500">Od</label>
+            <label className="text-[10px] uppercase font-bold text-zinc-500">Od</label>
             <input
               type="date"
               value={dateRange.from?.toISOString().split('T')[0] || ''}
               onChange={(e) => onDateRangeChange({ ...dateRange, from: e.target.value ? new Date(e.target.value) : undefined }, 'custom')}
               disabled={loading}
-              className="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="bg-zinc-900/50 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[10px] uppercase font-bold text-slate-500">Do</label>
+            <label className="text-[10px] uppercase font-bold text-zinc-500">Do</label>
             <input
               type="date"
               value={dateRange.to?.toISOString().split('T')[0] || ''}
               onChange={(e) => onDateRangeChange({ ...dateRange, to: e.target.value ? new Date(e.target.value) : undefined }, 'custom')}
               disabled={loading}
-              className="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="bg-zinc-900/50 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
             />
           </div>
         </div>

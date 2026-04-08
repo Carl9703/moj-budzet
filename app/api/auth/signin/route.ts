@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { jsonResponse } from '@/lib/utils/api'
 import { env } from '@/lib/env'
 import { signinSchema } from '@/lib/validations/auth'
 import { rateLimit } from '@/lib/middleware/rateLimit'
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     const limitResult = rateLimit(ip, { limit: 5, windowMs: 15 * 60 * 1000 }) // 5 requests per 15 min
 
     if (!limitResult.success) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Zbyt wiele prób logowania. Spróbuj ponownie później.' },
         { status: 429, headers: { 'Retry-After': String(Math.ceil((limitResult.reset! - Date.now()) / 1000)) } }
       )
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     // Walidacja z Zod (pomiń dla demo user)
     const validation = signinSchema.safeParse(body)
     if (!validation.success) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: validation.error.issues[0].message },
         { status: 400 }
       )
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
         { expiresIn: '7d' }
       )
 
-      return NextResponse.json({
+      return jsonResponse({
         token,
         user: {
           id: user.id,
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!user || !user.hashedPassword) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Nieprawidłowy email lub hasło' },
         { status: 401 }
       )
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, user.hashedPassword)
 
     if (!isPasswordValid) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Nieprawidłowy email lub hasło' },
         { status: 401 }
       )
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: '7d' }
     )
 
-    return NextResponse.json({
+    return jsonResponse({
       token,
       user: {
         id: user.id,
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     logger.error('Signin error', error)
-    return NextResponse.json(
+    return jsonResponse(
       { error: 'Wystąpił błąd podczas logowania' },
       { status: 500 }
     )

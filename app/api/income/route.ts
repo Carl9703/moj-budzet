@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { incomeSchema } from '@/lib/validations/transaction'
+import { jsonResponse } from '@/lib/utils/api'
+import { toNum } from '@/lib/utils/decimal'
 
 export async function POST(request: NextRequest) {
     try {
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
         // Walidacja danych wejściowych
         const validation = incomeSchema.safeParse(body)
         if (!validation.success) {
-            return NextResponse.json(
+            return jsonResponse(
                 { error: 'Nieprawidłowe dane', details: validation.error.issues },
                 { status: 400 }
             )
@@ -129,7 +131,7 @@ export async function POST(request: NextRequest) {
                             await tx.envelope.update({
                                 where: { id: envelope.id },
                                 data: {
-                                    currentAmount: envelope.currentAmount + dist.amount
+                                    currentAmount: toNum(envelope.currentAmount) + dist.amount
                                 }
                             })
                         } else {
@@ -152,7 +154,7 @@ export async function POST(request: NextRequest) {
             })
         }
 
-        const response = NextResponse.json({ success: true })
+        const response = jsonResponse({ success: true })
         
         // Wyłącz cache dla świeżych danych
         response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -163,7 +165,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Error creating income:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd serwera' },
             { status: 500 }
         )

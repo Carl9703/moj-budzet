@@ -62,8 +62,8 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-5">
-      <div className="bg-slate-800 p-10 rounded-xl shadow-lg w-full max-w-md border border-slate-700">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-5">
+      <div className="bg-zinc-800 p-10 rounded-xl shadow-lg w-full max-w-md border border-zinc-700">
         <div className="text-center mb-8">
           <Text variant="h1" className="mb-2">💰 Budżet Domowy</Text>
           <Text variant="body" color="secondary">Stwórz nowe konto</Text>
@@ -123,10 +123,10 @@ export default function SignUpPage() {
           </Button>
         </form>
 
-        <div className="text-center mt-6 pt-6 border-t border-slate-700">
+        <div className="text-center mt-6 pt-6 border-t border-zinc-700">
           <Text variant="caption" color="secondary">
             Masz już konto?{' '}
-            <Link href="/auth/signin" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+            <Link href="/auth/signin" className="text-amber-400 hover:text-amber-300 font-medium transition-colors">
               Zaloguj się
             </Link>
           </Text>

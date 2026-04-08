@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { AssetType } from '@prisma/client'
+import { jsonResponse } from '@/lib/utils/api'
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
 
         if (!Array.isArray(body)) {
-            return NextResponse.json({ error: 'Expected an array of investments' }, { status: 400 });
+            return jsonResponse({ error: 'Expected an array of investments' }, { status: 400 });
         }
 
         const results = [];
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        return NextResponse.json({
+        return jsonResponse({
             success: true,
             count: results.length,
             positions: results
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
             return unauthorizedResponse(errorMessage);
         }
 
-        return NextResponse.json({
+        return jsonResponse({
             error: 'Failed to bulk create investments',
             details: errorMessage
         }, { status: 500 });

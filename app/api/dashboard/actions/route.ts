@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
+import { jsonResponse } from '@/lib/utils/api'
 
 export async function GET(request: NextRequest) {
     try {
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
             dayOfMonth: payment.dayOfMonth
         }))
 
-        const response = NextResponse.json({
+        const response = jsonResponse({
             actions,
             count: actions.length,
             date: today.toISOString().split('T')[0]
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     } catch (error) {
         console.error('Error fetching dashboard actions:', error)
-        return NextResponse.json(
+        return jsonResponse(
             { error: 'Błąd pobierania akcji', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )

@@ -74,22 +74,22 @@ export function DetailedIncomeBreakdown({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-3xl border border-white/5 bg-slate-900/50 backdrop-blur-xl"
+            className="p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl"
         >
             <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
                     <span>💰</span>
                     <span>Szczegółowa Analiza Przychodów</span>
                 </h2>
             </div>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-zinc-400 mb-6">
                 Wybierz źródło przychodu, aby przeanalizować trendy i historię transakcji.
             </p>
 
             <div className="space-y-4">
                 {sources.length === 0 ? (
-                    <div className="p-8 text-center bg-slate-800/20 rounded-2xl border border-slate-700/50">
-                        <p className="text-slate-500">Brak danych o przychodach w tym okresie</p>
+                    <div className="p-8 text-center bg-zinc-800/20 rounded-2xl border border-zinc-700/50">
+                        <p className="text-zinc-500">Brak danych o przychodach w tym okresie</p>
                     </div>
                 ) : (
                     [...sources].sort((a, b) => (b.total || 0) - (a.total || 0)).map((source, index) => {
@@ -112,37 +112,37 @@ export function DetailedIncomeBreakdown({
                         return (
                             <div
                                 key={source.source || `source-${index}`}
-                                className={`rounded-lg border transition-all duration-300 overflow-hidden ${isSelected ? 'border-emerald-500/30 bg-emerald-500/5 shadow-lg' : 'border-slate-700/30 bg-slate-800/40 hover:bg-slate-700/30'}`}
+                                className={`rounded-lg border transition-all duration-300 overflow-hidden ${isSelected ? 'border-emerald-500/30 bg-emerald-500/5 shadow-lg' : 'border-zinc-700/30 bg-zinc-800/40 hover:bg-zinc-700/30'}`}
                             >
                                 <button
                                     onClick={(e) => toggleSource(source.source, e)}
                                     className="w-full p-4 flex items-center justify-between transition-colors"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-xl transition-colors ${isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
+                                        <div className={`p-2 rounded-xl transition-colors ${isSelected ? 'bg-emerald-500 text-white' : 'bg-zinc-700 text-zinc-400'}`}>
                                             <WalletCards size={20} />
                                         </div>
                                         <div className="text-left">
-                                            <p className={`font-semibold text-lg transition-colors ${isSelected ? 'text-emerald-200' : 'text-slate-200'}`}>
+                                            <p className={`font-semibold text-lg transition-colors ${isSelected ? 'text-emerald-200' : 'text-zinc-200'}`}>
                                                 {source.source}
                                             </p>
-                                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <div className="flex items-center gap-2 text-xs text-zinc-500">
                                                 <span>{source.count} transakcji</span>
                                                 <span>•</span>
-                                                <span className="text-slate-400">{(source.percentage || 0).toFixed(1)}% całości</span>
+                                                <span className="text-zinc-400">{(source.percentage || 0).toFixed(1)}% całości</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="text-right">
-                                            <p className="font-bold text-slate-200 text-lg">{(source.total || 0).toFixed(2)} zł</p>
+                                            <p className="font-bold text-zinc-200 text-lg">{(source.total || 0).toFixed(2)} zł</p>
                                             <div className="flex items-center justify-end gap-1.5">
                                             </div>
                                         </div>
                                         {isSelected ? (
-                                            <ChevronUp className="text-slate-500" size={20} />
+                                            <ChevronUp className="text-zinc-500" size={20} />
                                         ) : (
-                                            <ChevronDown className="text-slate-500" size={20} />
+                                            <ChevronDown className="text-zinc-500" size={20} />
                                         )}
                                     </div>
                                 </button>
@@ -157,27 +157,27 @@ export function DetailedIncomeBreakdown({
                                             className="overflow-hidden"
                                         >
                                             <div className="p-4 border-t border-emerald-500/20">
-                                                <div className="bg-slate-900/40 rounded-xl p-5 border border-slate-700/50 flex flex-col min-h-[400px]">
+                                                <div className="bg-zinc-900/40 rounded-xl p-5 border border-zinc-700/50 flex flex-col min-h-[400px]">
                                                     {/* Header with Tabs */}
-                                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-slate-700/50">
+                                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-zinc-700/50">
                                                         <div className="flex-1">
-                                                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Analizowany zakres</p>
-                                                            <h4 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                                            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Analizowany zakres</p>
+                                                            <h4 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
                                                                 {source.source}
                                                             </h4>
                                                         </div>
 
-                                                        <div className="flex bg-slate-800/80 p-1 rounded-lg border border-slate-700/50 self-start sm:self-auto">
+                                                        <div className="flex bg-zinc-800/80 p-1 rounded-lg border border-zinc-700/50 self-start sm:self-auto">
                                                             <button
                                                                 onClick={() => setActiveTab('chart')}
-                                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'chart' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'chart' ? 'bg-emerald-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
                                                             >
                                                                 <BarChart3 size={14} />
                                                                 Trend
                                                             </button>
                                                             <button
                                                                 onClick={() => setActiveTab('transactions')}
-                                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'transactions' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
+                                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${activeTab === 'transactions' ? 'bg-emerald-500 text-white shadow-lg' : 'text-zinc-400 hover:text-zinc-200'}`}
                                                             >
                                                                 <List size={14} />
                                                                 Transakcje
@@ -247,14 +247,14 @@ export function DetailedIncomeBreakdown({
                                                             >
                                                                 {source.transactions.length > 0 ? (
                                                                     source.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((trx, tIndex) => (
-                                                                        <div key={trx.id || `trx-${index}-${tIndex}`} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/40 border border-slate-700/30 hover:bg-slate-800/60 transition-colors">
+                                                                        <div key={trx.id || `trx-${index}-${tIndex}`} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/40 border border-zinc-700/30 hover:bg-zinc-800/60 transition-colors">
                                                                             <div className="flex items-center gap-3">
                                                                                 <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400">
                                                                                     <WalletCards size={16} />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <p className="text-sm font-medium text-slate-200">{trx.description || 'Przychód'}</p>
-                                                                                    <p className="text-xs text-slate-500">{new Date(trx.date).toLocaleDateString()}</p>
+                                                                                    <p className="text-sm font-medium text-zinc-200">{trx.description || 'Przychód'}</p>
+                                                                                    <p className="text-xs text-zinc-500">{new Date(trx.date).toLocaleDateString()}</p>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="font-bold text-emerald-400">
@@ -263,7 +263,7 @@ export function DetailedIncomeBreakdown({
                                                                         </div>
                                                                     ))
                                                                 ) : (
-                                                                    <div className="h-full flex flex-col items-center justify-center text-slate-500">
+                                                                    <div className="h-full flex flex-col items-center justify-center text-zinc-500">
                                                                         <List size={48} className="mb-2 opacity-20" />
                                                                         <p>Brak transakcji do wyświetlenia</p>
                                                                     </div>

@@ -87,8 +87,8 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-[400px] rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/30" />
-          <div className="h-[400px] rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/30" />
+          <div className="h-[400px] rounded-2xl bg-zinc-800/40 animate-pulse border border-zinc-700/30" />
+          <div className="h-[400px] rounded-2xl bg-zinc-800/40 animate-pulse border border-zinc-700/30" />
         </div>
       </div>
     )
@@ -97,7 +97,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
   if (!data) {
     return (
       <div
-        className="text-center p-12 rounded-2xl border border-slate-700/30"
+        className="text-center p-12 rounded-2xl border border-zinc-700/30"
         style={{
           background: 'rgba(30, 41, 59, 0.4)',
           backdropFilter: 'blur(12px)',
@@ -105,7 +105,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
       >
         <div className="text-5xl mb-4 opacity-50 grayscale">📊</div>
         <h3 className="text-xl font-bold text-white mb-2">Brak danych przychodów</h3>
-        <p className="text-slate-400">Nie znaleziono transakcji przychodów w wybranym okresie.</p>
+        <p className="text-zinc-400">Nie znaleziono transakcji przychodów w wybranym okresie.</p>
       </div>
     )
   }
@@ -118,7 +118,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-8 rounded-2xl border border-slate-700/30 relative overflow-hidden flex flex-col"
+          className="p-8 rounded-2xl border border-zinc-700/30 relative overflow-hidden flex flex-col"
           style={{
             background: 'rgba(30, 41, 59, 0.4)',
             backdropFilter: 'blur(12px)',
@@ -128,7 +128,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
 
           <div className="mb-6 relative z-10">
             <h3 className="text-xl font-bold text-white mb-1">Źródła Przychodów</h3>
-            <p className="text-sm text-slate-400">Skąd pochodzą Twoje pieniądze?</p>
+            <p className="text-sm text-zinc-400">Skąd pochodzą Twoje pieniądze?</p>
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center relative z-10 min-h-[300px]">
@@ -147,7 +147,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
                 variant="donut"
               />
               <div className="mt-6 text-center">
-                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Całkowity Przychód</div>
+                <div className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Całkowity Przychód</div>
                 <div className="text-3xl font-bold text-emerald-400">{formatMoneyWithSeparators(data.totalIncome)}</div>
               </div>
             </div>
@@ -159,7 +159,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="p-8 rounded-2xl border border-slate-700/30 relative overflow-hidden flex flex-col"
+          className="p-8 rounded-2xl border border-zinc-700/30 relative overflow-hidden flex flex-col"
           style={{
             background: 'rgba(30, 41, 59, 0.4)',
             backdropFilter: 'blur(12px)',
@@ -170,12 +170,12 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
           <div className="mb-6 flex items-end justify-between relative z-10">
             <div>
               <h3 className="text-xl font-bold text-white mb-1">📊 Trend Przychodów</h3>
-              <p className="text-sm text-slate-400">Jak zmieniały się Twoje zarobki?</p>
+              <p className="text-sm text-zinc-400">Jak zmieniały się Twoje zarobki?</p>
             </div>
 
             {formattedTrends.length > 0 && (
               <div className="text-right">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
                 <p className="text-lg font-bold text-emerald-400">
                   {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / formattedTrends.length)}
                 </p>
@@ -207,7 +207,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
                 }}
               >
                 <div className="flex justify-start items-center -mt-3.5">
-                  <span className="text-[9px] font-bold text-emerald-400 bg-slate-900 border border-emerald-400/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
+                  <span className="text-[9px] font-bold text-emerald-400 bg-zinc-900 border border-emerald-400/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
                     ŚREDNIA: {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / formattedTrends.length)}
                   </span>
                 </div>
@@ -222,7 +222,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="p-8 rounded-2xl border border-slate-700/30"
+        className="p-8 rounded-2xl border border-zinc-700/30"
         style={{
           background: 'rgba(30, 41, 59, 0.4)',
           backdropFilter: 'blur(12px)',
@@ -230,7 +230,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
       >
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-xl font-bold text-white">Szczegóły Źródeł</h3>
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-zinc-400">
             {data.summary.totalTransactions} transakcji | Średnio {formatMoneyWithSeparators(data.summary.avgTransactionAmount)}
           </div>
         </div>
@@ -241,7 +241,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
               <div
                 className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 ${selectedSource === source.source
                   ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                  : 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-700/40 hover:border-slate-600/50'
+                  : 'bg-zinc-800/30 border-zinc-700/50 hover:bg-zinc-700/40 hover:border-zinc-600/50'
                   }`}
                 onClick={() => handleSegmentClick(source.source)}
               >
@@ -249,7 +249,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
                   <div className="w-4 h-4 rounded-full ring-4 ring-white/5" style={{ backgroundColor: ANALYTICS_COLORS[index % ANALYTICS_COLORS.length] }}></div>
                   <div>
                     <div className="font-bold text-white text-lg">{source.source}</div>
-                    <div className="text-sm text-slate-400">
+                    <div className="text-sm text-zinc-400">
                       {source.count} wpłat • Średnio {formatMoneyWithSeparators(source.avgAmount)}
                     </div>
                   </div>
@@ -259,7 +259,7 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
                   <div className="font-bold text-emerald-400 text-xl">
                     +{formatMoneyWithSeparators(source.total)}
                   </div>
-                  <div className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  <div className="text-xs font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
                     {source.percentage}% całości
                   </div>
                 </div>
@@ -273,18 +273,18 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="mt-2 ml-4 md:ml-12 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
-                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Historia Transakcji</h4>
+                    <div className="mt-2 ml-4 md:ml-12 p-4 bg-zinc-900/50 rounded-xl border border-zinc-700/50">
+                      <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Historia Transakcji</h4>
                       <div className="space-y-2">
                         {source.transactions.map((t) => (
-                          <div key={t.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700/30">
+                          <div key={t.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors border border-zinc-700/30">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400">
                                 <TrendingUp size={14} />
                               </div>
                               <div>
-                                <div className="font-medium text-slate-200">{t.description}</div>
-                                <div className="text-xs text-slate-500">{t.date}</div>
+                                <div className="font-medium text-zinc-200">{t.description}</div>
+                                <div className="text-xs text-zinc-500">{t.date}</div>
                               </div>
                             </div>
                             <div className="font-bold text-emerald-400">
