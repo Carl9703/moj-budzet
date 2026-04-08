@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/setup-env.js && next dev",
-    "build": "node scripts/setup-env.js && prisma generate && next build",
+    "build": "node scripts/setup-env.js && prisma generate && prisma db push --accept-data-loss && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest",
