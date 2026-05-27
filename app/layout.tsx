@@ -13,7 +13,7 @@ export const metadata = {
     description: 'Quantum Budget - zaawansowana aplikacja do zarządzania budżetem osobistym z kopertami i analizami',
     icons: {
         icon: '/favicon.svg',
-        apple: '/favicon.svg',
+        apple: '/icon-180.png',
     },
     appleWebApp: {
         capable: true,
