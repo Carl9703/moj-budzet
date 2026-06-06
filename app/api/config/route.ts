@@ -130,6 +130,7 @@ export async function PUT(request: NextRequest) {
             bonusDistribution,
             monthlyEnvelopes,
             yearlyEnvelopes,
+            generateApiToken,
         } = body as {
             defaultSalary?: number
             bonusDistribution?: string
