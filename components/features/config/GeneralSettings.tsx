@@ -11,7 +11,6 @@ interface GeneralSettingsProps {
     defaultSalary: number
     setDefaultSalary: (val: number) => void
     bonusDistribution: BonusDistributionRule[]
-    bonusDistribution: BonusDistributionRule[]
     setBonusDistribution: (val: BonusDistributionRule[]) => void
     envelopes: Envelope[]
     apiToken?: string | null
