@@ -21,6 +21,9 @@ export function serializeDecimals<T>(obj: T): T {
   if (Array.isArray(obj)) {
     return obj.map(serializeDecimals) as unknown as T
   }
+  if (obj instanceof Date) {
+    return obj as unknown as T
+  }
   if (typeof obj === 'object') {
     return Object.fromEntries(
       Object.entries(obj).map(([k, v]) => [k, serializeDecimals(v)])
