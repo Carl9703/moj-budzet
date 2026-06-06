@@ -31,8 +31,6 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
     const { showToast } = useToast()
     const { categories, getCategoryName, getCategoryIcon } = useCategories()
 
-    const [editingId, setEditingId] = useState<string | null>(null)
-
     const fetchPending = async () => {
         try {
             const res = await authorizedFetch('/api/transactions/pending')
