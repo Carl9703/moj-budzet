@@ -4,6 +4,7 @@ import { Check, X, Edit2, Smartphone, Loader2 } from 'lucide-react'
 import { authorizedFetch } from '@/lib/api/client'
 import { useToast } from '@/components/ui/feedback/Toast'
 import { useCategories } from '@/lib/contexts/CategoryContext'
+import { ExpenseModal } from '@/components/shared/modals/ExpenseModal'
 
 interface PendingTransaction {
     id: string
@@ -30,10 +31,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
     const { showToast } = useToast()
     const { categories, getCategoryName, getCategoryIcon } = useCategories()
 
-    // Form state for editing
-    const [editForm, setEditForm] = useState<{ amount: string, description: string, category: string, envelopeId: string }>({
-        amount: '', description: '', category: '', envelopeId: ''
-    })
+    const [editingId, setEditingId] = useState<string | null>(null)
 
     const fetchPending = async () => {
         try {
@@ -59,36 +57,62 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
     const handleApprove = async (tx: PendingTransaction) => {
         setProcessingId(tx.id)
         try {
-            // Check if we are submitting the edited form or the original suggestion
-            const isEditing = editingId === tx.id
-            const amount = isEditing ? parseFloat(editForm.amount) : tx.amount
-            const description = isEditing ? editForm.description : tx.description
-            const category = isEditing ? editForm.category : (tx.suggestedCat || '')
-            const envelopeId = isEditing ? editForm.envelopeId : (tx.suggestedEnv || '')
-
             const res = await authorizedFetch('/api/transactions/pending', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     pendingId: tx.id,
-                    amount,
-                    description,
+                    amount: tx.amount,
+                    description: tx.description,
                     date: tx.date,
-                    envelopeId: envelopeId || null,
-                    category: category || null
+                    envelopeId: tx.suggestedEnv || null,
+                    category: tx.suggestedCat || null
                 })
             })
 
             if (res.ok) {
                 showToast('Transakcja zatwierdzona', 'success')
                 setPending(p => p.filter(t => t.id !== tx.id))
-                setEditingId(null)
                 onSuccess()
             } else {
                 showToast('Błąd zatwierdzania', 'error')
             }
         } catch {
             showToast('Błąd zatwierdzania', 'error')
+        } finally {
+            setProcessingId(null)
+        }
+    }
+
+    const handleSaveEdited = async (data: any, txId: string) => {
+        setProcessingId(txId)
+        try {
+            const res = await authorizedFetch('/api/transactions/pending', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pendingId: txId,
+                    amount: data.amount,
+                    description: data.description,
+                    date: data.date,
+                    envelopeId: data.envelopeId,
+                    category: data.category
+                })
+            })
+
+            if (res.ok) {
+                showToast('Transakcja zatwierdzona', 'success')
+                setPending(p => p.filter(t => t.id !== txId))
+                setEditingId(null)
+                onSuccess()
+                return true
+            } else {
+                showToast('Błąd zatwierdzania', 'error')
+                return false
+            }
+        } catch {
+            showToast('Błąd zatwierdzania', 'error')
+            return false
         } finally {
             setProcessingId(null)
         }
@@ -115,16 +139,6 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
 
     const startEditing = (tx: PendingTransaction) => {
         setEditingId(tx.id)
-        setEditForm({
-            amount: tx.amount.toString(),
-            description: tx.description,
-            category: tx.suggestedCat || '',
-            envelopeId: tx.suggestedEnv || ''
-        })
-    }
-
-    const cancelEditing = () => {
-        setEditingId(null)
     }
 
     if (loading && pending.length === 0) return null
@@ -155,79 +169,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="bg-zinc-900/80 border border-emerald-500/30 rounded-2xl p-4 shadow-lg backdrop-blur-xl"
                             >
-                                {isEditing ? (
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs font-bold text-zinc-400">Edycja transakcji z {dateFormatted}</span>
-                                            {tx.cardLastFour && <span className="text-[10px] bg-zinc-800 px-2 py-1 rounded text-zinc-400">•••{tx.cardLastFour}</span>}
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Kwota</label>
-                                                <input 
-                                                    type="number" 
-                                                    value={editForm.amount}
-                                                    onChange={e => setEditForm({...editForm, amount: e.target.value})}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Opis</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={editForm.description}
-                                                    onChange={e => setEditForm({...editForm, description: e.target.value})}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Kategoria</label>
-                                                <select 
-                                                    value={editForm.category}
-                                                    onChange={e => setEditForm({...editForm, category: e.target.value})}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-                                                >
-                                                    <option value="">Wybierz kategorię</option>
-                                                    {categories.map(c => (
-                                                        <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-1">Koperta</label>
-                                                <select 
-                                                    value={editForm.envelopeId}
-                                                    onChange={e => setEditForm({...editForm, envelopeId: e.target.value})}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-                                                >
-                                                    <option value="">Wybierz kopertę</option>
-                                                    {envelopes.map(e => (
-                                                        <option key={e.id} value={e.id}>{e.icon} {e.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex gap-2 pt-2">
-                                            <button 
-                                                onClick={cancelEditing}
-                                                className="flex-1 px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold hover:bg-zinc-700"
-                                            >
-                                                Anuluj
-                                            </button>
-                                            <button 
-                                                onClick={() => handleApprove(tx)}
-                                                disabled={isProcessing}
-                                                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-500 flex items-center justify-center gap-2"
-                                            >
-                                                {isProcessing && <Loader2 size={14} className="animate-spin" />}
-                                                Zapisz i zatwierdź
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="font-bold text-white text-lg">{tx.description}</span>
@@ -300,12 +242,26 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
                                             </button>
                                         </div>
                                     </div>
-                                )}
                             </motion.div>
                         )
                     })}
                 </AnimatePresence>
             </div>
+            
+            {editingId && pending.find(t => t.id === editingId) && (
+                <ExpenseModal
+                    envelopes={envelopes}
+                    initialData={{
+                        amount: pending.find(t => t.id === editingId)!.amount.toString(),
+                        description: pending.find(t => t.id === editingId)!.description,
+                        category: pending.find(t => t.id === editingId)!.suggestedCat || '',
+                        envelopeId: pending.find(t => t.id === editingId)!.suggestedEnv || '',
+                        date: new Date(pending.find(t => t.id === editingId)!.date).toISOString().split('T')[0]
+                    }}
+                    onClose={() => setEditingId(null)}
+                    onSave={(data) => handleSaveEdited(data, editingId)}
+                />
+            )}
         </div>
     )
 }

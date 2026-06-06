@@ -28,6 +28,13 @@ interface Props {
     onClose: () => void
     onSave: (data: ExpenseData) => Promise<boolean>
     envelopes: ExpenseEnvelope[]
+    initialData?: {
+        amount?: string
+        description?: string
+        category?: string
+        envelopeId?: string
+        date?: string
+    }
 }
 
 interface ExpenseData {
@@ -40,14 +47,14 @@ interface ExpenseData {
     foreignCurrency?: string
 }
 
-export function ExpenseModal({ onClose, onSave, envelopes }: Props) {
+export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props) {
     const { showToast } = useToast()
     const { categories, getCategoriesForEnvelope } = useCategories()
-    const [amount, setAmount] = useState('')
-    const [description, setDescription] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState('')
-    const [selectedEnvelope, setSelectedEnvelope] = useState('')
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+    const [amount, setAmount] = useState(initialData?.amount || '')
+    const [description, setDescription] = useState(initialData?.description || '')
+    const [selectedCategory, setSelectedCategory] = useState(initialData?.category || '')
+    const [selectedEnvelope, setSelectedEnvelope] = useState(initialData?.envelopeId || '')
+    const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0])
     const [showAllCategories, setShowAllCategories] = useState(false)
     const [showAllEnvelopes, setShowAllEnvelopes] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
