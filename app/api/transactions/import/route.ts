@@ -42,8 +42,9 @@ export async function POST(req: NextRequest) {
         })
 
         // Szukaj ścisłego lub przybliżonego dopasowania (case insensitive)
+        // Sprawdzamy czy nowy opis (np. "LIDL WARSZAWA") zawiera poprzedni opis ("Lidl")
         const match = recentTransactions.find(t => 
-            t.description && description && t.description.toLowerCase().includes(description.toLowerCase())
+            t.description && t.description.length > 2 && description && description.toLowerCase().includes(t.description.toLowerCase())
         )
 
         if (match) {
