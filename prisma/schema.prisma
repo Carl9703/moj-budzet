@@ -66,6 +66,7 @@ model User {
   userConfig         UserConfig?
   currencyWallets    CurrencyWallet[]
   currencyTx         CurrencyTransaction[]
+  pendingTransactions PendingTransaction[]
 }
 
 model Envelope {
@@ -153,6 +154,7 @@ model UserConfig {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   bonusDistribution String?
+  apiToken          String?  @unique
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -251,3 +253,21 @@ model CurrencyTransaction {
   @@index([userId])
   @@index([walletId])
 }
+
+model PendingTransaction {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Decimal  @db.Decimal(19, 4)
+  currency      String   @default("PLN")
+  description   String
+  date          DateTime
+  source        String   @default("google_wallet")
+  cardLastFour  String?
+  suggestedCat  String?
+  suggestedEnv  String?
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+

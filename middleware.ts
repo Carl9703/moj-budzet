@@ -34,8 +34,8 @@ export async function middleware(request: NextRequest) {
       )
     }
 
-    // C. Authorization Check (Skip for auth endpoints)
-    if (!pathname.startsWith('/api/auth/')) {
+    // C. Authorization Check (Skip for auth endpoints and mobile import endpoint)
+    if (!pathname.startsWith('/api/auth/') && !pathname.startsWith('/api/transactions/import')) {
       const authHeader = request.headers.get('Authorization')
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {

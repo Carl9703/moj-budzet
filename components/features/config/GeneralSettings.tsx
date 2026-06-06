@@ -11,8 +11,11 @@ interface GeneralSettingsProps {
     defaultSalary: number
     setDefaultSalary: (val: number) => void
     bonusDistribution: BonusDistributionRule[]
+    bonusDistribution: BonusDistributionRule[]
     setBonusDistribution: (val: BonusDistributionRule[]) => void
     envelopes: Envelope[]
+    apiToken?: string | null
+    setApiToken?: (val: string | null) => void
 }
 
 export function GeneralSettings({
@@ -20,7 +23,9 @@ export function GeneralSettings({
     setDefaultSalary,
     bonusDistribution,
     setBonusDistribution,
-    envelopes
+    envelopes,
+    apiToken,
+    setApiToken
 }: GeneralSettingsProps) {
     const router = useRouter()
     const { showToast } = useToast()
@@ -122,6 +127,30 @@ export function GeneralSettings({
         setDraftSalary(defaultSalary)
         setDraftDistribution(bonusDistribution)
         setHasChanges(false)
+    }
+
+    const handleGenerateToken = async () => {
+        setSaving(true)
+        try {
+            const res = await authorizedFetch('/api/config', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ generateApiToken: true })
+            })
+            if (res.ok) {
+                const data = await res.json()
+                if (setApiToken && data.config?.apiToken) {
+                    setApiToken(data.config.apiToken)
+                }
+                showToast('Nowy token wygenerowany', 'success')
+            } else {
+                showToast('Błąd generowania', 'error')
+            }
+        } catch {
+            showToast('Błąd generowania', 'error')
+        } finally {
+            setSaving(false)
+        }
     }
 
     return (
@@ -245,6 +274,41 @@ export function GeneralSettings({
                         <p className="mt-2 text-[8px] font-black uppercase text-rose-500/70 tracking-widest text-center">Suma procentów przekracza 100%!</p>
                     )}
                 </div>
+            </div>
+
+            {/* API Integration */}
+            <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl max-w-xl shadow-xl space-y-6">
+                <div>
+                    <h3 className="text-lg font-black text-white tracking-tight uppercase tracking-widest text-[14px]">
+                        📱 Integracja Mobile (Google Wallet)
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-2 font-medium">
+                        Token autoryzacji dla aplikacji mobilnej na Androida.
+                    </p>
+                </div>
+
+                {apiToken ? (
+                    <div className="space-y-4">
+                        <div className="px-4 py-3 bg-zinc-950 border border-white/5 rounded-xl font-mono text-xs text-amber-400 break-all select-all">
+                            {apiToken}
+                        </div>
+                        <button
+                            onClick={handleGenerateToken}
+                            disabled={saving}
+                            className="text-xs text-zinc-500 hover:text-white transition-colors"
+                        >
+                            Wygeneruj nowy token
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={handleGenerateToken}
+                        disabled={saving}
+                        className="px-6 py-2.5 bg-amber-600 text-white font-bold rounded-xl text-sm transition-all hover:bg-amber-500 active:scale-95 shadow-lg shadow-amber-500/20"
+                    >
+                        Wygeneruj Token API
+                    </button>
+                )}
             </div>
 
             {/* Save / Discard Buttons */}

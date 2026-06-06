@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
         const isArchived = archivedParam === 'true'
 
         let config = await prisma.userConfig.findUnique({ where: { userId } })
-
+        
+        // Nie wysyłamy pełnego hasha/tokena w każdym GET, chyba że jest w configu? 
+        // W sumie apiToken to tylko proste hasło dla apki na Androida, możemy je odesłać do wglądu.
+        
         if (!config) {
             // utwórz pustą konfigurację, jeśli brak
             config = await prisma.userConfig.create({
@@ -130,8 +133,10 @@ export async function PUT(request: NextRequest) {
         } = body as {
             defaultSalary?: number
             bonusDistribution?: string
+            bonusDistribution?: string
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
+            generateApiToken?: boolean
         }
 
         const updateData: any = {}
@@ -141,6 +146,12 @@ export async function PUT(request: NextRequest) {
             updateData.bonusDistribution = bonusDistribution === null || bonusDistribution === '' ? null : bonusDistribution
         }
 
+        let newApiToken: string | undefined = undefined
+        if (generateApiToken) {
+            newApiToken = crypto.randomUUID()
+            updateData.apiToken = newApiToken
+        }
+
         const updated = await prisma.userConfig.upsert({
             where: { userId },
             update: updateData,
@@ -148,6 +159,7 @@ export async function PUT(request: NextRequest) {
                 userId,
                 defaultSalary: defaultSalary ?? 0,
                 bonusDistribution: bonusDistribution ?? null,
+                apiToken: newApiToken ?? null,
             },
         })
 

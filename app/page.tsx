@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -14,6 +14,7 @@ import { useAuth } from '../lib/hooks/useAuth'
 import { createIncomeHandler, createExpenseHandler, createTransferHandler } from '@/lib/handlers/modalHandlers'
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader'
 import { QuickActions } from '@/components/features/dashboard/QuickActions'
+import { PendingWalletTransactions } from '@/components/features/dashboard/PendingWalletTransactions'
 import { GlobalFilters } from '@/components/features/analytics/filters/GlobalFilters'
 import { TrendingUp, Wallet, PieChart, PiggyBank } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -163,6 +164,15 @@ function HomePage() {
 
                     {/* Pending Actions */}
                     <PendingActions onSuccess={refetch} />
+
+                    {/* Pending Google Wallet Transactions */}
+                    <PendingWalletTransactions 
+                        envelopes={[
+                            ...(data.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly' })),
+                            ...(data.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly' }))
+                        ]} 
+                        onSuccess={refetch} 
+                    />
 
                     {/* Stats Row (Bento) */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">

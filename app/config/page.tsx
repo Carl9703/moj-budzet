@@ -26,6 +26,7 @@ export default function ConfigPage() {
   // State
   const [defaultSalary, setDefaultSalary] = useState<number>(0)
   const [bonusDistribution, setBonusDistribution] = useState<BonusDistributionRule[]>([])
+  const [apiToken, setApiToken] = useState<string | null>(null)
   const [envelopes, setEnvelopes] = useState<Envelope[]>([])
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function ConfigPage() {
         const cfg = data?.config
         if (cfg) {
           setDefaultSalary(cfg.defaultSalary ?? 0)
+          setApiToken(cfg.apiToken ?? null)
           if (cfg.bonusDistribution) {
             try {
               const parsed = JSON.parse(cfg.bonusDistribution)
@@ -371,6 +373,8 @@ export default function ConfigPage() {
                 bonusDistribution={bonusDistribution}
                 setBonusDistribution={setBonusDistribution}
                 envelopes={envelopes}
+                apiToken={apiToken}
+                setApiToken={setApiToken}
               />
             </motion.div>
           )}

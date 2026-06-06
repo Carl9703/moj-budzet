@@ -19,6 +19,7 @@ export interface BonusDistributionRule {
 export interface UserConfig {
     defaultSalary: number
     bonusDistribution: BonusDistributionRule[] | null
+    apiToken?: string | null
 }
 
 export interface EnvelopeUpdateData {
