@@ -41,15 +41,18 @@ export async function POST(req: NextRequest) {
             take: 200
         })
 
-        // Szukaj dopasowania po pierwszym wyrazie (zazwyczaj nazwa sklepu, np. "BIEDRONKA")
-        const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length >= 3)
-        const firstWord = words[0]
+        // Rozbij nowy opis na słowa (dłuższe niż 2 znaki)
+        const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length > 2)
         
         let match = null
-        if (firstWord) {
-            match = recentTransactions.find(t => 
-                t.description && t.description.toLowerCase().includes(firstWord)
-            )
+        if (words.length > 0) {
+            match = recentTransactions.find(t => {
+                if (!t.description) return false
+                const oldDesc = t.description.toLowerCase()
+                // Szukamy, czy w starym opisie (np. "Biedronka - zakupy") 
+                // występuje którekolwiek ze słów z nowego opisu (np. ["biedronka", "warszawa", "mokotow"])
+                return words.some((word: string) => oldDesc.includes(word))
+            })
         }
 
         if (match) {
