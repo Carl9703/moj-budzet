@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         // Rozbij nowy opis na słowa (dłuższe niż 2 znaki)
         const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length > 2)
         
-        let bestMatch = null
+        let bestMatch: any = null
         let bestScore = 0
 
         if (words.length > 0) {
