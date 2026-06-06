@@ -28,7 +28,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
     const [processingId, setProcessingId] = useState<string | null>(null)
     const [editingId, setEditingId] = useState<string | null>(null)
     const { showToast } = useToast()
-    const { categories } = useCategories()
+    const { categories, getCategoryName, getCategoryIcon } = useCategories()
 
     // Form state for editing
     const [editForm, setEditForm] = useState<{ amount: string, description: string, category: string, envelopeId: string }>({
@@ -246,7 +246,11 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
                                                 {tx.suggestedCat && (
                                                     <>
                                                         <span className="text-zinc-600">•</span>
-                                                        <span className="text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">Sugestia kat: {tx.suggestedCat}</span>
+                                                        <span className="text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                            <span>Sugestia:</span>
+                                                            <span>{getCategoryIcon(tx.suggestedCat)}</span>
+                                                            <span>{getCategoryName(tx.suggestedCat)}</span>
+                                                        </span>
                                                     </>
                                                 )}
                                                 {tx.suggestedEnv && envelopes.find(e => e.id === tx.suggestedEnv) && (
