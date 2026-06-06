@@ -44,16 +44,31 @@ export async function POST(req: NextRequest) {
         // Rozbij nowy opis na słowa (dłuższe niż 2 znaki)
         const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length > 2)
         
-        let match = null
+        let bestMatch = null
+        let bestScore = 0
+
         if (words.length > 0) {
-            match = recentTransactions.find(t => {
-                if (!t.description) return false
+            recentTransactions.forEach(t => {
+                if (!t.description) return
                 const oldDesc = t.description.toLowerCase()
-                // Szukamy, czy w starym opisie (np. "Biedronka - zakupy") 
-                // występuje którekolwiek ze słów z nowego opisu (np. ["biedronka", "warszawa", "mokotow"])
-                return words.some((word: string) => oldDesc.includes(word))
+                let score = 0
+                
+                // Pierwsze słowo to z reguły nazwa sklepu, dajemy za nią najwięcej punktów
+                if (oldDesc.includes(words[0])) score += 10
+                
+                // Za resztę słów (miasto, ulica) dajemy tylko po 1 punkcie
+                for (let i = 1; i < words.length; i++) {
+                    if (oldDesc.includes(words[i])) score += 1
+                }
+
+                if (score > bestScore) {
+                    bestScore = score
+                    bestMatch = t
+                }
             })
         }
+
+        const match = bestMatch
 
         if (match) {
             suggestedCat = match.category
