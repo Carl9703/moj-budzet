@@ -41,11 +41,16 @@ export async function POST(req: NextRequest) {
             take: 200
         })
 
-        // Szukaj ścisłego lub przybliżonego dopasowania (case insensitive)
-        // Sprawdzamy czy nowy opis (np. "LIDL WARSZAWA") zawiera poprzedni opis ("Lidl")
-        const match = recentTransactions.find(t => 
-            t.description && t.description.length > 2 && description && description.toLowerCase().includes(t.description.toLowerCase())
-        )
+        // Szukaj dopasowania po pierwszym wyrazie (zazwyczaj nazwa sklepu, np. "BIEDRONKA")
+        const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length >= 3)
+        const firstWord = words[0]
+        
+        let match = null
+        if (firstWord) {
+            match = recentTransactions.find(t => 
+                t.description && t.description.toLowerCase().includes(firstWord)
+            )
+        }
 
         if (match) {
             suggestedCat = match.category
