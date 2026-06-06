@@ -133,7 +133,6 @@ export async function PUT(request: NextRequest) {
         } = body as {
             defaultSalary?: number
             bonusDistribution?: string
-            bonusDistribution?: string
             monthlyEnvelopes?: { id: string; plannedAmount: number }[]
             yearlyEnvelopes?: { id: string; plannedAmount: number }[]
             generateApiToken?: boolean
