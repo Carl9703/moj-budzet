@@ -64,12 +64,13 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
                 onClick={onClick}
                 className={`group relative overflow-hidden p-5 rounded-3xl border bg-zinc-900/50 backdrop-blur-xl transition-all duration-300 w-full h-full text-left flex flex-col ${isClickable ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''
                     } ${isActive
-                        ? `border-2 ${activeAccent} shadow-lg`
+                        ? `border-2 ${activeAccent} shadow-xl`
                         : isClickable ? inactiveClickable : inactiveNonClickable
                     }`}
+                style={isActive ? { boxShadow: `0 0 32px -8px ${color.includes('emerald') ? 'rgba(52,211,153,0.2)' : color.includes('rose') ? 'rgba(251,113,133,0.2)' : color.includes('amber') ? 'rgba(251,191,36,0.2)' : 'rgba(167,139,250,0.2)'}` } : {}}
             >
                 {/* Glow effect */}
-                <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] transition-opacity ${color} ${isActive ? 'opacity-25' : 'opacity-10 group-hover:opacity-15'}`} />
+                <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-[70px] transition-opacity ${color} ${isActive ? 'opacity-30' : 'opacity-10 group-hover:opacity-20'}`} />
 
                 {/* Active indicator - subtle dot, not aggressive badge */}
                 {isActive && (
@@ -83,11 +84,11 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
                             {/* Removed aggressive colored badge - just show clickable hint on hover */}
                         </div>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-300">
+                            <span className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white via-zinc-100 to-zinc-400">
                                 {showSign && value > 0 ? '+' : ''}
                                 {formatNumber(displayValue)}
                             </span>
-                            <span className="text-base text-zinc-500 font-medium">{suffix}</span>
+                            <span className="text-sm text-zinc-500 font-medium">{suffix}</span>
                         </div>
                     </div>
                     <div className={`p-2.5 rounded-xl ${color.replace('bg-', 'bg-').replace('500', '500/10')} border border-white/5`}>

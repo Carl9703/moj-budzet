@@ -70,8 +70,8 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                     <div className="px-3 py-1 rounded-full bg-zinc-900/50 border border-white/5 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full animate-pulse"
                             style={{
-                                backgroundColor: color ? color.replace('rgba(', 'rgb(').replace(/,[^,]+\)$/, ')') : '#64748b',
-                                boxShadow: `0 0 10px ${color || 'rgba(100, 116, 139, 0.4)'}`
+                                backgroundColor: color || '#64748b',
+                                boxShadow: `0 0 8px ${color || '#64748b'}80`
                             }}
                         />
                         <h2 className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em]">

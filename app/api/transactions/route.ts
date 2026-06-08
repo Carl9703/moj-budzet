@@ -50,11 +50,19 @@ export async function GET(request: NextRequest) {
             whereClause.category = category
         }
 
-        // Wyszukiwanie tekstowe
+        // Wyszukiwanie tekstowe (case-insensitive workaround dla SQLite/Prisma)
         if (searchText) {
-            whereClause.description = {
-                contains: searchText
-            }
+            const lower = searchText.toLowerCase()
+            const upper = searchText.toUpperCase()
+            const capitalized = searchText.charAt(0).toUpperCase() + searchText.slice(1).toLowerCase()
+
+            // Ponieważ używamy SQLite, Prisma nie wspiera `mode: 'insensitive'`
+            whereClause.OR = [
+                { description: { contains: searchText } },
+                { description: { contains: lower } },
+                { description: { contains: upper } },
+                { description: { contains: capitalized } }
+            ]
         }
 
         // Filtry dat

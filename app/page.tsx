@@ -19,6 +19,7 @@ import { GlobalFilters } from '@/components/features/analytics/filters/GlobalFil
 import { TrendingUp, Wallet, PieChart, PiggyBank } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { motion } from 'framer-motion'
+import { GROUP_COLORS } from '@/lib/constants/chart-colors'
 
 import { IncomeModal } from '@/components/shared/modals/IncomeModal'
 import { ExpenseModal } from '@/components/shared/modals/ExpenseModal'
@@ -268,7 +269,7 @@ function HomePage() {
                                     <EnvelopeGroup
                                         title="Potrzeby"
                                         icon="🏡"
-                                        color="rgba(34, 197, 94, 0.4)"
+                                        color={GROUP_COLORS['needs']}
                                         envelopes={allNeeds}
                                         type="monthly"
                                         onEnvelopeClick={handleEnvelopeClick}
@@ -298,7 +299,7 @@ function HomePage() {
                                     <EnvelopeGroup
                                         title="Styl Życia"
                                         icon="🎉"
-                                        color="rgba(236, 72, 153, 0.4)"
+                                        color={GROUP_COLORS['lifestyle']}
                                         envelopes={allWants}
                                         type="monthly"
                                         onEnvelopeClick={handleEnvelopeClick}
@@ -333,7 +334,7 @@ function HomePage() {
                                         <EnvelopeGroup
                                             title="Cele i Majątek"
                                             icon="💎"
-                                            color="rgba(168, 85, 247, 0.4)"
+                                            color={GROUP_COLORS['assets']}
                                             envelopes={allAssets}
                                             type="monthly"
                                             onEnvelopeClick={handleEnvelopeClick}
@@ -353,7 +354,7 @@ function HomePage() {
                                         <EnvelopeGroup
                                             title="Cele Oszczędnościowe"
                                             icon="🎯"
-                                            color="rgba(249, 115, 22, 0.4)"
+                                            color={GROUP_COLORS['goals']}
                                             envelopes={goals}
                                             type="yearly"
                                             onEnvelopeClick={handleEnvelopeClick}
