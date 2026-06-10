@@ -5,7 +5,8 @@
 export const SYSTEM_DESCRIPTIONS = {
     BALANCE_TRANSFER: 'przeniesienie bilansu',
     TRANSFER_PREFIX: 'Transfer:',
-    BONUS_TRANSFER_INDICATOR: '→'
+    BONUS_TRANSFER_INDICATOR: '→',
+    MONTH_CLOSE: 'Zamknięcie miesiąca'
 } as const
 
 export const YEARLY_ENVELOPE_NAMES = [
