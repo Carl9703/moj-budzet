@@ -42,6 +42,8 @@
     "vitest.config.ts",
     "vitest.setup.ts",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "tests/**/*",
+    "e2e/**/*"
   ]
 }
