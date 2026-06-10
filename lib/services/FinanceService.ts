@@ -21,6 +21,7 @@ export class FinanceService {
                 date: { gte: startOfAppUsage },
                 transferPairId: null, // Wyklucz transfery wewnętrzne bezpośrednio w zapytaniu
                 NOT: [
+                    { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
                     { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
                 ]
             },
