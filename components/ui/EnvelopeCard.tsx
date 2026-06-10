@@ -1,7 +1,8 @@
-import { formatMoney } from '@/lib/utils/money'
+import { formatMoney, roundToCents } from '@/lib/utils/money'
+import { isFreeFundsEnvelope } from '@/lib/constants/envelopeTypes'
 import { memo } from 'react'
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useMotionTemplate } from 'framer-motion'
 
 interface FxPocket {
     currency: string
@@ -29,10 +30,24 @@ interface EnvelopeProps {
     currencyCode?: string
 }
 
-export const EnvelopeCard = memo(function EnvelopeCard({
-    name, icon, spent, planned, current, type, id, onTransactionClick, onExchangeClick, variant = 'card', isAccumulating = false, envelopeType, group, fxPocket, currencyCode
-}: EnvelopeProps) {
-    const isFreedomFunds = name.toLowerCase().includes('wolne środki')
+export const EnvelopeCard = memo(function EnvelopeCard(props: EnvelopeProps) {
+    const { name, icon, spent, planned, current, type, id, onTransactionClick, onExchangeClick, isAccumulating = false, envelopeType, fxPocket, currencyCode } = props
+    const isFreedomFunds = isFreeFundsEnvelope(envelopeType, name)
+    
+    // Spotlight effect
+    let mouseX = useMotionValue(0)
+    let mouseY = useMotionValue(0)
+
+    function handleMouseMove({
+        currentTarget,
+        clientX,
+        clientY,
+    }: React.MouseEvent) {
+        let { left, top } = currentTarget.getBoundingClientRect()
+        mouseX.set(clientX - left)
+        mouseY.set(clientY - top)
+    }
+
     // Tylko koperty typu 'savings' (jak IKE) pokazują spent (wpłaty na oszczędności)
     // Pozostałe yearly (goal, emergency) pokazują current (stan koperty)
     const isSavingsType = envelopeType === 'savings'
@@ -42,7 +57,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
     const fxPlnEquivalent = fxPocket
         ? fxPocket.reduce((s, p) => s + p.available * (p.rateAvg ?? 0), 0)
         : 0
-    const freePLN = Math.max(0, Math.round((current - fxPlnEquivalent) * 100) / 100)
+    const freePLN = Math.max(0, roundToCents(current - fxPlnEquivalent))
     const hasFxPockets = !!fxPocket && fxPocket.length > 0
 
     // --- PROGRESS BAR LOGIC ---
@@ -58,10 +73,10 @@ export const EnvelopeCard = memo(function EnvelopeCard({
 
     const remaining = isFreedomFunds
         ? 0
-        : Math.round(((planned - displayValue) * 100)) / 100
+        : roundToCents(planned - displayValue)
 
-    // Logic for "Paid" state: we hit the target exactly.
-    const isPaid = spentPercentage === 100 && type === 'monthly'
+    // Logic for "Paid" state: we hit the target with a slight margin of error (98% - 105%)
+    const isPaid = type === 'monthly' && spentPercentage >= 98 && spentPercentage <= 105 && planned > 0
 
     // --- COLOR THRESHOLDS ---
     // Monthly: green (safe) → amber (warning) → red (danger) → pulsing red (overspent)
@@ -135,33 +150,54 @@ export const EnvelopeCard = memo(function EnvelopeCard({
     return (
         <motion.div
             layout
+            onMouseMove={handleMouseMove}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={id && onTransactionClick ? {
                 scale: 1.02,
-                y: -2,
-                transition: { duration: 0.2 }
+                rotateX: 2,
+                rotateY: -2,
+                transition: { type: "spring", bounce: 0.25, duration: 0.4 }
             } : {}}
             whileTap={id && onTransactionClick ? { scale: 0.98 } : {}}
             onClick={handleClick}
+            role={id && onTransactionClick ? "button" : undefined}
+            tabIndex={id && onTransactionClick ? 0 : undefined}
+            aria-label={id && onTransactionClick ? `Koperta: ${name}` : undefined}
+            onKeyDown={id && onTransactionClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } } : undefined}
             className={`
-                relative pt-4 px-4 pb-0 rounded-3xl overflow-hidden flex flex-col justify-between h-[175px]
-                ${id && onTransactionClick ? 'cursor-pointer' : ''}
-                bg-zinc-900/50 backdrop-blur-xl border border-white/5 transition-all
+                text-left w-full relative pt-4 px-4 pb-0 rounded-3xl overflow-hidden flex flex-col justify-between h-[175px] group
+                ${id && onTransactionClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500/50' : ''}
+                glass-card transition-all
                 ${isPaid ? 'bg-zinc-950/80 border-white/10' : 'shadow-lg shadow-black/30'}
                 ${progressPercentage > 100 && type === 'monthly' ? 'border-red-500/20' : ''}
             `}
+            style={{ perspective: "1000px" }}
         >
+            {/* Spotlight Gradient */}
+            <motion.div
+                className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100"
+                style={{
+                    background: useMotionTemplate`
+                        radial-gradient(
+                            250px circle at ${mouseX}px ${mouseY}px,
+                            rgba(245, 158, 11, 0.15),
+                            transparent 80%
+                        )
+                    `,
+                }}
+            />
+
             {/* Header: Icon + Name */}
             <div className={`flex items-start justify-between mb-1 relative z-10 ${isPaid ? 'opacity-60' : ''}`}>
                 <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xl shrink-0">{icon}</span>
                     <div className="min-w-0">
-                        <span className="font-bold text-[11px] text-zinc-500 uppercase tracking-widest truncate max-w-[140px] block">
+                        <span className="font-bold text-xs text-zinc-500 uppercase tracking-widest truncate block">
                             {name}
                         </span>
                         {fxPocket && fxPocket.length > 0 && (
-                            <span className="text-[9px] font-black text-amber-400 tracking-widest">
+                            <span className="text-xs font-black text-amber-400 tracking-widest">
                                 {fxPocket.map(p => `${p.available.toFixed(2)} ${p.currency}`).join(' · ')}
                             </span>
                         )}
@@ -172,8 +208,9 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                     {onExchangeClick && id && currencyCode === 'PLN' && current > 0 && (
                         <button
                             onClick={handleExchangeClick}
-                            className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-400 flex items-center justify-center hover:bg-amber-500/30 transition-all text-[10px]"
+                            className="w-11 h-11 md:w-8 md:h-8 -m-2 p-2 rounded-md bg-transparent text-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-all text-xs"
                             title="Wymień walutę"
+                            aria-label={`Wymień walutę w kopercie ${name}`}
                         >
                             💱
                         </button>
@@ -181,7 +218,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                     {/* Status Indicator */}
                     {isPaid ? (
                         <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                            <div className="text-emerald-500 text-[10px]">✓</div>
+                            <div className="text-emerald-500 text-xs">✓</div>
                         </div>
                     ) : (
                         spentPercentage < 100 && type === 'monthly' && (
@@ -201,7 +238,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
                         </div>
-                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em]">
                             OPŁACONE
                         </span>
                     </div>
@@ -219,11 +256,11 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                     <span className="text-lg font-bold text-zinc-500 self-end mb-1">zł</span>
                                     {remaining < 0 && (
                                         <div className="w-5 h-5 rounded-full bg-red-400/20 flex items-center justify-center ml-1 animate-pulse">
-                                            <span className="text-red-400 text-[10px] font-bold">!</span>
+                                            <span className="text-red-400 text-xs font-bold">!</span>
                                         </div>
                                     )}
                                 </div>
-                                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
+                                <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">
                                     DOSTĘPNE
                                 </div>
                             </div>
@@ -237,7 +274,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                         </div>
                                         <span className="text-lg font-bold text-zinc-500 self-end mb-1">zł</span>
                                     </div>
-                                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
+                                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">
                                         Saldo
                                     </div>
                                 </div>
@@ -249,7 +286,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                 {progressPercentage >= 100 && (
                                     <div className="flex items-center gap-1 mb-0.5 text-amber-400">
                                         <span className="text-sm">🎉</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                                        <span className="text-xs font-bold uppercase tracking-widest">
                                             Cel Osiągnięty!
                                         </span>
                                     </div>
@@ -262,9 +299,9 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                             <span className="money text-3xl font-black tracking-tighter text-white">{formatMoney(freePLN, false)}</span>
                                             <span className="text-lg font-bold text-zinc-500">zł</span>
                                         </div>
-                                        <div className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Wolne PLN</div>
+                                        <div className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Wolne PLN</div>
                                         {/* Dół: łączna wartość po kursie zakupu */}
-                                        <div className="text-[9px] font-bold text-zinc-500 mt-0.5">
+                                        <div className="text-xs font-bold text-zinc-500 mt-0.5">
                                             Łącznie: <span className="text-zinc-400">{formatMoney(current, false)} zł</span>
                                         </div>
                                     </div>
@@ -276,7 +313,7 @@ export const EnvelopeCard = memo(function EnvelopeCard({
                                             </div>
                                             <span className="text-lg font-bold text-zinc-500 self-end mb-1">zł</span>
                                         </div>
-                                        <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-2">
+                                        <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">
                                             Uzbierano
                                         </div>
                                     </div>

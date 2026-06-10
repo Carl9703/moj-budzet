@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -27,7 +27,7 @@ const colorMap: Record<string, { bg: string; border: string; text: string }> = {
     blue: { bg: 'bg-blue-500/8', border: 'border-blue-500/15', text: 'text-blue-400' },
 }
 
-export const StatsCard = ({ title, value, icon: Icon, trend, subtitle, colorClass = "indigo", className = "", onClick, index = 0 }: StatsCardProps) => {
+export const StatsCard = memo(function StatsCard({ title, value, icon: Icon, trend, subtitle, colorClass = "indigo", className = "", onClick, index = 0 }: StatsCardProps) {
     const colors = colorMap[colorClass] || colorMap.indigo
 
     return (
@@ -36,12 +36,16 @@ export const StatsCard = ({ title, value, icon: Icon, trend, subtitle, colorClas
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
             onClick={onClick}
-            className={`py-3 px-6 rounded-[32px] bg-zinc-900/40 backdrop-blur-xl border border-white/5 flex flex-col relative overflow-hidden group transition-all duration-300 ${className} ${onClick ? 'cursor-pointer hover:bg-zinc-800/40 hover:scale-[1.02] hover:border-white/10' : ''}`}
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            aria-label={onClick ? `Karta statystyk: ${title}` : undefined}
+            onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+            className={`text-left w-full block py-3 px-6 rounded-[32px] bg-zinc-900/40 backdrop-blur-xl border border-white/5 flex flex-col relative overflow-hidden group transition-all duration-300 ${className} ${onClick ? 'cursor-pointer hover:bg-zinc-800/40 hover:scale-[1.02] hover:border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50' : ''}`}
         >
             {/* Minimal Header */}
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-2">
-                    <span className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">{title}</span>
+                    <span className="text-zinc-500 text-xs font-black uppercase tracking-[0.2em]">{title}</span>
                 </div>
                 <div className={`p-2.5 rounded-2xl ${colors.bg} border ${colors.border} ${colors.text} group-hover:scale-110 transition-transform`}>
                     <Icon size={18} />
@@ -62,19 +66,19 @@ export const StatsCard = ({ title, value, icon: Icon, trend, subtitle, colorClas
 
                 {trend && (
                     <div className="flex items-center gap-2 mt-2">
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${trend.isPositive ? 'bg-emerald-400/10 text-emerald-400' : 'bg-rose-400/10 text-rose-400'}`}>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${trend.isPositive ? 'bg-emerald-400/10 text-emerald-400' : 'bg-rose-400/10 text-rose-400'}`}>
                             {trend.isPositive ? '+' : ''}{trend.value}%
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{trend.label}</span>
+                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{trend.label}</span>
                     </div>
                 )}
 
                 {subtitle && (
-                    <p className="text-[11px] text-zinc-500 font-medium tracking-tight opacity-80 leading-relaxed text-left">
+                    <p className="text-xs text-zinc-500 font-medium tracking-tight opacity-80 leading-relaxed text-left">
                         {subtitle}
                     </p>
                 )}
             </div>
         </motion.div>
     )
-}
+})

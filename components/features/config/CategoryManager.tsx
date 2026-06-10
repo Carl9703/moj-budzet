@@ -195,7 +195,7 @@ export const CategoryManager = () => {
                             resetForm()
                             setIsAdding(!isAdding)
                         }}
-                        className={`px-6 py-3 rounded-2xl transition-all text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 active:scale-95 shadow-xl ${isAdding
+                        className={`px-6 py-3 rounded-2xl transition-all text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 active:scale-95 shadow-xl ${isAdding
                             ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                             : 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/20'}`}
                     >
@@ -225,7 +225,7 @@ export const CategoryManager = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Ikona</label>
+                                    <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Ikona</label>
                                     <div className="relative group">
                                         <input
                                             type="text"
@@ -239,7 +239,7 @@ export const CategoryManager = () => {
                                 </div>
 
                                 <div className="space-y-2 lg:col-span-2">
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Nazwa kategorii</label>
+                                    <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Nazwa kategorii</label>
                                     <input
                                         type="text"
                                         value={formData.name}
@@ -251,7 +251,7 @@ export const CategoryManager = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Domyślna koperta</label>
+                                    <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Domyślna koperta</label>
                                     <input
                                         type="text"
                                         value={formData.defaultEnvelope || ''}
@@ -266,13 +266,13 @@ export const CategoryManager = () => {
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="px-6 py-3 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
+                                    className="px-6 py-3 text-zinc-500 hover:text-white text-xs font-black uppercase tracking-[0.2em] transition-colors"
                                 >
                                     Anuluj
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-8 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center gap-3 active:scale-95 text-[10px] font-black uppercase tracking-[0.2em]"
+                                    className="px-8 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center gap-3 active:scale-95 text-xs font-black uppercase tracking-[0.2em]"
                                 >
                                     <Save size={16} />
                                     Zapisz kategorię
@@ -353,10 +353,10 @@ export const CategoryManager = () => {
                                 {category.defaultEnvelope ? (
                                     <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 w-fit">
                                         <FolderOpen size={10} className="text-emerald-400" />
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">{category.defaultEnvelope}</span>
+                                        <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{category.defaultEnvelope}</span>
                                     </div>
                                 ) : (
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 px-2">Brak domyślnej koperty</span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-600 px-2">Brak domyślnej koperty</span>
                                 )}
                             </div>
                         </motion.div>

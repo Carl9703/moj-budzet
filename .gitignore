@@ -70,3 +70,11 @@ lint_results.txt
 lint_verification.txt
 ts_errors.txt
 .gemini_lint_out.txt
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

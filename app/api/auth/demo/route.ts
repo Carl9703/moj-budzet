@@ -11,12 +11,14 @@ const JWT_SECRET = env.JWT_SECRET
 export async function POST(req: NextRequest) {
     try {
         const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
-        const limitResult = rateLimit(ip, { limit: 5, windowMs: 60 * 60 * 1000 }) // 5 requests per hour
-        if (!limitResult.success) {
-            return jsonResponse(
-                { error: 'Zbyt wiele prób. Spróbuj ponownie później.' },
-                { status: 429 }
-            )
+        if (env.NODE_ENV !== 'development') {
+            const limitResult = rateLimit(ip, { limit: 5, windowMs: 60 * 60 * 1000 }) // 5 requests per hour
+            if (!limitResult.success) {
+                return jsonResponse(
+                    { error: 'Zbyt wiele prób. Spróbuj ponownie później.' },
+                    { status: 429 }
+                )
+            }
         }
 
         const demoEmail = 'demo@example.com'
@@ -152,124 +154,82 @@ export async function POST(req: NextRequest) {
             { year: 2026, month: 0 },  // Styczeń 2026
         ]
 
+        const transactionsData = []
+
         for (const { year, month } of historicalMonths) {
             // Przychód
-            await prisma.transaction.create({
-                data: {
-                    userId: user.id, type: 'income', amount: 8500,
-                    description: 'Wynagrodzenie',
-                    date: new Date(year, month, 1, 8, 0),
-                    includeInStats: true
-                }
+            transactionsData.push({
+                userId: user.id, type: 'income', amount: 8500,
+                description: 'Wynagrodzenie',
+                date: new Date(year, month, 1, 8, 0),
+                includeInStats: true
             })
             // Wydatki historyczne z kopertami i kategoriami
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 900, description: 'Czynsz + media', date: new Date(year, month, 5, 10, 30), envelopeId: mieszkanie.id, category: 'housing-bills', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 1000, description: 'Zakupy spożywcze', date: new Date(year, month, 10, 17, 45), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 300, description: 'Paliwo i transport', date: new Date(year, month, 12, 14, 20), envelopeId: transport.id, category: 'fuel', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 150, description: 'Zdrowie i higiena', date: new Date(year, month, 15, 11, 0), envelopeId: zdrowie.id, category: 'healthcare', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 100, description: 'Subskrypcje i rachunki', date: new Date(year, month, 7, 9, 15), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 200, description: 'Gastronomia', date: new Date(year, month, 18, 19, 30), envelopeId: gastronomia.id, category: 'restaurants', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 150, description: 'Ubrania', date: new Date(year, month, 20, 15, 0), envelopeId: ubrania.id, category: 'clothes', includeInStats: true }
-            })
-            await prisma.transaction.create({
-                data: { userId: user.id, type: 'expense', amount: 500, description: 'Wydatki osobiste', date: new Date(year, month, 22, 16, 45), envelopeId: osobiste.id, category: 'hobby', includeInStats: true }
-            })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 900, description: 'Czynsz + media', date: new Date(year, month, 5, 10, 30), envelopeId: mieszkanie.id, category: 'housing-bills', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 1000, description: 'Zakupy spożywcze', date: new Date(year, month, 10, 17, 45), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 300, description: 'Paliwo i transport', date: new Date(year, month, 12, 14, 20), envelopeId: transport.id, category: 'fuel', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 150, description: 'Zdrowie i higiena', date: new Date(year, month, 15, 11, 0), envelopeId: zdrowie.id, category: 'healthcare', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 100, description: 'Subskrypcje i rachunki', date: new Date(year, month, 7, 9, 15), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 200, description: 'Gastronomia', date: new Date(year, month, 18, 19, 30), envelopeId: gastronomia.id, category: 'restaurants', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 150, description: 'Ubrania', date: new Date(year, month, 20, 15, 0), envelopeId: ubrania.id, category: 'clothes', includeInStats: true })
+            transactionsData.push({ userId: user.id, type: 'expense', amount: 500, description: 'Wydatki osobiste', date: new Date(year, month, 22, 16, 45), envelopeId: osobiste.id, category: 'hobby', includeInStats: true })
         }
         // Historyczne: 5 × 8500 = 42500 income, 5 × 3300 = 16500 expenses → net +26000
 
         // Premia grudniowa (uzasadnia duże przelewy na Wesele i FA)
-        await prisma.transaction.create({
-            data: {
-                userId: user.id, type: 'income', amount: 5000,
-                description: 'Premia roczna',
-                date: new Date(2025, 11, 20, 9, 0),
-                includeInStats: true
-            }
+        transactionsData.push({
+            userId: user.id, type: 'income', amount: 5000,
+            description: 'Premia roczna',
+            date: new Date(2025, 11, 20, 9, 0),
+            includeInStats: true
         })
 
         // --- BIEŻĄCY MIESIĄC (Luty 2026) ---
         // Przychód
-        await prisma.transaction.create({
-            data: {
-                userId: user.id,
-                type: 'income',
-                amount: 8500,
-                description: 'Wynagrodzenie',
-                date: new Date(today.getFullYear(), today.getMonth(), 1, 8, 0),
-                includeInStats: true
-            }
+        transactionsData.push({
+            userId: user.id,
+            type: 'income',
+            amount: 8500,
+            description: 'Wynagrodzenie',
+            date: new Date(today.getFullYear(), today.getMonth(), 1, 8, 0),
+            includeInStats: true
         })
 
         // --- ŻYWNOŚĆ ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 287.32, description: 'Biedronka — zakupy tygodniowe', date: daysAgo(3, 17, 23), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 156.40, description: 'Lidl — mięso i warzywa', date: daysAgo(8, 13, 45), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 130.44, description: 'Żabka — zakupy drobne', date: daysAgo(14, 18, 10), envelopeId: zywnosc.id, category: 'personal-groceries', includeInStats: true }
-        })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 287.32, description: 'Biedronka — zakupy tygodniowe', date: daysAgo(3, 17, 23), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 156.40, description: 'Lidl — mięso i warzywa', date: daysAgo(8, 13, 45), envelopeId: zywnosc.id, category: 'shared-groceries', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 130.44, description: 'Żabka — zakupy drobne', date: daysAgo(14, 18, 10), envelopeId: zywnosc.id, category: 'personal-groceries', includeInStats: true })
 
         // --- TRANSPORT ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 142.51, description: 'Orlen — paliwo', date: daysAgo(5, 14, 30), envelopeId: transport.id, category: 'fuel', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 40.00, description: 'Bilet miesięczny ZTM', date: daysAgo(20, 9, 15), envelopeId: transport.id, category: 'public-transport', includeInStats: true }
-        })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 142.51, description: 'Orlen — paliwo', date: daysAgo(5, 14, 30), envelopeId: transport.id, category: 'fuel', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 40.00, description: 'Bilet miesięczny ZTM', date: daysAgo(20, 9, 15), envelopeId: transport.id, category: 'public-transport', includeInStats: true })
 
         // --- RACHUNKI I SUBSKRYPCJE ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 12.99, description: 'Netflix', date: daysAgo(7, 10, 0), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 19.00, description: 'Spotify + YouTube Premium', date: daysAgo(7, 10, 5), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true }
-        })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 12.99, description: 'Netflix', date: daysAgo(7, 10, 0), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 19.00, description: 'Spotify + YouTube Premium', date: daysAgo(7, 10, 5), envelopeId: rachunki.id, category: 'subscriptions', includeInStats: true })
 
         // --- ZDROWIE I HIGIENA ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 89.50, description: 'Apteka — leki', date: daysAgo(11, 16, 20), envelopeId: zdrowie.id, category: 'healthcare', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 34.17, description: 'Rossmann — drogeria', date: daysAgo(4, 12, 40), envelopeId: zdrowie.id, category: 'drugstore', includeInStats: true }
-        })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 89.50, description: 'Apteka — leki', date: daysAgo(11, 16, 20), envelopeId: zdrowie.id, category: 'healthcare', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 34.17, description: 'Rossmann — drogeria', date: daysAgo(4, 12, 40), envelopeId: zdrowie.id, category: 'drugstore', includeInStats: true })
 
         // --- MIESZKANIE ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 900, description: 'Czynsz + media', date: new Date(today.getFullYear(), today.getMonth(), 5, 10, 0), envelopeId: mieszkanie.id, category: 'housing-bills', includeInStats: true }
-        })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 900, description: 'Czynsz + media', date: new Date(today.getFullYear(), today.getMonth(), 5, 10, 0), envelopeId: mieszkanie.id, category: 'housing-bills', includeInStats: true })
 
         // --- GASTRONOMIA ---
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 48.00, description: 'Pizza Hut — obiad', date: daysAgo(2, 19, 15), envelopeId: gastronomia.id, category: 'restaurants', includeInStats: true }
-        })
-        await prisma.transaction.create({
-            data: { userId: user.id, type: 'expense', amount: 25.97, description: 'Lunch w pracy × 2', date: daysAgo(6, 13, 10), envelopeId: gastronomia.id, category: 'work-lunch', includeInStats: true }
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 48.00, description: 'Pizza Hut — obiad', date: daysAgo(2, 19, 15), envelopeId: gastronomia.id, category: 'restaurants', includeInStats: true })
+        transactionsData.push({ userId: user.id, type: 'expense', amount: 25.97, description: 'Lunch w pracy × 2', date: daysAgo(6, 13, 10), envelopeId: gastronomia.id, category: 'work-lunch', includeInStats: true })
+
+        await prisma.transaction.createMany({
+            data: transactionsData
         })
 
         // ========== INWESTYCJE ==========
-        await prisma.investmentAsset.create({
-            data: { userId: user.id, symbol: 'BTC', quantity: 0.25, averagePurchasePrice: 45000, type: 'CRYPTO', currency: 'USD' }
-        })
-        await prisma.investmentAsset.create({
-            data: { userId: user.id, symbol: 'AAPL', quantity: 15, averagePurchasePrice: 180, type: 'STOCK', currency: 'USD' }
-        })
-        await prisma.investmentAsset.create({
-            data: { userId: user.id, symbol: 'WIG20', quantity: 100, averagePurchasePrice: 2200, type: 'STOCK', currency: 'PLN' }
+        await prisma.investmentAsset.createMany({
+            data: [
+                { userId: user.id, symbol: 'BTC', quantity: 0.25, averagePurchasePrice: 45000, type: 'CRYPTO', currency: 'USD' },
+                { userId: user.id, symbol: 'AAPL', quantity: 15, averagePurchasePrice: 180, type: 'STOCK', currency: 'USD' },
+                { userId: user.id, symbol: 'WIG20', quantity: 100, averagePurchasePrice: 2200, type: 'STOCK', currency: 'PLN' }
+            ]
         })
 
         // ========== JWT TOKEN ==========
@@ -279,7 +239,7 @@ export async function POST(req: NextRequest) {
             { expiresIn: '7d' }
         )
 
-        return jsonResponse({
+        const response = jsonResponse({
             token,
             user: {
                 id: user.id,
@@ -287,6 +247,14 @@ export async function POST(req: NextRequest) {
                 name: user.name
             }
         })
+        response.cookies.set('authToken', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60,
+            path: '/'
+        })
+        return response
 
     } catch (error) {
         console.error('Demo auth error:', error)

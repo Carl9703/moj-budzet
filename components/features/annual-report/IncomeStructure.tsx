@@ -54,13 +54,13 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                         <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
                             Źródła Dochodów
                         </h2>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-xs text-zinc-500">
                             {onSelectSource ? 'Kliknij segment aby zobaczyć szczegóły' : 'Podział przychodów'}
                         </p>
                     </div>
                 </div>
                 <div className="text-right shrink-0">
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Łącznie</div>
+                    <div className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Łącznie</div>
                     <div className="text-xl font-bold text-white tabular-nums">{formatMoneyWithSeparators(totalIncome)} zł</div>
                 </div>
             </div>
@@ -103,7 +103,7 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
                             </ResponsiveContainer>
                             {/* Center label */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Razem</div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Razem</div>
                                 <div className="text-base font-bold text-white tabular-nums leading-tight">{formatMoneyWithSeparators(totalIncome)}</div>
                                 <div className="text-xs text-zinc-500">zł</div>
                             </div>
@@ -154,7 +154,7 @@ export function IncomeStructureChart({ data, totalIncome, onSelectSource }: Inco
 
                                     <div className="text-right shrink-0 relative z-10">
                                         <div className="text-sm font-bold text-white tabular-nums">{formatMoneyWithSeparators(entry.value)} zł</div>
-                                        <div className="text-[10px] text-zinc-500 tabular-nums">{pct.toFixed(1)}%</div>
+                                        <div className="text-xs text-zinc-500 tabular-nums">{pct.toFixed(1)}%</div>
                                     </div>
 
                                     {onSelectSource && (

@@ -3,7 +3,6 @@
  */
 
 export const SYSTEM_DESCRIPTIONS = {
-    MONTH_CLOSE: '🔒 Zamknięcie miesiąca',
     BALANCE_TRANSFER: 'przeniesienie bilansu',
     TRANSFER_PREFIX: 'Transfer:',
     BONUS_TRANSFER_INDICATOR: '→'

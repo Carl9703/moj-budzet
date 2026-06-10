@@ -55,7 +55,6 @@ async function getIncomeTrendsData(userId: string, startDate: Date, endDate: Dat
         type: 'income',
         date: { gte: monthStart, lte: monthEnd },
         NOT: [
-          { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
           { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
         ]
       }
@@ -110,7 +109,6 @@ export async function GET(request: NextRequest) {
         type: 'income',
         date: { gte: start, lte: end },
         NOT: [
-          { description: { contains: 'Zamknięcie miesiąca' } },
           { description: { contains: 'przeniesienie bilansu' } }
         ]
       },

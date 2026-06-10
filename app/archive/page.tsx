@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -258,7 +258,7 @@ export default function ArchivePage() {
                             Brak danych archiwalnych
                         </h2>
                         <p className="text-zinc-400 text-sm max-w-md">
-                            Twoje archiwum jest puste. Dane pojawią się tutaj automatycznie po zamknięciu pierwszego miesiąca.
+                            Twoje archiwum jest puste. Dane pojawią się tutaj automatycznie, gdy tylko dodasz pierwsze transakcje i minie pierwszy miesiąc.
                         </p>
                     </motion.div>
                 ) : (
@@ -337,7 +337,7 @@ export default function ArchivePage() {
                                             >
                                                 <div className="border-t border-zinc-700/50">
                                                     {/* Table Header */}
-                                                    <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] text-zinc-500 uppercase tracking-wider font-bold border-b border-zinc-800/50 bg-zinc-900/50">
+                                                    <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs text-zinc-500 uppercase tracking-wider font-bold border-b border-zinc-800/50 bg-zinc-900/50">
                                                         <div className="col-span-3">Miesiąc</div>
                                                         <div className="col-span-2 text-right">Przychody</div>
                                                         <div className="col-span-2 text-right">Wydatki</div>

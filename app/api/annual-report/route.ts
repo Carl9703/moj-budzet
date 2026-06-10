@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
         const yearParam = searchParams.get('year')
         const requestedYear = yearParam ? parseInt(yearParam) : new Date().getFullYear()
         const previousYear = requestedYear - 1
+        const isCurrentYear = requestedYear === new Date().getFullYear()
+        const currentMonth = new Date().getMonth() + 1
+        const currentDivisor = isCurrentYear ? currentMonth : 12
+
+        const prevDivisor = 12 // Previous year is always fully completed
+
 
         // Date ranges
         const yearStart = new Date(requestedYear, 0, 1)
@@ -104,9 +110,9 @@ export async function GET(request: NextRequest) {
             savings: yearSavings,
             savingsRate: yearSavingsRate,
             monthlyAverage: {
-                income: yearIncome / 12,
-                expenses: yearExpenses / 12,
-                savings: yearSavings / 12
+                income: yearIncome / currentDivisor,
+                expenses: yearExpenses / currentDivisor,
+                savings: yearSavings / currentDivisor
             }
         }
 
@@ -128,9 +134,9 @@ export async function GET(request: NextRequest) {
             savings: prevYearSavings,
             savingsRate: prevYearSavingsRate,
             monthlyAverage: {
-                income: prevYearIncome / 12,
-                expenses: prevYearExpenses / 12,
-                savings: prevYearSavings / 12
+                income: prevYearIncome / prevDivisor,
+                expenses: prevYearExpenses / prevDivisor,
+                savings: prevYearSavings / prevDivisor
             }
         }
 
@@ -291,7 +297,7 @@ export async function GET(request: NextRequest) {
                 const groupChangePercent = gData.totalPrev > 0
                     ? (groupChange / gData.totalPrev) * 100
                     : (gData.totalCurrent > 0 ? 100 : 0)
-                const prevGroupAvg = gData.totalPrev / 12
+                const prevGroupAvg = gData.totalPrev / prevDivisor
 
                 const envelopes = Array.from(gData.envelopes.values())
                     .map((eData) => {
@@ -331,7 +337,7 @@ export async function GET(request: NextRequest) {
                                 const catChangePercent = cData.prevAmount > 0
                                     ? (catChange / cData.prevAmount) * 100
                                     : (cData.currentAmount > 0 ? 100 : 0)
-                                const prevCatAvg = cData.prevAmount / 12
+                                const prevCatAvg = cData.prevAmount / prevDivisor
 
                                 return {
                                     categoryId: cData.id,
@@ -340,7 +346,7 @@ export async function GET(request: NextRequest) {
                                     amount: cData.currentAmount,
                                     percentage: eData.currentAmount > 0 ? (cData.currentAmount / eData.currentAmount) * 100 : 0,
                                     monthlyTrend: catMonthlyTrend,
-                                    monthlyAverage: cData.currentAmount / 12,
+                                    monthlyAverage: cData.currentAmount / currentDivisor,
                                     transactionCount: cData.currentTransactions.length,
                                     yearOverYear: (cData.prevAmount > 0 || cData.currentAmount > 0) ? {
                                         previousYearAmount: cData.prevAmount,
@@ -356,7 +362,7 @@ export async function GET(request: NextRequest) {
                         const envChangePercent = eData.prevAmount > 0
                             ? (envChange / eData.prevAmount) * 100
                             : (eData.currentAmount > 0 ? 100 : 0)
-                        const prevEnvAvg = eData.prevAmount / 12
+                        const prevEnvAvg = eData.prevAmount / prevDivisor
 
                         return {
                             envelopeId: eData.id,
@@ -364,7 +370,7 @@ export async function GET(request: NextRequest) {
                             envelopeIcon: eData.icon,
                             totalAmount: eData.currentAmount,
                             percentage: gData.totalCurrent > 0 ? (eData.currentAmount / gData.totalCurrent) * 100 : 0,
-                            monthlyAverage: eData.currentAmount / 12,
+                            monthlyAverage: eData.currentAmount / currentDivisor,
                             transactionCount: eData.currentTransactions.length,
                             yearOverYear: (eData.prevAmount > 0 || eData.currentAmount > 0) ? {
                                 previousYearAmount: eData.prevAmount,
@@ -450,7 +456,7 @@ export async function GET(request: NextRequest) {
             const categoryIcon = getCategoryIcon(categoryId)
             const totalAmount = data.totalAmount
             const percentage = yearExpenses > 0 ? (totalAmount / yearExpenses) * 100 : 0
-            const monthlyAverage = totalAmount / 12
+            const monthlyAverage = totalAmount / currentDivisor
 
             // Calculate previous year amount for this category
             const prevYearAmount = prevExpenseTransactions
@@ -505,7 +511,7 @@ export async function GET(request: NextRequest) {
                     previousYearAmount: prevYearAmount,
                     change,
                     changePercent,
-                    previousYearMonthlyAverage: prevYearAmount / 12
+                    previousYearMonthlyAverage: prevYearAmount / prevDivisor
                 } : undefined,
                 monthlyTrend,
                 subcategories

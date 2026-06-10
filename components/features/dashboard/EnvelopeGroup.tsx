@@ -35,15 +35,27 @@ interface Props {
     onExchangeClick?: (envelopeId: string, envelopeName: string, balance: number) => void
 }
 
-export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeClick, onExchangeClick }: Props) {
+import { memo, useMemo } from 'react'
+
+export const EnvelopeGroup = memo(function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeClick, onExchangeClick }: Props) {
     if (envelopes.length === 0) return null
 
-    const monthlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'monthly')
-    const yearlyEnvelopes = envelopes.filter(e => (e.envelopeType || type) === 'yearly')
-
     // Suma wydatków - Math.max(0, spent) ignoruje wpłaty (ujemne wartości jak -600 w kopertach oszczędnościowych)
-    const totalSpent = envelopes.reduce((sum, envelope) => sum + Math.max(0, envelope.spent), 0)
-    const totalPlanned = envelopes.reduce((sum, envelope) => sum + envelope.planned, 0)
+    const totalSpent = useMemo(() => 
+        envelopes.reduce((sum, envelope) => sum + Math.max(0, envelope.spent), 0),
+    [envelopes])
+
+    const sortedEnvelopes = useMemo(() => {
+        return [...envelopes].sort((a, b) => {
+            // Custom sort: Paid monthly envelopes go to the end
+            const isAPaid = (a.envelopeType || type) === 'monthly' && a.planned > 0 && Math.round((a.spent / a.planned) * 100) === 100
+            const isBPaid = (b.envelopeType || type) === 'monthly' && b.planned > 0 && Math.round((b.spent / b.planned) * 100) === 100
+
+            if (isAPaid && !isBPaid) return 1
+            if (!isAPaid && isBPaid) return -1
+            return 0
+        })
+    }, [envelopes, type])
 
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('pl-PL', {
@@ -74,14 +86,14 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
                                 boxShadow: `0 0 8px ${color || '#64748b'}80`
                             }}
                         />
-                        <h2 className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em]">
+                        <h2 className="text-xs font-black text-zinc-400 uppercase tracking-[0.3em]">
                             {title}
                         </h2>
                     </div>
                 </div>
 
                 <div className="flex items-baseline gap-2 bg-zinc-900/30 px-3 py-1 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Wydano Łącznie:</span>
+                    <span className="text-xs text-zinc-500 font-black uppercase tracking-widest">Wydano Łącznie:</span>
                     <span className="text-sm font-black text-white tracking-tight">
                         {displayAmount}
                     </span>
@@ -90,17 +102,7 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
 
             {/* Grid of Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {envelopes
-                    .sort((a, b) => {
-                        // Custom sort: Paid monthly envelopes go to the end
-                        const isAPaid = (a.envelopeType || type) === 'monthly' && a.planned > 0 && Math.round((a.spent / a.planned) * 100) === 100
-                        const isBPaid = (b.envelopeType || type) === 'monthly' && b.planned > 0 && Math.round((b.spent / b.planned) * 100) === 100
-
-                        if (isAPaid && !isBPaid) return 1
-                        if (!isAPaid && isBPaid) return -1
-                        return 0
-                    })
-                    .map((envelope, index) => (
+                {sortedEnvelopes.map((envelope, index) => (
                         <motion.div
                             key={envelope.id}
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -122,4 +124,4 @@ export function EnvelopeGroup({ title, icon, color, envelopes, type, onEnvelopeC
             </div>
         </motion.div>
     )
-}
+})

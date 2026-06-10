@@ -75,7 +75,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <div className="bg-zinc-800/50 p-3 rounded-xl border border-white/5 text-center group-hover:border-emerald-500/20 transition-colors">
             <div className="flex items-center justify-center gap-1.5 mb-1 text-emerald-400">
               <TrendingUp size={14} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Przychody</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Przychody</span>
             </div>
             <div className="text-base font-bold text-white">
               +{formatMoney(monthData.income)}
@@ -86,7 +86,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
           <div className="bg-zinc-800/50 p-3 rounded-xl border border-white/5 text-center group-hover:border-rose-500/20 transition-colors">
             <div className="flex items-center justify-center gap-1.5 mb-1 text-rose-400">
               <TrendingDown size={14} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Wydatki</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Wydatki</span>
             </div>
             <div className="text-base font-bold text-white">
               -{formatMoney(monthData.expenses)}
@@ -97,7 +97,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
         {/* Balance */}
         <div className="p-5 mb-4 rounded-3xl border border-white/5 bg-zinc-950/40 shadow-inner">
           <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-zinc-500 text-xs font-black uppercase tracking-widest">
               <DollarSign size={14} className="text-zinc-600" />
               Bilans
             </div>
@@ -118,7 +118,7 @@ export function ArchivedMonthCard({ monthData, onClick }: ArchivedMonthCardProps
             />
           </div>
           <div className="flex justify-between items-center mt-3">
-            <span className="text-[10px] text-zinc-600 font-black uppercase tracking-widest">Stopa oszczędności</span>
+            <span className="text-xs text-zinc-600 font-black uppercase tracking-widest">Stopa oszczędności</span>
             <div className="flex items-center gap-1">
               <span className={`text-sm font-black ${getStatusColor()}`}>{savingsRate}%</span>
               {savingsRate >= 20 && <span className="text-xs">🚀</span>}

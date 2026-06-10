@@ -7,6 +7,7 @@ import { TransactionTable } from '@/components/features/transactions/Transaction
 import { api, authorizedFetch } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface Transaction {
   id: string
@@ -34,6 +35,7 @@ interface FilterOptions {
 
 export default function HistoryPage() {
   const { isAuthenticated, isCheckingAuth } = useAuth()
+  const queryClient = useQueryClient()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],
@@ -152,6 +154,31 @@ export default function HistoryPage() {
             />
           </motion.div>
 
+          {/* Stats Row */}
+          {!loading && transactions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="flex flex-wrap gap-4 px-2"
+            >
+              <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex-1 min-w-[200px]">
+                <div className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-1">Suma wydatków</div>
+                <div className="text-xl font-bold text-rose-500">{stats.expense.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł</div>
+              </div>
+              <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex-1 min-w-[200px]">
+                <div className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-1">Suma przychodów</div>
+                <div className="text-xl font-bold text-emerald-500">{stats.income.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł</div>
+              </div>
+              <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex-1 min-w-[200px]">
+                <div className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-1">Bilans</div>
+                <div className={`text-xl font-bold ${stats.income - stats.expense >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {(stats.income - stats.expense).toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Bottom Row: Table (Bento) */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -162,7 +189,7 @@ export default function HistoryPage() {
               transactions={transactions}
               onTransactionDeleted={() => {
                 fetchTransactions()
-                window.dispatchEvent(new CustomEvent('dashboardRefresh'))
+                queryClient.invalidateQueries({ queryKey: ['dashboard'] })
               }}
               loading={loading}
             />

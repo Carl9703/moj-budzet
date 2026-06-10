@@ -239,32 +239,32 @@ export default function WalletsPage() {
                   {/* Balance + stats */}
                   <div className="grid grid-cols-3 gap-3 mb-5">
                     <div className="col-span-1 p-3 rounded-2xl bg-zinc-800/50 border border-white/5">
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Saldo</p>
+                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Saldo</p>
                       <p className={`text-lg font-black ${wallet.balance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {wallet.balance.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[10px] text-zinc-600">{wallet.currency}</p>
+                      <p className="text-xs text-zinc-600">{wallet.currency}</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-zinc-800/50 border border-white/5">
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Wymieniono</p>
+                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Wymieniono</p>
                       <p className="text-sm font-bold text-zinc-300">
                         {totalExchangedIn.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[10px] text-zinc-600">{wallet.currency}</p>
+                      <p className="text-xs text-zinc-600">{wallet.currency}</p>
                     </div>
                     <div className="p-3 rounded-2xl bg-zinc-800/50 border border-white/5">
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Wydano</p>
+                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Wydano</p>
                       <p className="text-sm font-bold text-rose-400">
                         {totalExpensePln > 0 ? fmtPln(totalExpensePln) : '—'}
                       </p>
-                      <p className="text-[10px] text-zinc-600">w PLN</p>
+                      <p className="text-xs text-zinc-600">w PLN</p>
                     </div>
                   </div>
 
                   {/* Recent transactions */}
                   {wallet.transactions.length > 0 && (
                     <div>
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Ostatnie transakcje</p>
+                      <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-2">Ostatnie transakcje</p>
                       <div className="flex flex-col gap-1">
                         {wallet.transactions.slice(0, 5).map(tx => (
                           <div key={tx.id} className="flex items-center gap-2.5 py-2 px-3 rounded-xl hover:bg-zinc-800/50 transition-colors group">
@@ -275,7 +275,7 @@ export default function WalletsPage() {
                               <p className="text-xs font-bold text-zinc-300 truncate">
                                 {tx.description || txTypeLabel(tx.type, wallet.currency)}
                               </p>
-                              <p className="text-[10px] text-zinc-600">
+                              <p className="text-xs text-zinc-600">
                                 {new Date(tx.date).toLocaleDateString('pl-PL')}
                                 {tx.exchangeRate ? ` · kurs ${tx.exchangeRate.toFixed(4)}` : ''}
                               </p>
@@ -285,7 +285,7 @@ export default function WalletsPage() {
                                 {tx.amount >= 0 ? '+' : ''}{fmt(tx.amount, wallet.currency)}
                               </p>
                               {tx.plnAmount ? (
-                                <p className="text-[10px] text-zinc-600">{fmtPln(tx.plnAmount)}</p>
+                                <p className="text-xs text-zinc-600">{fmtPln(tx.plnAmount)}</p>
                               ) : null}
                             </div>
                             <button

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, ArrowRightLeft, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { api } from '@/lib/api/client'
+import { handleMoneyInput } from '@/lib/utils/input'
 
 interface CurrencyTransaction {
   id: string
@@ -133,7 +134,7 @@ export function AddTransactionModal({ isOpen, onClose, onSuccess, wallet }: AddT
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+          className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90dvh]"
         >
           <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
             <div>
@@ -145,12 +146,12 @@ export function AddTransactionModal({ isOpen, onClose, onSuccess, wallet }: AddT
                 </span>
               </p>
             </div>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1 rounded-xl hover:bg-white/5">
+            <button type="button" onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1 rounded-xl hover:bg-white/5">
               <X size={18} />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Direction */}
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -188,7 +189,7 @@ export function AddTransactionModal({ isOpen, onClose, onSuccess, wallet }: AddT
                 <input
                   type="number" step="0.01" min="0"
                   value={currencyAmount}
-                  onChange={e => setCurrencyAmount(e.target.value)}
+                  onChange={e => handleMoneyInput(e.target.value, setCurrencyAmount)}
                   placeholder="0.00"
                   autoFocus
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-mono"
@@ -201,7 +202,7 @@ export function AddTransactionModal({ isOpen, onClose, onSuccess, wallet }: AddT
                 <input
                   type="number" step="0.01" min="0"
                   value={plnAmount}
-                  onChange={e => setPlnAmount(e.target.value)}
+                  onChange={e => handleMoneyInput(e.target.value, setPlnAmount)}
                   placeholder="0.00"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors text-sm font-mono"
                 />
@@ -236,7 +237,7 @@ export function AddTransactionModal({ isOpen, onClose, onSuccess, wallet }: AddT
                       }`}
                     >
                       <span className="text-lg">{env.icon}</span>
-                      <span className="text-[10px] text-center leading-tight">{env.name}</span>
+                      <span className="text-xs text-center leading-tight">{env.name}</span>
                     </button>
                   ))}
                 </div>

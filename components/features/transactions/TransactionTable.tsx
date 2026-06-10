@@ -7,6 +7,10 @@ import { authorizedFetch } from '@/lib/api/client'
 import { useCategories } from '@/lib/contexts/CategoryContext'
 import { ConfirmationModal } from '@/components/shared/modals'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { Envelope } from '@prisma/client'
+import { roundToCents } from '@/lib/utils/money'
+import { handleCalculatorInput } from '@/lib/utils/input'
+import { ListSkeleton } from '@/components/ui/SkeletonLoader'
 
 interface Transaction {
   id: string
@@ -58,7 +62,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
         cleanExpression.includes('//')) return null
       const result = Function(`"use strict"; return (${cleanExpression})`)()
       if (typeof result !== 'number' || !isFinite(result)) return null
-      return Math.round(result * 100) / 100
+      return roundToCents(result)
     } catch {
       return null
     }
@@ -258,10 +262,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
   return (
     <div className="rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl transition-all duration-500 overflow-hidden relative min-h-[200px]">
       {loading ? (
-        <div className="flex flex-col items-center justify-center p-20 gap-4">
-          <div className="w-12 h-12 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
-          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest animate-pulse">Ładowanie transakcji...</p>
-        </div>
+        <ListSkeleton count={5} />
       ) : transactions.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -270,7 +271,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
         >
           <div className="text-6xl mb-4 opacity-50">📝</div>
           <h3 className="text-xl font-black text-white mb-2 tracking-tight">Brak transakcji</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Nie znaleziono transakcji spełniających kryteria wyszukiwania.</p>
+          <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Nie znaleziono transakcji spełniających kryteria wyszukiwania.</p>
         </motion.div>
       ) : (
         <motion.div
@@ -287,7 +288,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                   variants={itemVariants}
                   className="sticky top-0 z-10 px-5 py-3 bg-zinc-950/90 backdrop-blur-md border-b border-white/5"
                 >
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
                     {formatDateHeader(dateKey)}
                   </span>
                 </motion.div>
@@ -326,12 +327,12 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               {getSmartTitle(transaction)}
                             </div>
                             {getSubtitle(transaction) && (
-                              <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
+                              <div className="text-xs text-zinc-500 mt-0.5 truncate">
                                 {getSubtitle(transaction)} • {formatTime(transaction.date)}
                               </div>
                             )}
                             {!getSubtitle(transaction) && (
-                              <div className="text-[11px] text-zinc-500 mt-0.5">
+                              <div className="text-xs text-zinc-500 mt-0.5">
                                 {formatTime(transaction.date)}
                               </div>
                             )}
@@ -347,7 +348,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               <input
                                 type="text"
                                 value={editAmount}
-                                onChange={(e) => setEditAmount(e.target.value)}
+                                onChange={(e) => handleCalculatorInput(e.target.value, setEditAmount)}
                                 className="w-24 py-1.5 px-3 border border-amber-500/50 rounded-xl bg-zinc-900 text-white text-xs text-right outline-none shadow-[0_0_15px_rgba(99,102,241,0.2)] focus:border-amber-500 transition-all font-black"
                                 autoFocus
                               />
@@ -363,7 +364,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               {transaction.type === 'income' ? '+' : '-'}
                               {transaction.amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
-                            <span className="text-[11px] text-zinc-500 ml-1">zł</span>
+                            <span className="text-xs text-zinc-500 ml-1">zł</span>
                           </div>
                         )}
                       </div>
@@ -433,7 +434,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                 {getSmartTitle(transaction)}
                               </div>
                             )}
-                            <div className="text-[10px] text-zinc-500 mt-0.5 truncate">
+                            <div className="text-xs text-zinc-500 mt-0.5 truncate">
                               {getSubtitle(transaction) ? `${getSubtitle(transaction)} • ` : ''}{formatTime(transaction.date)}
                             </div>
                           </div>
@@ -444,7 +445,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                               <input
                                 type="text"
                                 value={editAmount}
-                                onChange={(e) => setEditAmount(e.target.value)}
+                                onChange={(e) => handleCalculatorInput(e.target.value, setEditAmount)}
                                 className="w-20 py-1 px-1 border border-amber-500 rounded bg-zinc-900 text-white text-xs text-right outline-none"
                                 autoFocus
                               />
@@ -456,7 +457,7 @@ export function TransactionTable({ transactions, onTransactionDeleted, loading =
                                   {transaction.type === 'income' ? '+' : '-'}
                                   {transaction.amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
-                                <span className="text-[10px] text-zinc-500 ml-0.5">zł</span>
+                                <span className="text-xs text-zinc-500 ml-0.5">zł</span>
                               </>
                             )}
                           </div>

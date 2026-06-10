@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/setup-env.js && next dev",
-    "build": "node scripts/setup-env.js && prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest",
@@ -49,15 +49,18 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.2",
     "jsdom": "^27.2.0",
+    "msw": "^2.14.6",
     "prisma": "^5.0.0",
     "sharp": "^0.34.5",
     "ts-node": "^10.9.2",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "vitest-mock-extended": "^4.0.0"
   }
 }

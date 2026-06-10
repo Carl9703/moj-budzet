@@ -139,7 +139,7 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                 </div>
                 <button
                     onClick={handleAddNew}
-                    className="px-6 py-3 rounded-2xl bg-amber-600 text-white shadow-xl shadow-amber-500/20 text-[10px] font-black uppercase tracking-[0.2em] hover:scale-105 transition-all active:scale-95 flex items-center gap-3"
+                    className="px-6 py-3 rounded-2xl bg-amber-600 text-white shadow-xl shadow-amber-500/20 text-xs font-black uppercase tracking-[0.2em] hover:scale-105 transition-all active:scale-95 flex items-center gap-3"
                 >
                     <Plus size={16} /> Dodaj płatność
                 </button>
@@ -176,18 +176,18 @@ export function RecurringPayments({ envelopes }: RecurringPaymentsProps) {
                                         </div>
                                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                                             <span className="font-black text-amber-400 text-sm bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 tabular-nums">{payment.amount.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} PLN</span>
-                                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-zinc-500">
                                                 <Calendar size={12} className="text-zinc-600" /> Dzień: <span className="text-zinc-300">{payment.dayOfMonth}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1 h-1 rounded-full bg-zinc-700 hidden sm:block"></div>
                                                 {payment.type === 'transfer' ? (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Transfer do: <span className="text-amber-400">{payment.toEnvelope?.icon} {payment.toEnvelope?.name}</span></span>
+                                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Transfer do: <span className="text-amber-400">{payment.toEnvelope?.icon} {payment.toEnvelope?.name}</span></span>
                                                 ) : (
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{payment.envelope?.icon} {payment.envelope?.name}</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-zinc-400">{payment.envelope?.icon} {payment.envelope?.name}</span>
                                                         <div className="w-1 h-1 rounded-full bg-zinc-700"></div>
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-zinc-400">{getCategoryIcon(payment.category)} {getCategoryName(payment.category)}</span>
                                                     </div>
                                                 )}
                                             </div>

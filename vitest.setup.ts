@@ -1,10 +1,16 @@
 
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { beforeAll, afterAll, afterEach, vi } from 'vitest'
+import { server } from './tests/setup/server'
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
+
+afterAll(() => server.close())
 
 // Cleanup after each test
 afterEach(() => {
+    server.resetHandlers()
     cleanup()
 })
 

@@ -50,19 +50,12 @@ export async function GET(request: NextRequest) {
             whereClause.category = category
         }
 
-        // Wyszukiwanie tekstowe (case-insensitive workaround dla SQLite/Prisma)
+        // Wyszukiwanie tekstowe
         if (searchText) {
-            const lower = searchText.toLowerCase()
-            const upper = searchText.toUpperCase()
-            const capitalized = searchText.charAt(0).toUpperCase() + searchText.slice(1).toLowerCase()
-
-            // Ponieważ używamy SQLite, Prisma nie wspiera `mode: 'insensitive'`
-            whereClause.OR = [
-                { description: { contains: searchText } },
-                { description: { contains: lower } },
-                { description: { contains: upper } },
-                { description: { contains: capitalized } }
-            ]
+            whereClause.description = {
+                contains: searchText,
+                mode: 'insensitive'
+            }
         }
 
         // Filtry dat
@@ -358,6 +351,7 @@ export async function POST(request: NextRequest) {
             let plnEquivalent: Prisma.Decimal | null = null
             // Kwota do użycia w transakcji (PLN). Dla FX pocket będzie nadpisana przez FIFO.
             let transactionAmount = data.amount
+            let fifoResult: any = null
 
             if (isFxExpense && envelope) {
                 // Kwota waluty obcej do skonsumowania z FIFO
@@ -365,7 +359,7 @@ export async function POST(request: NextRequest) {
                     ? new Prisma.Decimal(data.foreignAmount!)
                     : new Prisma.Decimal(data.amount)
 
-                const fifoResult = await consumeFxLotsFifo(
+                fifoResult = await consumeFxLotsFifo(
                     tx,
                     envelope.id,
                     foreignAmountToConsume,
@@ -374,7 +368,7 @@ export async function POST(request: NextRequest) {
                 plnEquivalent = fifoResult.plnEquivalent
 
                 // Dla PLN-koperty z FX pocket: używamy kosztu FIFO jako kwoty transakcji PLN
-                if (isFxExpenseViaPocket) {
+                if (isFxExpenseViaPocket && plnEquivalent) {
                     transactionAmount = plnEquivalent.toNumber()
                 }
             }
@@ -390,6 +384,14 @@ export async function POST(request: NextRequest) {
                     envelopeId: data.envelopeId || null,
                     category: data.category || null,
                     plnEquivalent,
+                    ...(isFxExpense && envelope && fifoResult ? {
+                        fxLotConsumptions: {
+                            create: fifoResult.consumedLots.map((lot: any) => ({
+                                fxLotId: lot.lotId,
+                                amountConsumed: lot.consumedAmount
+                            }))
+                        }
+                    } : {})
                 }
             })
 

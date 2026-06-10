@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
+import { Envelope, Transaction, FxLot } from '@prisma/client'
+import { handleMoneyInput } from '@/lib/utils/input'
 import { api } from '@/lib/api/client'
 import { trackCategoryUsage, trackEnvelopeUsage } from '@/lib/constants/categories'
 import { useCategories } from '@/lib/contexts/CategoryContext'
@@ -107,7 +109,7 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
         : []
 
     const allExpenseCategories = categories
-    const displayCategories = showAllCategories ? allExpenseCategories : envelopeCategories
+    const displayCategories = showAllCategories || !selectedEnvelope ? allExpenseCategories : envelopeCategories
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -232,12 +234,12 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
 
     return (
         <Modal title="💸 Dodaj Wydatek" onClose={onClose}>
-            <div className="p-3 md:p-4 bg-zinc-900/20">
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="p-3 md:p-4 bg-zinc-900/20">
                 <div className="space-y-2 md:space-y-3">
 
                     {/* HERO AMOUNT */}
                     <div className="bg-zinc-950/50 py-6 rounded-3xl border border-white/5 transition-all focus-within:border-amber-500/30 group">
-                        <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 text-center">
+                        <label className="block text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 text-center">
                             {(isFxEnvelope || (useFx && hasFxPocket)) ? `Kwota wydatku (${effectiveCurrency})` : 'Kwota wydatku'}
                         </label>
 
@@ -245,24 +247,24 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                         {hasFxPocket && fxPockets && (
                             <div className="flex flex-col items-center gap-2 mb-4">
                                 <div className="flex items-center gap-2">
-                                    <button
+                                    <button type="button"
                                         onClick={() => setUseFx(false)}
-                                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!useFx ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border border-white/5'}`}
+                                        className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${!useFx ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border border-white/5'}`}
                                     >
                                         PLN
                                     </button>
                                     {fxPockets.map(p => (
-                                        <button
+                                        <button type="button"
                                             key={p.currency}
                                             onClick={() => { setUseFx(true); setSelectedFxCurrency(p.currency) }}
-                                            className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${useFx && activeFxCurrency === p.currency ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-zinc-800 text-zinc-500 border border-white/5'}`}
+                                            className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${useFx && activeFxCurrency === p.currency ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-zinc-800 text-zinc-500 border border-white/5'}`}
                                         >
                                             {p.currency}
                                         </button>
                                     ))}
                                 </div>
                                 {useFx && envelopeFxPocket && (
-                                    <span className="text-[10px] text-zinc-500">
+                                    <span className="text-xs text-zinc-500">
                                         Dostępne: <span className="text-amber-400 font-bold">{envelopeFxPocket.available.toFixed(2)} {envelopeFxPocket.currency}</span>
                                     </span>
                                 )}
@@ -275,7 +277,7 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                                 type="number"
                                 inputMode="decimal"
                                 value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
+                                onChange={(e) => handleMoneyInput(e.target.value, setAmount)}
                                 placeholder="0"
                                 className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-zinc-800/50 focus:outline-none transition-all tracking-tighter"
                                 autoFocus
@@ -285,12 +287,12 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                             </span>
                         </div>
                         {useFx && hasFxPocket && envelopeFxPocket && parsedAmount > envelopeFxPocket.available && (
-                            <p className="mt-2 text-center text-[10px] text-red-400 font-bold">
+                            <p className="mt-2 text-center text-xs text-red-400 font-bold">
                                 Maks. {envelopeFxPocket.available.toFixed(2)} {envelopeFxPocket.currency}
                             </p>
                         )}
                         {(isFxEnvelope || (useFx && hasFxPocket)) && !(parsedAmount > (envelopeFxPocket?.available ?? Infinity)) && (
-                            <p className="mt-3 text-center text-[10px] text-zinc-500">
+                            <p className="mt-3 text-center text-xs text-zinc-500">
                                 Równowartość PLN zostanie wyliczona przez FIFO z historii wymiany
                             </p>
                         )}
@@ -301,18 +303,18 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                         {/* Envelope Selection - Even Grid */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between px-1">
-                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">
+                                <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">
                                     Z koperty
                                 </label>
-                                <button
+                                <button type="button"
                                     onClick={() => setShowAllEnvelopes(!showAllEnvelopes)}
-                                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-[0.2em]"
+                                    className="text-xs font-black text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-[0.2em]"
                                 >
                                     {showAllEnvelopes ? 'Tylko miesięczne' : 'Pokaż wszystkie'}
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {(() => {
                                     const filteredEnvelopes = showAllEnvelopes
                                         ? envelopes
@@ -334,7 +336,7 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
 
                                     if (sortedEnvelopes.length === 0) {
                                         return (
-                                            <div className="col-span-full text-center py-6 text-zinc-500 text-[10px] uppercase font-bold tracking-widest bg-zinc-900/40 rounded-3xl border border-white/5 border-dashed">
+                                            <div className="col-span-full text-center py-6 text-zinc-500 text-xs uppercase font-bold tracking-widest bg-zinc-900/40 rounded-3xl border border-white/5 border-dashed">
                                                 Brak kopert
                                             </div>
                                         )
@@ -345,12 +347,12 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                                         const isYearly = env.type === 'yearly'
 
                                         return (
-                                            <motion.button
+                                            <motion.button type="button"
                                                 key={env.id}
                                                 whileTap={{ scale: 0.95 }}
                                                 onClick={() => handleEnvelopeSelect(env.id)}
                                                 className={`
-                                                    flex flex-col items-center justify-center gap-1.5 p-2 rounded-2xl h-[72px] transition-all duration-200 border
+                                                    flex flex-col items-center justify-center gap-1.5 px-1 py-2 rounded-2xl h-[72px] transition-all duration-200 border
                                                     ${isSelected
                                                         ? 'bg-emerald-500/20 border-emerald-500 shadow-lg shadow-emerald-500/10 text-emerald-300'
                                                         : isYearly
@@ -359,8 +361,8 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                                                     }
                                                 `}
                                             >
-                                                <span className={`text-xl transition-opacity ${isSelected ? 'opacity-100' : 'opacity-80'}`}>{env.icon}</span>
-                                                <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-[1.1] w-full mt-auto">{env.name}</span>
+                                                <span className={`text-2xl mb-1 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-80'}`}>{env.icon}</span>
+                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight text-center leading-[1.1] w-full mt-auto px-0.5">{env.name}</span>
                                             </motion.button>
                                         )
                                     })
@@ -371,10 +373,10 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                         {/* Category Selection - Horizontal & Modern */}
                         <div className="space-y-1 md:space-y-2">
                             <div className="flex items-center justify-between px-1">
-                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Kategoria</label>
-                                <button
+                                <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Kategoria</label>
+                                <button type="button"
                                     onClick={() => setShowAllCategories(!showAllCategories)}
-                                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-[0.2em]"
+                                    className="text-xs font-black text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-[0.2em]"
                                 >
                                     {showAllCategories ? 'Mniej opcji' : 'Więcej opcji'}
                                 </button>
@@ -382,14 +384,14 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
 
                             <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x no-scrollbar">
                                 {displayCategories.length === 0 && (
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500 italic w-full text-center py-4 bg-zinc-900/40 rounded-2xl border border-dashed border-white/5">
+                                    <div className="text-xs font-black uppercase tracking-widest text-zinc-500 italic w-full text-center py-4 bg-zinc-900/40 rounded-2xl border border-dashed border-white/5">
                                         Wybierz kopertę...
                                     </div>
                                 )}
                                 {displayCategories.map((cat) => {
                                     const isSelected = selectedCategory === cat.id
                                     return (
-                                        <motion.button
+                                        <motion.button type="button"
                                             key={cat.id}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => handleCategorySelect(cat.id)}
@@ -398,8 +400,8 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                                                 : 'bg-zinc-900/40 text-zinc-400 border-white/5 hover:bg-zinc-800 hover:text-zinc-300'
                                                 }`}
                                         >
-                                            <span className={`text-xl transition-all ${isSelected ? 'scale-110 opacity-100' : 'opacity-80'}`}>{cat.icon}</span>
-                                            <span className="text-[9px] font-black uppercase tracking-tighter leading-[1.1] text-center w-full mt-1.5 break-words">
+                                            <span className={`text-2xl transition-all ${isSelected ? 'scale-110 opacity-100' : 'opacity-80'}`}>{cat.icon}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight leading-[1.1] text-center w-full mt-1.5 px-1">
                                                 {cat.name}
                                             </span>
                                         </motion.button>
@@ -420,15 +422,15 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                             >
                                 <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar snap-x no-scrollbar">
                                     {isLoadingSuggestions ? (
-                                        <div className="flex-shrink-0 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-[10px] font-bold text-zinc-500 animate-pulse">
+                                        <div className="flex-shrink-0 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-xs font-bold text-zinc-500 animate-pulse">
                                             ⏳ Analizuję historię...
                                         </div>
                                     ) : (
                                         suggestions.map((s, idx) => (
-                                            <button
+                                            <button type="button"
                                                 key={idx}
                                                 onClick={() => setDescription(s)}
-                                                className="flex-shrink-0 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-full text-[10px] font-bold text-amber-300 transition-all active:scale-95 snap-start whitespace-nowrap"
+                                                className="flex-shrink-0 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-full text-xs font-bold text-amber-300 transition-all active:scale-95 snap-start whitespace-nowrap"
                                             >
                                                 {s}
                                             </button>
@@ -463,15 +465,16 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                     {/* ACTION BUTTONS */}
                     <div className="flex gap-4 pt-4">
                         <button
+                            type="button"
                             onClick={onClose}
-                            className="px-6 py-4 rounded-2xl bg-zinc-900 border border-white/5 hover:bg-zinc-800 text-zinc-500 font-black text-[10px] uppercase tracking-[0.2em] transition-all w-1/3 active:scale-95 shadow-lg"
+                            className="px-6 py-4 rounded-2xl bg-zinc-900 border border-white/5 hover:bg-zinc-800 text-zinc-500 font-black text-xs uppercase tracking-[0.2em] transition-all w-1/3 active:scale-95 shadow-lg"
                         >
                             Anuluj
                         </button>
                         <button
-                            onClick={handleSubmit}
+                            type="submit"
                             disabled={!canSubmit}
-                            className={`flex-1 py-4 rounded-2xl font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl active:scale-[0.98] ${canSubmit
+                            className={`flex-1 py-4 rounded-2xl font-black text-white text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-[0.98] ${canSubmit
                                 ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:scale-[1.02] shadow-amber-500/20'
                                 : 'bg-zinc-900 text-zinc-700 cursor-not-allowed border border-white/5 opacity-50'
                                 }`}
@@ -485,7 +488,7 @@ export function ExpenseModal({ onClose, onSave, envelopes, initialData }: Props)
                         </button>
                     </div>
                 </div>
-            </div>
+            </form>
         </Modal>
     )
 }

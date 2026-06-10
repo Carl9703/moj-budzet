@@ -56,7 +56,7 @@ export function RouteError({
             {process.env.NODE_ENV === 'development' && (
                 <div className="mt-12 p-4 bg-black/50 border border-rose-500/20 rounded-xl text-left max-w-2xl w-full overflow-auto">
                     <p className="text-xs font-mono text-rose-400 mb-2">Szczegóły dla developera:</p>
-                    <pre className="text-[10px] text-zinc-500 font-mono whitespace-pre-wrap">
+                    <pre className="text-xs text-zinc-500 font-mono whitespace-pre-wrap">
                         {error.message}
                         {'\n'}{error.stack}
                     </pre>

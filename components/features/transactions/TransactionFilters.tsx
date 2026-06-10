@@ -161,7 +161,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
             value={filters.type}
             disabled={loading}
             onChange={(e) => handleFilterChange('type', e.target.value)}
-            className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-3 px-4 text-[10px] font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
+            className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-3 px-4 text-xs font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
           >
             <option value="">WSZYSTKIE TYPY</option>
             <option value="income">💰 PRZYCHODY</option>
@@ -175,14 +175,14 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
         <div className="flex gap-2 items-center justify-end">
           <button
             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-            className={`px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 active:scale-95 ${isAdvancedOpen
+            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 active:scale-95 ${isAdvancedOpen
               ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20'
               : 'bg-zinc-800 text-zinc-400 border border-white/5 hover:bg-zinc-700 hover:text-white'}`}
           >
             <Filter size={16} className={activeFiltersCount > 0 && !isAdvancedOpen ? "text-amber-400" : ""} />
             <span className="hidden sm:inline">{isAdvancedOpen ? 'Schowaj Filtry' : 'Więcej Opcji'}</span>
             {activeFiltersCount > 0 && (
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ml-1 min-w-[20px] text-center shadow-inner ${isAdvancedOpen ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-400'}`}>
+              <span className={`text-xs font-black px-2 py-0.5 rounded-lg ml-1 min-w-[20px] text-center shadow-inner ${isAdvancedOpen ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-400'}`}>
                 {activeFiltersCount}
               </span>
             )}
@@ -223,13 +223,13 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
                 {/* Category */}
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Kategoria</label>
+                  <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Kategoria</label>
                   <div className="relative">
                     <select
                       value={filters.category}
                       disabled={loading}
                       onChange={(e) => handleFilterChange('category', e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-[10px] font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
+                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-xs font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
                     >
                       <option value="">WSZYSTKIE KATEGORIE</option>
                       {filterOptions.categories.map(category => (
@@ -244,13 +244,13 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
 
                 {/* Group */}
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Grupa kopert</label>
+                  <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Grupa kopert</label>
                   <div className="relative">
                     <select
                       value={filters.group}
                       disabled={loading}
                       onChange={(e) => handleFilterChange('group', e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-[10px] font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
+                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-xs font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
                     >
                       <option value="">WSZYSTKIE GRUPY</option>
                       {filterOptions.groups.map(group => (
@@ -263,13 +263,13 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
 
                 {/* Envelope */}
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Koperta</label>
+                  <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Koperta</label>
                   <div className="relative">
                     <select
                       value={filters.envelope}
                       disabled={loading}
                       onChange={(e) => handleFilterChange('envelope', e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-[10px] font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
+                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-4 text-xs font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
                     >
                       <option value="">WSZYSTKIE KOPERTY</option>
                       {filterOptions.envelopes.map(envelope => (
@@ -285,23 +285,23 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
                 {/* Dates */}
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="block text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Od daty</label>
+                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Od daty</label>
                     <input
                       type="date"
                       value={filters.startDate}
                       disabled={loading}
                       onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner date-input-icon-fix disabled:opacity-50"
+                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-3 text-xs font-black uppercase tracking-widest text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner date-input-icon-fix disabled:opacity-50"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Do daty</label>
+                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] ml-1">Do daty</label>
                     <input
                       type="date"
                       value={filters.endDate}
                       disabled={loading}
                       onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner date-input-icon-fix disabled:opacity-50"
+                      className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2.5 px-3 text-xs font-black uppercase tracking-widest text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner date-input-icon-fix disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
                     value={filters.sortBy}
                     disabled={loading}
                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2 px-4 pr-10 text-[10px] font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
+                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-2 px-4 pr-10 text-xs font-black uppercase tracking-widest text-white appearance-none cursor-pointer focus:outline-none focus:border-amber-500/50 transition-all shadow-inner disabled:opacity-50"
                   >
                     <option value="date">📅 DATA</option>
                     <option value="amount">💸 KWOTA</option>
@@ -326,7 +326,7 @@ export function TransactionFilters({ onFiltersChange, filterOptions, loading, in
                 </div>
                 <button
                   onClick={toggleSortOrder}
-                  className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-400 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-700 hover:text-white transition-all flex items-center gap-3 active:scale-95"
+                  className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-400 border border-white/5 text-xs font-black uppercase tracking-widest hover:bg-zinc-700 hover:text-white transition-all flex items-center gap-3 active:scale-95"
                 >
                   {filters.sortOrder === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   {filters.sortOrder === 'asc' ? 'Rosnąco' : 'Malejąco'}

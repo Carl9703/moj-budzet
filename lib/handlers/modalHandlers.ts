@@ -1,9 +1,6 @@
 import { api } from '../api/client'
 
-// Funkcja do wywołania globalnego odświeżenia salda w sidebar
-const triggerDashboardRefresh = () => {
-    window.dispatchEvent(new CustomEvent('dashboardRefresh'))
-}
+// triggerDashboardRefresh is no longer needed - refetch now handles invalidation
 
 interface IncomeData {
     amount: number
@@ -34,7 +31,6 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
                 ...incomeData
             })
             refetch()
-            triggerDashboardRefresh()
             showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
             return true
         } catch {
@@ -59,7 +55,6 @@ export const createExpenseHandler = (refetch: () => void, showToast: (message: s
                 ...(expenseData.foreignCurrency !== undefined && { foreignCurrency: expenseData.foreignCurrency }),
             })
             refetch()
-            triggerDashboardRefresh()
             showToast('Wydatek zapisany pomyślnie!', 'success')
             return true
         } catch {
@@ -81,7 +76,6 @@ export const createTransferHandler = (refetch: () => void, showToast: (message: 
         try {
             await api.post('/api/transfer', transferData)
             refetch()
-            triggerDashboardRefresh()
             showToast('Transfer wykonany pomyślnie!', 'success')
             return true
         } catch {

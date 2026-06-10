@@ -44,7 +44,7 @@ export function YearlyAnalysisTab({
                 </p>
             </div>
             <div className="flex items-center gap-3">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Wybierz rok</span>
+                <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Wybierz rok</span>
                 <select
                     value={selectedYear}
                     onChange={(e) => onYearChange(Number(e.target.value))}
@@ -193,7 +193,7 @@ export function YearlyAnalysisTab({
                         Raport wygenerowany na podstawie <span className="text-white font-bold">{data.summary?.totalTransactions || 0}</span> transakcji
                     </p>
                 </div>
-                <div className="text-[10px] text-zinc-600 font-mono tracking-tighter uppercase italic">
+                <div className="text-xs text-zinc-600 font-mono tracking-tighter uppercase italic">
                     Final Annual Report {selectedYear} {'//'} Verified
                 </div>
             </motion.div>

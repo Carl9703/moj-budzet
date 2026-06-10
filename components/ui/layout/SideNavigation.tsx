@@ -10,8 +10,12 @@ export function SideNavigation() {
     const pathname = usePathname()
     const { isAuthenticated } = useAuth()
 
-    const handleLogout = () => {
-        localStorage.removeItem('authToken')
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/signout', { method: 'POST' })
+        } catch (e) {
+            console.error(e)
+        }
         localStorage.removeItem('user')
         router.push('/auth/signin')
     }
@@ -39,7 +43,7 @@ export function SideNavigation() {
                         <h1 className="text-xl font-bold m-0 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 leading-tight">
                             Quantum
                         </h1>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black opacity-80 mt-0.5">
+                        <p className="text-xs text-zinc-500 uppercase tracking-widest font-black opacity-80 mt-0.5">
                             System Budżetu
                         </p>
                     </div>

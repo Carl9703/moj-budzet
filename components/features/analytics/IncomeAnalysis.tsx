@@ -83,6 +83,14 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
       income: t.value
     }))
 
+  let trendDivisor = 12
+  if (formattedTrends.length > 0) {
+    const [yearStr] = formattedTrends[0].period.split('-')
+    if (parseInt(yearStr) === new Date().getFullYear()) {
+      trendDivisor = Math.max(1, new Date().getMonth() + 1)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -175,9 +183,9 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
 
             {formattedTrends.length > 0 && (
               <div className="text-right">
-                <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
                 <p className="text-lg font-bold text-emerald-400">
-                  {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / formattedTrends.length)}
+                  {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / trendDivisor)}
                 </p>
               </div>
             )}
@@ -203,12 +211,12 @@ export function IncomeAnalysis({ data, loading }: IncomeAnalysisProps) {
               <div
                 className="absolute left-[60px] right-0 border-t-2 border-emerald-400/40 z-20 pointer-events-none transition-all duration-500"
                 style={{
-                  bottom: `${Math.min(280, Math.max(40, ((formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / formattedTrends.length) / Math.max(...formattedTrends.map(d => d.income), 1) * 250) + 40))}px`
+                  bottom: `${Math.min(280, Math.max(40, ((formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / trendDivisor) / Math.max(...formattedTrends.map(d => d.income), 1) * 250) + 40))}px`
                 }}
               >
                 <div className="flex justify-start items-center -mt-3.5">
-                  <span className="text-[9px] font-bold text-emerald-400 bg-zinc-900 border border-emerald-400/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
-                    ŚREDNIA: {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / formattedTrends.length)}
+                  <span className="text-xs font-bold text-emerald-400 bg-zinc-900 border border-emerald-400/20 px-1.5 py-0.5 rounded shadow-lg backdrop-blur-md">
+                    ŚREDNIA: {trendFormatter(formattedTrends.reduce((acc, curr) => acc + curr.income, 0) / trendDivisor)}
                   </span>
                 </div>
               </div>

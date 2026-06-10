@@ -26,7 +26,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
     return (
         <div style={TOOLTIP_STYLE} className="min-w-[200px]">
-            <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-3">{label}</p>
+            <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">{label}</p>
             <div className="space-y-2">
                 {income && (
                     <div className="flex items-center justify-between gap-6">
@@ -75,10 +75,12 @@ export function IncomeExpenseChart({ data, year }: IncomeExpenseChartProps) {
     )
 
     const avgSavingsRate = useMemo(() => {
-        const validMonths = chartData.filter(d => d.savingsRate > 0)
-        if (!validMonths.length) return null
-        return validMonths.reduce((sum, d) => sum + d.savingsRate, 0) / validMonths.length
-    }, [chartData])
+        let divisor = 12
+        if (year === new Date().getFullYear()) {
+            divisor = Math.max(1, new Date().getMonth() + 1)
+        }
+        return chartData.reduce((sum, d) => sum + d.savingsRate, 0) / divisor
+    }, [chartData, year])
 
     const totalIncome = useMemo(() => data.reduce((sum, d) => sum + d.income, 0), [data])
     const totalExpenses = useMemo(() => data.reduce((sum, d) => sum + d.expenses, 0), [data])
@@ -105,18 +107,18 @@ export function IncomeExpenseChart({ data, year }: IncomeExpenseChartProps) {
                 <div className="flex gap-3 flex-wrap">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/8 border border-emerald-500/15">
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: INCOME_COLOR.solid }} />
-                        <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold">Dochody</span>
+                        <span className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Dochody</span>
                         <span className="text-xs text-emerald-300 font-bold tabular-nums">{formatMoneyWithSeparators(totalIncome)} zł</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/8 border border-rose-500/15">
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: EXPENSE_COLOR.solid }} />
-                        <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold">Wydatki</span>
+                        <span className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Wydatki</span>
                         <span className="text-xs text-rose-300 font-bold tabular-nums">{formatMoneyWithSeparators(totalExpenses)} zł</span>
                     </div>
                     {avgSavingsRate !== null && (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-violet-500/8 border border-violet-500/15">
                             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: SAVINGS_RATE_COLOR.solid }} />
-                            <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-bold">Śr. oszcz.</span>
+                            <span className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Śr. oszcz.</span>
                             <span className="text-xs text-violet-300 font-bold tabular-nums">{avgSavingsRate.toFixed(1)}%</span>
                         </div>
                     )}

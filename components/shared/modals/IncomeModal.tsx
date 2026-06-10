@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
 import { api } from '@/lib/api/client'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { handleMoneyInput } from '@/lib/utils/input'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
@@ -192,7 +193,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
                 {/* HERO AMOUNT */}
                 <div className="relative flex flex-col items-center justify-center py-6">
-                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">
+                    <label className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">
                         {incomeType === 'bonus' ? 'Kwota premii' : 'Kwota przychodu'}
                     </label>
                     <div className="relative flex items-baseline justify-center w-full px-4">
@@ -201,7 +202,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             type="number"
                             inputMode="decimal"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) => handleMoneyInput(e.target.value, setAmount)}
                             placeholder="0"
                             className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-zinc-800/50 focus:outline-none transition-all tracking-tighter"
                             autoFocus
@@ -217,7 +218,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         { id: 'other', label: 'Inne', icon: '💵' },
                         { id: 'bonus', label: 'Premia', icon: '🎁' },
                     ].map((type) => (
-                        <button
+                        <button type="button"
                             key={type.id}
                             onClick={() => setIncomeType(type.id as any)}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 relative z-10 
@@ -265,14 +266,14 @@ export function IncomeModal({ onClose, onSave }: Props) {
                             ) : (
                                 <div className="space-y-2">
                                     {bonusDistribution.map((dist, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-2 rounded-xl bg-zinc-900/30 border border-zinc-800">
+                                        <div key={index} className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 sm:gap-3 p-2 rounded-xl bg-zinc-900/30 border border-zinc-800">
                                             <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-lg shadow-inner">
                                                 {getEnvelopeIcon(dist.envelopeId)}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-xs font-bold text-zinc-300 break-words">{getEnvelopeName(dist.envelopeId)}</div>
+                                            <div className="min-w-0">
+                                                <div className="text-xs font-bold text-zinc-300 truncate">{getEnvelopeName(dist.envelopeId)}</div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1 sm:gap-2">
                                                 <input
                                                     type="number"
                                                     value={dist.percentage}
@@ -281,11 +282,11 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                                         newDist[index].percentage = parseInt(e.target.value) || 0
                                                         setBonusDistribution(newDist)
                                                     }}
-                                                    className="w-12 bg-transparent text-right font-bold text-zinc-400 focus:text-white outline-none border-b border-transparent focus:border-amber-500 text-sm"
+                                                    className="w-10 sm:w-12 bg-transparent text-right font-bold text-zinc-400 focus:text-white outline-none border-b border-transparent focus:border-amber-500 text-sm"
                                                 />
                                                 <span className="text-zinc-600 text-xs font-bold">%</span>
                                             </div>
-                                            <div className="w-20 text-right font-mono font-bold text-emerald-400 text-sm">
+                                            <div className="w-16 sm:w-20 text-right font-mono font-bold text-emerald-400 text-sm truncate">
                                                 {calculateAmount(dist.percentage)}
                                             </div>
                                         </div>
@@ -310,7 +311,7 @@ export function IncomeModal({ onClose, onSave }: Props) {
                                     <div className={`font-bold text-sm ${includeInStats ? 'text-emerald-400' : 'text-zinc-400'}`}>
                                         Wliczaj do statystyk
                                     </div>
-                                    <div className="text-[10px] text-zinc-500 mt-0.5">
+                                    <div className="text-xs text-zinc-500 mt-0.5">
                                         {includeInStats
                                             ? 'Wpłynie na bilans przychodów/wydatków'
                                             : 'Tylko zwiększy saldo konta (np. zwrot)'}
@@ -343,15 +344,15 @@ export function IncomeModal({ onClose, onSave }: Props) {
                         >
                             <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar snap-x no-scrollbar">
                                 {isLoadingSuggestions ? (
-                                    <div className="flex-shrink-0 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-[10px] font-bold text-zinc-500 animate-pulse">
+                                    <div className="flex-shrink-0 px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-full text-xs font-bold text-zinc-500 animate-pulse">
                                         ⏳ Analizuję historię...
                                     </div>
                                 ) : (
                                     suggestions.map((s, idx) => (
-                                        <button
+                                        <button type="button"
                                             key={idx}
                                             onClick={() => setDescription(s)}
-                                            className="flex-shrink-0 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full text-[10px] font-bold text-emerald-300 transition-all active:scale-95 snap-start whitespace-nowrap"
+                                            className="flex-shrink-0 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full text-xs font-bold text-emerald-300 transition-all active:scale-95 snap-start whitespace-nowrap"
                                         >
                                             {s}
                                         </button>
@@ -383,13 +384,13 @@ export function IncomeModal({ onClose, onSave }: Props) {
 
                 {/* ACTIONS */}
                 <div className="flex gap-4 pt-4">
-                    <button
+                    <button type="button"
                         onClick={onClose}
                         className="px-6 py-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 font-bold transition-all w-1/3 active:scale-95"
                     >
                         Anuluj
                     </button>
-                    <button
+                    <button type="button"
                         onClick={handleSubmit}
                         disabled={!canSubmit}
                         className={`flex-1 py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all shadow-xl active:scale-[0.98] ${canSubmit

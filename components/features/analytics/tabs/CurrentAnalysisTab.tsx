@@ -11,6 +11,7 @@ import { DrillDownExpenseChart } from '@/components/features/annual-report/Drill
 import { DetailedCategoryBreakdown } from '@/components/features/annual-report/DetailedCategoryBreakdown'
 import { IncomeStructureChart } from '@/components/features/annual-report/IncomeStructure'
 import { DetailedIncomeBreakdown } from '@/components/features/annual-report/DetailedIncomeBreakdown'
+import { CashflowSankeyChart } from '@/components/features/annual-report/CashflowSankeyChart'
 import { getPreviousDateRange } from '@/lib/utils/analytics-helpers'
 import { useCurrentAnalysisData } from '@/lib/hooks/useCurrentAnalysisData'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -37,7 +38,7 @@ export function CurrentAnalysisTab({
     onDateRangeChange,
     onCompareModeChange
 }: CurrentAnalysisTabProps) {
-    const [activeSubTab, setActiveSubTab] = useState<'expenses' | 'income'>('expenses')
+    const [activeSubTab, setActiveSubTab] = useState<'overview' | 'expenses' | 'income'>('overview')
     const [selectedEnvelopeId, setSelectedEnvelopeId] = useState<string | null>(null)
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
 
@@ -151,7 +152,34 @@ export function CurrentAnalysisTab({
 
                     {/* Bottom Section: Charts and Detailed Data */}
                     <AnimatePresence mode="wait">
-                        {activeSubTab === 'expenses' ? (
+                        {activeSubTab === 'overview' ? (
+                            <motion.div
+                                key="overview-tab"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex flex-col gap-6"
+                            >
+                                <div className="p-6 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl">
+                                    <div className="mb-6 flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                                                <span className="text-2xl">🌊</span> Mapa Przepływów Pieniężnych
+                                            </h3>
+                                            <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
+                                                Interaktywny diagram Sankeya obrazujący drogę Twoich pieniędzy
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <CashflowSankeyChart 
+                                        incomeSources={incomeSourcesMapped} 
+                                        expenseGroups={groupsBreakdown} 
+                                        summary={summary}
+                                    />
+                                </div>
+                            </motion.div>
+                        ) : activeSubTab === 'expenses' ? (
                             <motion.div
                                 key="expenses-tab"
                                 initial={{ opacity: 0, x: -20 }}
@@ -243,7 +271,7 @@ export function CurrentAnalysisTab({
                     >
                         <div className="flex gap-12">
                             <div className="text-center md:text-left">
-                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">
+                                <div className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">
                                     {activeSubTab === 'expenses' ? 'Kategorie' : 'Źródła Przychodów'}
                                 </div>
                                 <div className="text-2xl font-black text-white tracking-tight">
@@ -253,7 +281,7 @@ export function CurrentAnalysisTab({
                                 </div>
                             </div>
                             <div className="text-center md:text-left">
-                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Liczba Operacji</div>
+                                <div className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Liczba Operacji</div>
                                 <div className="text-2xl font-black text-white tracking-tight">
                                     {activeSubTab === 'expenses'
                                         ? (data?.summary?.totalTransactions || 0)
@@ -261,7 +289,7 @@ export function CurrentAnalysisTab({
                                 </div>
                             </div>
                         </div>
-                        <div className="text-[10px] text-zinc-600 font-mono italic">
+                        <div className="text-xs text-zinc-600 font-mono italic">
                             Analiza wygenerowana automatycznie na podstawie aktualnych danych
                         </div>
                     </motion.div>

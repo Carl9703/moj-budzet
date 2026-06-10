@@ -196,7 +196,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
                 style={{ width: `${Math.min(node.budgetPercentage || 0, 100)}%` }}
               />
             </div>
-            <div className={`text-[10px] font-medium ${getBudgetTextColor(node.budgetPercentage)}`}>
+            <div className={`text-xs font-medium ${getBudgetTextColor(node.budgetPercentage)}`}>
               {Math.round(node.budgetPercentage || 0)}% budżetu
             </div>
           </div>
@@ -210,7 +210,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
 
         {/* Comparison */}
         {compareMode && node.comparison && !isTransaction && (
-          <div className="flex flex-col items-end gap-0.5 min-w-[70px]">
+          <div className="flex flex-col items-end gap-0.5 whitespace-nowrap">
             <div className={`flex items-center gap-1 font-semibold text-xs ${node.comparison.change > 0 ? 'text-rose-400' : node.comparison.change < 0 ? 'text-emerald-400' : 'text-zinc-500'
               }`}>
               {node.comparison.change > 0 ? <TrendingUp size={12} /> : node.comparison.change < 0 ? <TrendingDown size={12} /> : <Minus size={12} />}
@@ -220,7 +220,7 @@ const TreeNode: React.FC<TreeNodeProps> = React.memo(({
                 formatPercentage(node.comparison.changePercent)
               )}
             </div>
-            <div className="text-[10px] text-zinc-600">
+            <div className="text-xs text-zinc-600">
               vs {formatMoney(node.comparison.previousTotal)}
             </div>
           </div>

@@ -7,7 +7,7 @@ import { formatMoneyWithSeparators } from '@/lib/utils/money'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ChevronRight, PieChart as PieChartIcon } from 'lucide-react'
 import { SpendingTreeNode } from '@/lib/types'
-import { EmptyState } from '@/components/shared/ui/EmptyState'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { CHART_PALETTE, CHART_PALETTE_GLOW, TOOLTIP_STYLE } from '@/lib/constants/chart-colors'
 
 interface ChartData {
@@ -41,7 +41,7 @@ const CustomTooltip = ({ active, payload, total }: any) => {
         <p className="text-zinc-300 text-xs font-semibold">{cleanName}</p>
       </div>
       <p className="text-white font-bold text-sm tabular-nums">{formatMoneyWithSeparators(entry.value)} zł</p>
-      <p className="text-zinc-500 text-[11px] tabular-nums mt-0.5">{pct}% całości</p>
+      <p className="text-zinc-500 text-xs tabular-nums mt-0.5">{pct}% całości</p>
     </div>
   )
 }
@@ -69,7 +69,7 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
       <EmptyState
         title="Brak wydatków"
         description="Brak danych do wyświetlenia dla tej sekcji w wybranym okresie."
-        icon={PieChartIcon}
+        icon={<PieChartIcon size={48} className="text-zinc-500" />}
       />
     )
   }
@@ -93,12 +93,12 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
             <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 mb-1">
               {currentTitle}
             </h2>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-xs text-zinc-500">
               {isDrilledDown ? 'Podgląd szczegółów wybranego elementu' : 'Kliknij segment aby sprawdzić szczegóły'}
             </p>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 font-medium">Suma</div>
+            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1 font-medium">Suma</div>
             <div className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 tabular-nums tracking-tight">
               {formatMoneyWithSeparators(chartTotal)} zł
             </div>
@@ -192,7 +192,7 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
 
             {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Razem</div>
+              <div className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Razem</div>
               <div className="text-lg font-bold text-white tabular-nums leading-tight">
                 {formatMoneyWithSeparators(chartTotal)}
               </div>
@@ -232,7 +232,7 @@ export function AnalyticsCharts({ data, selectedItem, onSegmentClick, drillDownP
 
                 <div className="flex-1 min-w-0 relative z-10">
                   <div className="text-xs font-medium text-zinc-200 truncate leading-tight">{entry.name}</div>
-                  <div className="text-[10px] text-zinc-500 tabular-nums mt-0.5">{formatMoneyWithSeparators(entry.value)} zł</div>
+                  <div className="text-xs text-zinc-500 tabular-nums mt-0.5">{formatMoneyWithSeparators(entry.value)} zł</div>
                 </div>
 
                 <div className="text-sm font-bold text-zinc-300 tabular-nums shrink-0 relative z-10">

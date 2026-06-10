@@ -59,7 +59,7 @@ export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalPro
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl"
+          className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[90dvh]"
         >
           <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -68,12 +68,12 @@ export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalPro
               </div>
               <h2 className="text-lg font-bold text-white">Nowy portfel walutowy</h2>
             </div>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1 rounded-xl hover:bg-white/5">
+            <button type="button" onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1 rounded-xl hover:bg-white/5">
               <X size={18} />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Currency selector */}
             <div>
               <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Waluta</label>
@@ -90,7 +90,7 @@ export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalPro
                     }`}
                   >
                     <span className="text-xl">{c.flag}</span>
-                    <span className="text-[11px]">{c.code}</span>
+                    <span className="text-xs">{c.code}</span>
                   </button>
                 ))}
               </div>

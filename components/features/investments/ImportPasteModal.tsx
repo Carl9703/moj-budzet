@@ -177,7 +177,7 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                             <span className="text-2xl">📋</span>
                             <h2 className="text-xl font-bold text-white">Importuj Inwestycje</h2>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 transition-colors">
+                        <button type="button" onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 transition-colors">
                             <X size={20} />
                         </button>
                     </div>
@@ -243,13 +243,13 @@ export function ImportPasteModal({ isOpen, onClose, onSuccess }: ImportPasteModa
                         </div>
 
                         <div className="flex gap-3">
-                            <button
+                            <button type="button"
                                 onClick={onClose}
                                 className="flex-1 px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-2xl font-bold transition-all active:scale-95"
                             >
                                 Anuluj
                             </button>
-                            <button
+                            <button type="button"
                                 onClick={handleSubmit}
                                 disabled={loading || preview.length === 0}
                                 className="flex-[2] px-6 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-amber-600/20 active:scale-95 flex items-center justify-center gap-2"

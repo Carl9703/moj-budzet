@@ -7,6 +7,7 @@ import { X, Save, Trash2, Plus, AlertCircle, RefreshCw } from 'lucide-react'
 import { Category } from '@/lib/contexts/CategoryContext'
 import { ConfirmationModal } from '@/components/shared/modals'
 import { authorizedFetch } from '@/lib/api/client'
+import { blockInvalidDecimals } from '@/lib/utils/input'
 
 interface Envelope {
     id: string
@@ -256,27 +257,27 @@ export function EnvelopeDetailModal({
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-white tracking-tight">{formData.name}</h2>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Edycja szczegółów i kategorii</p>
+                            <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Edycja szczegółów i kategorii</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-zinc-400 hover:text-white">
+                    <button type="button" onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-zinc-400 hover:text-white">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex border-b border-white/5 px-6 gap-6 bg-zinc-950/20">
-                    <button
+                    <button type="button"
                         onClick={() => setActiveTab('details')}
-                        className={`py-4 text-[10px] font-black transition-all uppercase tracking-[0.2em] border-b-2 ${activeTab === 'details' ? 'border-amber-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`py-4 text-xs font-black transition-all uppercase tracking-[0.2em] border-b-2 ${activeTab === 'details' ? 'border-amber-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
                     >
                         Szczegóły
                     </button>
-                    <button
+                    <button type="button"
                         onClick={() => setActiveTab('categories')}
-                        className={`py-4 text-[10px] font-black transition-all flex items-center gap-2 uppercase tracking-[0.2em] border-b-2 ${activeTab === 'categories' ? 'border-amber-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`py-4 text-xs font-black transition-all flex items-center gap-2 uppercase tracking-[0.2em] border-b-2 ${activeTab === 'categories' ? 'border-amber-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
                     >
-                        Kategorie <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 text-[9px] border border-amber-500/20">{categories.length}</span>
+                        Kategorie <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs border border-amber-500/20">{categories.length}</span>
                     </button>
                 </div>
 
@@ -287,7 +288,7 @@ export function EnvelopeDetailModal({
                             {/* Icon & Name */}
                             <div className="flex gap-4 items-start">
                                 <div className="w-24 shrink-0">
-                                    <label className="block text-[9px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] text-center">Ikona</label>
+                                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em] text-center">Ikona</label>
                                     <div className="bg-zinc-950/50 p-2 rounded-2xl border border-white/10 flex justify-center shadow-inner hover:border-amber-500/50 transition-all">
                                         <input
                                             value={formData.icon || ''}
@@ -299,7 +300,7 @@ export function EnvelopeDetailModal({
                                     </div>
                                 </div>
                                 <div className="flex-1">
-                                    <label className="block text-[9px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Nazwa koperty</label>
+                                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Nazwa koperty</label>
                                     <input
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -312,7 +313,7 @@ export function EnvelopeDetailModal({
                             <div className={`p-4 rounded-2xl border transition-all shadow-lg ${formData.plannedAmount > 0
                                 ? 'bg-emerald-500/5 border-emerald-500/20'
                                 : 'bg-zinc-950/50 border-white/10'}`}>
-                                <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-2 text-center">
+                                <label className="block text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-2 text-center">
                                     {formData.type === 'monthly' ? 'Miesięczny Limit' : 'Cel Oszczędności'}
                                 </label>
                                 <div className="relative flex items-baseline justify-center">
@@ -320,17 +321,18 @@ export function EnvelopeDetailModal({
                                         type="number"
                                         value={formData.plannedAmount || ''}
                                         onChange={e => setFormData({ ...formData, plannedAmount: Number(e.target.value) })}
+                                        onInput={blockInvalidDecimals}
                                         className="w-full bg-transparent text-3xl font-black text-center text-white placeholder:text-zinc-800 focus:outline-none tracking-tighter"
                                         placeholder="0"
                                     />
-                                    <span className="absolute right-4 bottom-1 text-[9px] font-black text-zinc-600 uppercase tracking-widest">zł</span>
+                                    <span className="absolute right-4 bottom-1 text-xs font-black text-zinc-600 uppercase tracking-widest">zł</span>
                                 </div>
                             </div>
 
                             {/* SETTINGS GRID */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[9px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Grupa</label>
+                                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Grupa</label>
                                     <div className="relative">
                                         <select
                                             value={formData.group || 'needs'}
@@ -341,24 +343,24 @@ export function EnvelopeDetailModal({
                                             <option value="lifestyle">STYL ŻYCIA</option>
                                             <option value="assets">CELE I MAJĄTEK</option>
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-[10px]">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-xs">
                                             ▼
                                         </div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-[9px] font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Typ</label>
+                                    <label className="block text-xs font-black text-zinc-500 mb-2 uppercase tracking-[0.2em]">Typ</label>
                                     <div className="flex bg-zinc-950/50 p-1.5 rounded-2xl border border-white/10 relative shadow-inner">
-                                        <button
+                                        <button type="button"
                                             onClick={() => setFormData({ ...formData, type: 'monthly' })}
-                                            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative z-10 ${formData.type === 'monthly' ? 'text-white' : 'text-zinc-500'}`}
+                                            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all relative z-10 ${formData.type === 'monthly' ? 'text-white' : 'text-zinc-500'}`}
                                         >
                                             Miesięczna
                                         </button>
-                                        <button
+                                        <button type="button"
                                             onClick={() => setFormData({ ...formData, type: 'yearly' })}
-                                            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative z-10 ${formData.type === 'yearly' ? 'text-white' : 'text-zinc-500'}`}
+                                            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all relative z-10 ${formData.type === 'yearly' ? 'text-white' : 'text-zinc-500'}`}
                                         >
                                             Roczna
                                         </button>
@@ -372,7 +374,7 @@ export function EnvelopeDetailModal({
                                     <div className={`font-black text-xs uppercase tracking-widest ${formData.isAccumulating ? 'text-amber-400' : 'text-zinc-400'}`}>
                                         Koperta Akumulująca
                                     </div>
-                                    <div className="text-[9px] text-zinc-600 font-medium uppercase tracking-[0.05em] mt-0.5">
+                                    <div className="text-xs text-zinc-600 font-medium uppercase tracking-[0.05em] mt-0.5">
                                         Środki przechodzą na kolejny miesiąc
                                     </div>
                                 </div>
@@ -388,17 +390,17 @@ export function EnvelopeDetailModal({
                             </label>
 
                             <div className="pt-4 flex gap-3">
-                                <button
+                                <button type="button"
                                     onClick={handleDelete}
                                     disabled={loading}
-                                    className="px-6 py-4 rounded-2xl bg-zinc-900/50 border border-white/5 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg"
+                                    className="px-6 py-4 rounded-2xl bg-zinc-900/50 border border-white/5 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg"
                                 >
                                     <Trash2 size={16} /> Usuń
                                 </button>
-                                <button
+                                <button type="button"
                                     onClick={handleSave}
                                     disabled={loading}
-                                    className="flex-1 py-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-amber-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                    className="flex-1 py-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-amber-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
                                 >
                                     {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save size={18} />}
                                     Zapisz zmiany
@@ -415,7 +417,7 @@ export function EnvelopeDetailModal({
                                     className="flex-1 bg-zinc-950/50 border border-white/10 rounded-2xl px-5 py-4 text-sm font-black text-white focus:outline-none focus:border-amber-500/50 transition-all shadow-inner"
                                     onKeyDown={e => e.key === 'Enter' && handleAddCategoryClick()}
                                 />
-                                <button
+                                <button type="button"
                                     onClick={handleAddCategoryClick}
                                     disabled={!newCategoryName.trim()}
                                     className="w-14 h-14 shrink-0 flex items-center justify-center rounded-2xl bg-amber-600 hover:bg-amber-500 text-white shadow-xl shadow-amber-500/20 active:scale-95 transition-all disabled:opacity-50"
@@ -427,7 +429,7 @@ export function EnvelopeDetailModal({
                             <div className="space-y-3">
                                 {categoryDrafts.length === 0 ? (
                                     <div className="text-center p-12 border border-dashed border-white/5 rounded-3xl bg-zinc-950/20">
-                                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">Brak kategorii w tej kopercie</p>
+                                        <p className="text-zinc-600 text-xs font-black uppercase tracking-widest">Brak kategorii w tej kopercie</p>
                                     </div>
                                 ) : (
                                     categoryDrafts.map(cat => (
@@ -445,8 +447,8 @@ export function EnvelopeDetailModal({
                                                 value={cat.name}
                                                 onChange={e => updateCategoryDraft(cat.id, { name: e.target.value })}
                                             />
-                                            {cat.isDirty && <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-widest">Zmieniono</span>}
-                                            <button
+                                            {cat.isDirty && <span className="text-xs font-black text-amber-500/60 uppercase tracking-widest">Zmieniono</span>}
+                                            <button type="button"
                                                 onClick={() => handleDeleteCategoryClick(cat.id, cat.name)}
                                                 disabled={checkingCategory === cat.id}
                                                 className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-rose-500 hover:text-white rounded-xl border border-white/5 transition-all text-zinc-500 disabled:opacity-50 shadow-inner"
@@ -460,12 +462,12 @@ export function EnvelopeDetailModal({
 
                             {hasUnsavedCategories && (
                                 <div className="p-5 bg-amber-500/5 rounded-3xl border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-                                    <div className="flex items-center gap-3 text-amber-500 text-[10px] font-black uppercase tracking-widest">
+                                    <div className="flex items-center gap-3 text-amber-500 text-xs font-black uppercase tracking-widest">
                                         <AlertCircle size={18} className="text-amber-600" /> Niezapisane zmiany
                                     </div>
                                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                                        <button onClick={handleDiscardCategoryChanges} className="flex-1 sm:flex-none px-4 py-2 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors">Odrzuć</button>
-                                        <button onClick={handleSaveAllCategories} disabled={savingCategories} className={`flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest ${savingCategories ? 'opacity-70 cursor-wait' : ''}`}>
+                                        <button type="button" onClick={handleDiscardCategoryChanges} className="flex-1 sm:flex-none px-4 py-2 text-zinc-500 hover:text-white text-xs font-black uppercase tracking-widest transition-colors">Odrzuć</button>
+                                        <button type="button" onClick={handleSaveAllCategories} disabled={savingCategories} className={`flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest ${savingCategories ? 'opacity-70 cursor-wait' : ''}`}>
                                             {savingCategories ? <RefreshCw className="animate-spin" size={14} /> : <Save size={14} />} Zapisz zmiany
                                         </button>
                                     </div>
@@ -474,7 +476,7 @@ export function EnvelopeDetailModal({
 
                             <div className="p-5 bg-zinc-950/40 rounded-3xl border border-white/5 flex gap-4 text-zinc-500 shadow-inner">
                                 <AlertCircle size={22} className="shrink-0 text-amber-500/50" />
-                                <p className="text-[11px] font-medium leading-relaxed">Kategorie są przypisane do koperty. Zmiana nazwy koperty automatycznie zaktualizuje powiązanie dla wszystkich kategorii.</p>
+                                <p className="text-xs font-medium leading-relaxed">Kategorie są przypisane do koperty. Zmiana nazwy koperty automatycznie zaktualizuje powiązanie dla wszystkich kategorii.</p>
                             </div>
                         </div>
                     )}

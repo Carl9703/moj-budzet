@@ -93,7 +93,7 @@ export function EnvelopeTransactionsModal({
               <div>
                 <h3 className="text-white font-bold mb-1">Coś poszło nie tak</h3>
                 <p className="text-sm text-zinc-500 mb-6">{error}</p>
-                <button
+                <button type="button"
                   onClick={fetchTransactions}
                   className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xs font-black uppercase tracking-widest text-white transition-all active:scale-95"
                 >
@@ -127,13 +127,13 @@ export function EnvelopeTransactionsModal({
                           {transaction.description || 'Bez opisu'}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                          <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">
                             {formatDate(transaction.date)}
                           </span>
                           {transaction.category && (
                             <>
                               <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                              <span className="text-xs font-black text-amber-400 uppercase tracking-widest">
                                 {getCategoryIcon(transaction.category)} {getCategoryName(transaction.category)}
                               </span>
                             </>
@@ -158,7 +158,7 @@ export function EnvelopeTransactionsModal({
         {/* Footer info */}
         <div className="pt-4 border-t border-zinc-800/50 flex justify-between items-center text-xs text-zinc-500 mt-2">
           <span>Wyświetlono {transactions.length} ostatnich transakcji</span>
-          <button
+          <button type="button"
             onClick={onClose}
             className="hover:text-zinc-300 transition-colors"
           >

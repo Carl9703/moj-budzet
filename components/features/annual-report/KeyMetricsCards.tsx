@@ -7,8 +7,8 @@ import { YearSummary } from '@/lib/api/annual-report'
 interface KeyMetricsCardsProps {
     summary: YearSummary
     previousYearSummary?: YearSummary
-    activeTab?: 'expenses' | 'income'
-    onTabChange?: (tab: 'expenses' | 'income') => void
+    activeTab?: 'overview' | 'expenses' | 'income'
+    onTabChange?: (tab: 'overview' | 'expenses' | 'income') => void
 }
 
 interface MetricCardProps {
@@ -109,7 +109,7 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
 
                     {effectivePrevious !== undefined && (
                         <div className="flex items-center gap-2 pt-0.5">
-                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${displayValue > 0 ? (
+                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border ${displayValue > 0 ? (
                                 hasIncrease
                                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                     : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -128,7 +128,7 @@ function MetricCard({ title, value, suffix, monthlyAverage, previousValue, isPer
                             </div>
 
                             {!isNeutral && changePercent !== 0 && (
-                                <span className={`text-[10px] font-semibold tabular-nums ${displayValue > 0
+                                <span className={`text-xs font-semibold tabular-nums ${displayValue > 0
                                     ? (hasIncrease ? 'text-emerald-500/80' : 'text-rose-500/80')
                                     : (hasDecrease ? 'text-rose-500/80' : 'text-emerald-500/80')
                                     }`}>
@@ -175,7 +175,7 @@ export function KeyMetricsCards({ summary, previousYearSummary, activeTab, onTab
             />
 
             <MetricCard
-                title="Oszczędności"
+                title="Oszczędności (ZOBACZ PRZEPŁYWY)"
                 value={summary.savings}
                 suffix="zł"
                 monthlyAverage={summary.monthlyAverage.savings}
@@ -183,6 +183,9 @@ export function KeyMetricsCards({ summary, previousYearSummary, activeTab, onTab
                 icon={PiggyBank}
                 color="bg-amber-500"
                 showSign={true}
+                isClickable={!!onTabChange}
+                isActive={activeTab === 'overview'}
+                onClick={() => onTabChange?.('overview')}
             />
 
             <MetricCard

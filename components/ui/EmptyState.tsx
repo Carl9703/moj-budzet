@@ -1,5 +1,5 @@
 interface Props {
-    icon: string
+    icon: React.ReactNode
     title: string
     description: string
     actionText?: string
@@ -67,7 +67,7 @@ export function EmptyState({
             {actionText && onAction && (
                 <button
                     onClick={onAction}
-                    className={`py-3 px-8 text-white border-none rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer shadow-xl hover:scale-105 active:scale-95 transition-all ${classes.button}`}
+                    className={`py-3 px-8 text-white border-none rounded-2xl text-xs font-black uppercase tracking-[0.2em] cursor-pointer shadow-xl hover:scale-105 active:scale-95 transition-all ${classes.button}`}
                 >
                     {actionText}
                 </button>

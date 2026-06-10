@@ -194,7 +194,6 @@ async function getTrendsData(userId: string, startDate: Date, endDate: Date, env
       type: 'expense',
       date: { gte: monthStart, lte: monthEnd },
       NOT: [
-        { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
         { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
       ]
     }
@@ -240,7 +239,6 @@ async function buildSpendingTree(
       type: 'expense',
       date: { gte: startDate, lte: endDate },
       NOT: [
-        { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
         { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
       ]
     },
@@ -281,7 +279,6 @@ async function buildSpendingTree(
         type: 'expense',
         date: { gte: previousStart, lte: previousEnd },
         NOT: [
-          { description: { contains: 'Zamknięcie miesiąca' } },
           { description: { contains: 'przeniesienie bilansu' } }
         ]
       },
@@ -522,7 +519,6 @@ export async function GET(request: NextRequest) {
         type: { in: ['income', 'expense'] },
         date: { gte: start, lte: end },
         NOT: [
-          { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
           { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
         ]
       },
@@ -558,7 +554,6 @@ export async function GET(request: NextRequest) {
           type: { in: ['income', 'expense'] },
           date: { gte: previousStart, lte: previousEnd },
           NOT: [
-            { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
             { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
           ]
         }
@@ -613,7 +608,6 @@ export async function GET(request: NextRequest) {
         type: 'expense',
         date: { gte: yearStart, lte: yearEnd },
         NOT: [
-          { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
           { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
         ]
       },

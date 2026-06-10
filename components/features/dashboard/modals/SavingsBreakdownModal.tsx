@@ -37,7 +37,7 @@ export function SavingsBreakdownModal({
                 <div className="text-center py-6 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 opacity-50" />
                     <div className="relative z-10">
-                        <div className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-2">
+                        <div className="text-xs font-black text-amber-500 uppercase tracking-[0.2em] mb-2">
                             Łączne Oszczędności
                         </div>
                         <div className="text-4xl font-black text-white tracking-tighter">
@@ -59,7 +59,7 @@ export function SavingsBreakdownModal({
                             </div>
                             <div>
                                 <h3 className="font-bold text-white tracking-tight">Poduszka Finansowa</h3>
-                                <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Fundusz Awaryjny</p>
+                                <p className="text-xs text-zinc-500 uppercase font-black tracking-widest">Fundusz Awaryjny</p>
                             </div>
                             <div className="ml-auto text-xl font-black text-emerald-400 tracking-tight">
                                 {emergencyFund.toLocaleString('pl-PL')} <span className="text-xs text-emerald-500/50">zł</span>
@@ -88,7 +88,7 @@ export function SavingsBreakdownModal({
                             </div>
                             <div>
                                 <h3 className="font-bold text-white tracking-tight">Cele Oszczędnościowe</h3>
-                                <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">{goalEnvelopes.length} aktywnych celów</p>
+                                <p className="text-xs text-zinc-500 uppercase font-black tracking-widest">{goalEnvelopes.length} aktywnych celów</p>
                             </div>
                             <div className="ml-auto text-xl font-black text-amber-400 tracking-tight">
                                 {computedGoalsAmount.toLocaleString('pl-PL')} <span className="text-xs text-amber-500/50">zł</span>
@@ -105,7 +105,7 @@ export function SavingsBreakdownModal({
                                             <span className="text-sm font-bold text-zinc-300">{envelope.name}</span>
                                         </div>
                                         <span className="text-sm font-black text-zinc-200 tracking-tight">
-                                            {envelope.current.toLocaleString('pl-PL')} <span className="text-[10px] text-zinc-500">zł</span>
+                                            {envelope.current.toLocaleString('pl-PL')} <span className="text-xs text-zinc-500">zł</span>
                                         </span>
                                     </div>
                                 ))

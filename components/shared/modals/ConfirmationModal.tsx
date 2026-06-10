@@ -83,14 +83,14 @@ export function ConfirmationModal({
                 </p>
 
                 <div className="flex gap-3 justify-center">
-                    <button
+                    <button type="button"
                         onClick={onClose}
                         disabled={isLoading}
                         className="px-5 py-2.5 rounded-xl font-semibold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50"
                     >
                         {cancelText}
                     </button>
-                    <button
+                    <button type="button"
                         onClick={onConfirm}
                         disabled={isLoading}
                         className={`px-6 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 flex items-center gap-2 ${style.confirmBtn}`}

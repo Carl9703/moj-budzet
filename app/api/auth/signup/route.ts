@@ -120,9 +120,8 @@ async function createDefaultEnvelopes(userId: string) {
     { name: 'Wolne środki (roczne)', type: 'yearly', envelopeType: ENVELOPE_TYPES.GOAL, plannedAmount: 2000, icon: '🎉', group: 'assets', isAccumulating: true },
   ]
 
-  for (const envelope of defaultEnvelopes) {
-    await prisma.envelope.create({
-      data: {
+  await prisma.envelope.createMany({
+    data: defaultEnvelopes.map(envelope => ({
         userId,
         name: envelope.name,
         type: envelope.type,
@@ -132,9 +131,8 @@ async function createDefaultEnvelopes(userId: string) {
         icon: envelope.icon,
         group: envelope.group,
         isAccumulating: envelope.isAccumulating || false
-      }
-    })
-  }
+    }))
+  })
 }
 
 async function createDefaultCategories(userId: string) {

@@ -36,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const value = payload[0]?.value ?? 0
   return (
     <div style={TOOLTIP_STYLE} className="min-w-[160px]">
-      <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-2">{label}</p>
+      <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">{label}</p>
       <p className="text-white font-bold text-sm tabular-nums">{formatMoneyWithSeparators(value)} zł</p>
     </div>
   )
@@ -62,7 +62,12 @@ export function TrendsVisualization({
 
   const average = useMemo(() => {
     if (!chartData.length) return 0
-    return chartData.reduce((acc, curr) => acc + curr.wydatki, 0) / chartData.length
+    let divisor = 12
+    const [yearStr] = chartData[0].originalPeriod.split('-')
+    if (parseInt(yearStr) === new Date().getFullYear()) {
+      divisor = Math.max(1, new Date().getMonth() + 1)
+    }
+    return chartData.reduce((acc, curr) => acc + curr.wydatki, 0) / divisor
   }, [chartData])
 
   const areaColor = selectedItem ? '#fbbf24' : EXPENSE_COLOR.solid
@@ -116,7 +121,7 @@ export function TrendsVisualization({
 
         {chartData.length > 0 && (
           <div className="text-right">
-            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-bold mb-0.5">Średnia</p>
             <p className="text-base font-bold tabular-nums" style={{ color: areaColor }}>
               {formatMoneyWithSeparators(average)} zł
             </p>

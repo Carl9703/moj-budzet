@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Modal } from '@/components/ui/layout/Modal'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { handleMoneyInput } from '@/lib/utils/input'
 import { useCategories } from '@/lib/contexts/CategoryContext'
 import { CustomSelect } from '@/components/ui/primitives/CustomSelect'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -38,7 +39,7 @@ export interface TransferData {
 export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: Props) {
     const { showToast } = useToast()
     const { getCategoriesForEnvelope } = useCategories()
-    const [fromEnvelopeId, setFromEnvelopeId] = useState('')
+    const [fromEnvelopeId, setFromEnvelopeId] = useState('MAIN_ACCOUNT')
     const [toEnvelopeId, setToEnvelopeId] = useState('')
     const [amount, setAmount] = useState('')
     const [destinationAmount, setDestinationAmount] = useState('')
@@ -147,12 +148,12 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
     )
 
     return (
-        <Modal title="💸 Transfer Środków" onClose={onClose}>
-            <div className="flex flex-col gap-3 p-3 md:p-4">
+        <Modal title="Transfer Środków" onClose={onClose}>
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="flex flex-col gap-3 p-3 md:p-4">
 
                 {/* HERO AMOUNT */}
                 <div className="bg-zinc-950/50 py-6 rounded-3xl border border-white/5 transition-all focus-within:border-amber-500/30">
-                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 text-center">
+                    <label className="block text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 text-center">
                         Kwota transferu (PLN)
                     </label>
                     <div className="relative flex items-baseline justify-center w-full px-4">
@@ -161,7 +162,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             type="number"
                             inputMode="decimal"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) => handleMoneyInput(e.target.value, setAmount)}
                             placeholder="0"
                             className="w-full bg-transparent text-5xl font-black text-center text-white placeholder:text-zinc-800/50 focus:outline-none transition-all tracking-tighter"
                             autoFocus
@@ -180,7 +181,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             className="overflow-hidden"
                         >
                             <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl py-5 px-4">
-                                <label className="block text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3 text-center">
+                                <label className="block text-xs font-black text-amber-500 uppercase tracking-[0.2em] mb-3 text-center">
                                     Kwota otrzymana ({toCurrency})
                                 </label>
                                 <div className="relative flex items-baseline justify-center">
@@ -195,7 +196,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                                     <span className="absolute right-8 bottom-1 text-lg font-black text-amber-700 pointer-events-none">{toCurrency}</span>
                                 </div>
                                 {impliedRate && (
-                                    <p className="text-[10px] text-center text-zinc-500 mt-2 font-mono">
+                                    <p className="text-xs text-center text-zinc-500 mt-2 font-mono">
                                         kurs: <span className="text-zinc-300 font-black">{impliedRate} PLN/{toCurrency}</span>
                                     </p>
                                 )}
@@ -209,9 +210,9 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                     {/* FROM */}
                     <div className="bg-zinc-900/40 p-4 rounded-3xl border border-white/5">
                         <div className="flex items-center justify-between mb-2 px-1">
-                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Z konta / koperty</span>
+                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Z konta / koperty</span>
                             {(fromEnvelope || fromEnvelopeId === 'MAIN_ACCOUNT') && (
-                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tight">
+                                <span className="text-xs font-black text-emerald-500 uppercase tracking-tight">
                                     Dostępne: {fromEnvelopeId === 'MAIN_ACCOUNT'
                                         ? `${mainBalance.toFixed(2)} zł`
                                         : `${fromEnvelope?.currentAmount.toFixed(2)} zł`
@@ -240,9 +241,9 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                     {/* TO */}
                     <div className="bg-zinc-900/40 p-4 rounded-3xl border border-white/5">
                         <div className="flex items-center justify-between mb-2 px-1">
-                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Do koperty</span>
+                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Do koperty</span>
                             {toEnvelope && (
-                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tight">
+                                <span className="text-xs font-black text-zinc-500 uppercase tracking-tight">
                                     Obecnie: {toEnvelope.currentAmount.toFixed(2)} {toCurrency}
                                 </span>
                             )}
@@ -289,7 +290,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                             exit={{ opacity: 0, height: 0 }}
                             className="bg-amber-500/10 rounded-xl border border-amber-500/20 px-3 py-2 flex justify-between items-center"
                         >
-                            <div className="text-[10px] text-amber-300 font-medium">Po operacji w celu:</div>
+                            <div className="text-xs text-amber-300 font-medium">Po operacji w celu:</div>
                             <div className="text-sm font-bold text-white font-mono">
                                 {toEnvelope
                                     ? isCrossCurrency
@@ -305,13 +306,14 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                 {/* ACTIONS */}
                 <div className="flex gap-4 pt-4">
                     <button
+                        type="button"
                         onClick={onClose}
                         className="px-6 py-4 rounded-2xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 font-bold transition-all w-1/3 active:scale-95"
                     >
                         Anuluj
                     </button>
                     <button
-                        onClick={handleSubmit}
+                        type="submit"
                         disabled={!canSubmit}
                         className={`flex-1 py-4 rounded-2xl font-black text-white text-base uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] ${canSubmit
                             ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:scale-[1.02] shadow-amber-500/20'
@@ -321,7 +323,7 @@ export function TransferModal({ onClose, onSave, envelopes, mainBalance = 0 }: P
                         {isSubmitting ? 'Transferuję...' : isCrossCurrency ? `Wymień ${toCurrency}` : 'Transferuj'}
                     </button>
                 </div>
-            </div>
+            </form>
         </Modal>
     )
 }

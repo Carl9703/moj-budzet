@@ -46,7 +46,7 @@ export function CommandPalette() {
                         placeholder="Szukaj akcji lub widoku (np. 'dodaj')"
                         className="flex-1 bg-transparent py-4 text-base tracking-wide text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-0"
                     />
-                    <div className="text-[10px] text-zinc-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-mono uppercase tracking-widest hidden sm:block">
+                    <div className="text-xs text-zinc-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-mono uppercase tracking-widest hidden sm:block">
                         ESC aby zamknąć
                     </div>
                 </div>

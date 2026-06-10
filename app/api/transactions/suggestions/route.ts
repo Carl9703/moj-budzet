@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
             type: type,
             description: {
                 not: '',
-                notIn: ['Zamknięcie miesiąca', 'przeniesienie bilansu', 'Wypłata', 'Premia'] // Wykluczamy systemowe i oczywiste
+                notIn: ['przeniesienie bilansu', 'Wypłata', 'Premia'] // Wykluczamy systemowe i oczywiste
             }
         }
 

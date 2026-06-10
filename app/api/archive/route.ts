@@ -130,9 +130,6 @@ export async function GET(request: NextRequest) {
                         categoryName = 'Inne'
                         isTransfer = false
                     }
-                } else if (desc.includes(SYSTEM_DESCRIPTIONS.MONTH_CLOSE.toLowerCase())) {
-                    categoryName = SYSTEM_DESCRIPTIONS.MONTH_CLOSE
-                    isTransfer = true
                 }
             }
 
@@ -211,8 +208,7 @@ export async function GET(request: NextRequest) {
 
             for (const transaction of expenseTransactions) {
                 const isTransfer = (transaction.isTransfer && !['Budowanie Przyszłości', 'Wolne środki (roczne)'].includes(transaction.category)) ||
-                    (YEARLY_ENVELOPE_NAMES.includes(transaction.category)) ||
-                    transaction.category === SYSTEM_DESCRIPTIONS.MONTH_CLOSE
+                    (YEARLY_ENVELOPE_NAMES.includes(transaction.category))
 
                 if (isTransfer) {
                     if (!transferMap.has(transaction.category)) {
@@ -365,7 +361,6 @@ function getTransferIcon(transferName: string): string {
         case 'Auto: Serwis i Ubezpieczenie': return '🚗'
         case 'Fundusz Awaryjny': return '🚨'
         case 'Transfery': return '🔄'
-        case 'Zamknięcie miesiąca': return '🔒'
         default: return '💸'
     }
 }

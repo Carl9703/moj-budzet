@@ -165,7 +165,7 @@ export function DetailedCategoryBreakdown({
                                                     {group.yearOverYear.change > 0 ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
                                                     {group.yearOverYear.changePercent > 0 ? '+' : ''}{group.yearOverYear.changePercent.toFixed(1)}%
                                                 </div>
-                                                <span className="text-[10px] text-zinc-500">
+                                                <span className="text-xs text-zinc-500">
                                                     (Poprz: {group.yearOverYear.previousYearAmount.toFixed(0)} zł)
                                                 </span>
                                             </div>
@@ -196,22 +196,32 @@ export function DetailedCategoryBreakdown({
                                     {(() => {
                                         // Aggregate monthly data from all envelopes in this group
                                         const groupMonthlyMap = new Map<string, number>()
+                                        let groupTrendYear: number | undefined = undefined;
                                         group.envelopes.forEach(env => {
-                                            env.monthlyTrend.forEach(m => {
+                                            env.monthlyTrend.forEach((m: any) => {
                                                 const current = groupMonthlyMap.get(m.month) || 0
                                                 groupMonthlyMap.set(m.month, current + m.amount)
+                                                if (m.year) groupTrendYear = m.year;
                                             })
                                         })
 
                                         const groupTrendData = Array.from(groupMonthlyMap.entries())
                                             .map(([month, amount]) => ({ month, amount, displayMonth: month.slice(0, 3) }))
-                                            .filter(d => d.amount > 0)
+
+                                        let groupTrendDivisor = 12;
+                                        if (groupTrendYear === new Date().getFullYear()) {
+                                            groupTrendDivisor = Math.max(1, new Date().getMonth() + 1);
+                                        }
 
                                         const groupAverage = groupTrendData.length > 0
-                                            ? groupTrendData.reduce((sum, d) => sum + d.amount, 0) / groupTrendData.length
+                                            ? groupTrendData.reduce((sum, d) => sum + d.amount, 0) / groupTrendDivisor
                                             : 0
 
-                                        if (groupTrendData.length === 0) return null
+                                        // Filter after calculating average to not show empty months, or keep them?
+                                        // Wait, the composed chart handles empty data fine, but we filter them.
+                                        const filteredGroupTrendData = groupTrendData.filter(d => d.amount > 0)
+
+                                        if (filteredGroupTrendData.length === 0) return null
 
                                         const isChartExpanded = expandedGroupChart === group.groupName
 
@@ -263,7 +273,7 @@ export function DetailedCategoryBreakdown({
                                                             <div className="px-4 pb-4">
                                                                 <div className="h-[180px] w-full">
                                                                     <ResponsiveContainer width="100%" height="100%">
-                                                                        <ComposedChart data={groupTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                                        <ComposedChart data={filteredGroupTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                                                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.15} vertical={false} />
                                                                             <XAxis
                                                                                 dataKey="displayMonth"
@@ -289,11 +299,11 @@ export function DetailedCategoryBreakdown({
                                                                                     return null;
                                                                                 }}
                                                                             />
-                                                                            {groupTrendData.length > 1 && (
+                                                                            {filteredGroupTrendData.length > 1 && (
                                                                                 <ReferenceLine y={groupAverage} stroke="#fbbf24" strokeDasharray="4 4" opacity={0.5} />
                                                                             )}
                                                                             <Bar dataKey="amount" radius={[4, 4, 0, 0]} maxBarSize={40} animationDuration={500}>
-                                                                                {groupTrendData.map((entry, index) => (
+                                                                                {filteredGroupTrendData.map((entry, index) => (
                                                                                     <Cell
                                                                                         key={`cell-${index}`}
                                                                                         fill={entry.amount > groupAverage * 1.3 ? '#f59e0b' : '#8b5cf6'}
@@ -376,11 +386,16 @@ export function DetailedCategoryBreakdown({
                                             // Determine colors based on average comparison (in a simple way for now)
                                             // const primaryColor = selectedCategoryId ? "##3b82f6" : "#8b5cf6"
 
-                                            // Filter out months with no data to avoid "ghost town" charts
+                                            // Calculate actual average for the annual trend
+                                            let trendDivisor = 12;
+                                            const trendYear = chartData.length > 0 ? (chartData[0] as any).year : undefined;
+                                            if (trendYear === new Date().getFullYear()) {
+                                                trendDivisor = Math.max(1, new Date().getMonth() + 1);
+                                            }
+                                            const actualAverage = chartData.reduce((sum, t) => sum + t.amount, 0) / trendDivisor
+
+                                            // Filter out months with no data for display
                                             const monthsWithData = chartData.filter(t => t.amount > 0)
-                                            const actualAverage = monthsWithData.length > 0
-                                                ? monthsWithData.reduce((sum, t) => sum + t.amount, 0) / monthsWithData.length
-                                                : 0
 
                                             const formattedChartData = monthsWithData.map((t, idx) => {
                                                 const diff = t.amount - actualAverage
@@ -419,7 +434,7 @@ export function DetailedCategoryBreakdown({
                                                                             <span>•</span>
                                                                         </>
                                                                     )}
-                                                                    <span className="text-zinc-400">Śr. {envelope.monthlyAverage.toFixed(0)} zł/m-c</span>
+                                                                    <span className="text-zinc-400">Średnia z wybranego okresu: {envelope.monthlyAverage.toFixed(0)} zł/m-c</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -428,7 +443,7 @@ export function DetailedCategoryBreakdown({
                                                                 <p className="font-bold text-zinc-200">{envelope.totalAmount.toFixed(2)} zł</p>
                                                                 {envelope.yearOverYear && (
                                                                     <div className="flex items-center justify-end gap-1.5">
-                                                                        <span className="text-[10px] text-zinc-500">
+                                                                        <span className="text-xs text-zinc-500">
                                                                             {envelope.yearOverYear.previousYearAmount.toFixed(0)} zł
                                                                         </span>
                                                                         <span className={`text-xs font-mono ${envelope.yearOverYear.change > 0 ? 'text-amber-500/80' : 'text-emerald-500/80'}`}>
@@ -536,11 +551,13 @@ export function DetailedCategoryBreakdown({
                                                                                 <div className="flex gap-4 sm:gap-6">
                                                                                     {prevYearAverage && (
                                                                                         <div className="text-right hidden sm:block">
-                                                                                            <p className="text-[10px] text-zinc-500 mb-0.5">Śr. poprzednio: {prevYearAverage.toFixed(0)} zł</p>
+                                                                                            <p className="text-xs text-zinc-500 mb-0.5">Śr. poprzednio: {prevYearAverage.toFixed(0)} zł</p>
                                                                                         </div>
                                                                                     )}
                                                                                     <div className="text-right">
-                                                                                        <p className="text-[10px] text-zinc-500 mb-0.5">Śr. obecnie: {chartAverage.toFixed(0)} zł</p>
+                                                                                        <p className="text-xs text-zinc-500 mb-0.5">
+                                                                                            {activeTab === 'chart' ? `Śr. roczna (wykres): ${actualAverage.toFixed(0)} zł` : `Śr. w wybranym okresie: ${chartAverage.toFixed(0)} zł`}
+                                                                                        </p>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -631,7 +648,7 @@ export function DetailedCategoryBreakdown({
                                                                                                 </ComposedChart>
                                                                                             </ResponsiveContainer>
                                                                                         </div>
-                                                                                        <div className="mt-4 flex items-center justify-center gap-4 text-[10px] text-zinc-500">
+                                                                                        <div className="mt-4 flex items-center justify-center gap-4 text-xs text-zinc-500">
                                                                                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded bg-amber-500/80"></div><span>Skok (&gt;150%)</span></div>
                                                                                             <div className="flex items-center gap-1"><div className="w-2 h-0.5 border-t border-dashed border-amber-400"></div><span>Średnia roczna</span></div>
                                                                                         </div>
@@ -664,7 +681,7 @@ export function DetailedCategoryBreakdown({
                                                                                                             <div className="text-sm font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                                                                                                                 {trx.description}
                                                                                                             </div>
-                                                                                                            <div className="text-[10px] text-zinc-500 font-mono">
+                                                                                                            <div className="text-xs text-zinc-500 font-mono">
                                                                                                                 {new Date(trx.date).toLocaleDateString('pl-PL')}
                                                                                                             </div>
                                                                                                         </div>

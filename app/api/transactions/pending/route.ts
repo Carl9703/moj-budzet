@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { jsonResponse } from '@/lib/utils/api'
+import { z } from 'zod'
+
+const approvePendingSchema = z.object({
+    pendingId: z.string().min(1),
+    amount: z.number().positive('Kwota musi być większa od zera'),
+    description: z.string().min(1, 'Opis jest wymagany'),
+    date: z.string().or(z.date()),
+    envelopeId: z.string().optional().nullable(),
+    category: z.string().optional().nullable()
+})
 
 export async function GET(request: NextRequest) {
     try {
@@ -20,11 +30,15 @@ export async function POST(request: NextRequest) {
     try {
         const userId = await getUserIdFromToken(request)
         const body = await request.json()
-        const { pendingId, amount, description, date, envelopeId, category } = body
-
-        if (!pendingId || amount === undefined || !description) {
-            return jsonResponse({ error: 'Missing required fields' }, { status: 400 })
+        const validation = approvePendingSchema.safeParse(body)
+        if (!validation.success) {
+            return jsonResponse(
+                { error: 'Nieprawidłowe dane', details: validation.error.issues },
+                { status: 400 }
+            )
         }
+
+        const { pendingId, amount, description, date, envelopeId, category } = validation.data
 
         // Upewnij się, że transakcja istnieje i należy do usera
         const pending = await prisma.pendingTransaction.findUnique({
@@ -33,6 +47,15 @@ export async function POST(request: NextRequest) {
 
         if (!pending || pending.userId !== userId) {
             return jsonResponse({ error: 'Pending transaction not found' }, { status: 404 })
+        }
+
+        if (envelopeId) {
+            const envelope = await prisma.envelope.findFirst({
+                where: { id: envelopeId, userId }
+            })
+            if (!envelope) {
+                return jsonResponse({ error: 'Koperta nie należy do użytkownika' }, { status: 403 })
+            }
         }
 
         // Utworzenie nowej "prawdziwej" transakcji

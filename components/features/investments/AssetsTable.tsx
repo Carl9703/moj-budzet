@@ -94,7 +94,7 @@ export const AssetsTable = ({ assets, totalPortfolioValue, onEdit, onDelete }: A
                     </span>
                     <span>Twoje Aktywa</span>
                 </h2>
-                <span className="text-[10px] font-black text-zinc-400 bg-zinc-800/50 px-3 py-1.5 rounded-xl border border-white/5 uppercase tracking-widest">
+                <span className="text-xs font-black text-zinc-400 bg-zinc-800/50 px-3 py-1.5 rounded-xl border border-white/5 uppercase tracking-widest">
                     {assets.length} {assets.length === 1 ? 'Pozycja' : assets.length < 5 ? 'Pozycje' : 'Pozycji'}
                 </span>
             </div>
@@ -135,7 +135,7 @@ export const AssetsTable = ({ assets, totalPortfolioValue, onEdit, onDelete }: A
                                             <p className={`font-black text-sm uppercase tracking-widest transition-colors ${isExpanded ? 'text-amber-200' : 'text-zinc-200'}`}>
                                                 {group}
                                             </p>
-                                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter text-zinc-500 mt-1">
+                                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-tighter text-zinc-500 mt-1">
                                                 <span>{groupAssets.length} {groupAssets.length === 1 ? 'poz.' : 'poz.'}</span>
                                                 <span className="w-1 h-1 rounded-full bg-zinc-700" />
                                                 <span className="text-zinc-400">{groupPercentage.toFixed(1)}% portfela</span>
@@ -149,7 +149,7 @@ export const AssetsTable = ({ assets, totalPortfolioValue, onEdit, onDelete }: A
                                                 {groupTotalValue.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 <span className="text-xs ml-1 opacity-50">zł</span>
                                             </p>
-                                            <div className={`text-[11px] font-bold flex items-center justify-end gap-1 ${groupTotalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                            <div className={`text-xs font-bold flex items-center justify-end gap-1 ${groupTotalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {groupTotalProfit >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                                 {groupTotalProfit >= 0 ? '+' : ''}{groupTotalProfit.toLocaleString('pl-PL', { maximumFractionDigits: 0 })} zł
                                             </div>
@@ -223,7 +223,7 @@ const AssetItem = ({
                 <div className="flex items-center gap-4 flex-1">
                     <div
                         onClick={hasSubPositions ? onToggle : undefined}
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-[10px] font-black tracking-widest shadow-inner cursor-pointer transition-all ${asset.type === 'CRYPTO' ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20' :
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-black tracking-widest shadow-inner cursor-pointer transition-all ${asset.type === 'CRYPTO' ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20' :
                             asset.type === 'PPK' ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' :
                                 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
                             }`}
@@ -234,17 +234,17 @@ const AssetItem = ({
                         <div className="flex items-center gap-2">
                             <span className="font-black text-white text-base tracking-tight truncate">{asset.symbol}</span>
                             {hasSubPositions && (
-                                <span className="bg-zinc-800 text-[9px] font-black px-2 py-0.5 rounded-full text-zinc-500 uppercase tracking-widest">
+                                <span className="bg-zinc-800 text-xs font-black px-2 py-0.5 rounded-full text-zinc-500 uppercase tracking-widest">
                                     {asset.subPositions?.length} trans.
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">
                                 {asset.quantity.toLocaleString('pl-PL')} j. • {asset.currentPrice.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                             </span>
                             <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+                            <span className="text-xs font-black text-zinc-600 uppercase tracking-widest">
                                 {percentage.toFixed(1)}% portfela
                             </span>
                         </div>
@@ -256,7 +256,7 @@ const AssetItem = ({
                         <p className="font-black text-zinc-200 text-base tabular-nums tracking-tighter">
                             {asset.marketValue.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                         </p>
-                        <div className={`text-[11px] font-bold flex items-center justify-end gap-1 ${isProfit ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <div className={`text-xs font-bold flex items-center justify-end gap-1 ${isProfit ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {isProfit ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                             {asset.profitPercentage.toFixed(2)}%
                         </div>
@@ -290,7 +290,7 @@ const AssetItem = ({
                         className="bg-zinc-900/60 border-t border-white/5"
                     >
                         <div className="p-3 pl-20 space-y-2">
-                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] mb-3">Historia transakcji</p>
+                            <p className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] mb-3">Historia transakcji</p>
                             {asset.subPositions?.map((sub, idx) => (
                                 <div
                                     key={sub.id}
@@ -301,17 +301,17 @@ const AssetItem = ({
                                             <Clock size={12} />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-zinc-300">
+                                            <p className="text-xs font-bold text-zinc-300">
                                                 {new Date(sub.createdAt!).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                             </p>
-                                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                                            <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">
                                                 {sub.quantity.toLocaleString('pl-PL')} j. @ {sub.averagePurchasePrice?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="text-right">
-                                            <p className="text-[11px] font-bold text-zinc-300">
+                                            <p className="text-xs font-bold text-zinc-300">
                                                 {sub.marketValue.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                                             </p>
                                         </div>

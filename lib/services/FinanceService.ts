@@ -2,6 +2,7 @@ import { prisma } from '@/lib/utils/prisma'
 import { SYSTEM_DESCRIPTIONS, DEFAULT_APP_START_DATE } from '@/lib/constants/system'
 import { isEmergencyEnvelope, isGoalEnvelope } from '@/lib/constants/envelopeTypes'
 import { toNum } from '@/lib/utils/decimal'
+import { roundToCents } from '@/lib/utils/money'
 
 export class FinanceService {
     /**
@@ -12,33 +13,38 @@ export class FinanceService {
         const client = tx || prisma
         const startOfAppUsage = new Date(DEFAULT_APP_START_DATE)
 
-        const allTransactions = await client.transaction.findMany({
+        const aggregations = await client.transaction.groupBy({
+            by: ['type'],
             where: {
                 userId,
                 type: { in: ['income', 'expense'] },
                 date: { gte: startOfAppUsage },
+                transferPairId: null, // Wyklucz transfery wewnętrzne bezpośrednio w zapytaniu
                 NOT: [
-                    { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
                     { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
                 ]
+            },
+            _sum: {
+                amount: true
             }
         })
 
-        const income = Math.round(allTransactions
-            .filter((t: any) => {
-                const hasTransferPairId = !!(t as any).transferPairId
-                return t.type === 'income' && !hasTransferPairId
-            })
-            .reduce((sum: number, t: any) => sum + toNum(t.amount), 0) * 100) / 100
+        let income = 0;
+        let expenses = 0;
 
-        const expenses = Math.round(allTransactions
-            .filter((t: any) => {
-                const hasTransferPairId = !!(t as any).transferPairId
-                return t.type === 'expense' && !hasTransferPairId
-            })
-            .reduce((sum: number, t: any) => sum + toNum(t.amount), 0) * 100) / 100
+        for (const agg of aggregations) {
+            const amountVal = agg._sum.amount ? toNum(agg._sum.amount) : 0;
+            if (agg.type === 'income') {
+                income = amountVal;
+            } else if (agg.type === 'expense') {
+                expenses = amountVal;
+            }
+        }
 
-        return { income, expenses, net: Math.round((income - expenses) * 100) / 100 }
+        income = roundToCents(income);
+        expenses = roundToCents(expenses);
+
+        return { income, expenses, net: roundToCents(income - expenses) }
     }
 
     /**
@@ -50,10 +56,10 @@ export class FinanceService {
         const { net } = await this.getTransactionBalance(userId, client)
 
         // Emergency Fund
-        const emergencyFundEnvelope = await client.envelope.findFirst({
+        const emergencyFundEnvelopes = await client.envelope.findMany({
             where: { userId, envelopeType: 'emergency', isArchived: false }
         })
-        const emergencyFundAmount = emergencyFundEnvelope ? toNum(emergencyFundEnvelope.currentAmount) : 0
+        const emergencyFundAmount = emergencyFundEnvelopes.reduce((sum: number, e: any) => sum + toNum(e.currentAmount), 0)
 
         // Goal Funds — filtrowanie po envelopeType zamiast nazw
         const envelopes = await this.getActiveEnvelopes(userId, client)
@@ -64,7 +70,7 @@ export class FinanceService {
             )
             .reduce((sum: number, e: any) => sum + toNum(e.currentAmount), 0)
 
-        return Math.round((net - emergencyFundAmount - goalFundsAmount) * 100) / 100
+        return roundToCents(net - emergencyFundAmount - goalFundsAmount)
     }
 
     /**

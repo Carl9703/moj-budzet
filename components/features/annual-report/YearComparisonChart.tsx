@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload, label, currentYear, previousYear }: an
 
     return (
         <div style={TOOLTIP_STYLE} className="min-w-[200px]">
-            <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-3">{label}</p>
+            <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">{label}</p>
             <div className="space-y-2">
                 {prev && (
                     <div className="flex items-center justify-between gap-6">

@@ -36,16 +36,14 @@ export async function middleware(request: NextRequest) {
 
     // C. Authorization Check (Skip for auth endpoints and mobile import endpoint)
     if (!pathname.startsWith('/api/auth/') && !pathname.startsWith('/api/transactions/import')) {
-      const authHeader = request.headers.get('Authorization')
+      const token = request.cookies.get('authToken')?.value
 
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!token) {
         return NextResponse.json(
           { error: 'Authentication required' },
           { status: 401 }
         )
       }
-
-      const token = authHeader.substring(7)
       const secretStr = process.env.JWT_SECRET
 
       if (!secretStr) {

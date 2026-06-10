@@ -10,8 +10,7 @@ interface DashboardData {
     emergencyFundAmount?: number
     goalFundsAmount?: number
     monthlyReturns?: number
-    monthlyTransfersToEnvelopes?: Array<{ name: string; icon: string; amount: number }>
-    isMonthClosed?: boolean
+
     monthlyEnvelopes: Array<{
         id: string
         name: string
@@ -44,30 +43,23 @@ interface DashboardData {
     }>
 }
 
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+
 export function useDashboard() {
-    const [data, setData] = useState<DashboardData | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<Error | null>(null)
+    const queryClient = useQueryClient()
 
-    const fetchData = async () => {
-        try {
-            setError(null)
-            const json = await api.get<DashboardData>('/api/dashboard')
-            setData(json)
-        } catch (error) {
-            setError(error as Error)
-            setData(null)
-        } finally {
-            setLoading(false)
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['dashboard'],
+        queryFn: async () => {
+            return await api.get<DashboardData>('/api/dashboard')
         }
+    })
+
+    return { 
+        data: data || null, 
+        loading: isLoading, 
+        error: error as Error | null, 
+        refetch,
+        invalidate: () => queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     }
-
-    useEffect(() => {
-        fetchData()
-        const handleRefresh = () => fetchData()
-        window.addEventListener('dashboardRefresh', handleRefresh)
-        return () => window.removeEventListener('dashboardRefresh', handleRefresh)
-    }, [])
-
-    return { data, loading, error, refetch: fetchData }
 }

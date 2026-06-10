@@ -174,11 +174,11 @@ export function EnvelopeManager({
                         <div>
                             <h3 className="text-base font-black text-white tracking-tight flex items-center gap-2">
                                 {showArchived ? 'Archiwum Systemu' : 'Zarządzanie Kopertami'}
-                                {showArchived && <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-md border border-amber-500/30 font-black uppercase tracking-widest">Wgląd</span>}
+                                {showArchived && <span className="text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-md border border-amber-500/30 font-black uppercase tracking-widest">Wgląd</span>}
                             </h3>
                             <button
                                 onClick={() => setShowArchived(!showArchived)}
-                                className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 hover:text-amber-400 transition-colors flex items-center gap-1.5"
+                                className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-0.5 hover:text-amber-400 transition-colors flex items-center gap-1.5"
                             >
                                 {showArchived ? <><RotateCcw size={10} /> Wróć do edycji</> : <><Archive size={10} /> Zobacz zarchiwizowane</>}
                             </button>
@@ -196,12 +196,12 @@ export function EnvelopeManager({
                                             .filter(e => e.type === 'monthly' && !e.isArchived)
                                             .reduce((sum, e) => sum + (e.plannedAmount || 0), 0)
                                             .toLocaleString('pl-PL', { minimumFractionDigits: 0 })}
-                                        <span className="text-[10px] font-bold text-zinc-600 ml-1.5 uppercase tracking-widest">Zaplanowano</span>
+                                        <span className="text-xs font-bold text-zinc-600 ml-1.5 uppercase tracking-widest">Zaplanowano</span>
                                     </p>
                                     <div className="w-px h-6 bg-white/5" />
                                     <div className="text-right">
-                                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">Limit Mies.</p>
-                                        <p className="text-[11px] font-black text-zinc-300 mt-0.5">
+                                        <p className="text-xs font-black text-zinc-500 uppercase tracking-widest leading-none">Limit Mies.</p>
+                                        <p className="text-xs font-black text-zinc-300 mt-0.5">
                                             {defaultSalary.toLocaleString('pl-PL')} zł
                                         </p>
                                     </div>
@@ -211,7 +211,7 @@ export function EnvelopeManager({
                             {/* Circular/Visual Progress */}
                             <div className="flex flex-col items-end gap-2 shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-[11px] font-black ${(defaultSalary - envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0)) >= 0
+                                    <span className={`text-xs font-black ${(defaultSalary - envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0)) >= 0
                                         ? 'text-emerald-500' : 'text-rose-500'
                                         }`}>
                                         {((envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0) / defaultSalary) * 100).toFixed(0)}%
@@ -226,14 +226,14 @@ export function EnvelopeManager({
                                         />
                                     </div>
                                 </div>
-                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                                <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">
                                     Wolne: {(defaultSalary - envelopes.filter(e => e.type === 'monthly' && !e.isArchived).reduce((sum, e) => sum + (e.plannedAmount || 0), 0)).toLocaleString('pl-PL')} zł
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div className="flex items-center gap-4">
-                            <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-black uppercase tracking-widest">
+                            <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-black uppercase tracking-widest">
                                 Tryb Przeglądania Archiwum
                             </div>
                         </div>
@@ -255,19 +255,19 @@ export function EnvelopeManager({
                                         boxShadow: `0 0 10px ${groupKey === 'needs' ? '#22c55e' : groupKey === 'lifestyle' ? '#f59e0b' : '#6366f1'}`
                                     }}
                                 />
-                                <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <h2 className="text-xs font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
                                     <span>{getGroupIcon(groupKey)}</span>
                                     {getGroupTitle(groupKey)}
                                 </h2>
                             </div>
-                            <span className="text-[10px] font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
+                            <span className="text-xs font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
                                 {groupEnvelopes.length}
                             </span>
                         </div>
                         {!showArchived && (
                             <button
                                 onClick={() => handleAddClick(groupKey)}
-                                className="px-4 py-2 rounded-xl bg-zinc-900/50 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all flex items-center gap-2 active:scale-95"
+                                className="px-4 py-2 rounded-xl bg-zinc-900/50 text-amber-400 border border-amber-500/20 text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all flex items-center gap-2 active:scale-95"
                             >
                                 <Plus size={14} /> Dodaj kopertę
                             </button>
@@ -277,7 +277,7 @@ export function EnvelopeManager({
                     <div className="w-full">
                         {groupEnvelopes.length === 0 ? (
                             <div className="text-center py-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-zinc-900/10 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak {showArchived ? 'zarchiwizowanych' : ''} kopert w tej grupie.</p>
+                                <p className="text-xs font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak {showArchived ? 'zarchiwizowanych' : ''} kopert w tej grupie.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -301,12 +301,12 @@ export function EnvelopeManager({
                     <div className="flex items-center gap-3 px-1">
                         <div className="px-3 py-1.5 rounded-full bg-zinc-900/50 border border-white/5 flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px] bg-amber-500 shadow-amber-500" />
-                            <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h2 className="text-xs font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Tag size={14} />
                                 Zarchiwizowane Kategorie
                             </h2>
                         </div>
-                        <span className="text-[10px] font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
+                        <span className="text-xs font-black bg-zinc-900 text-zinc-500 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
                             {loadingArchived ? '...' : archivedCategories.length}
                         </span>
                     </div>
@@ -315,11 +315,11 @@ export function EnvelopeManager({
                         {loadingArchived ? (
                             <div className="text-center py-20 text-zinc-500 flex flex-col items-center gap-4">
                                 <RefreshCw className="animate-spin text-amber-500" size={32} />
-                                <p className="text-[10px] font-black uppercase tracking-widest animate-pulse">Synchronizacja archiwum...</p>
+                                <p className="text-xs font-black uppercase tracking-widest animate-pulse">Synchronizacja archiwum...</p>
                             </div>
                         ) : archivedCategories.length === 0 ? (
                             <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-white/5 bg-zinc-900/10 backdrop-blur-sm">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak zarchiwizowanych kategorii.</p>
+                                <p className="text-xs font-black uppercase tracking-[0.3em] text-zinc-700 italic">Brak zarchiwizowanych kategorii.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -335,7 +335,7 @@ export function EnvelopeManager({
                                             <div className="min-w-0">
                                                 <p className="font-black text-zinc-200 truncate tracking-tight text-sm">{cat.name}</p>
                                                 {cat.defaultEnvelope && (
-                                                    <p className="text-[9px] font-black text-zinc-500 truncate uppercase tracking-widest mt-0.5">
+                                                    <p className="text-xs font-black text-zinc-500 truncate uppercase tracking-widest mt-0.5">
                                                         Koperta: {cat.defaultEnvelope}
                                                     </p>
                                                 )}

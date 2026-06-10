@@ -4,6 +4,12 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
 import { jsonResponse } from '@/lib/utils/api'
 import { toNum } from '@/lib/utils/decimal'
+import { z } from 'zod'
+
+const updateTransactionSchema = z.object({
+    amount: z.number().positive('Kwota musi być większa od zera'),
+    description: z.string().optional()
+})
 
 // GET - pobierz pojedynczą transakcję
 export async function GET(
@@ -64,6 +70,16 @@ export async function PATCH(
         const params = await context.params
         const data = await request.json()
 
+        const validation = updateTransactionSchema.safeParse(data)
+        if (!validation.success) {
+            return jsonResponse(
+                { error: 'Nieprawidłowe dane', details: validation.error.issues },
+                { status: 400 }
+            )
+        }
+
+        const validData = validation.data
+
         // Pobierz oryginalną transakcję
         const originalTransaction = await prisma.transaction.findUnique({
             where: {
@@ -81,91 +97,71 @@ export async function PATCH(
 
         // POPRAWIONA KALKULACJA różnicy kwoty
         const oldAmount = toNum(originalTransaction.amount)
-        const newAmount = data.amount
+        const newAmount = validData.amount
         const amountDifference = oldAmount - newAmount
 
         // Przykłady:
         // oldAmount=120, newAmount=50 → amountDifference=70 (zwrot)
         // oldAmount=120, newAmount=150 → amountDifference=-30 (dodatkowy wydatek)
 
-        // Zaktualizuj transakcję
-        const updatedTransaction = await prisma.transaction.update({
-            where: { id: params.id },
-            data: {
-                amount: newAmount,
-                description: data.description || originalTransaction.description
-            }
-        })
-
-        // Jeśli to wydatek z kopertą, zaktualizuj stan koperty
-        if (originalTransaction.type === 'expense' && originalTransaction.envelopeId) {
-            const envelope = await prisma.envelope.findUnique({
-                where: { id: originalTransaction.envelopeId }
+        // Zaktualizuj transakcję i saldo w jednej transakcji bazy danych
+        const updatedTransaction = await prisma.$transaction(async (tx) => {
+            const ut = await tx.transaction.update({
+                where: { id: params.id },
+                data: {
+                    amount: newAmount,
+                    description: validData.description !== undefined ? validData.description : originalTransaction.description
+                }
             })
 
-            if (envelope) {
-                const currentAmt = toNum(envelope.currentAmount)
-                let newCurrentAmount: number = currentAmt
-
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
-                    newCurrentAmount = currentAmt + amountDifference
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
-                        // Koperty oszczędnościowe: expense zwiększa saldo, więc przy zmianie kwoty zmieniamy znak
-                        newCurrentAmount = currentAmt - amountDifference
-                    } else {
-                        // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy zmianie kwoty odwracamy znak
-                        newCurrentAmount = currentAmt + amountDifference
-                    }
-                }
-
-                await prisma.envelope.update({
-                    where: { id: originalTransaction.envelopeId },
-                    data: {
-                        currentAmount: newCurrentAmount
-                    }
+            // Jeśli to wydatek z kopertą, zaktualizuj stan koperty
+            if (originalTransaction.type === 'expense' && originalTransaction.envelopeId) {
+                const envelope = await tx.envelope.findUnique({
+                    where: { id: originalTransaction.envelopeId }
                 })
-            }
-        }
 
-        // Jeśli to przychód z kopertą, zaktualizuj stan koperty
-        if (originalTransaction.type === 'income' && originalTransaction.envelopeId) {
-            const envelope = await prisma.envelope.findUnique({
-                where: { id: originalTransaction.envelopeId }
-            })
-
-            if (envelope) {
-                const currentAmt = toNum(envelope.currentAmount)
-                let newCurrentAmount: number = currentAmt
-
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
-                    newCurrentAmount = currentAmt - amountDifference
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
-                        // Koperty oszczędnościowe: income zmniejsza saldo, więc przy zmianie kwoty zmieniamy znak
-                        newCurrentAmount = currentAmt + amountDifference
-                    } else {
-                        // Koperty wydatkowe roczne: income zwiększa saldo, więc przy zmianie kwoty odwracamy znak
-                        newCurrentAmount = currentAmt - amountDifference
+                if (envelope) {
+                    let incrementValue = amountDifference; // domyślnie dodajemy różnicę
+                    
+                    if (envelope.type === 'yearly') {
+                        const isSavings = isSavingsEnvelope(envelope.envelopeType)
+                        if (isSavings) {
+                            incrementValue = -amountDifference; // odejmujemy różnicę
+                        }
                     }
+
+                    await tx.envelope.update({
+                        where: { id: originalTransaction.envelopeId },
+                        data: { currentAmount: { increment: incrementValue } }
+                    })
                 }
-
-                await prisma.envelope.update({
-                    where: { id: originalTransaction.envelopeId },
-                    data: {
-                        currentAmount: newCurrentAmount
-                    }
-                })
             }
-        }
+
+            // Jeśli to przychód z kopertą, zaktualizuj stan koperty
+            if (originalTransaction.type === 'income' && originalTransaction.envelopeId) {
+                const envelope = await tx.envelope.findUnique({
+                    where: { id: originalTransaction.envelopeId }
+                })
+
+                if (envelope) {
+                    let incrementValue = -amountDifference; // domyślnie odejmujemy różnicę
+                    
+                    if (envelope.type === 'yearly') {
+                        const isSavings = isSavingsEnvelope(envelope.envelopeType)
+                        if (isSavings) {
+                            incrementValue = amountDifference; // dodajemy różnicę
+                        }
+                    }
+
+                    await tx.envelope.update({
+                        where: { id: originalTransaction.envelopeId },
+                        data: { currentAmount: { increment: incrementValue } }
+                    })
+                }
+            }
+
+            return ut;
+        });
 
         return jsonResponse(updatedTransaction)
 
@@ -207,145 +203,133 @@ export async function DELETE(
             )
         }
 
-        // Sprawdź czy to jest transfer (ma transferPairId)
-        if (transaction.transferPairId) {
-            // Znajdź wszystkie transakcje z tej pary transferów
-            const allTransferTransactions = await prisma.transaction.findMany({
-                where: {
-                    transferPairId: transaction.transferPairId
-                }
-            })
+        // Używamy transakcji bazy danych dla atomowości operacji
+        await prisma.$transaction(async (tx) => {
+            // Sprawdź czy to jest transfer (ma transferPairId)
+            if (transaction.transferPairId) {
+                // Znajdź wszystkie transakcje z tej pary transferów
+                const allTransferTransactions = await tx.transaction.findMany({
+                    where: { transferPairId: transaction.transferPairId }
+                })
 
-            if (allTransferTransactions.length > 0) {
-                // Iteruj po wszystkich transakcjach i odwróć ich skutki na kopertach
-                await Promise.all(allTransferTransactions.map(async (t) => {
-                    if (t.envelopeId) {
-                        const envelope = await prisma.envelope.findUnique({
-                            where: { id: t.envelopeId }
-                        })
-
-                        if (envelope) {
-                            const envAmt = toNum(envelope.currentAmount)
-                            let newCurrentAmount: number = envAmt
-                            if (t.type === 'income') {
-                                // Cofnięcie wpływu -> odejmij kwotę
-                                newCurrentAmount = envAmt - toNum(t.amount)
-                            } else if (t.type === 'expense') {
-                                // Cofnięcie wydatku -> dodaj kwotę
-                                newCurrentAmount = envAmt + toNum(t.amount)
-                            }
-
-                            // Zabezpieczenie przed ujemnym saldem (opcjonalne, ale warto dać max(0))
-                            // Chociaż przy cofaniu wydatku (add) nie trzeba. Przy cofaniu wpływu (sub) można.
-                            // Zachowajmy logikę prostą matematykę, ewentualnie max(0) dla income revert.
-                            /* 
-                               W oryginalnym kodzie było Math.max(0, ...). 
-                            */
-
-                            await prisma.envelope.update({
-                                where: { id: envelope.id },
-                                data: {
-                                    currentAmount: newCurrentAmount
-                                }
+                if (allTransferTransactions.length > 0) {
+                    // Iteruj po wszystkich transakcjach i odwróć ich skutki na kopertach
+                    await Promise.all(allTransferTransactions.map(async (t) => {
+                        if (t.envelopeId) {
+                            const envelope = await tx.envelope.findUnique({
+                                where: { id: t.envelopeId }
                             })
+
+                            if (envelope) {
+                                let incrementValue = 0
+                                if (t.type === 'income') {
+                                    incrementValue = -toNum(t.amount)
+                                } else if (t.type === 'expense') {
+                                    incrementValue = toNum(t.amount)
+                                }
+
+                                await tx.envelope.update({
+                                    where: { id: envelope.id },
+                                    data: { currentAmount: { increment: incrementValue } }
+                                })
+                            }
                         }
-                    }
-                }))
+                    }))
 
-                // Usuń wszystkie transakcje z pary
-                await prisma.transaction.deleteMany({
-                    where: {
-                        transferPairId: transaction.transferPairId
-                    }
+                    // Usuń wszystkie transakcje z pary
+                    await tx.transaction.deleteMany({
+                        where: { transferPairId: transaction.transferPairId }
+                    })
+                }
+            } else {
+                // Cofnij konsumpcję FxLot jeśli to wydatek walutowy
+                const consumptions = await tx.fxLotConsumption.findMany({
+                    where: { transactionId: params.id }
                 })
 
-                return jsonResponse({
-                    success: true,
-                    message: 'Transfer został usunięty (cała operacja została cofnięta)'
-                })
-            }
-        }
-
-        // Standardowa logika dla pojedynczych transakcji
-        if (transaction.type === 'expense' && transaction.envelopeId) {
-            const envelope = await prisma.envelope.findUnique({
-                where: { id: transaction.envelopeId }
-            })
-
-            if (envelope) {
-                const envAmt = toNum(envelope.currentAmount)
-                const txAmt = toNum(transaction.amount)
-                let newCurrentAmount: number
-
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: expense zmniejsza saldo (wydatek z budżetu)
-                    newCurrentAmount = envAmt + txAmt
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
-                        // Koperty oszczędnościowe: expense zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
-                        newCurrentAmount = Math.max(0, envAmt - txAmt)
-                    } else {
-                        // Koperty wydatkowe roczne: expense zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
-                        newCurrentAmount = envAmt + txAmt
-                    }
-                } else {
-                    newCurrentAmount = envAmt
+                if (consumptions.length > 0) {
+                    await Promise.all(consumptions.map(async (consumption) => {
+                        await tx.fxLot.update({
+                            where: { id: consumption.fxLotId },
+                            data: { remainingAmount: { increment: consumption.amountConsumed } }
+                        })
+                    }))
+                    // Kaskadowe usuwanie usunie same logi w tabeli FxLotConsumption
                 }
 
-                await prisma.envelope.update({
-                    where: { id: transaction.envelopeId },
-                    data: {
-                        currentAmount: newCurrentAmount
+                // Standardowa logika dla pojedynczych transakcji
+                if (transaction.type === 'expense' && transaction.envelopeId) {
+                    const envelope = await tx.envelope.findUnique({
+                        where: { id: transaction.envelopeId }
+                    })
+
+                    if (envelope) {
+                        const txAmt = toNum(transaction.amount)
+                        let incrementValue = 0
+
+                        if (envelope.type === 'monthly') {
+                            incrementValue = txAmt
+                        } else if (envelope.type === 'yearly') {
+                            const isSavings = isSavingsEnvelope(envelope.envelopeType)
+
+                            if (isSavings) {
+                                incrementValue = -txAmt
+                            } else {
+                                incrementValue = txAmt
+                            }
+                        }
+
+                        // Uwaga: oryginalny kod zawierał Math.max(0) zabezpieczenie przed minusowymi wartościami,
+                        // ale przy increment() polegamy na prawidłowym stanie bazy danych. W razie potrzeby 
+                        // można by dodać constraint w bazie db.
+                        await tx.envelope.update({
+                            where: { id: transaction.envelopeId },
+                            data: { currentAmount: { increment: incrementValue } }
+                        })
                     }
-                })
-            }
-        }
-
-        if (transaction.type === 'income' && transaction.envelopeId) {
-            const envelope = await prisma.envelope.findUnique({
-                where: { id: transaction.envelopeId }
-            })
-
-            if (envelope) {
-                const envAmt = toNum(envelope.currentAmount)
-                const txAmt = toNum(transaction.amount)
-                let newCurrentAmount: number
-
-                if (envelope.type === 'monthly') {
-                    // Dla kopert miesięcznych: income zwiększa saldo (transfer do koperty)
-                    // Przy usuwaniu odwracamy: zmniejszamy saldo
-                    newCurrentAmount = Math.max(0, envAmt - txAmt)
-                } else if (envelope.type === 'yearly') {
-                    // Dla kopert rocznych: rozróżniamy oszczędzanie od wydawania
-                    const isSavings = isSavingsEnvelope(envelope.envelopeType)
-
-                    if (isSavings) {
-                        // Koperty oszczędnościowe: income zmniejsza saldo, więc przy usuwaniu odwracamy: zwiększamy saldo
-                        newCurrentAmount = envAmt + txAmt
-                    } else {
-                        // Koperty wydatkowe roczne: income zwiększa saldo, więc przy usuwaniu odwracamy: zmniejszamy saldo
-                        newCurrentAmount = Math.max(0, envAmt - txAmt)
-                    }
-                } else {
-                    newCurrentAmount = envAmt
                 }
 
-                await prisma.envelope.update({
-                    where: { id: transaction.envelopeId },
-                    data: {
-                        currentAmount: newCurrentAmount
+                if (transaction.type === 'income' && transaction.envelopeId) {
+                    const envelope = await tx.envelope.findUnique({
+                        where: { id: transaction.envelopeId }
+                    })
+
+                    if (envelope) {
+                        const txAmt = toNum(transaction.amount)
+                        let incrementValue = 0
+
+                        if (envelope.type === 'monthly') {
+                            incrementValue = -txAmt
+                        } else if (envelope.type === 'yearly') {
+                            const isSavings = isSavingsEnvelope(envelope.envelopeType)
+
+                            if (isSavings) {
+                                incrementValue = txAmt
+                            } else {
+                                incrementValue = -txAmt
+                            }
+                        }
+
+                        await tx.envelope.update({
+                            where: { id: transaction.envelopeId },
+                            data: { currentAmount: { increment: incrementValue } }
+                        })
                     }
+                }
+
+                // Usuń transakcję
+                await tx.transaction.delete({
+                    where: { id: params.id }
                 })
             }
-        }
+        });
 
-        // Usuń transakcję
-        await prisma.transaction.delete({
-            where: { id: params.id }
-        })
+        if (transaction.transferPairId) {
+            return jsonResponse({
+                success: true,
+                message: 'Transfer został usunięty (cała operacja została cofnięta)'
+            })
+        }
 
         return jsonResponse({
             success: true,

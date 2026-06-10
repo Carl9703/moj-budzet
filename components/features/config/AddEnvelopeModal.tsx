@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { X, Plus } from 'lucide-react'
 import { ENVELOPE_TYPES } from '@/lib/constants/envelopeTypes'
+import { handleMoneyInput } from '@/lib/utils/input'
 
 const SUPPORTED_CURRENCIES = ['PLN', 'EUR', 'GBP', 'USD', 'CHF', 'NOK', 'CZK', 'HUF'] as const
 const CURRENCY_FLAGS: Record<string, string> = {
@@ -92,7 +93,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-zinc-400 hover:text-white">
+                    <button type="button" onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-zinc-400 hover:text-white">
                         <X size={20} />
                     </button>
                 </div>
@@ -103,7 +104,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                         {/* Icon & Name */}
                         <div className="flex gap-3 items-start">
                             <div className="w-20">
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider text-center">Ikona</label>
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider text-center">Ikona</label>
                                 <div className="bg-zinc-800/30 p-1.5 rounded-xl border border-zinc-700/50 flex justify-center">
                                     <input
                                         value={icon}
@@ -114,7 +115,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Nazwa koperty</label>
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Nazwa koperty</label>
                                 <input
                                     value={name}
                                     onChange={e => setName(e.target.value)}
@@ -128,14 +129,14 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                         <div className={`py-3 px-4 rounded-xl border transition-all ${Number(plannedAmount) > 0
                             ? 'bg-emerald-500/5 border-emerald-500/20'
                             : 'bg-zinc-800/30 border-zinc-700/50'}`}>
-                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 text-center">
+                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1 text-center">
                                 {type === 'monthly' ? 'Miesięczny Limit' : 'Cel Oszczędności'}
                             </label>
                             <div className="relative flex items-baseline justify-center">
                                 <input
                                     type="number"
                                     value={plannedAmount}
-                                    onChange={e => setPlannedAmount(e.target.value)}
+                                    onChange={e => handleMoneyInput(e.target.value, setPlannedAmount)}
                                     className="w-full bg-transparent text-3xl font-black text-center text-white placeholder:text-zinc-700 focus:outline-none"
                                     placeholder="0"
                                 />
@@ -149,7 +150,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                         <div className="grid grid-cols-2 gap-3">
                             {/* Group */}
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Grupa</label>
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Grupa</label>
                                 <div className="relative">
                                     <select
                                         value={group}
@@ -167,7 +168,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
 
                             {/* Type - Segmented */}
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Typ</label>
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Typ</label>
                                 <div className="flex bg-zinc-800/50 p-1 rounded-xl border border-zinc-700/50 relative">
                                     <button
                                         type="button"
@@ -190,7 +191,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
 
                         {/* Currency Selector */}
                         <div>
-                            <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Waluta koperty</label>
+                            <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Waluta koperty</label>
                             <div className="flex flex-wrap gap-2">
                                 {SUPPORTED_CURRENCIES.map(c => (
                                     <button
@@ -216,7 +217,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                         {/* Parent Envelope (only for foreign currency) */}
                         {isForeignCurrency && parentEnvelopes.length > 0 && (
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
                                     Koperta nadrzędna (PLN) — opcjonalnie
                                 </label>
                                 <div className="flex flex-wrap gap-2">
@@ -247,7 +248,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-zinc-600 mt-1.5 px-1">
+                                <p className="text-xs text-zinc-600 mt-1.5 px-1">
                                     Łączy tę kopertę z kopertą PLN do analityki i transferów.
                                 </p>
                             </div>
@@ -261,7 +262,7 @@ export function AddEnvelopeModal({ isOpen, onClose, onAdd, initialGroup, parentE
                                 <div className={`font-bold text-sm ${isAccumulating ? 'text-amber-400' : 'text-zinc-300'}`}>
                                     Koperta Akumulująca
                                 </div>
-                                <div className="text-[10px] text-zinc-500">
+                                <div className="text-xs text-zinc-500">
                                     Środki przechodzą na kolejny miesiąc
                                 </div>
                             </div>

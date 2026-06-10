@@ -183,15 +183,15 @@ export function PortfolioHistoryChart({ positions }: { positions: any[] }) {
             <div className="flex justify-center gap-4 mt-2">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="text-[10px] text-zinc-400">Akcje</span>
+                    <span className="text-xs text-zinc-400">Akcje</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span className="text-[10px] text-zinc-400">Krypto</span>
+                    <span className="text-xs text-zinc-400">Krypto</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-[10px] text-zinc-400">PPK</span>
+                    <span className="text-xs text-zinc-400">PPK</span>
                 </div>
             </div>
         </div>

@@ -1,48 +1,44 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { api, ApiError } from '@/lib/api/client'
-
-// Mock fetch globally
-const mockFetch = vi.fn()
-global.fetch = mockFetch
+import { server } from '@/tests/setup/server'
+import { http, HttpResponse } from 'msw'
 
 describe('API Client', () => {
     beforeEach(() => {
-        mockFetch.mockReset()
-        vi.mocked(localStorage.getItem).mockReturnValue('test-token')
+        // Reset or setup before tests if needed
     })
 
     describe('api.get', () => {
-        it('should make GET request with auth header', async () => {
+        it('should make GET request with content-type header', async () => {
             const mockData = { success: true }
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: () => Promise.resolve(mockData)
-            })
+            let requestHeaders = new Headers()
+            
+            server.use(
+                http.get('http://localhost:3000/api/test', ({ request }) => {
+                    requestHeaders = request.headers
+                    return HttpResponse.json(mockData)
+                })
+            )
 
             const result = await api.get<{ success: boolean }>('/api/test')
 
             expect(result).toEqual(mockData)
-            expect(mockFetch).toHaveBeenCalledWith('/api/test', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test-token'
-                }
-            })
+            expect(requestHeaders.get('Content-Type')).toBe('application/json')
         })
 
         it('should handle query params', async () => {
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: () => Promise.resolve({})
-            })
+            let requestUrl = ''
+            server.use(
+                http.get('http://localhost:3000/api/test', ({ request }) => {
+                    requestUrl = request.url
+                    return HttpResponse.json({})
+                })
+            )
 
             await api.get('/api/test', { page: 1, limit: 10 })
 
-            expect(mockFetch).toHaveBeenCalledWith(
-                '/api/test?page=1&limit=10',
-                expect.any(Object)
-            )
+            expect(requestUrl).toContain('page=1')
+            expect(requestUrl).toContain('limit=10')
         })
     })
 
@@ -50,32 +46,29 @@ describe('API Client', () => {
         it('should make POST request with body', async () => {
             const mockData = { id: 1 }
             const body = { name: 'test' }
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: () => Promise.resolve(mockData)
-            })
+            let requestBody: any = null
+            
+            server.use(
+                http.post('http://localhost:3000/api/test', async ({ request }) => {
+                    requestBody = await request.json()
+                    return HttpResponse.json(mockData)
+                })
+            )
 
             const result = await api.post<{ id: number }>('/api/test', body)
 
             expect(result).toEqual(mockData)
-            expect(mockFetch).toHaveBeenCalledWith('/api/test', {
-                method: 'POST',
-                body: JSON.stringify(body),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test-token'
-                }
-            })
+            expect(requestBody).toEqual(body)
         })
     })
 
     describe('Error handling', () => {
         it('should throw ApiError on non-ok response', async () => {
-            mockFetch.mockResolvedValueOnce({
-                ok: false,
-                status: 404,
-                json: () => Promise.resolve({ error: 'Not found' })
-            })
+            server.use(
+                http.get('http://localhost:3000/api/test', () => {
+                    return HttpResponse.json({ error: 'Not found' }, { status: 404 })
+                })
+            )
 
             await expect(api.get('/api/test')).rejects.toThrow(ApiError)
         })

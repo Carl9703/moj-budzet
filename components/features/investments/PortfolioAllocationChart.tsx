@@ -140,7 +140,7 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
                                         : totalValue.toLocaleString('pl-PL', { maximumFractionDigits: 0 })
                                     }
                                 </span>
-                                <span className="text-[10px] text-zinc-500 font-medium">PLN</span>
+                                <span className="text-xs text-zinc-500 font-medium">PLN</span>
                             </>
                         )}
                     </div>
@@ -170,7 +170,7 @@ export function PortfolioAllocationChart({ allocations, totalValue }: PortfolioA
                                 }}
                             />
                             <span className="text-zinc-300 text-xs font-semibold">{entry.name}</span>
-                            <span className="text-zinc-500 text-[11px] font-bold tabular-nums">{entry.percentage.toFixed(1)}%</span>
+                            <span className="text-zinc-500 text-xs font-bold tabular-nums">{entry.percentage.toFixed(1)}%</span>
                         </div>
                     )
                 })}

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { jsonResponse } from '@/lib/utils/api'
+import { z } from 'zod'
+
+const importSchema = z.object({
+    amount: z.number().positive('Kwota musi być większa od zera'),
+    description: z.string().min(1, 'Opis jest wymagany'),
+    date: z.string().or(z.date()).optional(),
+    currency: z.string().optional(),
+    source: z.string().optional(),
+    cardLastFour: z.string().optional()
+})
 
 export async function POST(req: NextRequest) {
     try {
@@ -24,10 +34,37 @@ export async function POST(req: NextRequest) {
         const userId = userConfig.userId
         const body = await req.json()
 
-        const { amount, description, date, currency, source, cardLastFour } = body
+        const validation = importSchema.safeParse(body)
 
-        if (amount === undefined || !description) {
-            return jsonResponse({ error: 'Missing required fields' }, { status: 400 })
+        if (!validation.success) {
+            return jsonResponse({ error: 'Nieprawidłowe dane', details: validation.error.issues }, { status: 400 })
+        }
+
+        const { amount, description, date, currency, source, cardLastFour } = validation.data
+
+        const parsedDate = date ? new Date(date) : new Date()
+
+        // IDEMPOTENCY CHECK (Deduplikacja)
+        // Szukaj takiej samej oczekującej transakcji (ta sama kwota, źródło i opis) w ciągu ostatnich 30 sekund
+        const idempotencyWindow = new Date(parsedDate.getTime() - 30 * 1000)
+        
+        const existingPending = await prisma.pendingTransaction.findFirst({
+            where: {
+                userId,
+                amount,
+                source: source || 'api',
+                createdAt: {
+                    gte: idempotencyWindow
+                }
+            }
+        })
+
+        if (existingPending) {
+            // Jeśli istnieje z tym samym opisem, potraktuj jako powtórzenie (retry) i zwróć OK, 
+            // ale nie twórz nowej w bazie. (Używamy includes dla bezpieczeństwa przy lekkich różnicach w nazwach)
+            if (existingPending.description.includes(description) || description.includes(existingPending.description)) {
+                return jsonResponse({ success: true, pendingTransactionId: existingPending.id, duplicate: true })
+            }
         }
 
         // Prosta próba dopasowania z ostatnich 200 transakcji (podobna do /api/transactions/suggestions)
@@ -75,7 +112,10 @@ export async function POST(req: NextRequest) {
             suggestedEnv = match.envelopeId
         }
 
-        const parsedDate = date ? new Date(date) : new Date()
+        if (match) {
+            suggestedCat = match.category
+            suggestedEnv = match.envelopeId
+        }
 
         const pendingTx = await prisma.pendingTransaction.create({
             data: {

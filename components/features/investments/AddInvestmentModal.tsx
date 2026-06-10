@@ -74,16 +74,16 @@ export function AddInvestmentModal({ isOpen, onClose, onSuccess }: AddInvestment
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+                    className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90dvh]"
                 >
                     <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
                         <h2 className="text-xl font-bold text-white">Nowe Aktywo</h2>
-                        <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+                        <button type="button" onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
                             <X size={24} />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1 overflow-y-auto custom-scrollbar">
                         {error && (
                             <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-xl text-sm flex items-center gap-2">
                                 <Info size={16} />

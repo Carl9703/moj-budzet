@@ -115,10 +115,14 @@ model Transaction {
   exchangeRate        Decimal?  @db.Decimal(19, 6)
   // Koszt historyczny w PLN wyliczony przez FIFO (tylko dla wydatków walutowych)
   plnEquivalent       Decimal?  @db.Decimal(19, 4)
-  envelope            Envelope? @relation(fields: [envelopeId], references: [id])
+  envelope            Envelope? @relation(fields: [envelopeId], references: [id], onDelete: Restrict)
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fxLotConsumptions   FxLotConsumption[]
+  generatedFxLots     FxLot[]   @relation("FxLotSourceTx")
 
   @@index([userId, date])
+  @@index([envelopeId])
+  @@index([transferPairId])
 }
 
 // Lot waluty obcej — jednostka kosztu nabycia dla algorytmu FIFO
@@ -139,12 +143,28 @@ model FxLot {
   foreignCurrency     String   @default("EUR")
   // Referencja do transferu, który wygenerował ten lot
   sourceTransactionId String?
+  sourceTransaction   Transaction? @relation("FxLotSourceTx", fields: [sourceTransactionId], references: [id], onDelete: Cascade)
   createdAt           DateTime @default(now())
   envelope            Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fxLotConsumptions   FxLotConsumption[]
 
   @@index([envelopeId, date])
   @@index([userId])
+}
+
+// Tabela śledząca konsumpcję lotów (do cofania transakcji walutowych)
+model FxLotConsumption {
+  id              String      @id @default(cuid())
+  transactionId   String
+  fxLotId         String
+  amountConsumed  Decimal     @db.Decimal(19, 4)
+  createdAt       DateTime    @default(now())
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  fxLot           FxLot       @relation(fields: [fxLotId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@index([fxLotId])
 }
 
 model UserConfig {
@@ -173,9 +193,9 @@ model RecurringPayment {
   type           String    @default("expense")
   fromEnvelopeId String?
   toEnvelopeId   String?
-  envelope       Envelope? @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
-  fromEnvelope   Envelope? @relation("RecurringPaymentFrom", fields: [fromEnvelopeId], references: [id], onDelete: Cascade)
-  toEnvelope     Envelope? @relation("RecurringPaymentTo", fields: [toEnvelopeId], references: [id], onDelete: Cascade)
+  envelope       Envelope? @relation(fields: [envelopeId], references: [id], onDelete: SetNull)
+  fromEnvelope   Envelope? @relation("RecurringPaymentFrom", fields: [fromEnvelopeId], references: [id], onDelete: SetNull)
+  toEnvelope     Envelope? @relation("RecurringPaymentTo", fields: [toEnvelopeId], references: [id], onDelete: SetNull)
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

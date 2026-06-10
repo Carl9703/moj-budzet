@@ -1,5 +1,7 @@
 'use client'
 
+import { blockInvalidDecimals } from '@/lib/utils/input'
+
 interface Envelope {
     id: string
     name: string
@@ -30,7 +32,7 @@ export function EnvelopeGroupConfig({ title, icon, color, envelopes, onEnvelopeC
                     <h2 className="text-lg font-black text-white tracking-tight uppercase tracking-widest leading-none mb-1">
                         {title}
                     </h2>
-                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{envelopes.length} {envelopes.length === 1 ? 'Koperta' : 'Koperty'}</p>
+                    <p className="text-xs text-zinc-500 font-black uppercase tracking-widest">{envelopes.length} {envelopes.length === 1 ? 'Koperta' : 'Koperty'}</p>
                 </div>
             </div>
             <div className="space-y-3">
@@ -51,9 +53,10 @@ export function EnvelopeGroupConfig({ title, icon, color, envelopes, onEnvelopeC
                                     const v = Number((ev.target as HTMLInputElement).value || 0)
                                     onEnvelopeChange(e.id, v)
                                 }}
+                                onInput={blockInvalidDecimals}
                                 className="w-[140px] text-right p-3 pr-10 rounded-xl bg-zinc-950/50 border border-white/10 text-white font-black hover:border-amber-500/50 focus:border-amber-500 transition-all outline-none"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-600 uppercase">PLN</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-600 uppercase">PLN</span>
                         </div>
                     </div>
                 ))}

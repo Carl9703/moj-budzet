@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
             },
             orderBy: {
                 createdAt: 'asc'
-            }
+            },
+            take: 20
         })
 
         // Formatuj dane dla frontendu

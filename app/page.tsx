@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { StatsCard } from '@/components/features/dashboard/StatsCard'
 import { EnvelopeGroup } from '@/components/features/dashboard/EnvelopeGroup'
@@ -9,9 +9,11 @@ import { LoadingSpinner } from '@/components/ui/feedback/LoadingSpinner'
 import { useDashboard } from '../lib/hooks/useDashboard'
 import { useToast } from '@/components/ui/feedback/Toast'
 import { useConfig } from '../lib/hooks/useConfig'
-import { usePreviousMonth } from '../lib/hooks/usePreviousMonth'
 import { useAuth } from '../lib/hooks/useAuth'
+import { useDashboardModals } from '../lib/hooks/useDashboardModals'
+import { useGroupedEnvelopes } from '@/lib/hooks/useGroupedEnvelopes'
 import { createIncomeHandler, createExpenseHandler, createTransferHandler } from '@/lib/handlers/modalHandlers'
+import { DashboardModals } from '@/components/features/dashboard/DashboardModals'
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader'
 import { QuickActions } from '@/components/features/dashboard/QuickActions'
 import { PendingWalletTransactions } from '@/components/features/dashboard/PendingWalletTransactions'
@@ -20,13 +22,9 @@ import { TrendingUp, Wallet, PieChart, PiggyBank } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { motion } from 'framer-motion'
 import { GROUP_COLORS } from '@/lib/constants/chart-colors'
+import { isFreeFundsEnvelope, isGoalEnvelope, isEmergencyEnvelope, isSavingsEnvelope } from '@/lib/constants/envelopeTypes'
 
-import { IncomeModal } from '@/components/shared/modals/IncomeModal'
-import { ExpenseModal } from '@/components/shared/modals/ExpenseModal'
-import { TransferModal } from '@/components/shared/modals/TransferModal'
-import { EnvelopeTransactionsModal } from '@/components/shared/modals/EnvelopeTransactionsModal'
-import { SavingsBreakdownModal } from '@/components/features/dashboard/modals/SavingsBreakdownModal'
-import { ExchangeModal } from '@/components/shared/modals/ExchangeModal'
+
 
 
 function HomePage() {
@@ -35,51 +33,36 @@ function HomePage() {
     const { showToast } = useToast()
     const { data, loading, error, refetch } = useDashboard()
     const { loading: configLoading } = useConfig()
-    const { previousMonthStatus } = usePreviousMonth()
 
-    // Modal states
-    const [showIncomeModal, setShowIncomeModal] = useState(false)
-    const [showExpenseModal, setShowExpenseModal] = useState(false)
-    const [showTransferModal, setShowTransferModal] = useState(false)
-    const [showEnvelopeTransactionsModal, setShowEnvelopeTransactionsModal] = useState(false)
-    const [showSavingsModal, setShowSavingsModal] = useState(false)
-    const [showExchangeModal, setShowExchangeModal] = useState(false)
-    const [exchangeEnvelope, setExchangeEnvelope] = useState<{ id: string; name: string; balance: number } | null>(null)
-    const [selectedEnvelope, setSelectedEnvelope] = useState<{ id: string, name: string, icon: string } | null>(null)
+    const {
+        activeModal,
+        setActiveModal,
+        selectedEnvelope,
+        setSelectedEnvelope,
+        exchangeEnvelope,
+        setExchangeEnvelope,
+        closeModal
+    } = useDashboardModals()
 
-    // Keyboard shortcuts: N=expense, I=income, T=transfer
-    const anyModalOpen = showIncomeModal || showExpenseModal || showTransferModal || showEnvelopeTransactionsModal || showSavingsModal || showExchangeModal
-    const handleKeyboardShortcut = useCallback((e: KeyboardEvent) => {
-        // Skip if user is typing in an input or a modal is open
-        const tag = (e.target as HTMLElement).tagName
-        if (anyModalOpen || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-        if (e.metaKey || e.ctrlKey || e.altKey) return
-
-        switch (e.key.toLowerCase()) {
-            case 'n': setShowExpenseModal(true); break
-            case 'i': setShowIncomeModal(true); break
-            case 't': setShowTransferModal(true); break
-        }
-    }, [anyModalOpen])
-
-    useEffect(() => {
-        document.addEventListener('keydown', handleKeyboardShortcut)
-        return () => document.removeEventListener('keydown', handleKeyboardShortcut)
-    }, [handleKeyboardShortcut])
-
-    const handleEnvelopeClick = (envelopeId: string, envelopeName: string, envelopeIcon: string) => {
+    const handleEnvelopeClick = useCallback((envelopeId: string, envelopeName: string, envelopeIcon: string) => {
         setSelectedEnvelope({ id: envelopeId, name: envelopeName, icon: envelopeIcon })
-        setShowEnvelopeTransactionsModal(true)
-    }
+        setActiveModal('envelopeTransactions')
+    }, [setSelectedEnvelope, setActiveModal])
 
-    const handleExchangeClick = (envelopeId: string, envelopeName: string, balance: number) => {
+    const handleExchangeClick = useCallback((envelopeId: string, envelopeName: string, balance: number) => {
         setExchangeEnvelope({ id: envelopeId, name: envelopeName, balance })
-        setShowExchangeModal(true)
-    }
+        setActiveModal('exchange')
+    }, [setExchangeEnvelope, setActiveModal])
 
-    const handleIncomeSave = createIncomeHandler(refetch, showToast)
-    const handleExpenseSave = createExpenseHandler(refetch, showToast)
-    const handleTransferSave = createTransferHandler(refetch, showToast)
+    const handleIncomeSave = useMemo(() => createIncomeHandler(refetch, showToast), [refetch, showToast])
+    const handleExpenseSave = useMemo(() => createExpenseHandler(refetch, showToast), [refetch, showToast])
+    const handleTransferSave = useMemo(() => createTransferHandler(refetch, showToast), [refetch, showToast])
+
+    const onAddIncomeClick = useCallback(() => setActiveModal('income'), [setActiveModal])
+    const onAddExpenseClick = useCallback(() => setActiveModal('expense'), [setActiveModal])
+    const onTransferClick = useCallback(() => setActiveModal('transfer'), [setActiveModal])
+
+    const groupedEnvelopes = useGroupedEnvelopes(data)
 
     const calculateDaysLeft = () => {
         const now = new Date()
@@ -87,19 +70,24 @@ function HomePage() {
         return Math.max(0, lastDay.getDate() - now.getDate())
     }
 
-    const freeFunds = data?.yearlyEnvelopes?.find(e => e.name.toLowerCase().includes('wolne środki'))?.current || 0
+    const freeFunds = data?.yearlyEnvelopes?.find(e => isFreeFundsEnvelope(e.envelopeType, e.name))?.current || 0
     const emergencyFund = data?.emergencyFundAmount || 0
     const totalNetWorth = (data?.balance || 0) + (data?.emergencyFundAmount || 0) + (data?.goalFundsAmount || 0)
 
-    const getGoalEnvelopes = () => {
+    const goalEnvelopes = useMemo(() => {
         if (!data?.yearlyEnvelopes) return []
         return data.yearlyEnvelopes.filter(e =>
-            (e.envelopeType === 'goal' || ['Wesele', 'Podróże', 'Wakacje', 'Prezenty i Okazje', 'Auto: Serwis i Ubezpieczenie'].includes(e.name)) &&
-            !e.name.toLowerCase().includes('wolne środki') &&
-            e.name !== 'Fundusz Awaryjny' &&
-            e.name !== 'Budowanie Przyszłości'
+            isGoalEnvelope(e.envelopeType, e.name) &&
+            !isFreeFundsEnvelope(e.envelopeType, e.name) &&
+            !isEmergencyEnvelope(e.envelopeType, e.name) &&
+            !isSavingsEnvelope(e.envelopeType, e.name)
         )
-    }
+    }, [data?.yearlyEnvelopes])
+
+    const pendingWalletEnvelopes = useMemo(() => [
+        ...(data?.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly' as const })),
+        ...(data?.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly' as const }))
+    ], [data?.monthlyEnvelopes, data?.yearlyEnvelopes])
 
     if (isCheckingAuth) return <LoadingSpinner />
 
@@ -153,9 +141,9 @@ function HomePage() {
                 <div className="shrink-0">
                     <DashboardHeader totalNetWorth={totalNetWorth}>
                         <QuickActions
-                            onAddIncome={() => setShowIncomeModal(true)}
-                            onAddExpense={() => setShowExpenseModal(true)}
-                            onTransfer={() => setShowTransferModal(true)}
+                            onAddIncome={onAddIncomeClick}
+                            onAddExpense={onAddExpenseClick}
+                            onTransfer={onTransferClick}
                         />
                     </DashboardHeader>
                 </div>
@@ -168,10 +156,7 @@ function HomePage() {
 
                     {/* Pending Google Wallet Transactions */}
                     <PendingWalletTransactions 
-                        envelopes={[
-                            ...(data.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly' })),
-                            ...(data.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly' }))
-                        ]} 
+                        envelopes={pendingWalletEnvelopes} 
                         onSuccess={refetch} 
                     />
 
@@ -201,29 +186,24 @@ function HomePage() {
                             title="Bilans Miesiąca"
                             value={
                                 <div className="flex flex-col w-full gap-3 mt-1.5 min-w-[180px]">
-                                    {/* Income Bar */}
-                                    <div className="flex flex-col gap-1.5">
-                                        <div className="flex justify-between items-center w-full px-0.5">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest shrink-0">Wpływy</span>
-                                            <span className="text-[13px] font-black text-emerald-400 leading-none tabular-nums text-right">{data.totalIncome?.toLocaleString('pl-PL')} zł</span>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                        <div className="flex justify-between items-end px-1">
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Wydatki</span>
+                                                <span className="text-[13px] font-black text-white tabular-nums">{data.totalExpenses?.toLocaleString('pl-PL')} zł</span>
+                                            </div>
+                                            <div className="flex flex-col text-right">
+                                                <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Wpływy</span>
+                                                <span className="text-[13px] font-black text-emerald-400 tabular-nums">{data.totalIncome?.toLocaleString('pl-PL')} zł</span>
+                                            </div>
                                         </div>
-                                        <div className="w-full h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: '100%' }} />
-                                        </div>
-                                    </div>
-
-                                    {/* Expenses Bar */}
-                                    <div className="flex flex-col gap-1.5">
-                                        <div className="flex justify-between items-center w-full px-0.5">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest shrink-0">Wydatki</span>
-                                            <span className={`text-[13px] font-black leading-none tabular-nums text-right ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'text-[#f87171]' : 'text-zinc-200'}`}>
-                                                {data.totalExpenses?.toLocaleString('pl-PL')} zł
-                                            </span>
-                                        </div>
-                                        <div className="w-full h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'bg-[#f87171]' : 'bg-amber-500'}`}
-                                                style={{ width: `${Math.min(((data.totalExpenses || 0) / (data.totalIncome || 1)) * 100, 100)}%` }}
+                                        <div className="relative w-full h-2.5 bg-zinc-800/50 rounded-full overflow-hidden">
+                                            {/* Base layer: Full Income */}
+                                            <div className="absolute top-0 left-0 h-full bg-emerald-500/20" style={{ width: '100%' }} />
+                                            {/* Foreground layer: Expenses relative to Income */}
+                                            <div 
+                                                className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${((data.totalExpenses || 0) > (data.totalIncome || 0)) ? 'bg-[#f87171] shadow-[0_0_10px_rgba(248,113,113,0.5)]' : 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]'}`}
+                                                style={{ width: `${Math.min(((data.totalExpenses || 0) / (data.totalIncome || 1)) * 100, 100)}%` }} 
                                             />
                                         </div>
                                     </div>
@@ -238,11 +218,11 @@ function HomePage() {
                         {/* Savings / Goals */}
                         <StatsCard
                             title="Oszczędności"
-                            value={`${(emergencyFund + getGoalEnvelopes().reduce((s, e) => s + e.current, 0)).toLocaleString('pl-PL')} zł`}
+                            value={`${(emergencyFund + goalEnvelopes.reduce((s, e) => s + e.current, 0)).toLocaleString('pl-PL')} zł`}
                             subtitle="Fundusze i cele długoterminowe"
                             icon={PiggyBank}
                             colorClass="amber"
-                            onClick={() => setShowSavingsModal(true)}
+                            onClick={() => setActiveModal('savings')}
                             index={3}
                         />
                     </div>
@@ -256,27 +236,15 @@ function HomePage() {
                             transition={{ delay: 0.2 }}
                             className="w-full flex flex-col gap-6"
                         >
-                            {(() => {
-                                const needsMonthly = data.monthlyEnvelopes
-                                    .filter(e => e.group === 'needs' && !e.isAccumulating)
-                                    .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
-                                const needsYearly = (data.yearlyEnvelopes || [])
-                                    .filter(e => e.group === 'needs' && !e.isAccumulating)
-                                    .map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
-                                const allNeeds = [...needsMonthly, ...needsYearly]
-
-                                return (
-                                    <EnvelopeGroup
-                                        title="Potrzeby"
-                                        icon="🏡"
-                                        color={GROUP_COLORS['needs']}
-                                        envelopes={allNeeds}
-                                        type="monthly"
-                                        onEnvelopeClick={handleEnvelopeClick}
-                                        onExchangeClick={handleExchangeClick}
-                                    />
-                                )
-                            })()}
+                            <EnvelopeGroup
+                                title="Potrzeby"
+                                icon="🏡"
+                                color={GROUP_COLORS['needs']}
+                                envelopes={groupedEnvelopes.needs}
+                                type="monthly"
+                                onEnvelopeClick={handleEnvelopeClick}
+                                onExchangeClick={handleExchangeClick}
+                            />
                         </motion.div>
 
                         {/* Section 2: Lifestyle */}
@@ -286,27 +254,15 @@ function HomePage() {
                             transition={{ delay: 0.3 }}
                             className="w-full flex flex-col gap-6"
                         >
-                            {(() => {
-                                const wantsMonthly = data.monthlyEnvelopes
-                                    .filter(e => (e.group === 'wants' || e.group === 'lifestyle') && !e.isAccumulating)
-                                    .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
-                                const wantsYearly = (data.yearlyEnvelopes || [])
-                                    .filter(e => (e.group === 'wants' || e.group === 'lifestyle') && !e.isAccumulating)
-                                    .map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
-                                const allWants = [...wantsMonthly, ...wantsYearly]
-
-                                return (
-                                    <EnvelopeGroup
-                                        title="Styl Życia"
-                                        icon="🎉"
-                                        color={GROUP_COLORS['lifestyle']}
-                                        envelopes={allWants}
-                                        type="monthly"
-                                        onEnvelopeClick={handleEnvelopeClick}
-                                        onExchangeClick={handleExchangeClick}
-                                    />
-                                )
-                            })()}
+                            <EnvelopeGroup
+                                title="Styl Życia"
+                                icon="🎉"
+                                color={GROUP_COLORS['lifestyle']}
+                                envelopes={groupedEnvelopes.lifestyle}
+                                type="monthly"
+                                onEnvelopeClick={handleEnvelopeClick}
+                                onExchangeClick={handleExchangeClick}
+                            />
                         </motion.div>
 
                         {/* Section 3: Goals */}
@@ -318,145 +274,47 @@ function HomePage() {
                         >
                             {/* Assets */}
                             <div className="w-full">
-                                {(() => {
-                                    const assetsMonthly = data.monthlyEnvelopes
-                                        .filter(e => (e.group === 'assets' || (e.isAccumulating && e.group !== 'goals')) && e.name !== 'Fundusz Awaryjny')
-                                        .map(e => ({ ...e, envelopeType: 'monthly' as const, envelopeKind: e.envelopeType }))
-                                    const assetsYearly = (data.yearlyEnvelopes?.filter(e => {
-                                        const nameLower = e.name.toLowerCase()
-                                        return (e.group === 'assets' || (e.isAccumulating && e.group !== 'goals')) &&
-                                            !nameLower.includes('wolne środki') &&
-                                            e.name !== 'Fundusz Awaryjny'
-                                    }) || []).map(e => ({ ...e, envelopeType: 'yearly' as const, envelopeKind: e.envelopeType }))
-                                    const allAssets = [...assetsMonthly, ...assetsYearly]
-
-                                    return (
-                                        <EnvelopeGroup
-                                            title="Cele i Majątek"
-                                            icon="💎"
-                                            color={GROUP_COLORS['assets']}
-                                            envelopes={allAssets}
-                                            type="monthly"
-                                            onEnvelopeClick={handleEnvelopeClick}
-                                            onExchangeClick={handleExchangeClick}
-                                        />
-                                    )
-                                })()}
+                                <EnvelopeGroup
+                                    title="Cele i Majątek"
+                                    icon="💎"
+                                    color={GROUP_COLORS['assets']}
+                                    envelopes={groupedEnvelopes.assets}
+                                    type="monthly"
+                                    onEnvelopeClick={handleEnvelopeClick}
+                                    onExchangeClick={handleExchangeClick}
+                                />
                             </div>
 
                             {/* Saving Goals */}
                             <div className="w-full">
-                                {data.yearlyEnvelopes && (() => {
-                                    const goals = data.yearlyEnvelopes
-                                        .filter(e => e.group === 'goals')
-                                        .map(e => ({ ...e, envelopeKind: e.envelopeType, envelopeType: 'yearly' as const }))
-                                    return (
-                                        <EnvelopeGroup
-                                            title="Cele Oszczędnościowe"
-                                            icon="🎯"
-                                            color={GROUP_COLORS['goals']}
-                                            envelopes={goals}
-                                            type="yearly"
-                                            onEnvelopeClick={handleEnvelopeClick}
-                                            onExchangeClick={handleExchangeClick}
-                                        />
-                                    )
-                                })()}
+                                <EnvelopeGroup
+                                    title="Cele Oszczędnościowe"
+                                    icon="🎯"
+                                    color={GROUP_COLORS['goals']}
+                                    envelopes={groupedEnvelopes.goals}
+                                    type="yearly"
+                                    onEnvelopeClick={handleEnvelopeClick}
+                                    onExchangeClick={handleExchangeClick}
+                                />
                             </div>
                         </motion.div>
                     </div>
                 </div>
             </div>
 
-            {/* Modals */}
-            {showIncomeModal && (
-                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="modal-content w-full max-w-lg">
-                        <IncomeModal
-                            onClose={() => setShowIncomeModal(false)}
-                            onSave={handleIncomeSave}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {showExpenseModal && (
-                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="modal-content w-full max-w-lg">
-                        <ExpenseModal
-                            onClose={() => setShowExpenseModal(false)}
-                            onSave={handleExpenseSave}
-                            envelopes={[
-                                ...(data.monthlyEnvelopes || []).map(e => ({ ...e, type: 'monthly', currentAmount: e.current })),
-                                ...(data.yearlyEnvelopes || []).map(e => ({ ...e, type: 'yearly', currentAmount: e.current }))
-                            ]}
-                        />
-                    </div>
-                </div>
-            )}
-
-
-            {showEnvelopeTransactionsModal && selectedEnvelope && (
-                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="modal-content w-full max-w-4xl h-[80vh]">
-                        <EnvelopeTransactionsModal
-                            isOpen={showEnvelopeTransactionsModal}
-                            onClose={() => setShowEnvelopeTransactionsModal(false)}
-                            envelopeId={selectedEnvelope.id}
-                            envelopeName={selectedEnvelope.name}
-                            envelopeIcon={selectedEnvelope.icon}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {showTransferModal && (
-                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="modal-content w-full max-w-lg">
-                        <TransferModal
-                            onClose={() => setShowTransferModal(false)}
-                            onSave={handleTransferSave}
-                            mainBalance={data.balance}
-                            envelopes={[
-                                ...(data.monthlyEnvelopes || []).map(e => ({
-                                    ...e,
-                                    type: 'monthly' as const,
-                                    currentAmount: e.current
-                                })),
-                                ...(data.yearlyEnvelopes || []).map(e => ({
-                                    ...e,
-                                    type: 'yearly' as const,
-                                    currentAmount: e.current
-                                }))
-                            ]}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {showSavingsModal && (
-                <SavingsBreakdownModal
-                    isOpen={showSavingsModal}
-                    onClose={() => setShowSavingsModal(false)}
-                    emergencyFund={emergencyFund}
-                    goalsAmount={data.goalFundsAmount || 0}
-                    goalEnvelopes={getGoalEnvelopes()}
-                />
-            )}
-
-            {showExchangeModal && exchangeEnvelope && (
-                <div className="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="modal-content w-full max-w-lg">
-                        <ExchangeModal
-                            envelopeId={exchangeEnvelope.id}
-                            envelopeName={exchangeEnvelope.name}
-                            envelopeBalance={exchangeEnvelope.balance}
-                            onClose={() => setShowExchangeModal(false)}
-                            onSave={refetch}
-                        />
-                    </div>
-                </div>
-            )}
+            <DashboardModals
+                activeModal={activeModal}
+                closeModal={closeModal}
+                data={data}
+                refetch={refetch}
+                handleIncomeSave={handleIncomeSave}
+                handleExpenseSave={handleExpenseSave}
+                handleTransferSave={handleTransferSave}
+                selectedEnvelope={selectedEnvelope}
+                exchangeEnvelope={exchangeEnvelope}
+                emergencyFund={emergencyFund}
+                goalEnvelopes={goalEnvelopes}
+            />
 
         </div>
     )

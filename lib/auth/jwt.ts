@@ -13,13 +13,11 @@ interface JWTPayload {
 
 export async function getUserIdFromToken(request: NextRequest): Promise<string> {
   try {
-    const authHeader = request.headers.get('Authorization')
+    const token = request.cookies.get('authToken')?.value
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       throw new Error('Brak tokenu autoryzacji')
     }
-
-    const token = authHeader.substring(7)
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
 
     if (!decoded.userId) {

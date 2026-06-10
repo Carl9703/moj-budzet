@@ -133,11 +133,16 @@ export async function consumeFxLotsFifo(
     throw new InsufficientFxLotsError(envelopeId, requested, ZERO)
   }
 
-  // Całkowita dostępna pula (do diagnostyki)
+  // Całkowita dostępna pula
   const totalAvailable = lots.reduce(
     (sum, lot) => sum.plus(lot.remainingAmount),
     ZERO
   )
+
+  // Poziom 4 - twarda blokada przed wydatkami przekraczającymi pulę
+  if (requested.greaterThan(totalAvailable)) {
+    throw new InsufficientFxLotsError(envelopeId, requested, totalAvailable)
+  }
 
   let toConsume = requested
   let plnEquivalent = ZERO
@@ -172,19 +177,8 @@ export async function consumeFxLotsFifo(
     })
   }
 
-  // Poziom 2 — miękki fallback: kolejka wyczerpana, reszta po kursie ostatniego lotu
-  const usedFallback = toConsume.greaterThan(EPSILON)
-  if (usedFallback) {
-    const fallbackPln = toConsume.mul(lastRate)
-    plnEquivalent = plnEquivalent.plus(fallbackPln)
-
-    console.warn(
-      `[costBasis] FIFO fallback dla koperty ${envelopeId}: ` +
-      `brakuje ${toConsume.toFixed(6)} jed. — ` +
-      `przeliczono @ ${lastRate.toFixed(6)} PLN/jed. (kurs ostatniego lotu). ` +
-      `Łącznie dostępne było: ${totalAvailable.toFixed(6)}.`
-    )
-  }
+  // Usunięto miękki fallback: system ściśle blokuje przekraczanie salda FX
+  const usedFallback = false
 
   return {
     plnEquivalent: plnEquivalent.toDecimalPlaces(4, Prisma.Decimal.ROUND_HALF_UP),

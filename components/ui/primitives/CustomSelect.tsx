@@ -33,6 +33,7 @@ export function CustomSelect({
 }: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1)
 
     const selectedOption = options.find(opt => opt.value === value)
 
@@ -45,6 +46,52 @@ export function CustomSelect({
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
+
+    useEffect(() => {
+        if (isOpen) {
+            const index = options.findIndex(opt => opt.value === value)
+            setFocusedIndex(index >= 0 ? index : 0)
+        } else {
+            setFocusedIndex(-1)
+        }
+    }, [isOpen, value, options])
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (disabled) return
+
+        if (!isOpen) {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault()
+                setIsOpen(true)
+            }
+            return
+        }
+
+        switch (e.key) {
+            case 'Escape':
+                e.preventDefault()
+                e.stopPropagation() // Prevent closing parent Modals
+                setIsOpen(false)
+                break
+            case 'ArrowDown':
+                e.preventDefault()
+                setFocusedIndex(prev => (prev < options.length - 1 ? prev + 1 : prev))
+                break
+            case 'ArrowUp':
+                e.preventDefault()
+                setFocusedIndex(prev => (prev > 0 ? prev - 1 : prev))
+                break
+            case 'Enter':
+                e.preventDefault()
+                if (focusedIndex >= 0 && focusedIndex < options.length) {
+                    handleSelect(options[focusedIndex].value)
+                }
+                break
+            case 'Tab':
+                setIsOpen(false)
+                break
+        }
+    }
 
     const handleSelect = (optionValue: string) => {
         if (disabled) return
@@ -63,6 +110,7 @@ export function CustomSelect({
             <button
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
+                onKeyDown={handleKeyDown}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 ${disabled
                     ? 'bg-zinc-800/50 border-zinc-800 text-zinc-500 cursor-not-allowed'
                     : isOpen
@@ -101,14 +149,17 @@ export function CustomSelect({
                             {options.length === 0 ? (
                                 <div className="p-4 text-center text-sm text-zinc-500">Brak opcji</div>
                             ) : (
-                                options.map((option) => (
+                                options.map((option, index) => (
                                     <button
                                         key={option.value}
                                         type="button"
                                         onClick={() => handleSelect(option.value)}
-                                        className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left group ${option.value === value
+                                        onMouseEnter={() => setFocusedIndex(index)}
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left group focus:outline-none ${option.value === value
                                             ? 'bg-amber-600 text-white font-medium'
-                                            : 'text-zinc-300 hover:bg-zinc-800'
+                                            : focusedIndex === index
+                                                ? 'bg-zinc-800 text-white'
+                                                : 'text-zinc-300 hover:bg-zinc-800'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3 truncate">

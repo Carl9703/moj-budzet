@@ -3,7 +3,8 @@ export const ENVELOPE_TYPES = {
     SAVINGS: 'savings',    // For accumulating money (e.g., "Budowanie Przyszłości")
     BUDGET: 'budget',      // Regular monthly spending envelopes
     EMERGENCY: 'emergency', // Emergency fund (e.g., "Fundusz Awaryjny") 
-    GOAL: 'goal'           // Specific savings goals (e.g., "Wesele", "Wakacje")
+    GOAL: 'goal',           // Specific savings goals (e.g., "Wesele", "Wakacje")
+    FREE_FUNDS: 'free_funds' // Unallocated funds
 } as const
 
 export type EnvelopeType = typeof ENVELOPE_TYPES[keyof typeof ENVELOPE_TYPES]
@@ -24,6 +25,14 @@ export const isEmergencyEnvelope = (envelopeType: string | null | undefined, nam
 export const isGoalEnvelope = (envelopeType: string | null | undefined, name?: string): boolean => {
     if (envelopeType === ENVELOPE_TYPES.GOAL) return true
     if (!envelopeType && name) return getEnvelopeTypeFromName(name) === ENVELOPE_TYPES.GOAL
+    return false
+}
+
+export const isFreeFundsEnvelope = (envelopeType: string | null | undefined, name?: string): boolean => {
+    if (envelopeType === ENVELOPE_TYPES.FREE_FUNDS) return true
+    if (!envelopeType && name) return getEnvelopeTypeFromName(name) === ENVELOPE_TYPES.FREE_FUNDS
+    // Fallback dla starych danych
+    if (name?.toLowerCase().includes('wolne środki')) return true
     return false
 }
 
@@ -63,7 +72,7 @@ export const LEGACY_ENVELOPE_TYPE_MAP: Record<string, EnvelopeType> = {
     'Prezenty i Okazje': ENVELOPE_TYPES.GOAL,
     'Auto: Serwis i Ubezpieczenie': ENVELOPE_TYPES.GOAL,
     'Cele finansowe': ENVELOPE_TYPES.GOAL,
-    'Wolne środki (roczne)': ENVELOPE_TYPES.GOAL,
+    'Wolne środki (roczne)': ENVELOPE_TYPES.FREE_FUNDS,
 }
 
 // Get envelope type from legacy name (for backward compatibility)

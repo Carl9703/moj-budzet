@@ -3,6 +3,16 @@ import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { prisma } from '@/lib/utils/prisma'
 import { AssetType } from '@prisma/client'
 import { jsonResponse } from '@/lib/utils/api'
+import { z } from 'zod'
+
+const updateInvestmentSchema = z.object({
+    symbol: z.string().min(1).optional(),
+    quantity: z.number().min(0, 'Ilość nie może być ujemna').optional(),
+    averagePurchasePrice: z.number().min(0, 'Cena nie może być ujemna').optional(),
+    type: z.enum(['CRYPTO', 'STOCK', 'PPK']).optional(),
+    totalContributed: z.number().min(0).optional().nullable(),
+    manualCurrentValue: z.number().min(0).optional().nullable()
+})
 
 export async function PATCH(
     request: NextRequest,
@@ -12,10 +22,22 @@ export async function PATCH(
         const userId = await getUserIdFromToken(request)
         const { id } = await params
         const body = await request.json()
+        // Transform string inputs to numbers first if they are passed as strings with commas
+        const preprocessedBody = { ...body }
+        if (typeof preprocessedBody.quantity === 'string') preprocessedBody.quantity = parseFloat(preprocessedBody.quantity.replace(',', '.'))
+        if (typeof preprocessedBody.averagePurchasePrice === 'string') preprocessedBody.averagePurchasePrice = parseFloat(preprocessedBody.averagePurchasePrice.replace(',', '.'))
+        if (typeof preprocessedBody.totalContributed === 'string') preprocessedBody.totalContributed = parseFloat(preprocessedBody.totalContributed.replace(',', '.'))
+        if (typeof preprocessedBody.manualCurrentValue === 'string') preprocessedBody.manualCurrentValue = parseFloat(preprocessedBody.manualCurrentValue.replace(',', '.'))
+
+        const validation = updateInvestmentSchema.safeParse(preprocessedBody)
+        if (!validation.success) {
+            return jsonResponse({ error: 'Nieprawidłowe dane', details: validation.error.issues }, { status: 400 })
+        }
+
         const {
             symbol, quantity, averagePurchasePrice, type,
             totalContributed, manualCurrentValue
-        } = body
+        } = validation.data
 
         const position = await prisma.investmentAsset.findUnique({
             where: { id }
@@ -29,13 +51,11 @@ export async function PATCH(
             where: { id },
             data: {
                 ...(symbol && { symbol: symbol.toUpperCase() }),
-                ...(quantity !== undefined && { quantity: parseFloat(String(quantity).replace(',', '.')) }),
-                ...(averagePurchasePrice !== undefined && { averagePurchasePrice: parseFloat(String(averagePurchasePrice).replace(',', '.')) }),
+                ...(quantity !== undefined && { quantity }),
+                ...(averagePurchasePrice !== undefined && { averagePurchasePrice }),
                 ...(type && { type: type as AssetType }),
-                ...(totalContributed !== undefined && { totalContributed: parseFloat(String(totalContributed).replace(',', '.')) }),
-                // Allow resetting to null if passed explicitly? Or just update if value.
-                // Assuming client sends value to update.
-                ...(manualCurrentValue !== undefined && { manualCurrentValue: parseFloat(String(manualCurrentValue).replace(',', '.')) }),
+                ...(totalContributed !== undefined && { totalContributed }),
+                ...(manualCurrentValue !== undefined && { manualCurrentValue }),
             }
         })
 

@@ -404,7 +404,7 @@ export default function ArchiveMonthPage() {
                 <span className="text-xl">📈</span> Trendy Wydatków
               </h3>
               {selectedItem && (
-                <span className="text-[10px] px-2 py-1 bg-amber-500/15 text-amber-400 rounded-full border border-amber-500/30 uppercase font-black tracking-widest">
+                <span className="text-xs px-2 py-1 bg-amber-500/15 text-amber-400 rounded-full border border-amber-500/30 uppercase font-black tracking-widest">
                   {selectedItem.name}
                 </span>
               )}

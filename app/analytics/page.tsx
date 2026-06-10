@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, Suspense } from 'react'
 import { motion } from 'framer-motion'
@@ -75,7 +75,7 @@ function AnalyticsContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
         <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-6xl mb-4">??</div>
           <h2 className="text-2xl font-bold text-zinc-100 mb-2">Błąd ładowania danych</h2>
           <p className="text-zinc-400 mb-4">
             Nie udało się załadować danych. Spróbuj ponownie później.
@@ -101,7 +101,7 @@ function AnalyticsContent() {
           className="mb-6 flex flex-col pt-4"
         >
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 mb-1">
-            📊 Analizy Finansowe
+            📈 Analizy Finansowe
           </h1>
           <p className="text-xs text-zinc-500 font-medium tracking-wide">
             Kompleksowy przegląd Twoich finansów
@@ -177,3 +177,4 @@ export default function AnalyticsPage() {
     </Suspense>
   )
 }
+

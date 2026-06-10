@@ -1,12 +1,5 @@
 // Centralized API client with type safety
 
-const getAuthToken = () => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('authToken')
-    }
-    return null
-}
-
 interface RequestConfig extends RequestInit {
     params?: Record<string, string | number | boolean | undefined>
 }
@@ -32,11 +25,8 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
         if (queryString) url += `?${queryString}`
     }
 
-    const token = getAuthToken()
-
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
 
     if (init.headers) {
@@ -89,7 +79,6 @@ export { ApiError }
 // Backward-compatible authorizedFetch - wraps fetch with auth and 401 handling
 // This allows gradual migration without breaking existing code
 export async function authorizedFetch(url: string, options: RequestInit = {}): Promise<Response> {
-    const token = getAuthToken()
     const headers: Record<string, string> = {}
 
     // Copy existing headers
@@ -107,10 +96,6 @@ export async function authorizedFetch(url: string, options: RequestInit = {}): P
         }
     }
 
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-    }
-
     if (!headers['Content-Type'] && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
         headers['Content-Type'] = 'application/json'
     }
@@ -125,7 +110,6 @@ export async function authorizedFetch(url: string, options: RequestInit = {}): P
         if (typeof window !== 'undefined') {
             const isOnAuthPage = window.location.pathname.startsWith('/auth/')
             if (!isOnAuthPage) {
-                localStorage.removeItem('authToken')
                 localStorage.removeItem('user')
                 window.location.href = '/auth/signin'
             }

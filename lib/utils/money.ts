@@ -1,5 +1,5 @@
 export function roundToCents(amount: number): number {
-    return Math.round(amount * 100) / 100
+    return Math.round((amount + Number.EPSILON) * 100) / 100
 }
 
 export function formatMoney(amount: number, showCurrency: boolean = true): string {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { memo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Edit2, Smartphone, Loader2 } from 'lucide-react'
 import { authorizedFetch } from '@/lib/api/client'
@@ -23,34 +24,29 @@ interface PendingWalletTransactionsProps {
     onSuccess: () => void
 }
 
-export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalletTransactionsProps) {
-    const [pending, setPending] = useState<PendingTransaction[]>([])
-    const [loading, setLoading] = useState(true)
+export const PendingWalletTransactions = memo(function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalletTransactionsProps) {
     const [processingId, setProcessingId] = useState<string | null>(null)
     const [editingId, setEditingId] = useState<string | null>(null)
     const { showToast } = useToast()
     const { categories, getCategoryName, getCategoryIcon } = useCategories()
+    const queryClient = useQueryClient()
 
-    const fetchPending = async () => {
-        try {
+    const { data: pending = [], isLoading: loading } = useQuery<PendingTransaction[]>({
+        queryKey: ['pendingTransactions'],
+        queryFn: async () => {
             const res = await authorizedFetch('/api/transactions/pending')
-            if (res.ok) {
-                const data = await res.json()
-                setPending(data.pendingTransactions || [])
-            }
-        } catch (e) {
-            console.error('Error fetching pending tx', e)
-        } finally {
-            setLoading(false)
-        }
-    }
+            if (!res.ok) throw new Error('Błąd pobierania oczekujących transakcji')
+            const data = await res.json()
+            return data.pendingTransactions || []
+        },
+        refetchInterval: 10000, // Automatyczny polling co 10s, bezpieczny dla baterii i sieci (zatrzymuje się gdy okno nie ma focusu)
+    })
 
-    useEffect(() => {
-        fetchPending()
-        // Poll every 10 seconds for new transactions
-        const interval = setInterval(fetchPending, 10000)
-        return () => clearInterval(interval)
-    }, [])
+    const removePendingLocal = (id: string) => {
+        queryClient.setQueryData<PendingTransaction[]>(['pendingTransactions'], (old) => 
+            old ? old.filter(t => t.id !== id) : []
+        )
+    }
 
     const handleApprove = async (tx: PendingTransaction) => {
         setProcessingId(tx.id)
@@ -70,7 +66,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
 
             if (res.ok) {
                 showToast('Transakcja zatwierdzona', 'success')
-                setPending(p => p.filter(t => t.id !== tx.id))
+                removePendingLocal(tx.id)
                 onSuccess()
             } else {
                 showToast('Błąd zatwierdzania', 'error')
@@ -100,7 +96,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
 
             if (res.ok) {
                 showToast('Transakcja zatwierdzona', 'success')
-                setPending(p => p.filter(t => t.id !== txId))
+                removePendingLocal(txId)
                 setEditingId(null)
                 onSuccess()
                 return true
@@ -124,7 +120,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
             })
             if (res.ok) {
                 showToast('Transakcja odrzucona', 'success')
-                setPending(p => p.filter(t => t.id !== id))
+                removePendingLocal(id)
             } else {
                 showToast('Błąd odrzucania', 'error')
             }
@@ -147,7 +143,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
             <h3 className="text-sm font-black text-white tracking-widest uppercase mb-4 flex items-center gap-2">
                 <Smartphone size={16} className="text-emerald-400" />
                 Oczekujące z Google Wallet
-                <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-[10px]">
+                <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs">
                     {pending.length}
                 </span>
             </h3>
@@ -215,6 +211,7 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
                                                 disabled={isProcessing}
                                                 className="p-2 text-zinc-400 hover:text-white bg-zinc-800/50 hover:bg-zinc-700 rounded-xl transition-all"
                                                 title="Edytuj"
+                                                aria-label={`Edytuj transakcję ${tx.description}`}
                                             >
                                                 <Edit2 size={18} />
                                             </button>
@@ -223,12 +220,14 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
                                                 disabled={isProcessing}
                                                 className="p-2 text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/30 rounded-xl transition-all"
                                                 title="Odrzuć"
+                                                aria-label={`Odrzuć transakcję ${tx.description}`}
                                             >
                                                 <X size={18} />
                                             </button>
                                             <button
                                                 onClick={() => handleApprove(tx)}
                                                 disabled={isProcessing || (!tx.suggestedCat && !tx.suggestedEnv)}
+                                                aria-label={`Zatwierdź transakcję ${tx.description}`}
                                                 className={`flex-1 sm:flex-none px-4 py-2 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                                     (!tx.suggestedCat && !tx.suggestedEnv) 
                                                     ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
@@ -262,4 +261,4 @@ export function PendingWalletTransactions({ envelopes, onSuccess }: PendingWalle
             )}
         </div>
     )
-}
+})

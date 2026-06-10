@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { motion } from 'framer-motion'
 
 interface QuickActionsProps {
@@ -7,7 +7,7 @@ interface QuickActionsProps {
     onTransfer: () => void
 }
 
-export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickActionsProps) => {
+export const QuickActions = memo(function QuickActions({ onAddIncome, onAddExpense, onTransfer }: QuickActionsProps) {
     return (
         <div className="flex gap-4">
             <motion.button
@@ -23,7 +23,7 @@ export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickAct
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-2">
                     <span className="text-lg leading-none">＋</span> Przychód
-                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-[10px] font-bold text-white/60 border border-white/10">I</kbd>
+                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-xs font-bold text-white/60 border border-white/10">I</kbd>
                 </span>
             </motion.button>
 
@@ -40,7 +40,7 @@ export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickAct
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-2">
                     <span className="text-lg leading-none">−</span> Wydatek
-                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-[10px] font-bold text-white/60 border border-white/10">N</kbd>
+                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-xs font-bold text-white/60 border border-white/10">N</kbd>
                 </span>
             </motion.button>
 
@@ -57,9 +57,9 @@ export const QuickActions = ({ onAddIncome, onAddExpense, onTransfer }: QuickAct
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-2">
                     <span className="text-lg leading-none">⇄</span> Transfer
-                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-[10px] font-bold text-white/60 border border-white/10">T</kbd>
+                    <kbd className="hidden md:flex items-center justify-center w-5 h-5 rounded-md bg-white/15 text-xs font-bold text-white/60 border border-white/10">T</kbd>
                 </span>
             </motion.button>
         </div>
     )
-}
+})

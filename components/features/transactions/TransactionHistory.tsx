@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { authorizedFetch } from '@/lib/api/client'
 import { getCategoryIcon, getCategoryName } from '@/lib/constants/categories'
+import { roundToCents } from '@/lib/utils/money'
+import { handleCalculatorInput } from '@/lib/utils/input'
 
 interface Transaction {
     id: string
@@ -55,7 +57,7 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
             }
             
             // Zaokrąglij do 2 miejsc po przecinku
-            return Math.round(result * 100) / 100
+            return roundToCents(result)
         } catch {
             return null
         }
@@ -275,7 +277,7 @@ export function TransactionHistory({ transactions, onTransactionDeleted }: Props
                                                     <input
                                                         type="text"
                                                         value={editAmount}
-                                                        onChange={(e) => setEditAmount(e.target.value)}
+                                                        onChange={(e) => handleCalculatorInput(e.target.value, setEditAmount)}
                                                         placeholder="np. 750/2"
                                                         style={{
                                                             width: '120px',

@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { recurringPaymentSchema, RecurringPaymentFormData } from '@/lib/schemas'
 import { useCategories } from '@/lib/contexts/CategoryContext'
 import { RecurringPayment, Envelope } from '@/lib/types'
+import { blockInvalidDecimals } from '@/lib/utils/input'
 
 interface RecurringPaymentModalProps {
     isOpen: boolean
@@ -139,7 +140,7 @@ export function RecurringPaymentModal({
                             <p className="text-xs text-zinc-400">Automatyczne płatności cykliczne</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-zinc-400 hover:text-white">
+                    <button type="button" onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-zinc-400 hover:text-white">
                         <X size={20} />
                     </button>
                 </div>
@@ -152,7 +153,7 @@ export function RecurringPaymentModal({
                         <div className={`py-3 px-4 rounded-xl border transition-all ${Number(watchedAmount) > 0
                             ? 'bg-emerald-500/5 border-emerald-500/20'
                             : 'bg-zinc-800/30 border-zinc-700/50'}`}>
-                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 text-center">
+                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1 text-center">
                                 Kwota Płatności
                             </label>
                             <div className="relative flex items-baseline justify-center">
@@ -160,17 +161,18 @@ export function RecurringPaymentModal({
                                     type="number"
                                     step="0.01"
                                     {...register('amount', { valueAsNumber: true })}
+                                    onInput={blockInvalidDecimals}
                                     className="w-full bg-transparent text-3xl font-black text-center text-white placeholder:text-zinc-700 focus:outline-none"
                                     placeholder="0.00"
                                 />
                                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-600">PLN</span>
                             </div>
-                            {errors.amount && <p className="text-rose-400 text-[10px] text-center mt-1">{errors.amount.message}</p>}
+                            {errors.amount && <p className="text-rose-400 text-xs text-center mt-1">{errors.amount.message}</p>}
                         </div>
 
                         {/* TYPE SEGMENTED CONTROL */}
                         <div>
-                            <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider text-center">Rodzaj</label>
+                            <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider text-center">Rodzaj</label>
                             <div className="flex bg-zinc-800/50 p-1 rounded-xl border border-zinc-700/50 relative">
                                 <button
                                     type="button"
@@ -196,12 +198,12 @@ export function RecurringPaymentModal({
                         {/* NAME & DAY GRID */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="md:col-span-2">
-                                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Nazwa</label>
+                                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Nazwa</label>
                                 <input
                                     {...register('name')}
                                     className="w-full bg-zinc-800/30 border border-zinc-700/50 rounded-xl px-3 py-3 text-sm font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all"
                                 />
-                                {errors.name && <p className="text-rose-400 text-[10px] mt-1">{errors.name.message}</p>}
+                                {errors.name && <p className="text-rose-400 text-xs mt-1">{errors.name.message}</p>}
                             </div>
 
                             <CustomSelect
@@ -259,7 +261,7 @@ export function RecurringPaymentModal({
                                 <div className={`font-bold text-sm ${watchedIsActive ? 'text-amber-400' : 'text-zinc-300'}`}>
                                     Płatność Aktywna
                                 </div>
-                                <div className="text-[10px] text-zinc-500">
+                                <div className="text-xs text-zinc-500">
                                     Odznacz, aby zawiesić płatność bez usuwania
                                 </div>
                             </div>
@@ -335,7 +337,7 @@ function CustomSelect({
 
     return (
         <div className="relative" ref={containerRef}>
-            <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
+            <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
@@ -363,7 +365,7 @@ function CustomSelect({
                         className="absolute z-[100] left-0 right-0 max-h-60 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl backdrop-blur-3xl p-1.5 custom-scrollbar"
                     >
                         {options.length === 0 ? (
-                            <div className="px-3 py-4 text-center text-[10px] font-black uppercase text-zinc-600 tracking-widest italic">
+                            <div className="px-3 py-4 text-center text-xs font-black uppercase text-zinc-600 tracking-widest italic">
                                 Brak opcji
                             </div>
                         ) : (
@@ -375,7 +377,7 @@ function CustomSelect({
                                         onChange(opt.value)
                                         setIsOpen(false)
                                     }}
-                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-[11px] font-bold transition-all hover:bg-white/5 group ${value === opt.value ? 'bg-amber-600/20 text-amber-400' : 'text-zinc-300'}`}
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition-all hover:bg-white/5 group ${value === opt.value ? 'bg-amber-600/20 text-amber-400' : 'text-zinc-300'}`}
                                 >
                                     <span className="flex items-center gap-3">
                                         {opt.icon && <span className="text-lg group-hover:scale-125 transition-transform duration-300">{opt.icon}</span>}
@@ -388,7 +390,7 @@ function CustomSelect({
                     </motion.div>
                 )}
             </AnimatePresence>
-            {error && <p className="text-rose-400 text-[10px] mt-1">{error}</p>}
+            {error && <p className="text-rose-400 text-xs mt-1">{error}</p>}
         </div>
     )
 }

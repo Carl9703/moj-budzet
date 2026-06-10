@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -6,6 +5,7 @@ import { Trash2, LogOut, Plus, Settings, RefreshCw, Save } from 'lucide-react'
 import { authorizedFetch } from '@/lib/api/client'
 import { BonusDistributionRule, Envelope } from '@/lib/types/config'
 import { useToast } from '@/components/ui/feedback/Toast'
+import { blockInvalidDecimals } from '@/lib/utils/input'
 
 interface GeneralSettingsProps {
     defaultSalary: number
@@ -51,8 +51,12 @@ export function GeneralSettings({
         setHasChanges(salaryChanged || distributionChanged)
     }, [draftSalary, draftDistribution, defaultSalary, bonusDistribution])
 
-    const handleLogout = () => {
-        localStorage.removeItem('authToken')
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/signout', { method: 'POST' })
+        } catch (e) {
+            console.error(e)
+        }
         localStorage.removeItem('user')
         router.push('/auth/signin')
     }
@@ -166,7 +170,7 @@ export function GeneralSettings({
                 <div className="flex-shrink-0">
                     <button
                         onClick={handleLogout}
-                        className="px-5 py-3 rounded-2xl bg-zinc-800 text-zinc-400 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 active:scale-95 flex items-center gap-3"
+                        className="px-5 py-3 rounded-2xl bg-zinc-800 text-zinc-400 border border-white/5 text-xs font-black uppercase tracking-[0.2em] transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 active:scale-95 flex items-center gap-3"
                     >
                         <LogOut size={16} /> Wyloguj
                     </button>
@@ -175,7 +179,7 @@ export function GeneralSettings({
 
             {/* Default Salary */}
             <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl max-w-xl shadow-xl">
-                <label className="block text-[10px] font-black text-zinc-500 mb-4 uppercase tracking-[0.2em] ml-1">
+                <label className="block text-xs font-black text-zinc-500 mb-4 uppercase tracking-[0.2em] ml-1">
                     Domyślny Przychód Miesięczny
                 </label>
                 <div className="relative group">
@@ -183,6 +187,7 @@ export function GeneralSettings({
                         type="number"
                         value={draftSalary}
                         onChange={(e) => setDraftSalary(Number(e.target.value))}
+                        onInput={blockInvalidDecimals}
                         className="w-full text-4xl font-black text-emerald-400 bg-zinc-950/50 border border-white/5 rounded-2xl py-6 px-6 focus:border-emerald-500/50 transition-all outline-none tabular-nums shadow-inner"
                         placeholder="0.00"
                     />
@@ -190,7 +195,7 @@ export function GeneralSettings({
                 </div>
                 <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
                     <span className="text-amber-400 text-sm">ℹ️</span>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-300/60 leading-relaxed">
+                    <p className="text-xs font-black uppercase tracking-widest text-amber-300/60 leading-relaxed">
                         Ta kwota będzie używana jako domyślna podstawa przy planowaniu nowego miesiąca.
                     </p>
                 </div>
@@ -207,7 +212,7 @@ export function GeneralSettings({
                     </div>
                     <button
                         onClick={addDistributionRule}
-                        className="px-4 py-2.5 rounded-xl bg-zinc-800 text-amber-400 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-700 transition-all flex items-center gap-2 active:scale-95"
+                        className="px-4 py-2.5 rounded-xl bg-zinc-800 text-amber-400 border border-white/5 text-xs font-black uppercase tracking-widest hover:bg-zinc-700 transition-all flex items-center gap-2 active:scale-95"
                     >
                         <Plus size={14} /> Dodaj regułę
                     </button>
@@ -232,6 +237,7 @@ export function GeneralSettings({
                                     type="number"
                                     value={dist.percentage === 0 ? '' : dist.percentage}
                                     onChange={(e) => updateDistributionRule(index, 'percentage', parseFloat(e.target.value) || 0)}
+                                    onInput={blockInvalidDecimals}
                                     placeholder="0"
                                     className="input-glass text-right font-bold py-2 !pr-10 w-full"
                                 />
@@ -256,7 +262,7 @@ export function GeneralSettings({
 
                 <div className="px-6 py-5 rounded-3xl bg-zinc-950/50 border border-white/5 shadow-inner">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Suma przydziału:</span>
+                        <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Suma przydziału:</span>
                         <span className={`text-sm font-black tabular-nums transition-colors ${totalPercentage > 100 ? 'text-rose-500' : 'text-emerald-500'}`}>
                             {totalPercentage}%
                         </span>
@@ -319,20 +325,20 @@ export function GeneralSettings({
                         </div>
                         <div>
                             <p className="text-sm font-bold text-amber-400 tracking-tight">Masz niezapisane zmiany</p>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-amber-500/60 mt-0.5">Zapisz lub odrzuć wprowadzone modyfikacje</p>
+                            <p className="text-xs font-black uppercase tracking-widest text-amber-500/60 mt-0.5">Zapisz lub odrzuć wprowadzone modyfikacje</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 w-full sm:w-auto">
                         <button
                             onClick={handleDiscard}
-                            className="flex-1 sm:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+                            className="flex-1 sm:flex-none px-6 py-3 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
                         >
                             Odrzuć zmiany
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className={`flex-1 sm:flex-none px-8 py-3 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-500/20 text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 active:scale-95 ${saving ? 'opacity-70 cursor-wait' : 'hover:scale-105 hover:bg-emerald-500'}`}
+                            className={`flex-1 sm:flex-none px-8 py-3 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-500/20 text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 active:scale-95 ${saving ? 'opacity-70 cursor-wait' : 'hover:scale-105 hover:bg-emerald-500'}`}
                         >
                             {saving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
                             {saving ? 'Zapisuję...' : 'Zapisz zmiany'}

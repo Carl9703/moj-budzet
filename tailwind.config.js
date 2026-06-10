@@ -9,32 +9,8 @@ module.exports = {
   ],
   // NOWA SEKCJA: 'safelist' to nasza polisa ubezpieczeniowa
   // Gwarantuje, że kolory Tremora ZAWSZE znajdą się w finalnym CSS.
-  safelist: [
-    {
-      pattern:
-        /^(bg-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-    {
-      pattern:
-        /^(text-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-    {
-      pattern:
-        /^(border-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-    {
-      pattern:
-        /^(ring-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-    {
-      pattern:
-        /^(stroke-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-    {
-      pattern:
-        /^(fill-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
-    },
-  ],
+  // Gwarantuje, że kolory Tremora ZAWSZE znajdą się w finalnym CSS.
+  safelist: [],
   theme: {
     transparent: "transparent",
     current: "currentColor",
@@ -84,31 +60,31 @@ module.exports = {
         // Dodajemy pełną paletę kolorów Tremora, aby była dostępna
         tremor: {
           brand: {
-            faint: "#eff6ff", // blue-50
-            muted: "#bfdbfe", // blue-200
-            subtle: "#60a5fa", // blue-400
-            DEFAULT: "#3b82f6", // blue-500
-            emphasis: "#1d4ed8", // blue-700
-            inverted: "#ffffff", // white
+            faint: "#fffbeb", // amber-50
+            muted: "#fde68a", // amber-200
+            subtle: "#fbbf24", // amber-400
+            DEFAULT: "#f59e0b", // amber-500
+            emphasis: "#d97706", // amber-600
+            inverted: "#09090b", // zinc-950
           },
           background: {
-            muted: "#f9fafb", // gray-50
-            subtle: "#f3f4f6", // gray-100
-            DEFAULT: "#ffffff", // white
-            emphasis: "#374151", // gray-700
+            muted: "#09090b", // zinc-950
+            subtle: "#18181b", // zinc-900
+            DEFAULT: "#18181b", // zinc-900
+            emphasis: "#27272a", // zinc-800
           },
           border: {
-            DEFAULT: "#e5e7eb", // gray-200
+            DEFAULT: "#27272a", // zinc-800
           },
           ring: {
-            DEFAULT: "#e5e7eb", // gray-200
+            DEFAULT: "#27272a", // zinc-800
           },
           content: {
-            subtle: "#9ca3af", // gray-400
-            DEFAULT: "#6b7280", // gray-500
-            emphasis: "#374151", // gray-700
-            strong: "#111827", // gray-900
-            inverted: "#ffffff", // white
+            subtle: "#71717a", // zinc-500
+            DEFAULT: "#a1a1aa", // zinc-400
+            emphasis: "#e4e4e7", // zinc-200
+            strong: "#fafafa", // zinc-50
+            inverted: "#09090b", // zinc-950
           },
         },
       },

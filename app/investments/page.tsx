@@ -91,7 +91,7 @@ export default function InvestmentsPage() {
                                 Dodaj
                             </button>
                         </div>
-                        <span className="text-[10px] text-zinc-600 font-mono">
+                        <span className="text-xs text-zinc-600 font-mono">
                             Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
@@ -104,7 +104,7 @@ export default function InvestmentsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                         {/* Total Value */}
                         <div className="p-5 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Wartość portfela</span>
+                            <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Wartość portfela</span>
                             <span className="text-2xl font-black text-white tracking-tight">
                                 {summary.totalMarketValue?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                             </span>
@@ -112,7 +112,7 @@ export default function InvestmentsPage() {
 
                         {/* Invested */}
                         <div className="p-5 rounded-3xl bg-zinc-900/50 backdrop-blur-xl border border-white/5">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zainwestowano</span>
+                            <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Zainwestowano</span>
                             <span className="text-2xl font-black text-zinc-300 tracking-tight">
                                 {summary.totalCostBasis?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
                             </span>
@@ -120,7 +120,7 @@ export default function InvestmentsPage() {
 
                         {/* Profit */}
                         <div className="p-5 bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-3xl shrink-0">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Zysk/Strata</span>
+                            <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Zysk/Strata</span>
                             <div className="flex items-baseline gap-3">
                                 <span className={`text-2xl font-black tracking-tight ${summary.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {summary.totalProfit > 0 ? '+' : ''}{summary.totalProfit?.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł

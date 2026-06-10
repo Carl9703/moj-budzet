@@ -34,9 +34,11 @@ export function Modal({ title, children, onClose }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-xl bg-zinc-950/50"
-            onClick={onClose}
         >
             <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -54,10 +56,10 @@ export function Modal({ title, children, onClose }: Props) {
                 {/* Modal Header */}
                 <div className="relative px-8 pt-8 pb-4 flex-shrink-0">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight flex items-center gap-3">
+                        <h2 id="modal-title" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400 tracking-tight flex items-center gap-3">
                             {title}
                         </h2>
-                        <button
+                        <button type="button"
                             onClick={onClose}
                             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-90"
                         >

@@ -65,17 +65,17 @@ export async function GET(request: NextRequest) {
         const { income: incomeFromSeptember, expenses: expensesFromSeptember, net } = await FinanceService.getTransactionBalance(userId)
 
         const startOfAppUsage = new Date(DEFAULT_APP_START_DATE)
-        const transactionsFromSeptember = await prisma.transaction.findMany({
+        const recentTransactions = await prisma.transaction.findMany({
             where: {
                 userId,
                 type: { in: ['income', 'expense'] },
                 date: { gte: startOfAppUsage },
                 NOT: [
-                    { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } },
                     { description: { contains: SYSTEM_DESCRIPTIONS.BALANCE_TRANSFER } }
                 ]
             },
-            orderBy: { date: 'desc' }
+            orderBy: { date: 'desc' },
+            take: 20
         })
 
         // Znajdź kopertę Fundusz Awaryjny (emergency type)
@@ -97,44 +97,16 @@ export async function GET(request: NextRequest) {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-        const monthCloseTransaction = await prisma.transaction.findFirst({
+        let monthTransactions: Transaction[] = await prisma.transaction.findMany({
             where: {
                 userId,
-                description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE },
                 date: {
                     gte: startOfMonth,
                     lte: endOfMonth
-                }
+                },
+                type: { in: ['income', 'expense'] }
             }
         })
-
-        let monthTransactions: Transaction[] = []
-
-        if (monthCloseTransaction) {
-            monthTransactions = await prisma.transaction.findMany({
-                where: {
-                    userId,
-                    date: {
-                        gt: monthCloseTransaction.date,
-                        lte: endOfMonth
-                    },
-                    type: { in: ['income', 'expense'] },
-                    NOT: { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } }
-                }
-            })
-        } else {
-            monthTransactions = await prisma.transaction.findMany({
-                where: {
-                    userId,
-                    date: {
-                        gte: startOfMonth,
-                        lte: endOfMonth
-                    },
-                    type: { in: ['income', 'expense'] },
-                    NOT: { description: { contains: SYSTEM_DESCRIPTIONS.MONTH_CLOSE } }
-                }
-            })
-        }
 
         const totalIncome = Math.round(monthTransactions
             .filter(t => {
@@ -168,70 +140,7 @@ export async function GET(request: NextRequest) {
             )
             .reduce((sum, t) => sum + toNum(t.amount), 0) * 100) / 100
 
-        // Oblicz nadwyżkę miesiąca (do transferu do Wolnych Środków)
-        // = przychody (stats) + zwroty (non-stats) - wydatki
-        // Transfery na koperty oszczędnościowe są odejmowane dalej w kodzie (savingsTransfers)
-        let monthlySurplus = roundToCents(totalIncome + totalReturns - totalExpenses)
 
-        // Zbierz transfery do kopert (zmniejszające saldo główne)
-        const monthlyTransfersToEnvelopes: { name: string; icon: string; amount: number }[] = []
-
-
-        // Alokacje do innych kopert (transfery premii)
-        // Musimy rozróżnić:
-        // 1. Alokacje do kopert ROCZNYCH (np. Wolne środki, Wakacje) -> te środki tam zostają, więc pomniejszają nadwyżkę
-        // 2. Alokacje do kopert MIESIĘCZNYCH (np. Jedzenie) -> te koperty i tak są zerowane przy zamknięciu, więc środki wracają do nadwyżki
-        const bonusTransfers = monthTransactions.filter(t =>
-            t.type === 'income' && t.envelopeId && t.description?.includes('→')
-        )
-
-        let allocatedToYearlyEnvelopes = 0
-
-        for (const transfer of bonusTransfers) {
-            const envelope = envelopes.find(e => e.id === transfer.envelopeId)
-            if (envelope) {
-                monthlyTransfersToEnvelopes.push({
-                    name: envelope.name,
-                    icon: envelope.icon || '📦',
-                    amount: toNum(transfer.amount)
-                })
-
-                // Jeśli koperta jest roczna (lub chroniona typem), odejmij od nadwyżki
-                // 'yearly' envelopes OR protected types (savings, etc, which are effectively persistent)
-                if (envelope.type === 'yearly' || isProtectedEnvelope(envelope.envelopeType)) {
-                    allocatedToYearlyEnvelopes += toNum(transfer.amount)
-                }
-            }
-        }
-        // Recalculate surplus subtracting yearly allocations
-        // Note: monthlyAllocations are effectively ignored (treated as surplus)
-        monthlySurplus = roundToCents(monthlySurplus - allocatedToYearlyEnvelopes)
-
-
-        const savingsTransfers = monthTransactions.filter(t =>
-            t.type === 'income' &&
-            t.envelopeId &&
-            !t.description?.includes('→')
-        )
-
-        for (const transfer of savingsTransfers) {
-            const envelope = envelopes.find(e => e.id === transfer.envelopeId)
-
-            // Jeśli to transfer na kopertę chronioną (Savings, Emergency, Goal)
-            if (envelope && isProtectedEnvelope(envelope.envelopeType)) {
-                monthlySurplus -= toNum(transfer.amount)
-
-                // Dodaj do listy (żeby użytkownik widział w modalu)
-                monthlyTransfersToEnvelopes.push({
-                    name: envelope.name,
-                    icon: envelope.icon || '🐷',
-                    amount: toNum(transfer.amount)
-                })
-            }
-        }
-        monthlySurplus = roundToCents(monthlySurplus)
-
-        const isMonthClosed = !!monthCloseTransaction
 
         const envelopeActivity: { [key: string]: number } = {}
 
@@ -347,12 +256,11 @@ export async function GET(request: NextRequest) {
             .sort((a, b) => a.name.localeCompare(b.name))
 
         // NOWA LOGIKA: Nadwyżka to suma niewykorzystanych limitów w kopertach budżetowych
-        // (to ta wartość zostanie zaproponowana przy zamykaniu miesiąca)
         const envelopeSavings = monthlyEnvelopes
             .filter(e => isBudgetEnvelope(e.envelopeType))
             .reduce((sum, e) => sum + (e.planned - e.spent), 0)
 
-        monthlySurplus = roundToCents(envelopeSavings)
+        const monthlySurplus = roundToCents(envelopeSavings)
 
         // Oblicz dostępne środki (saldo główne)
         const availableFunds = balance
@@ -390,12 +298,10 @@ export async function GET(request: NextRequest) {
             emergencyFundAmount,
             goalFundsAmount,
             monthlySurplus,
-            monthlyTransfersToEnvelopes,
             monthlyEnvelopes,
             yearlyEnvelopes,
-            transactions: transactionsFromSeptember.slice(0, 20),
-            monthlyReturns: totalReturns,
-            isMonthClosed
+            transactions: recentTransactions,
+            monthlyReturns: totalReturns
         })
 
         // Wyłącz cache dla świeżych danych
