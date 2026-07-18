@@ -410,14 +410,14 @@ export async function POST(request: NextRequest) {
 
         return jsonResponse(transaction)
 
-    } catch (error) {
-        if (error instanceof Error && error.message === 'ENVELOPE_NOT_FOUND') {
+    } catch (error: any) {
+        if (error.message === 'ENVELOPE_NOT_FOUND') {
             return jsonResponse(
                 { error: 'Koperta nie znaleziona' },
                 { status: 404 }
             )
         }
-        if (error instanceof InsufficientFxLotsError) {
+        if (error.name === 'InsufficientFxLotsError' || error instanceof InsufficientFxLotsError) {
             return jsonResponse(
                 { error: error.message },
                 { status: 422 }
@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
         }
         console.error('Error creating transaction:', error)
         return jsonResponse(
-            { error: 'Błąd zapisywania transakcji' },
+            { error: 'Błąd zapisywania transakcji', details: error.message, stack: error.stack },
             { status: 500 }
         )
     }

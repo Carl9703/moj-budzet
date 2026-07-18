@@ -187,6 +187,7 @@ export async function POST(request: NextRequest) {
                     foreignAmount: destinationAmount,
                     costBasisPln: sourceAmount,
                     exchangeRate,
+                    foreignCurrency: toEnvelope.currencyCode,
                     sourceTransactionId: outTx.id,
                 })
             }

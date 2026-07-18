@@ -141,7 +141,12 @@ export async function consumeFxLotsFifo(
 
   // Poziom 4 - twarda blokada przed wydatkami przekraczającymi pulę
   if (requested.greaterThan(totalAvailable)) {
-    throw new InsufficientFxLotsError(envelopeId, requested, totalAvailable)
+    // Tolerancja na błędy zmiennoprzecinkowe (epsilon)
+    if (requested.minus(totalAvailable).lessThanOrEqualTo(EPSILON)) {
+      requested = totalAvailable
+    } else {
+      throw new InsufficientFxLotsError(envelopeId, requested, totalAvailable)
+    }
   }
 
   let toConsume = requested
