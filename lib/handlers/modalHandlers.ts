@@ -33,8 +33,9 @@ export const createIncomeHandler = (refetch: () => void, showToast: (message: st
             refetch()
             showToast(result.message || 'Przychód zapisany pomyślnie!', 'success')
             return true
-        } catch {
-            showToast('Błąd podczas zapisywania przychodu', 'error')
+        } catch (error: any) {
+            const msg = error?.data?.error || error?.message || 'Błąd podczas zapisywania przychodu'
+            showToast(msg, 'error')
             return false
         }
     }
@@ -57,8 +58,9 @@ export const createExpenseHandler = (refetch: () => void, showToast: (message: s
             refetch()
             showToast('Wydatek zapisany pomyślnie!', 'success')
             return true
-        } catch {
-            showToast('Błąd podczas zapisywania wydatku', 'error')
+        } catch (error: any) {
+            const msg = error?.data?.error || error?.message || 'Błąd podczas zapisywania wydatku'
+            showToast(msg, 'error')
             return false
         }
     }
@@ -78,8 +80,9 @@ export const createTransferHandler = (refetch: () => void, showToast: (message: 
             refetch()
             showToast('Transfer wykonany pomyślnie!', 'success')
             return true
-        } catch {
-            showToast('Błąd podczas wykonywania transferu', 'error')
+        } catch (error: any) {
+            const msg = error?.data?.error || error?.message || 'Błąd podczas wykonywania transferu'
+            showToast(msg, 'error')
             return false
         }
     }
