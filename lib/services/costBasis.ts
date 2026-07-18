@@ -111,7 +111,7 @@ export async function consumeFxLotsFifo(
   foreignAmount: Prisma.Decimal | number,
   foreignCurrency?: string
 ): Promise<FifoConsumeResult> {
-  const requested = toDecimal(foreignAmount)
+  let requested = toDecimal(foreignAmount)
 
   if (requested.lessThanOrEqualTo(ZERO)) {
     throw new RangeError(`consumeFxLotsFifo: kwota musi być > 0, otrzymano ${requested}`)
