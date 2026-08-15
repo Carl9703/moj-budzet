@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
         // Prosta próba dopasowania z ostatnich 200 transakcji (podobna do /api/transactions/suggestions)
         let suggestedCat = null
         let suggestedEnv = null
+        let suggestedDesc = null
 
         const recentTransactions = await prisma.transaction.findMany({
             where: { userId, type: 'expense' },
@@ -110,11 +111,16 @@ export async function POST(req: NextRequest) {
         if (match) {
             suggestedCat = match.category
             suggestedEnv = match.envelopeId
-        }
 
-        if (match) {
-            suggestedCat = match.category
-            suggestedEnv = match.envelopeId
+            // Jeśli trafiliśmy dzięki nazwie sklepu (pierwsze słowo, waga 10+), a wcześniejszy
+            // opis różni się od surowego opisu z synchronizatora, zaproponuj podmianę opisu -
+            // zwykle historyczny opis to już ręcznie poprawiona, czytelna nazwa
+            if (bestScore >= 10 && match.description) {
+                const cleanedDesc = match.description.trim()
+                if (cleanedDesc.toLowerCase() !== description.trim().toLowerCase()) {
+                    suggestedDesc = cleanedDesc
+                }
+            }
         }
 
         const pendingTx = await prisma.pendingTransaction.create({
@@ -127,7 +133,8 @@ export async function POST(req: NextRequest) {
                 source: source || 'api',
                 cardLastFour: cardLastFour || null,
                 suggestedCat,
-                suggestedEnv
+                suggestedEnv,
+                suggestedDesc
             }
         })
 

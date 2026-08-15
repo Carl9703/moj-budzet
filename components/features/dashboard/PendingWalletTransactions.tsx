@@ -17,7 +17,16 @@ interface PendingTransaction {
     cardLastFour: string | null
     suggestedCat: string | null
     suggestedEnv: string | null
+    suggestedDesc: string | null
 }
+
+const SOURCE_LABELS: Record<string, string> = {
+    google_wallet: 'Google Wallet',
+    ing_assistant: 'ING',
+    api: 'Ręczny import'
+}
+
+const getSourceLabel = (source: string) => SOURCE_LABELS[source] || source
 
 interface PendingWalletTransactionsProps {
     envelopes: any[]
@@ -57,7 +66,7 @@ export const PendingWalletTransactions = memo(function PendingWalletTransactions
                 body: JSON.stringify({
                     pendingId: tx.id,
                     amount: tx.amount,
-                    description: tx.description,
+                    description: tx.suggestedDesc || tx.description,
                     date: tx.date,
                     envelopeId: tx.suggestedEnv || null,
                     category: tx.suggestedCat || null
@@ -142,7 +151,7 @@ export const PendingWalletTransactions = memo(function PendingWalletTransactions
         <div className="mb-8">
             <h3 className="text-sm font-black text-white tracking-widest uppercase mb-4 flex items-center gap-2">
                 <Smartphone size={16} className="text-emerald-400" />
-                Oczekujące z Google Wallet
+                Oczekujące transakcje
                 <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs">
                     {pending.length}
                 </span>
@@ -171,8 +180,16 @@ export const PendingWalletTransactions = memo(function PendingWalletTransactions
                                                     -{Number(tx.amount).toFixed(2)} {tx.currency}
                                                 </span>
                                             </div>
+                                            {tx.suggestedDesc && (
+                                                <div className="text-xs text-sky-400 bg-sky-500/10 inline-flex items-center gap-1 px-1.5 py-0.5 rounded mb-1">
+                                                    <span>Sugestia nazwy:</span>
+                                                    <span className="font-semibold">{tx.suggestedDesc}</span>
+                                                </div>
+                                            )}
                                             <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
                                                 <span>{dateFormatted}</span>
+                                                <span className="text-zinc-600">•</span>
+                                                <span>{getSourceLabel(tx.source)}</span>
                                                 {tx.cardLastFour && (
                                                     <>
                                                         <span className="text-zinc-600">•</span>
@@ -250,7 +267,7 @@ export const PendingWalletTransactions = memo(function PendingWalletTransactions
                     envelopes={envelopes}
                     initialData={{
                         amount: pending.find(t => t.id === editingId)!.amount.toString(),
-                        description: pending.find(t => t.id === editingId)!.description,
+                        description: pending.find(t => t.id === editingId)!.suggestedDesc || pending.find(t => t.id === editingId)!.description,
                         category: pending.find(t => t.id === editingId)!.suggestedCat || '',
                         envelopeId: pending.find(t => t.id === editingId)!.suggestedEnv || '',
                         date: new Date(pending.find(t => t.id === editingId)!.date).toISOString().split('T')[0]
