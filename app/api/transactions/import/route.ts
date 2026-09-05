@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/utils/prisma'
 import { jsonResponse } from '@/lib/utils/api'
 import { z } from 'zod'
+import { buildMerchantSuggestion } from '@/lib/services/merchantSuggestions'
 
 const importSchema = z.object({
     amount: z.number().positive('Kwota musi być większa od zera'),
@@ -67,61 +68,13 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Prosta próba dopasowania z ostatnich 200 transakcji (podobna do /api/transactions/suggestions)
-        let suggestedCat = null
-        let suggestedEnv = null
-        let suggestedDesc = null
-
-        const recentTransactions = await prisma.transaction.findMany({
-            where: { userId, type: 'expense' },
-            select: { description: true, category: true, envelopeId: true },
-            orderBy: { date: 'desc' },
-            take: 200
-        })
-
-        // Rozbij nowy opis na słowa (dłuższe niż 2 znaki)
-        const words = description.toLowerCase().split(/[\s,.-]+/).filter((w: string) => w.length > 2)
-        
-        let bestMatch: any = null
-        let bestScore = 0
-
-        if (words.length > 0) {
-            recentTransactions.forEach(t => {
-                if (!t.description) return
-                const oldDesc = t.description.toLowerCase()
-                let score = 0
-                
-                // Pierwsze słowo to z reguły nazwa sklepu, dajemy za nią najwięcej punktów
-                if (oldDesc.includes(words[0])) score += 10
-                
-                // Za resztę słów (miasto, ulica) dajemy tylko po 1 punkcie
-                for (let i = 1; i < words.length; i++) {
-                    if (oldDesc.includes(words[i])) score += 1
-                }
-
-                if (score > bestScore) {
-                    bestScore = score
-                    bestMatch = t
-                }
-            })
-        }
-
-        const match = bestMatch
-
-        if (match) {
-            suggestedCat = match.category
-            suggestedEnv = match.envelopeId
-
-            // Jeśli trafiliśmy dzięki nazwie sklepu (pierwsze słowo, waga 10+), a wcześniejszy
-            // opis różni się od surowego opisu z synchronizatora, zaproponuj podmianę opisu -
-            // zwykle historyczny opis to już ręcznie poprawiona, czytelna nazwa
-            if (bestScore >= 10 && match.description) {
-                const cleanedDesc = match.description.trim()
-                if (cleanedDesc.toLowerCase() !== description.trim().toLowerCase()) {
-                    suggestedDesc = cleanedDesc
-                }
-            }
-        }
+        // Sugestie: nauczone reguły sprzedawców, a w razie ich braku historia transakcji.
+        // Wynik poniżej progu pewności zwraca null - patrz lib/utils/merchantMatch.ts
+        const { suggestedCat, suggestedEnv, suggestedDesc } = await buildMerchantSuggestion(
+            prisma,
+            userId,
+            description
+        )
 
         const pendingTx = await prisma.pendingTransaction.create({
             data: {

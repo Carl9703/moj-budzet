@@ -3,6 +3,7 @@ import { prisma } from '@/lib/utils/prisma'
 import { getUserIdFromToken, unauthorizedResponse } from '@/lib/auth/jwt'
 import { jsonResponse } from '@/lib/utils/api'
 import { z } from 'zod'
+import { learnMerchantRule } from '@/lib/services/merchantSuggestions'
 
 const approvePendingSchema = z.object({
     pendingId: z.string().min(1),
@@ -81,6 +82,14 @@ export async function POST(request: NextRequest) {
                     data: { currentAmount: { decrement: amount } }
                 })
             }
+
+            // Zapamiętaj decyzję użytkownika, żeby ten sam sprzedawca był
+            // rozpoznany przy kolejnym imporcie (patrz lib/services/merchantSuggestions.ts)
+            await learnMerchantRule(tx, userId, pending.description, {
+                description,
+                category: category || null,
+                envelopeId: envelopeId || null
+            })
 
             // Usuń pending
             await tx.pendingTransaction.delete({

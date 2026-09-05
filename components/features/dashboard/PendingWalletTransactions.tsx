@@ -243,10 +243,10 @@ export const PendingWalletTransactions = memo(function PendingWalletTransactions
                                             </button>
                                             <button
                                                 onClick={() => handleApprove(tx)}
-                                                disabled={isProcessing || (!tx.suggestedCat && !tx.suggestedEnv)}
+                                                disabled={isProcessing || !tx.suggestedCat || !tx.suggestedEnv}
                                                 aria-label={`Zatwierdź transakcję ${tx.description}`}
                                                 className={`flex-1 sm:flex-none px-4 py-2 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                                                    (!tx.suggestedCat && !tx.suggestedEnv) 
+                                                    (!tx.suggestedCat || !tx.suggestedEnv) 
                                                     ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
                                                     : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/20 active:scale-95'
                                                 }`}

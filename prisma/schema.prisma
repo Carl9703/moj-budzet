@@ -42,31 +42,32 @@ model VerificationToken {
 }
 
 model User {
-  id                 String               @id @default(cuid())
-  email              String               @unique
-  name               String?
-  createdAt          DateTime             @default(now())
-  emailVerified      DateTime?
-  image              String?
-  hashedPassword     String?
-  role               String               @default("USER")
-  updatedAt          DateTime             @updatedAt
-  isActive           Boolean              @default(true)
-  lastLoginAt        DateTime?
-  loginAttempts      Int                  @default(0)
-  lockedUntil        DateTime?
-  accounts           Account[]
-  categories         Category[]
-  envelopes          Envelope[]
-  fxLots             FxLot[]
-  investments        InvestmentAsset[]
-  recurringPayments  RecurringPayment[]
-  sessions           Session[]
-  transactions       Transaction[]
-  userConfig         UserConfig?
-  currencyWallets    CurrencyWallet[]
-  currencyTx         CurrencyTransaction[]
+  id                  String                @id @default(cuid())
+  email               String                @unique
+  name                String?
+  createdAt           DateTime              @default(now())
+  emailVerified       DateTime?
+  image               String?
+  hashedPassword      String?
+  role                String                @default("USER")
+  updatedAt           DateTime              @updatedAt
+  isActive            Boolean               @default(true)
+  lastLoginAt         DateTime?
+  loginAttempts       Int                   @default(0)
+  lockedUntil         DateTime?
+  accounts            Account[]
+  categories          Category[]
+  envelopes           Envelope[]
+  fxLots              FxLot[]
+  investments         InvestmentAsset[]
+  recurringPayments   RecurringPayment[]
+  sessions            Session[]
+  transactions        Transaction[]
+  userConfig          UserConfig?
+  currencyWallets     CurrencyWallet[]
+  currencyTx          CurrencyTransaction[]
   pendingTransactions PendingTransaction[]
+  merchantRules       MerchantRule[]
 }
 
 model Envelope {
@@ -95,30 +96,30 @@ model Envelope {
 }
 
 model Transaction {
-  id                  String    @id @default(cuid())
+  id                  String             @id @default(cuid())
   userId              String
   type                String
-  amount              Decimal   @db.Decimal(19, 4)
+  amount              Decimal            @db.Decimal(19, 4)
   description         String?
-  includeInStats      Boolean   @default(true)
+  includeInStats      Boolean            @default(true)
   date                DateTime
   envelopeId          String?
   category            String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   transferPairId      String?
   // Pola dla transferów międzywalutowych (cross-currency)
-  sourceAmount        Decimal?  @db.Decimal(19, 4)
+  sourceAmount        Decimal?           @db.Decimal(19, 4)
   sourceCurrency      String?
-  destinationAmount   Decimal?  @db.Decimal(19, 4)
+  destinationAmount   Decimal?           @db.Decimal(19, 4)
   destinationCurrency String?
-  exchangeRate        Decimal?  @db.Decimal(19, 6)
+  exchangeRate        Decimal?           @db.Decimal(19, 6)
   // Koszt historyczny w PLN wyliczony przez FIFO (tylko dla wydatków walutowych)
-  plnEquivalent       Decimal?  @db.Decimal(19, 4)
-  envelope            Envelope? @relation(fields: [envelopeId], references: [id], onDelete: Restrict)
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plnEquivalent       Decimal?           @db.Decimal(19, 4)
+  envelope            Envelope?          @relation(fields: [envelopeId], references: [id], onDelete: Restrict)
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fxLotConsumptions   FxLotConsumption[]
-  generatedFxLots     FxLot[]   @relation("FxLotSourceTx")
+  generatedFxLots     FxLot[]            @relation("FxLotSourceTx")
 
   @@index([userId, date])
   @@index([envelopeId])
@@ -127,26 +128,26 @@ model Transaction {
 
 // Lot waluty obcej — jednostka kosztu nabycia dla algorytmu FIFO
 model FxLot {
-  id                  String   @id @default(cuid())
+  id                  String             @id @default(cuid())
   userId              String
   envelopeId          String
   date                DateTime
   // Ile waluty obcej zakupiono w tym locie (np. 300 EUR)
-  originalAmount      Decimal  @db.Decimal(19, 4)
+  originalAmount      Decimal            @db.Decimal(19, 4)
   // Ile pozostało do skonsumowania (maleje przy każdym wydatku FIFO)
-  remainingAmount     Decimal  @db.Decimal(19, 4)
+  remainingAmount     Decimal            @db.Decimal(19, 4)
   // Ile PLN zapłacono za cały lot (np. 1290 PLN)
-  costBasisPln        Decimal  @db.Decimal(19, 4)
+  costBasisPln        Decimal            @db.Decimal(19, 4)
   // Kurs nabycia: costBasisPln / originalAmount (np. 4.300000)
-  exchangeRate        Decimal  @db.Decimal(19, 6)
+  exchangeRate        Decimal            @db.Decimal(19, 6)
   // Waluta obca lotu (np. EUR, USD, GBP)
-  foreignCurrency     String   @default("EUR")
+  foreignCurrency     String             @default("EUR")
   // Referencja do transferu, który wygenerował ten lot
   sourceTransactionId String?
-  sourceTransaction   Transaction? @relation("FxLotSourceTx", fields: [sourceTransactionId], references: [id], onDelete: Cascade)
-  createdAt           DateTime @default(now())
-  envelope            Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceTransaction   Transaction?       @relation("FxLotSourceTx", fields: [sourceTransactionId], references: [id], onDelete: Cascade)
+  createdAt           DateTime           @default(now())
+  envelope            Envelope           @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   fxLotConsumptions   FxLotConsumption[]
 
   @@index([envelopeId, date])
@@ -155,13 +156,13 @@ model FxLot {
 
 // Tabela śledząca konsumpcję lotów (do cofania transakcji walutowych)
 model FxLotConsumption {
-  id              String      @id @default(cuid())
-  transactionId   String
-  fxLotId         String
-  amountConsumed  Decimal     @db.Decimal(19, 4)
-  createdAt       DateTime    @default(now())
-  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  fxLot           FxLot       @relation(fields: [fxLotId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  transactionId  String
+  fxLotId        String
+  amountConsumed Decimal     @db.Decimal(19, 4)
+  createdAt      DateTime    @default(now())
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  fxLot          FxLot       @relation(fields: [fxLotId], references: [id], onDelete: Cascade)
 
   @@index([transactionId])
   @@index([fxLotId])
@@ -292,3 +293,24 @@ model PendingTransaction {
   @@index([userId])
 }
 
+/// Nauczona mapa "sprzedawca -> kategoria/koperta/nazwa", budowana przy zatwierdzaniu
+/// transakcji oczekujacych. Zastepuje zgadywanie z ostatnich 200 transakcji: rzadki
+/// sprzedawca (np. fryzjer raz na 6 tygodni) nie wypada z okna.
+model MerchantRule {
+  id          String   @id @default(cuid())
+  userId      String
+  /// Znormalizowany klucz z lib/utils/merchantMatch.ts (bez diakrytykow i szumu bankowego)
+  key         String
+  /// Opis, ktory uzytkownik faktycznie zatwierdzil - proponowany przy kolejnym trafieniu
+  displayName String
+  category    String?
+  envelopeId  String?
+  hitCount    Int      @default(1)
+  lastUsedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId])
+}
